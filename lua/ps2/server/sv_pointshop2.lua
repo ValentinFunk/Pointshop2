@@ -1,0 +1,1 @@
+LibK.addContentFolder( "materials/pointshop2" )
