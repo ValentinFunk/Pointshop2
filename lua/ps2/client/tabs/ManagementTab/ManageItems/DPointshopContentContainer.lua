@@ -10,7 +10,6 @@ AccessorFunc( PANEL, "m_bTriggerSpawnlistChange", 		"TriggerSpawnlistChange" )
    Name: Init
 -----------------------------------------------------------]]
 function PANEL:Init()
-
 	self:SetPaintBackground( false )
 	
 	self.IconList = vgui.Create( "DTileLayout", self:GetCanvas() )
@@ -19,12 +18,13 @@ function PANEL:Init()
 	self.IconList:SetSelectionCanvas( true )
 	--self.IconList:SetUseLiveDrag( true )
 	self.IconList:Dock( TOP )
-	self.IconList.OnModified = function() self:OnModified() end
-	
+	ErrorNoHalt( "Hooked" )
+
+	self.IconList.OnModified = function()  self:OnModified() error( ) end
+
 end
 
 function PANEL:Add( pnl )
-
 	self.IconList:Add( pnl )
 	
 	if ( pnl.InstallMenu ) then
@@ -32,89 +32,48 @@ function PANEL:Add( pnl )
 	end
 
 	self:Layout()
-
 end
 
 function PANEL:Layout()
-
 	self.IconList:Layout()
 	self:InvalidateLayout()
-	
 end
 
 function PANEL:PerformLayout()
-
 	BaseClass.PerformLayout( self )
 	self.IconList:SetMinHeight( self:GetTall() - 16 )
-
-end
-
---[[---------------------------------------------------------
-   Name: RebuildAll
------------------------------------------------------------]]
-function PANEL:RebuildAll( proppanel )
-
-	local items = self.IconList:GetChildren()
-	
-	for k, v in pairs( items ) do
-	
-		v:RebuildSpawnIcon()
-	
-	end
-	
 end
 
 --[[---------------------------------------------------------
    Name: GetCount
 -----------------------------------------------------------]]
 function PANEL:GetCount()
-
 	local items = self.IconList:GetChildren()
 	return #items
-	
 end
 
-
 function PANEL:Clear()
-
 	self.IconList:Clear( true )
-
 end
 
 function PANEL:OnModified()
-
+	dp( "OnModified" )
 	if ( !self:GetTriggerSpawnlistChange() ) then return end
-
 	hook.Run( "PS2_SpawnlistContentChanged" )
-
 end
 
-
-function PANEL:ContentsToTable( contentpanel )
-
-	local tab = {}
-	
-	local items = self.IconList:GetChildren()
-	
-	for k, v in pairs( items ) do
-	
-		v:ToTable( tab )
-	
-	end
-	
-	return tab
-
+function PANEL:GetItems( )
+	return self.IconList:GetChildren( )
 end
+
 
 function PANEL:Copy()
-
 	local copy = vgui.Create( "DPointshopContentContainer", self:GetParent() )
 	copy:CopyBase( self )
 	
 	copy.IconList:CopyContents( self.IconList )
 	
 	return copy	
-
 end
 
 derma.DefineControl( "DPointshopContentContainer", "", PANEL, "DScrollPanel" )

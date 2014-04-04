@@ -1,6 +1,12 @@
-local AddCustomizableNode = nil
+local SetupCategoryNode
 
-local function SetupCategoryNode( node, pnlContent )
+local function AddCategoryNode( pnlContent, name, icon, parent )
+	local node = parent:AddNode( name, icon )
+	SetupCategoryNode( node, pnlContent )
+	return node
+end
+
+function SetupCategoryNode( node, pnlContent )
 	node.OnModified = function( )
 		hook.Run( "PS2_SpawnlistContentChanged" )
 	end
@@ -53,6 +59,12 @@ local function SetupCategoryNode( node, pnlContent )
 			self.PropPanel:DockMargin( 5, 5, 5, 5 )
 			self.PropPanel:SetVisible( false )
 			self.PropPanel:SetTriggerSpawnlistChange( true )
+			
+			for k, itemClass in pairs( self.categoryInfo.items ) do
+				local panel = vgui.Create( "DPointshopContentIcon" )
+				self.PropPanel:Add( panel )
+				panel:SetItemClass( KInventory.Items[itemClass] )
+			end
 		end
 	end
 	
@@ -63,10 +75,15 @@ local function SetupCategoryNode( node, pnlContent )
 	
 end
 
-function AddCategoryNode( pnlContent, name, icon, parent )
-	local node = parent:AddNode( name, icon )
-	SetupCategoryNode( node, pnlContent )
-	return node
+
+local function PopulateWithExistingCategories( pnlContent, node, dataNode )
+	for id, subcategory in pairs( dataNode.subcategories ) do
+		local newNode = AddCategoryNode( pnlContent, subcategory.self.label, subcategory.self.icon, node )
+		PopulateWithExistingCategories( pnlContent, newNode, subcategory )
+		newNode:SetExpanded( true )
+		newNode.categoryInfo = subcategory
+		newNode:DoPopulate( )
+	end
 end
 
 local categoriesNode
@@ -119,6 +136,11 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 	end
 	categoriesNode = node
 	
+	--Populate with existing stuff
+	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
+	PopulateWithExistingCategories( pnlContent, node, { subcategories = dataNode } )
+	node:SetExpanded( true )
+	
 	local node = AddCategoryNode( pnlContent, "Uncategorized Items", "pointshop2/folder62.png", tree )
 	node:SetDraggableName( "CustomContent" )
 	function node:DoRightClick( )
@@ -135,7 +157,7 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 		self.PropPanel:Dock( FILL )
 		self.PropPanel:SetTriggerSpawnlistChange( true )
 		
-		for _, itemClass in pairs( Pointshop2.GetUncategorizedItems( ) ) do
+		for _, itemClass in pairs(  Pointshop2View:getInstance( ):getUncategorizedItems( ) ) do
 			local panel = vgui.Create( "DPointshopContentIcon" )
 			self.PropPanel:Add( panel )
 			panel:SetItemClass( itemClass )
@@ -156,19 +178,23 @@ hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
 			items = { }
 		}
 		
-		print( node, node.GetName and node:GetName( ) )
-		for k, childNode in pairs( node.ChildNodes:GetChildren( ) ) do
-			print( node, node.GetClassName and node:GetClassName( ) )
-			recursiveAddCategory( childNode, nodeInTable.subcategories )
+		if node.ChildNodes then
+			for k, childNode in pairs( node.ChildNodes:GetChildren( ) ) do
+				recursiveAddCategory( childNode, nodeInTable.subcategories )
+			end
 		end
 		
-		for k, itemIcon in pairs( node.PropPanel:GetChildren( ) ) do
+		--make sure it has all items it should contain
+		node:DoPopulate( )
+		for k, itemIcon in pairs( node.PropPanel:GetItems( ) ) do
 			table.insert( nodeInTable.items, itemIcon.itemClass.className )
 		end
 		
-		table.insert( tbl, nodeInTbl )
+		table.insert( tbl, nodeInTable )
 	end
-	recursiveAddCategory( categoriesNode, categoriesWithItems )
+	for k, v in pairs( categoriesNode.ChildNodes:GetChildren( ) ) do
+		recursiveAddCategory( v, categoriesWithItems )
+	end
 	
 	Pointshop2View:getInstance( ):saveCategoryOrganization( categoriesWithItems )
 end )

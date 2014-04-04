@@ -37,8 +37,6 @@ hook.Add( "OnTextEntryGetFocus", "PointshopMenuKeyboardFocusOn", PointshopMenuKe
 		Called when text entry stops needing keyboard focus
 -----------------------------------------------------------]]
 local function PointshopMenuKeyboardFocusOff( pnl )
-	debug.Trace( )
-	
 	if not ValidPanel( Pointshop2.Menu ) then
 		return 
 	end
@@ -72,9 +70,11 @@ end
 
 --debug
 concommand.Add( "pointshop2_reload", function( )
-Pointshop2.CloseMenu( )
-RunConsoleCommand( "libk_reload" )
-hook.Add( "OnReloaded", "openWhenReady", function( )
-CompileString( "Pointshop2.OpenMenu( )", "chink" )( )
-end )
+	Pointshop2.CloseMenu( )
+	RunConsoleCommand( "libk_reload" )
+	hook.Add( "OnReloaded", "openWhenReady", function( )
+		timer.Simple( 2, function( )
+			CompileString( "Pointshop2.OpenMenu( )", "chink" )( )
+		end )
+	end )
 end )

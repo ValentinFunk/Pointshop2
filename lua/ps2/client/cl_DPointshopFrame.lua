@@ -1,5 +1,5 @@
 local PANEL = {}
-print( "ye" )
+
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	self:SetSize( 1024, 768 )

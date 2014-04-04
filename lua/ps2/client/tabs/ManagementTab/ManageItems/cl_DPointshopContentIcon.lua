@@ -33,6 +33,7 @@ function PANEL:Init()
 end
 
 function PANEL:SetItemClass( itemClass )
+	print( itemClass )
 	self.itemClass = itemClass
 	self.actualIcon = vgui.Create( itemClass:GetPointshopIconControl( ), self )
 	self.actualIcon:Dock( FILL )
@@ -42,6 +43,9 @@ function PANEL:SetItemClass( itemClass )
 	self.Label:SetText( itemClass.PrintName )
 end
 
+function PANEL:OnModified( )
+	error( "mode" )
+end
 
 function PANEL:DoRightClick()
 	local pCanvas = self:GetSelectionCanvas()

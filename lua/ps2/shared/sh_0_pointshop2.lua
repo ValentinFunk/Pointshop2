@@ -18,7 +18,3 @@ function Pointshop2:GetRegisteredItems( )
 	end
 	return pointshopItems
 end
-
-function Pointshop2:GetUncategorizedItems( )
-	return Pointshop2:GetRegisteredItems( )
-end

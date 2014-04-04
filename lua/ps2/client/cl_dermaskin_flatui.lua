@@ -160,7 +160,6 @@ function SKIN:LayoutPropertySheetSheet( panel, sheet )
 		DLabel.ApplySchemeSettings( self )
 	end
 	sheet.Panel:Dock( FILL )
-	print( "layout panel", sheet.Panel:GetTall( ), sheet.Panel:GetPos( ) )
 end
 
 function SKIN:PaintTab( panel, w, h )
@@ -188,5 +187,4 @@ hook.Add( "Initialize", SKIN.Name .. "init", loadSkin, 100 )
 hook.Add( "OnReloaded", SKIN.Name .. "reload", loadSkin, 100 )
 if GAMEMODE then
 	loadSkin( )
-	print( "Skin Reloaded" )
 end
