@@ -31,9 +31,12 @@ function SetupCategoryNode( node, pnlContent )
 		btn.m_Image:SetSize( 16, 16 )
 		
 		btn = menu:AddOption( "New Category", function()
-			AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", self );
+			local node = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", self );
 			self:SetExpanded( true )
+			node:DoClick( )
+			node:InternalDoClick()
 			hook.Run( "PS2_SpawnlistContentChanged" )
+			hook.Run( "PS2_OpenToolbox" )  
 		end )
 		btn:SetImage( "pointshop2/category2.png" )
 		btn.m_Image:SetSize( 16, 16 )
@@ -61,10 +64,12 @@ function SetupCategoryNode( node, pnlContent )
 			self.PropPanel:SetVisible( false )
 			self.PropPanel:SetTriggerSpawnlistChange( true )
 			
+			if not self.categoryInfo then return end 
 			for k, itemClass in pairs( self.categoryInfo.items ) do
-				local panel = vgui.Create( "DPointshopContentIcon" )
+				itemClass = Pointshop2.GetItemClassByName( itemClass )
+				local panel = vgui.Create( itemClass:GetPointshopIconControl( ) )
 				self.PropPanel:Add( panel )
-				panel:SetItemClass( Pointshop2.GetItemClassByName( itemClass ) )
+				panel:SetItemClass( itemClass )
 			end
 		end
 	end
@@ -159,7 +164,7 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 		self.PropPanel:SetTriggerSpawnlistChange( true )
 		
 		for _, itemClass in pairs(  Pointshop2View:getInstance( ):getUncategorizedItems( ) ) do
-			local panel = vgui.Create( "DPointshopContentIcon" )
+			local panel = vgui.Create( itemClass:GetPointshopIconControl( ) )
 			self.PropPanel:Add( panel )
 			panel:SetItemClass( itemClass )
 		end

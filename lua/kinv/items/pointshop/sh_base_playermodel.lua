@@ -41,3 +41,7 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.skin = persistenceItem.skin
 	itemTable.bodygroups = persistenceItem.bodygroups
 end
+
+function ITEM.static.GetPointshopIconDimensions( )
+	return 100, 128
+end

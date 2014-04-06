@@ -32,6 +32,10 @@ function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopItemIcon"
 end
 
+function ITEM.static.GetPointshopDescriptionControl( )
+	return "DPointshopItemDescription"
+end
+
 function ITEM.static:GetPointshopIconDimensions( )
 	return 100, 100
 end

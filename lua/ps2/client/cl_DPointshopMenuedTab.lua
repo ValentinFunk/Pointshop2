@@ -70,10 +70,27 @@ function PANEL:Init( )
 	self.buttons:SetSpaceY( 10 )
 end
 
+function PANEL:OnTabChanged( )
+	--for override
+end
+
+function PANEL:SetActiveTab( tab )
+	DPropertySheet.SetActiveTab( self, tab )
+	self:OnTabChanged( tab )
+end
+
 function PANEL:Clear( )
-	for k, v in pairs( self.buttons ) do
+	self:SetActiveTab( nil )
+	self.animFade = Derma_Anim( "Fade", self, self.CrossFade )
+	for k, v in pairs( self.Items ) do
+		v.Tab:Remove( )
+		self.Items[k] = nil
+	end
+	for k, v in pairs( self.buttons:GetChildren( ) ) do
+		v:GetPanel( ):Remove( )
 		v:Remove( )
 	end
+	self:InvalidateLayout( true )
 end
 
 function PANEL:PerformLayout( )

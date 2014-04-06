@@ -9,6 +9,7 @@ SKIN.HeaderBG   = Color( 23, 23, 23 )
 SKIN.MainBG     = Color( 102, 102, 102 )
 SKIN.InnerPanel = Color( 49, 49, 49 )
 SKIN.ButtonColor = Color( 65, 65, 65 )
+SKIN.BrightPanel = Color( 102, 102, 102 )
 SKIN.Highlight	= Color( 255, 198, 0 )
 SKIN.NormalBtn  = color_white
 SKIN.IconBackground = Color( 102, 102, 102 )
@@ -64,11 +65,46 @@ surface.CreateFont( "PS2_Normal", {
 	size = 22,
 } )
 
+surface.CreateFont( "PS2_Text", {
+	font = "Segoe UI Semilight 8",
+	size = 16,
+} )
+
 SKIN.fontName = "PS2_Normal"
 SKIN.BigTitleFont = "PS2_LargeHeading"
 SKIN.SmallTitleFont = "PS2_SmallHeading"
 SKIN.TabFont = "PS2_MediumLarge"
 SKIN.ButtonFont = "PS2_MediumLarge"
+SKIN.TextFont = "PS2_Text"
+
+function SKIN:LayoutCategoryPanelLevel0( panel )
+	panel.title:SetVisible( false )
+end
+
+function SKIN:LayoutCategoryPanelLevel1( panel )
+	panel.title:SetFont( self.TabFont )
+	panel.title:SizeToContents( )
+	panel.title:SetColor( color_white )
+end
+function SKIN:PaintCategoryPanelLevel1( panel, w, h )
+end
+
+function SKIN:LayoutCategoryPanelLevel2( panel )
+	panel.title:SetFont( self.SmallTitleFont )
+	panel.title:SizeToContents( )
+	panel.title:DockMargin( 8, 5, 0, -5 )
+end
+function SKIN:PaintCategoryPanelLevel2( panel, w, h )
+	surface.SetDrawColor( self.ButtonColor )
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:LayoutCategoryPanelLevel3( panel )
+	panel.title:SetFont( self.fontName )
+	panel.title:SetColor( self.Highlight )
+end
+function SKIN:PaintCategoryPanelLevel3( panel, w, h )
+end
 
 function SKIN:LayoutPointshopFrame( panel )
 	function panel.contentsPanel:PerformLayout( )
@@ -119,7 +155,7 @@ function SKIN:PaintInnerPanel( panel, w, h )
 end
 
 function SKIN:PaintInnerPanelBright( panel, w, h )
-	surface.SetDrawColor( self.ButtonColor )
+	surface.SetDrawColor( self.BrightPanel )
 	surface.DrawRect( 0, 0, w, h )
 end
 
@@ -131,6 +167,15 @@ end
 function SKIN:PaintTopBar( panel, w, h )
 	surface.SetDrawColor( self.HeaderBG )
 	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintPointshopItemIcon( panel, w, h )
+	if panel.Selected or panel.Hovered or panel:IsChildHovered( 2 ) then
+		draw.RoundedBox( 6, 0, 0, w, h, self.Highlight )
+		draw.RoundedBox( 6, 2, 2, w - 4, h - 4, Color( 47, 47, 47 ) )
+	else
+		draw.RoundedBox( 6, 0, 0, w, h, Color( 47, 47, 47 ) )
+	end
 end
 
 function SKIN:PaintButton( panel, w, h )
@@ -197,11 +242,6 @@ end
 
 function SKIN:PaintTree( panel, w, h )
 	surface.SetDrawColor( self.ButtonColor )
-	surface.DrawRect( 0, 0, w, h )
-end
-
-function SKIN:PaintPointshopContentIcon( panel, w, h )
-	surface.SetDrawColor( self.IconBackground ) 
 	surface.DrawRect( 0, 0, w, h )
 end
 
