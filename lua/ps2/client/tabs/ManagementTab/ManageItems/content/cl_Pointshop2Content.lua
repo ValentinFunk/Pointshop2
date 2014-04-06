@@ -39,7 +39,8 @@ function SetupCategoryNode( node, pnlContent )
 		btn.m_Image:SetSize( 16, 16 )
 		
 		btn = menu:AddOption( "Delete", function() 			
-			if #self.PropPanel:GetChildren( ) > 0 or #self.ChildNodes:GetChildren( ) > 0 then
+			print( self.PropPanel:GetCount( ), self.ChildNodes and #self.ChildNodes:GetChildren( ) )
+			if self.PropPanel:GetCount( ) > 0 or self.ChildNodes and #self.ChildNodes:GetChildren( ) > 0 then
 				return Derma_Message( "Please clear the category of all items and subcategories before deleting it", "Error" )
 			end
 			node:GetParentNode( ):DoClick( )
@@ -63,7 +64,7 @@ function SetupCategoryNode( node, pnlContent )
 			for k, itemClass in pairs( self.categoryInfo.items ) do
 				local panel = vgui.Create( "DPointshopContentIcon" )
 				self.PropPanel:Add( panel )
-				panel:SetItemClass( KInventory.Items[itemClass] )
+				panel:SetItemClass( Pointshop2.GetItemClassByName( itemClass ) )
 			end
 		end
 	end

@@ -4,16 +4,12 @@ function PANEL:Init( )
 end
 
 function PANEL:SetItemClass( itemClass )
-	if itemClass.Model then
-		
-	end
 end
 
 function PANEL:SetItem( item )
 end
 
 function PANEL:OnModified( )
-	error( "mode" )
 end
 
 function PANEL:Paint( w, h )

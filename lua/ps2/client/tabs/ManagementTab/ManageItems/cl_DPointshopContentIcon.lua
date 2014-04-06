@@ -1,11 +1,4 @@
-
-AddCSLuaFile()
-
 local PANEL = {}
-
-local matOverlay_Normal = Material( "gui/ContentIcon-normal.png" )
-local matOverlay_Hovered = Material( "gui/ContentIcon-hovered.png" )
-local matOverlay_AdminOnly = Material( "icon16/shield.png" )
 
 AccessorFunc( PANEL, "m_Color", 			"Color" )
 AccessorFunc( PANEL, "m_Type", 				"ContentType" )
@@ -38,6 +31,7 @@ function PANEL:SetItemClass( itemClass )
 	self.actualIcon = vgui.Create( itemClass:GetPointshopIconControl( ), self )
 	self.actualIcon:Dock( FILL )
 	self.actualIcon:SetDragParent( self )
+	self.actualIcon:SetItemClass( itemClass )
 	local w, h = itemClass:GetPointshopIconDimensions( )
 	self:SetSize( w + self.Border, h + self.Border + self.Label:GetTall( ) )
 	self.Label:SetText( itemClass.PrintName )

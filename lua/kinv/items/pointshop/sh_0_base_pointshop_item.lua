@@ -1,5 +1,6 @@
 ITEM.PrintName = "Pointshop Item Base"
 ITEM.Material = "materials/error"
+ITEM.Description = "Pointshop Item Base"
 
 ITEM.Price = {
 	DonorPoints = 1,
@@ -32,5 +33,19 @@ function ITEM.static:GetPointshopIconControl( )
 end
 
 function ITEM.static:GetPointshopIconDimensions( )
-	return 128, 128
+	return 100, 100
+end
+
+/*
+	This function is called to populate the itemTable (a new class which inherits the BaseClass from persistanceItem).
+	Should be overwritten and called by any other item bases.
+*/
+function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
+	itemTable.Price = {
+		Points = persistenceItem.price,
+		DonorPoints = persistenceItem.pricePremium,
+	}
+	itemTable.Ranks = persistenceItem.ranks
+	itemTable.PrintName = persistenceItem.name
+	itemTable.Description = persistenceItem.description
 end

@@ -11,6 +11,12 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
+	elseif action == "saveModuleItem" then
+		if PermissionInterface.query( ply, "pointshop2 createitems" ) then
+			def:Resolve( )
+		else
+			def:Reject( 1, "Permission Denied" )
+		end
 	else
 		def:Reject( 1, "Permission denied" )
 	end
@@ -20,10 +26,10 @@ end
 function Pointshop2Controller:sendDynamicInfo( ply )
 	timer.Simple( 1, function( )
 		WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ), 
-						 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" ) 
+						 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
 		}
 		:Then( function( itemMappings, categories )
-			local itemProperties = {}--TODO
+			local itemProperties = self.cachedPersistentItems
 			self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
 		end )
 	end )
@@ -109,3 +115,59 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 		end
 	DATABASES[Pointshop2.Category.DB].SetBlocking( false )
 end	
+	
+function Pointshop2Controller:loadModuleItems( )
+	local promises = {}
+	self.cachedPersistentItems = {}
+	for _, mod in pairs( Pointshop2.Modules ) do
+		for k, v in pairs( mod.Blueprints ) do
+			local class = Pointshop2.GetItemClassByName( v.base )
+			local promise = class.getPersistence( ).getDbEntries( "WHERE 1" )
+			:Then( function( persistentItems ) 
+				for _, persistentItem in pairs( persistentItems ) do
+					table.insert( self.cachedPersistentItems, persistentItem )
+					Pointshop2.LoadPersistentItem( persistentItem )
+				end
+			end )
+			table.insert( promises, promise )
+		end
+	end
+	return WhenAllFinished( promises )
+end
+local function loadPersistent( )
+	KLogf( 4, "[Pointshop2] Loading Module items" )
+	Pointshop2Controller:getInstance( ):loadModuleItems( )
+	:Done( function( )
+		KLogf( 4, "[Pointshop2] Loaded Module items from DB" )
+	end )
+	:Fail( function( errid, err )
+		KLogf( 2, "[Pointshop2] Couldn't load persistent items: %i - %s", errid, err )
+	end )
+end
+function Pointshop2.onDatabaseConnected( )
+	loadPersistent( )
+end
+
+function Pointshop2Controller:saveModuleItem( ply, saveTable )
+	local class = Pointshop2.GetItemClassByName( saveTable.baseClass )
+	if not class then
+		KLogf( 3, "[Pointshop2] Couldn't save item %s: invalid baseclass", saveTable.name, saveTable.baseClass )
+		return self:reportError( "Pointshop2View", ply, "Error saving item", 1, "Invalid Baseclass " .. saveTable.baseClass )
+	end
+	class.getPersistence( ).createFromSaveTable( saveTable )
+	:Then( function( saved )
+		KLogf( 4, "[Pointshop2] Saved item %s", saveTable.name )
+		self:moduleItemsChanged( )
+	end, function( errid, err )
+		self:reportError( "Pointshop2View", ply, "Error saving item", errid, err )
+	end )
+end
+
+function Pointshop2Controller:moduleItemsChanged( )
+	self:loadModuleItems( )
+	:Then( function( )
+		for k, v in pairs( player.GetAll( ) ) do
+			self:sendDynamicInfo( v )
+		end
+	end )
+end

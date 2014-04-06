@@ -1,6 +1,9 @@
 ITEM.PrintName = "Pointshop Playermodel Base"
+ITEM.baseClass = "base_pointshop_item"
 
-ITEM.Model = "models/player/kleiner.mdl"
+ITEM.model = "models/player/kleiner.mdl"
+ITEM.bodygroups = "0"
+ITEM.skin = 0
 
 function ITEM:OnEquip( )
 	if not ply._OldModel then
@@ -9,6 +12,7 @@ function ITEM:OnEquip( )
 	
 	timer.Simple( 1, function( )
 		ply:SetModel( self.Model )
+		
 	end )
 end
 
@@ -22,3 +26,18 @@ function ITEM:PlayerSetModel( ply )
 	ply:SetModel( self.Model )
 end
 Pointshop2.AddItemHook( "PlayerSetModel", ITEM )
+
+function ITEM.static:GetPointshopIconControl( )
+	return "DPointshopPlayerModelIcon"
+end
+
+function ITEM.static.getPersistence( )
+	return Pointshop2.PlayermodelPersistence
+end
+
+function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
+	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
+	itemTable.model = persistenceItem.model
+	itemTable.skin = persistenceItem.skin
+	itemTable.bodygroups = persistenceItem.bodygroups
+end

@@ -70,6 +70,12 @@ function PANEL:Init( )
 	self.buttons:SetSpaceY( 10 )
 end
 
+function PANEL:Clear( )
+	for k, v in pairs( self.buttons ) do
+		v:Remove( )
+	end
+end
+
 function PANEL:PerformLayout( )
 	local ActiveTab = self:GetActiveTab()
 	local Padding = self:GetPadding()
@@ -107,6 +113,7 @@ end
 
 function PANEL:addMenuEntry( label, material, panel )
 	if not IsValid( panel ) then 
+		error( "Invalid argument #3 given to addMenuEntry, expected Panel, got nil", 1 )
 		return
 	end
 

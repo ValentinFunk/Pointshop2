@@ -13,15 +13,13 @@ function PANEL:Init()
 	self:SetPaintBackground( false )
 	
 	self.IconList = vgui.Create( "DTileLayout", self:GetCanvas() )
-	self.IconList:SetBaseSize( 64 )
+	self.IconList:SetBaseSize( 8 )
 	self.IconList:MakeDroppable( "SandboxContentPanel", true )
 	self.IconList:SetSelectionCanvas( true )
 	--self.IconList:SetUseLiveDrag( true )
 	self.IconList:Dock( TOP )
-	ErrorNoHalt( "Hooked" )
 
-	self.IconList.OnModified = function()  self:OnModified() error( ) end
-
+	self.IconList.OnModified = function()  self:OnModified() end
 end
 
 function PANEL:Add( pnl )

@@ -13,8 +13,6 @@ function PANEL:Init( )
 	
 	for k, btnInfo in pairs( Pointshop2.AdminPanels ) do 
 		local panel = vgui.Create( btnInfo.controlName )
-		print( "Created ", btnInfo.controlName )
-		dp( btnInfo )
 		self:addMenuEntry( btnInfo.label, btnInfo.icon, panel )
 	end
 end

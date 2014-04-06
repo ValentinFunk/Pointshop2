@@ -15,6 +15,11 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.itemCategories = itemCategories
 	self.itemProperties = itemProperties
 	
+	--Load persistent items
+	for k, v in pairs( self.itemProperties ) do
+		Pointshop2.LoadPersistentItem( v )
+	end
+	
 	--Create Tree from the information
 	local categoryItemsTable = {}
 	for k, dbCategory in pairs( self.itemCategories ) do
@@ -32,7 +37,6 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		for k, dbItemMapping in pairs( self.itemMappings ) do
 			if dbItemMapping.categoryId == newCategory.self.id then
 				table.insert( newCategory.items, dbItemMapping.itemClass )
-				self.itemMappings[k] = nil
 			end
 		end
 		
@@ -61,6 +65,8 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		end
 	end
 	self.categoryItemsTable = categoryItemsTable
+	
+	hook.Call( "PS2_DynamicItemsUpdated" )
 end
 
 function Pointshop2View:saveCategoryOrganization( categoryItemsTable )
@@ -80,14 +86,17 @@ function Pointshop2View:getUncategorizedItems( )
 	for _, itemClass in pairs( Pointshop2:GetRegisteredItems( ) ) do
 		local found = false
 		for _, itemMapping in pairs( self.itemMappings ) do
-			if itemMapping.itemClass == itemClass then
+			if itemMapping.itemClass == itemClass.className then
 				found = true
 			end
 		end
 		if not found then 
-			print( KInventory.Items[itemClass]  )
-			table.insert( uncategorized, KInventory.Items[itemClass] )
+			table.insert( uncategorized, itemClass )
 		end
 	end
 	return uncategorized
+end
+
+function Pointshop2View:createPointshopItem( saveTable )
+	self:controllerAction( "saveModuleItem", saveTable )
 end

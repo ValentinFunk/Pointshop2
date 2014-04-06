@@ -22,7 +22,7 @@ function PANEL:EnableModify()
 	self.Toolbox = vgui.Create( "DPointshopContentSidebarToolbox", self )
 	self.Toolbox:Dock( BOTTOM )
 	
-	hook.Add( "PS2_OpenToolbox", "OpenToolbox", function()
+	hook.Add( "PS2_OpenToolbox", self, function()
 		
 		if ( !IsValid( self.Toolbox ) ) then return end
 		
@@ -49,7 +49,7 @@ function PANEL:CreateSaveNotification()
 		hook.Run( "PS2_OnSaveSpawnlist" );
 	end
 		
-	hook.Add( "PS2_SpawnlistContentChanged", "ShowSaveButton", function()
+	hook.Add( "PS2_SpawnlistContentChanged", self, function()
 		if SavePanel:IsVisible( ) then
 			return
 		end

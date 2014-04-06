@@ -20,8 +20,8 @@ SKIN.Colours.Label.Highlight = SKIN.Highlight
 
 SKIN.Colours.Button = {}
 SKIN.Colours.Button.Normal		= color_white
-SKIN.Colours.Button.Hover		= SKIN.Highlight
-SKIN.Colours.Button.Down		= SKIN.Highlight
+SKIN.Colours.Button.Hover		= color_black
+SKIN.Colours.Button.Down		= color_black
 SKIN.Colours.Button.Disabled	= Color( 180, 180, 180 )
 
 
@@ -54,6 +54,11 @@ surface.CreateFont( "PS2_MediumLarge", {
 	size = 32,
 } )
 
+surface.CreateFont( "PS2_SmallHeading", {
+	font = "Segoe UI 8",
+	size = 26,
+} )
+
 surface.CreateFont( "PS2_Normal", {
 	font = "Segoe UI Semilight 8",
 	size = 22,
@@ -61,10 +66,9 @@ surface.CreateFont( "PS2_Normal", {
 
 SKIN.fontName = "PS2_Normal"
 SKIN.BigTitleFont = "PS2_LargeHeading"
-SKIN.MapPanelLabelFont = "LibKHeading"
+SKIN.SmallTitleFont = "PS2_SmallHeading"
 SKIN.TabFont = "PS2_MediumLarge"
 SKIN.ButtonFont = "PS2_MediumLarge"
-SKIN.NumRatingsFont = "DermaDefault"
 
 function SKIN:LayoutPointshopFrame( panel )
 	function panel.contentsPanel:PerformLayout( )
@@ -114,6 +118,10 @@ function SKIN:PaintInnerPanel( panel, w, h )
 	surface.DrawRect( 0, 0, w, h )
 end
 
+function SKIN:PaintInnerPanelBright( panel, w, h )
+	surface.SetDrawColor( self.ButtonColor )
+	surface.DrawRect( 0, 0, w, h )
+end
 
 function SKIN:PaintPointshopFrame( panel, w, h )
 	surface.SetDrawColor( self.MainBG )
@@ -122,6 +130,24 @@ end
 
 function SKIN:PaintTopBar( panel, w, h )
 	surface.SetDrawColor( self.HeaderBG )
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintButton( panel, w, h )
+	if panel.Hovered then
+		surface.SetDrawColor( self.Highlight )
+	else
+		surface.SetDrawColor( self.ButtonColor )
+	end
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintCreateItemButton( panel, w, h )
+	if panel.Hovered then
+		surface.SetDrawColor( self.Highlight )
+	else
+		surface.SetDrawColor( self.InnerPanel )
+	end
 	surface.DrawRect( 0, 0, w, h )
 end
 
@@ -179,7 +205,23 @@ function SKIN:PaintPointshopContentIcon( panel, w, h )
 	surface.DrawRect( 0, 0, w, h )
 end
 
-derma.DefineSkin( SKIN.Name, "Fullscreen customized KMapVote Skin", SKIN )
+function SKIN:PaintFrame( panel, w, h ) 
+	if not panel.startTime then
+		panel.startTime = SysTime( )
+	
+	
+		panel.btnMaxim:SetVisible( false )
+		panel.btnMinim:SetVisible( false )
+		
+		panel.lblTitle:SetFont( "PS2_Normal" )
+	end
+	
+	Derma_DrawBackgroundBlur( panel, panel.startTime )
+	draw.RoundedBox( 6, 0, 0, w, h, self.MainBG )
+	draw.RoundedBoxEx( 6, 0, 0, w, 27, self.HeaderBG, true, true )
+end
+
+derma.DefineSkin( SKIN.Name, "Poinsthop2 Default", SKIN )
 
 end --function loadSkin
 

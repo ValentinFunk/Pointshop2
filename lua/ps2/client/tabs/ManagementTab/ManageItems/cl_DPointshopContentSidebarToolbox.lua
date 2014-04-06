@@ -29,7 +29,7 @@ function PANEL:Init()
 	--
 	-- If we select a node from the sidebar, update the text/icon/actions in the toolbox (at the bottom)
 	--
-	hook.Add( "PS2_ContentSidebarSelection", "SidebarToolboxSelection", function( pnlContent, node )
+	hook.Add( "PS2_ContentSidebarSelection", self, function( _self, pnlContent, node )
 		label:SetText( node:GetText() )
 		icons:SelectIcon( node:GetIcon() )
 		icons:ScrollToSelected()
