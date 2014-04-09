@@ -14,7 +14,7 @@ function PANEL:Init( )
 	self.label:SetTall( 24 )
 	
 	function self.label:Paint( w, h )
-		surface.SetDrawColor( self:GetSkin( ).InnerPanel )
+		surface.SetDrawColor( self:GetSkin( ).ButtonColor )
 		surface.DrawRect( 0, 0, w, h )
 	end
 	

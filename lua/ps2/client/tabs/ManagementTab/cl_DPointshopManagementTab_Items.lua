@@ -10,8 +10,8 @@ function PANEL:Init( )
 	
 	--Recreate content panel if items change
 	hook.Add( "PS2_DynamicItemsUpdated", self, function( )
-		--self.contentPanel:Remove( )
-		--self:Init( )
+		self.contentPanel:Remove( )
+		self:Init( )
 	end )
 	
 	derma.SkinHook( "Layout", "PointshopManagementTab_Items", self )

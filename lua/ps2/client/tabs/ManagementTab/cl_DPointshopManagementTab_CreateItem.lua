@@ -7,13 +7,14 @@ function PANEL:Init( )
 	
 	local label = vgui.Create( "DLabel", self )
 	label:SetText( "Select an item type" )
+	label:SetColor( color_white )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
 	
 	for k, mod in pairs( Pointshop2.Modules ) do
 		local modPanel = vgui.Create( "DPanel", self )
-		Derma_Hook( modPanel, "Paint", "Paint", "InnerPanelBright" )
+		Derma_Hook( modPanel, "Paint", "Paint", "InnerPanel" )
 		modPanel:DockMargin( 0, 5, 0, 5 )
 		modPanel:DockPadding( 8, 8, 8, 8 )
 		modPanel:Dock( TOP )

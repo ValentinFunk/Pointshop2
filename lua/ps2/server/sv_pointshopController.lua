@@ -23,24 +23,66 @@ function Pointshop2Controller:canDoAction( ply, action )
 	return def:Promise( )
 end
 
-function Pointshop2Controller:sendDynamicInfo( ply )
-	timer.Simple( 1, function( )
-		WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ), 
-						 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
-		}
-		:Then( function( itemMappings, categories )
-			local itemProperties = self.cachedPersistentItems
-			self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
+function Pointshop2Controller:initializeInventory( ply )
+	KInventory.Inventory.findByOwnerId( ply.kPlayerId )
+	:Then( function( inventory )
+		--Check for Inventory and create if necessary
+		if inventory then
+			return inventory
+		end
+		
+		inventory = KInventory.Inventory:new( )
+		inventory.ownerId = ply.kPlayerId
+		inventory.numSlots = 40
+		inventory.maxWeight = 0 --Not using weight for ps items
+		return inventory:save( )
+	end )
+	:Then( function( inventory )
+		--Load Items
+		return inventory:loadItems( )
+		:Done( function( )
+			--Network the Inventory to the player
+			self:startView( "Pointshop2View", "receiveInventory", ply, inventory )
 		end )
+		:Fail( function( errid, err )
+			KLogf( 2, "Error loading items %i %s", errid, err )
+		end )
+	end,
+	function( errid, err )
+		KLogf( 2, "Error creating inventory %i %s", errid, err )
+	end )
+end
+
+/*
+function InventoryController:openInventory( ply )
+	self:startView( "InventoryView", "displayInventory", ply )
+end
+hook.Add( "ShowTeam", "Openinv", function( ply )
+	InventoryController:getInstance( ):openInventory( ply )
+end )*/
+
+function Pointshop2Controller:sendDynamicInfo( ply )
+	WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ), 
+					 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+	}
+	:Then( function( itemMappings, categories )
+		local itemProperties = self.cachedPersistentItems
+		self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
 	end )
 end
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:sendDynamicInfo", function( ply )
-	Pointshop2Controller:getInstance( ):sendDynamicInfo( ply )
+	timer.Simple( 1, function( )
+		Pointshop2Controller:getInstance( ):sendDynamicInfo( ply )
+		Pointshop2Controller:getInstance( ):initializeInventory( ply )
+	end )
 end )
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
-	for _, ply in pairs( player.GetAll( ) ) do
-		Pointshop2Controller:getInstance( ):sendDynamicInfo( ply )
-	end
+	timer.Simple( 1, function( )
+		for _, ply in pairs( player.GetAll( ) ) do
+			Pointshop2Controller:getInstance( ):sendDynamicInfo( ply )
+			Pointshop2Controller:getInstance( ):initializeInventory( ply )
+		end
+	end )
 end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )

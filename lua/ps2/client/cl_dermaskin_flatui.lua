@@ -144,6 +144,15 @@ function SKIN:LayoutPointshopMenuButton( panel )
 	panel:SetContentAlignment( 4 )
 end
 
+function SKIN:PaintInventoryTab( panel, w, h )
+	panel:SetContentAlignment( 2 )
+	self:PaintTab( panel, w, h )
+end
+
+function SKIN:PaintItemsContainer( panel, w, h )
+	self:PaintInnerPanel( panel, w, h )
+end
+
 function SKIN:PaintPointshopMenuButton( panel, w, h )
 	surface.SetDrawColor( self.ButtonColor )
 	surface.DrawRect( 0, 0, w, h )
@@ -191,7 +200,7 @@ function SKIN:PaintCreateItemButton( panel, w, h )
 	if panel.Hovered then
 		surface.SetDrawColor( self.Highlight )
 	else
-		surface.SetDrawColor( self.InnerPanel )
+		surface.SetDrawColor( self.ButtonColor )
 	end
 	surface.DrawRect( 0, 0, w, h )
 end

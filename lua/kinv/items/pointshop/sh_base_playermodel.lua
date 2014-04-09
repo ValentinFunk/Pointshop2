@@ -5,6 +5,8 @@ ITEM.model = "models/player/kleiner.mdl"
 ITEM.bodygroups = "0"
 ITEM.skin = 0
 
+ITEM.category = "Playermodels"
+
 function ITEM:OnEquip( )
 	if not ply._OldModel then
 		ply._OldModel = ply:GetModel( )

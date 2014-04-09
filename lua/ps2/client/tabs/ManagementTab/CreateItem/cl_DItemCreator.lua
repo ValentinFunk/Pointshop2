@@ -56,6 +56,9 @@ function PANEL:Init( )
 		panel.checkBox:SetValue( true )
 		
 		function panel:GetPrice( )
+			if self.wang:GetDisabled( ) then
+				return nil
+			end
 			return self.wang:GetValue( )
 		end
 		
@@ -80,6 +83,7 @@ function PANEL:Init( )
 		local saveTable = { }
 		frame:SaveItem( saveTable )
 		Pointshop2View:getInstance( ):createPointshopItem( saveTable )
+		frame:Close( )
 	end
 end
 

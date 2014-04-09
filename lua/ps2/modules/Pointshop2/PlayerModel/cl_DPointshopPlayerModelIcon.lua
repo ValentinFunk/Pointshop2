@@ -82,7 +82,7 @@ function PANEL:Init( )
 			
 			surface.SetDrawColor( color_white )
 			surface.SetMaterial( self.mt2 )
-			surface.DrawTexturedRect( -1, -2, w, h )
+			surface.DrawTexturedRect( 0, 0, w, h )
 		end
 		
 		cam.Start3D( self.vCamPos, ang, 25, x, y, w, h, 5, self.FarZ )

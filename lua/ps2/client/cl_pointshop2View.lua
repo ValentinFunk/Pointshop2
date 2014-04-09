@@ -9,6 +9,11 @@ function Pointshop2View:initialize( )
 	self.itemProperties = {}
 end
 
+function Pointshop2View:receiveInventory( inventory )
+	LocalPlayer().PS2_Inventory = inventory
+	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
+end
+
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
 	self.itemMappings = itemMappings
