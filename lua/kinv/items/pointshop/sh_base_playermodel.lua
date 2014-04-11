@@ -13,7 +13,7 @@ function ITEM:OnEquip( )
 	end
 	
 	timer.Simple( 1, function( )
-		ply:SetModel( self.Model )
+		ply:SetModel( self.model )
 		
 	end )
 end
@@ -25,7 +25,7 @@ function ITEM:OnHolster( )
 end
 
 function ITEM:PlayerSetModel( ply )
-	ply:SetModel( self.Model )
+	ply:SetModel( self.model )
 end
 Pointshop2.AddItemHook( "PlayerSetModel", ITEM )
 

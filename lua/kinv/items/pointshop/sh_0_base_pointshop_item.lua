@@ -7,6 +7,20 @@ ITEM.Price = {
 	Points = 1
 }
 
+function ITEM.static.GetBuyPrice( ply )
+	return { 
+		points = self.points,
+		premiumPoints = self.Price.premiumPoints 
+	}
+end
+
+function ITEM:GetSellPrice( )
+	return self.Price.Points * 0.75
+end
+
+function ITEM:CanBeSold( )
+	return true
+end
 
 function ITEM:OnPurchased( )
 
@@ -46,8 +60,8 @@ end
 */
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.Price = {
-		Points = persistenceItem.price,
-		DonorPoints = persistenceItem.pricePremium,
+		points = persistenceItem.price,
+		premiumPoints = persistenceItem.pricePremium,
 	}
 	itemTable.Ranks = persistenceItem.ranks
 	itemTable.PrintName = persistenceItem.name

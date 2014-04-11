@@ -9,12 +9,23 @@ function Pointshop2View:initialize( )
 	self.itemProperties = {}
 end
 
+function Pointshop2View:walletChanged( newWallet )
+	LocalPlayer().PS2_Wallet = newWallet
+	KLogf( 5, "[PS2] Received Wallet: %i pts, %i premPts", newWallet.points, newWallet.premiumPoints )
+	hook.Run( "PS2_WalletChanged", newWallet ) 
+end 
+
 function Pointshop2View:receiveInventory( inventory )
 	LocalPlayer().PS2_Inventory = inventory
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
 end
 
+function Pointshop2View:startBuyItem( itemClass, currencyType )
+	self:controllerAction( "buyItem", itemClass.className, currencyType )
+end
+
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
+	print( itemMappings, itemCategories, itemProperties, type( itemMappings ), type( itemCategories ), type( itemProperties ) )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
 	self.itemMappings = itemMappings
 	self.itemCategories = itemCategories

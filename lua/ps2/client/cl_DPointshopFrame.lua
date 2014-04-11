@@ -47,6 +47,26 @@ function PANEL:Init( )
 	function self.currencyPanel:Paint( w, h )
 	end
 	
+	self.pointsMoneyPanel = vgui.Create( "DPanel", self.currencyPanel )
+	self.pointsMoneyPanel:Dock( TOP )
+	self.pointsMoneyPanel:SetTall( 24 )
+	function self.pointsMoneyPanel:Paint( w, h)
+	end
+	
+	self.pointsMoneyPanel.icon = vgui.Create( "DImage", self.pointsMoneyPanel )
+	self.pointsMoneyPanel.icon:SetMaterial( Material( "pointshop2/dollar103.png", "noclamp smooth" ) )
+	self.pointsMoneyPanel.icon:Dock( LEFT )
+	self.pointsMoneyPanel.icon:DockMargin( 0, 2, 5, 2 )
+	self.pointsMoneyPanel.icon:SetSize( 20, 20 )
+	
+	self.pointsMoneyPanel.label = vgui.Create( "DLabel", self.pointsMoneyPanel )
+	self.pointsMoneyPanel.label:SetText( "12,000" )
+	self.pointsMoneyPanel.label:SetFont( self:GetSkin( ).fontName )
+	self.pointsMoneyPanel.label:Dock( FILL )
+	function self.pointsMoneyPanel.label:Think( )
+		self:SetText( LocalPlayer().PS2_Wallet.points )
+	end
+	
 	self.donationMoneyPanel = vgui.Create( "DPanel", self.currencyPanel )
 	self.donationMoneyPanel:Dock( TOP )
 	self.donationMoneyPanel:DockMargin( 0, 0, 0, 5 )
@@ -67,23 +87,9 @@ function PANEL:Init( )
 	self.donationMoneyPanel.label:SetText( "370" )
 	self.donationMoneyPanel.label:SetFont( self:GetSkin( ).fontName )
 	self.donationMoneyPanel.label:Dock( FILL )
-	
-	self.pointsMoneyPanel = vgui.Create( "DPanel", self.currencyPanel )
-	self.pointsMoneyPanel:Dock( TOP )
-	self.pointsMoneyPanel:SetTall( 24 )
-	function self.pointsMoneyPanel:Paint( w, h)
+	function self.donationMoneyPanel.label:Think( )
+		self:SetText( LocalPlayer().PS2_Wallet.premiumPoints )
 	end
-	
-	self.pointsMoneyPanel.icon = vgui.Create( "DImage", self.pointsMoneyPanel )
-	self.pointsMoneyPanel.icon:SetMaterial( Material( "pointshop2/dollar103.png", "noclamp smooth" ) )
-	self.pointsMoneyPanel.icon:Dock( LEFT )
-	self.pointsMoneyPanel.icon:DockMargin( 0, 2, 5, 2 )
-	self.pointsMoneyPanel.icon:SetSize( 20, 20 )
-	
-	self.pointsMoneyPanel.label = vgui.Create( "DLabel", self.pointsMoneyPanel )
-	self.pointsMoneyPanel.label:SetText( "12,000" )
-	self.pointsMoneyPanel.label:SetFont( self:GetSkin( ).fontName )
-	self.pointsMoneyPanel.label:Dock( FILL )
 	
 	self.contentsPanel = vgui.Create( "DPropertySheet", self )
 	self.contentsPanel:DockMargin( 0, 0, 0, 0 )

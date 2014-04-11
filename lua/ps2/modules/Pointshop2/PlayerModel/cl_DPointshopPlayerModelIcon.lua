@@ -50,7 +50,9 @@ function PANEL:Init( )
 					render.MaterialOverride( Material( "models/shiny" ) )
 						render.SetColorModulation( 1, 198.0 / 255, 0 )
 						render.SetBlend( 1 )
+						render.OverrideDepthEnable( true, false )
 						self.Entity:DrawModel()
+						render.OverrideDepthEnable( false )
 						render.SetColorModulation( 0, 0, 0 )
 					render.MaterialOverride( )
 					render.SuppressEngineLighting( false )
@@ -78,7 +80,7 @@ function PANEL:Init( )
 			cam.End2D( )
 			render.SetViewPort( 0, 0, oldW, oldH )
 			render.SetRenderTarget( oldRt )
-			self.mt2:SetTexture( "$basetexture", effecttex )
+			self.mt2:SetTexture( "$basetexture", rt )
 			
 			surface.SetDrawColor( color_white )
 			surface.SetMaterial( self.mt2 )
@@ -102,8 +104,8 @@ function PANEL:Init( )
 			end
 			
 			self.Entity:DrawModel()
-
-		render.SuppressEngineLighting( false )
+			
+			render.SuppressEngineLighting( false )
 		cam.IgnoreZ( false )
 		cam.End3D()
 

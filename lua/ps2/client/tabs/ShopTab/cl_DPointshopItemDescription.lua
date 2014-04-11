@@ -1,6 +1,8 @@
 local PANEL = {}
 
 function PANEL:Init( )
+	self:SetSkin( Pointshop2.Config.DermaSkin )
+	
 	self:DockPadding( 8, 0, 8, 8 )
 
 	self.titleLabel = vgui.Create( "DLabel", self )
@@ -20,19 +22,19 @@ function PANEL:Init( )
 	self.description:SetText( "Please Select an Item" )
 	self.description:SetFontInternal( self:GetSkin( ).TextFont )
 	
-	self.buyPanel = vgui.Create( "DPanel", self )
-	self.buyPanel:Dock( TOP )
-	self.buyPanel:DockMargin( 0, 8, 0, 0 )
-	Derma_Hook( self.buyPanel, "Paint", "Paint", "InnerPanelBright" )
-	self.buyPanel:SetTall( 100 )
-	self.buyPanel:DockPadding( 5, 5, 5, 5 )
-	function self.buyPanel:PerformLayout( )
+	self.buttonsPanel = vgui.Create( "DPanel", self )
+	self.buttonsPanel:Dock( TOP )
+	self.buttonsPanel:DockMargin( 0, 8, 0, 0 )
+	Derma_Hook( self.buttonsPanel, "Paint", "Paint", "InnerPanelBright" )
+	self.buttonsPanel:SetTall( 100 )
+	self.buttonsPanel:DockPadding( 5, 5, 5, 5 )
+	function self.buttonsPanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
 	
 	local itemDesc = self
 	local function AddBuyOption( icon, price, type )
-		local pnl = vgui.Create( "DPanel", self.buyPanel )
+		local pnl = vgui.Create( "DPanel", self.buttonsPanel )
 		pnl:DockMargin( 0, 0, 0, 5 )
 		function pnl:Paint( ) end
 		pnl:Dock( TOP )
@@ -42,7 +44,6 @@ function PANEL:Init( )
 			self:SetTall( h )
 			
 			self.icon:SetPos( 0, ( h - self.icon:GetTall( ) ) / 2 )
-			self.label:SetColor( color_white )
 			self.label:SetPos( 0 + self.icon:GetTall( ) + 5, ( h - self.label:GetTall( ) ) / 2 )
 			self.buyBtn:SetPos( self:GetWide( ) - self.buyBtn:GetWide( ), ( h - self.buyBtn:GetTall( ) ) / 2 )
 		end
@@ -54,6 +55,7 @@ function PANEL:Init( )
 		pnl.label = vgui.Create( "DLabel", pnl )
 		pnl.label:SetFont( self:GetSkin( ).fontName )
 		pnl.label:SetText( price )
+		pnl.label:SetColor( color_white )
 		pnl.label:SizeToContents( )
 		
 		pnl.buyBtn = vgui.Create( "DButton", pnl )
@@ -61,18 +63,44 @@ function PANEL:Init( )
 		function pnl.buyBtn:DoClick( )
 			Pointshop2View:getInstance( ):startBuyItem( itemDesc.itemClass, type )
 		end
+		
+		local function updatePrices( )
+			--Check 
+			local pts = LocalPlayer( ).PS2_Wallet[type]
+			if pts < price then
+				--pnl.label:SetColor( Color( 255, 0, 0 ) )
+				pnl.buyBtn:SetDisabled( true )
+				pnl.buyBtn:SetText( "Can't afford" )
+			else
+				pnl.label:SetColor( color_white )
+				pnl.buyBtn:SetText( "Buy Now" )
+			end
+		end
+		updatePrices( )
+		hook.Add( "PS2_WalletChanged", pnl, updatePrices )
 	end
 	
-	function self.buyPanel:SetPriceInfo( priceInfo )
+	function self.buttonsPanel:Reset( )
 		for k, v in pairs( self:GetChildren( ) ) do
 			v:Remove( ) 
 		end
-		if priceInfo.Points then
-			AddBuyOption( "pointshop2/dollar103.png", priceInfo.Points, "Points" )
+	end
+	
+	function self.buttonsPanel:AddBuyButtons( priceInfo )
+		if priceInfo.points then
+			AddBuyOption( "pointshop2/dollar103.png", priceInfo.points, "points" )
 		end
 		
-		if priceInfo.DonorPoints then
-			AddBuyOption( "pointshop2/donation.png", priceInfo.DonorPoints, "DonorPoints" )
+		if priceInfo.premiumPoints then
+			AddBuyOption( "pointshop2/donation.png", priceInfo.premiumPoints, "premiumPoints" )
+		end
+	end
+	
+	function self.buttonsPanel:AddSellButton( price )
+		self.sellBtn = vgui.Create( "DButton", self )
+		self.sellBtn:SetText( "Sell Item (" .. price .. "pts)" )
+		function pnl.buyBtn:DoClick( )
+			Pointshop2View:getInstance( ):startSellItem( itemDesc.item )
 		end
 	end
 end
@@ -83,7 +111,7 @@ function PANEL:SelectionReset( )
 	self.description:SetText( "Please Select an Item" )
 end
 
-function PANEL:SetItemClass( itemClass )
+function PANEL:SetItemClass( itemClass, noBuyPanel )
 	self.itemClass = itemClass
 
 	self.titleLabel:SetText( itemClass.PrintName )
@@ -91,7 +119,20 @@ function PANEL:SetItemClass( itemClass )
 	
 	self.description:SetText( itemClass.Description )
 	
-	self.buyPanel:SetPriceInfo( itemClass.Price )
+	self.buttonsPanel:Reset( )
+	if not noBuyPanel then
+		self.buttonsPanel:AddBuyButtons( itemClass.GetBuyPrice( LocalPlayer( ) )
+	end
+end
+
+function PANEL:SetItem( item )
+	self.item = item
+	self:SetItemClass( item.class )
+	
+	self.buyPanel:Reset( )
+	if item:CanBeSold( ) then --todo
+		self.buttonsPanel:AddSellButton( item:GetSellPrice( ) )
+	end
 end
 
 function PANEL:PerformLayout( )
