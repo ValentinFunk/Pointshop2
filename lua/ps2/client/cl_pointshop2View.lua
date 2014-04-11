@@ -25,7 +25,6 @@ function Pointshop2View:startBuyItem( itemClass, currencyType )
 end
 
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
-	print( itemMappings, itemCategories, itemProperties, type( itemMappings ), type( itemCategories ), type( itemProperties ) )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
 	self.itemMappings = itemMappings
 	self.itemCategories = itemCategories
@@ -41,7 +40,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	for k, dbCategory in pairs( self.itemCategories ) do
 		local newCategory = { 
 			self = {
-				id = dbCategory.id,
+				id = tonumber( dbCategory.id ),
 				label = dbCategory.label,
 				icon = dbCategory.icon
 			},

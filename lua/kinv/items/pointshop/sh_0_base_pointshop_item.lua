@@ -2,20 +2,20 @@ ITEM.PrintName = "Pointshop Item Base"
 ITEM.Material = "materials/error"
 ITEM.Description = "Pointshop Item Base"
 
-ITEM.Price = {
-	DonorPoints = 1,
-	Points = 1
+ITEM.static.Price = {
+	points = 1,
+	premiumPoints = 1
 }
 
-function ITEM.static.GetBuyPrice( ply )
+function ITEM.static:GetBuyPrice( ply )
 	return { 
-		points = self.points,
+		points = self.Price.points,
 		premiumPoints = self.Price.premiumPoints 
 	}
 end
 
-function ITEM:GetSellPrice( )
-	return self.Price.Points * 0.75
+function ITEM.static:GetSellPrice( )
+	return ITEM.Price.points * 0.75
 end
 
 function ITEM:CanBeSold( )
@@ -59,10 +59,12 @@ end
 	Should be overwritten and called by any other item bases.
 */
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
-	itemTable.Price = {
+	itemTable.static.Price = {
 		points = persistenceItem.price,
 		premiumPoints = persistenceItem.pricePremium,
 	}
+	print( "added persistence: ", persistenceItem.price, persistenceItem.pricePremium )
+	PrintTable( itemTable )
 	itemTable.Ranks = persistenceItem.ranks
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description

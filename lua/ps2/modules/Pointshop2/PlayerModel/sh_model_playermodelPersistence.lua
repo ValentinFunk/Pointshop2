@@ -7,7 +7,7 @@ PlayermodelPersistence.static.model = {
 	tableName = "ps2_playermodelpersistence",
 	fields = {
 		itemPersistenceId = "int",
-		model = "string",
+		playerModel = "string",
 		skin = "int",
 		bodygroups = "string"
 	},
@@ -26,7 +26,7 @@ function PlayermodelPersistence.static.createFromSaveTable( saveTable )
 	:Then( function( itemPersistence )
 		local playermodel = PlayermodelPersistence:new( )
 		playermodel.itemPersistenceId = itemPersistence.id
-		playermodel.model = saveTable.model
+		playermodel.playerModel = saveTable.playerModel
 		playermodel.bodygroups = saveTable.bodygroups
 		playermodel.skin = saveTable.skin
 		return playermodel:save( )

@@ -47,7 +47,7 @@ end
 
 function PANEL:SaveItem( saveTable )
 	self.BaseClass.SaveItem( self, saveTable )
-	saveTable.model = self.manualEntry:GetText( )
+	saveTable.playerModel = self.manualEntry:GetText( )
 	saveTable.skin = self.skin
 	saveTable.bodygroups = self.bodygroups
 end

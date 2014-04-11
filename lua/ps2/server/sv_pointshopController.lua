@@ -1,6 +1,27 @@
 Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
 
+Pointshop2.ItemsLoadedPromise = Deferred( )
+Pointshop2.ItemsLoadedPromise:Done( function( )
+	KLogf( 4, "[Pointshop2] All Items were loaded by KInv" )
+end )
+hook.Add( "KInv_ItemsLoaded", "ResolveDeferred", function( )
+	Pointshop2.ItemsLoadedPromise:Resolve( ) --Trigger ready for all listeners
+end )
+
+Pointshop2.DatabaseConnectedPromise = Deferred( )
+Pointshop2.DatabaseConnectedPromise:Done( function( )
+	KLogf( 4, "[Pointshop2] The database was connected" )
+end )
+function Pointshop2.onDatabaseConnected( )
+	Pointshop2.DatabaseConnectedPromise:Resolve( )
+end
+
+Pointshop2.FullyInitializedPromise = WhenAllFinished{ Pointshop2.ItemsLoadedPromise:Promise( ), Pointshop2.DatabaseConnectedPromise:Promise( ) }
+Pointshop2.FullyInitializedPromise:Then( function( )
+	KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
+end )
+
 --Override for access controll
 --returns a promise, resolved if user can do it, rejected with error if he cant
 function Pointshop2Controller:canDoAction( ply, action )
@@ -73,20 +94,27 @@ function Pointshop2Controller:sendWallet( ply )
 end
 
 function Pointshop2Controller:sendDynamicInfo( ply )
-	WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ), 
-					 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
-	}
-	:Then( function( itemMappings, categories )
-		print( "SendDynamicInfo ", ply, itemMappings, categories )
-		local itemProperties = self.cachedPersistentItems
-		self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
+	Pointshop2.LoadModuleItemsPromise:Done( function( )
+		WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ), 
+						 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+		}
+		:Then( function( itemMappings, categories )
+			print( "SendDynamicInfo ", ply, itemMappings, categories )
+			local itemProperties = self.cachedPersistentItems
+			self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
+		end )
 	end )
 end
+
 local function initPlayer( ply )
 	local controller = Pointshop2Controller:getInstance( )
-	controller:sendDynamicInfo( ply )
 	controller:initializeInventory( ply )
 	controller:sendWallet( ply )
+	
+	--
+	Pointshop2.LoadModuleItemsPromise:Done( function( )
+		controller:sendDynamicInfo( ply )
+	end )
 end
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:sendDynamicInfo", function( ply )
 	timer.Simple( 1, function( )
@@ -181,6 +209,10 @@ function Pointshop2Controller:loadModuleItems( )
 	for _, mod in pairs( Pointshop2.Modules ) do
 		for k, v in pairs( mod.Blueprints ) do
 			local class = Pointshop2.GetItemClassByName( v.base )
+			if not class then
+				KLogf( 2, "[Pointshop2][Error] Blueprint %s: couldn't find baseclass", v.base )
+				continue
+			end
 			local promise = class.getPersistence( ).getDbEntries( "WHERE 1" )
 			:Then( function( persistentItems ) 
 				for _, persistentItem in pairs( persistentItems ) do
@@ -195,7 +227,7 @@ function Pointshop2Controller:loadModuleItems( )
 end
 local function loadPersistent( )
 	KLogf( 4, "[Pointshop2] Loading Module items" )
-	Pointshop2Controller:getInstance( ):loadModuleItems( )
+	Pointshop2.LoadModuleItemsPromise = Pointshop2Controller:getInstance( ):loadModuleItems( )
 	:Done( function( )
 		KLogf( 4, "[Pointshop2] Loaded Module items from DB" )
 	end )
@@ -203,9 +235,10 @@ local function loadPersistent( )
 		KLogf( 2, "[Pointshop2] Couldn't load persistent items: %i - %s", errid, err )
 	end )
 end
-function Pointshop2.onDatabaseConnected( )
+--When KInventory has loaded all item bases and the database has been connected we load persistent items
+Pointshop2.FullyInitializedPromise:Done( function( )
 	loadPersistent( )
-end
+end )
 
 function Pointshop2Controller:saveModuleItem( ply, saveTable )
 	local class = Pointshop2.GetItemClassByName( saveTable.baseClass )
@@ -237,7 +270,7 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, item " .. itemClass .. " isn't valid" ) 
 		return
 	end
-	local price = itemClass.GetBuyPrice( ply )
+	local price = itemClass:GetBuyPrice( ply )
 	
 	/*
 		Wrap everything into a blocking transaction to make sure we don't get duplicate stuff
@@ -262,7 +295,7 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 				canAfford = true
 				wallet.points = wallet.points - price.points
 			end
-		else if currencyType == "premiumPoints" then
+		elseif currencyType == "premiumPoints" then
 			if wallet.premiumPoints >= price.premiumPoints then
 				canAfford = true
 				wallet.premiumPoints = wallet.premiumPoints - price.premiumPoints

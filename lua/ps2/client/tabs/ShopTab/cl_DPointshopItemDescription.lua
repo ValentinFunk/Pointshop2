@@ -112,6 +112,7 @@ function PANEL:SelectionReset( )
 end
 
 function PANEL:SetItemClass( itemClass, noBuyPanel )
+	debug.Trace( )
 	self.itemClass = itemClass
 
 	self.titleLabel:SetText( itemClass.PrintName )
@@ -121,7 +122,8 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 	
 	self.buttonsPanel:Reset( )
 	if not noBuyPanel then
-		self.buttonsPanel:AddBuyButtons( itemClass.GetBuyPrice( LocalPlayer( ) )
+		print( itemClass )
+		self.buttonsPanel:AddBuyButtons( itemClass:GetBuyPrice( LocalPlayer( ) ) )
 	end
 end
 
