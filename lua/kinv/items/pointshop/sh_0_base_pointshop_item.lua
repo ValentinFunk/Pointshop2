@@ -14,16 +14,22 @@ function ITEM.static:GetBuyPrice( ply )
 	}
 end
 
-function ITEM.static:GetSellPrice( )
-	return ITEM.Price.points * 0.75
+function ITEM:GetSellPrice( )
+	return self.class.Price.points * 0.75
 end
 
+--TODO add to editor
 function ITEM:CanBeSold( )
-	return true
+	return self.class.Price.points != nil
 end
 
-function ITEM:OnPurchased( )
+function ITEM:OnPurchased( ply )
 
+end
+
+--TODO add to editor
+function ITEM:CanBeEquipedInSlot( slotName )
+	return false
 end
 
 function ITEM:OnSold( )
@@ -34,11 +40,11 @@ function ITEM:CanBeTraded( receivingPly )
 
 end
 
-function ITEM:OnEquip( )
+function ITEM:OnEquip( ply )
 
 end
 
-function ITEM:OnHolster( )
+function ITEM:OnHolster( ply )
 
 end
 
@@ -63,9 +69,20 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 		points = persistenceItem.price,
 		premiumPoints = persistenceItem.pricePremium,
 	}
-	print( "added persistence: ", persistenceItem.price, persistenceItem.pricePremium )
-	PrintTable( itemTable )
 	itemTable.Ranks = persistenceItem.ranks
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
+end
+
+/*
+	Inventory Icon control
+*/
+function ITEM:getIcon( )
+	self.icon = vgui.Create( "DPointshopInventoryItemIcon" )
+	self.icon:SetItem( self )
+	self.icon.Paint = function( _, w, h )
+		surface.SetDrawColor( 255, 0, 0 )
+		surface.DrawRect( 0, 0, w, h )
+	end
+	return self.icon
 end

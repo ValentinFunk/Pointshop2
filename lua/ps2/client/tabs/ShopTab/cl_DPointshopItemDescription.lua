@@ -84,6 +84,7 @@ function PANEL:Init( )
 		for k, v in pairs( self:GetChildren( ) ) do
 			v:Remove( ) 
 		end
+		self:InvalidateLayout( )
 	end
 	
 	function self.buttonsPanel:AddBuyButtons( priceInfo )
@@ -99,7 +100,8 @@ function PANEL:Init( )
 	function self.buttonsPanel:AddSellButton( price )
 		self.sellBtn = vgui.Create( "DButton", self )
 		self.sellBtn:SetText( "Sell Item (" .. price .. "pts)" )
-		function pnl.buyBtn:DoClick( )
+		self.sellBtn:Dock( TOP )
+		function self.sellBtn:DoClick( )
 			Pointshop2View:getInstance( ):startSellItem( itemDesc.item )
 		end
 	end
@@ -112,7 +114,6 @@ function PANEL:SelectionReset( )
 end
 
 function PANEL:SetItemClass( itemClass, noBuyPanel )
-	debug.Trace( )
 	self.itemClass = itemClass
 
 	self.titleLabel:SetText( itemClass.PrintName )
@@ -122,16 +123,15 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 	
 	self.buttonsPanel:Reset( )
 	if not noBuyPanel then
-		print( itemClass )
 		self.buttonsPanel:AddBuyButtons( itemClass:GetBuyPrice( LocalPlayer( ) ) )
 	end
 end
 
 function PANEL:SetItem( item )
 	self.item = item
-	self:SetItemClass( item.class )
+	self:SetItemClass( item.class, true )
 	
-	self.buyPanel:Reset( )
+	self.buttonsPanel:Reset( )
 	if item:CanBeSold( ) then --todo
 		self.buttonsPanel:AddSellButton( item:GetSellPrice( ) )
 	end

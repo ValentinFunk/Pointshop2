@@ -30,6 +30,15 @@ function PANEL:Init( )
 	self.invPanel:initSlots( LocalPlayer( ).PS2_Inventory:getNumSlots( ) )
 	function self.invPanel:Paint( ) 
 	end
+	hook.Add( "PS2_ItemRemoved", self, function( self, item )
+		self.invPanel:itemRemoved( item.id )
+	end )
+	hook.Add( "KInv_ItemAdded", self, function( self, item )
+		if item.inventory_id != LocalPlayer( ).PS2_Inventory.id then
+			return 
+		end
+		self.invPanel:itemAdded( item.id )
+	end )
 	
 	self.bottomPnl = vgui.Create( "DPanel", self.leftPanel )
 	self.bottomPnl:Dock( BOTTOM )
@@ -50,16 +59,21 @@ function PANEL:Init( )
 	self.topContainer = vgui.Create( "DPanel", self.rightPanel )
 	self.topContainer:Dock( TOP )
 	self.topContainer:SetTall( 400 )
+	self.topContainer.Paint = function( ) end
 	
 	self.slotsScroll = vgui.Create( "DScrollPanel", self.topContainer )
 	self.slotsScroll.wantedWidth = 2 * 64 + 2 * 8
 	self.slotsScroll:SetWide( self.slotsScroll.wantedWidth )
 	self.slotsScroll:DockMargin( 8, 0, 8, 0 )
 	self.slotsScroll:Dock( LEFT )
+	Derma_Hook( self.slotsScroll, "Paint", "Paint", "InnerPanelBright" )
 	self.rightPanel.slotsScroll = self.slotsScroll
 	
 	self.slotsLayout = vgui.Create( "DIconLayout", self.slotsScroll )
 	self.slotsLayout:Dock( FILL )
+	self.slotsLayout:DockMargin( 5, 5, 5, 5 )
+	self.slotsLayout:SetSpaceX( 5 )
+	self.slotsLayout:SetSpaceY( 5 )
 	hook.Run( "PS2_PopulateSlots", self.slotsLayout )
 	
 	self.preview = vgui.Create( "DPointshopInventoryPreviewPanel", self.topContainer )
@@ -78,17 +92,17 @@ function PANEL:Init( )
 	
 	self.descPanel = vgui.Create( "DPointshopItemDescription", self.rightPanel )
 	self.descPanel:Dock( TOP )
-	hook.Add( "PS2_ItemIconSelected", self, function( self, panel, itemClass )
-		if not IsValid( panel ) or not itemClass then
+	hook.Add( "PS2_InvItemIconSelected", self, function( self, panel, item )
+		if not IsValid( panel ) or not item then
 			self.descPanel:SelectionReset( )
 			return
 		end
-		if self.descPanel.ClassName != itemClass.GetPointshopDescriptionControl( ) then
+		if self.descPanel.ClassName != item.class:GetPointshopDescriptionControl( ) then
 			self.descPanel:Remove( )
-			self.descPanel = vgui.Create( itemClass.GetPointshopDescriptionControl( ), self.rightPanel )
+			self.descPanel = vgui.Create( item.class:GetPointshopDescriptionControl( ), self.rightPanel )
 			self.descPanel:Dock( TOP )
 		end
-		self.descPanel:SetItemClass( itemClass, true )
+		self.descPanel:SetItem( item, true )
 	end )
 end
 

@@ -1,6 +1,16 @@
 Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
 
+--TODO:
+--	- Cache player inventories
+--	- Cache player items
+-- Why? For proper, persistent OO and reduction in queries
+
+Pointshop2.LoadModuleItemsPromise = Deferred( )
+Pointshop2.LoadModuleItemsPromise:Done( function( )
+	KLogf( 4, "[Pointshop2] All Module items were loaded" )
+end )
+
 Pointshop2.ItemsLoadedPromise = Deferred( )
 Pointshop2.ItemsLoadedPromise:Done( function( )
 	KLogf( 4, "[Pointshop2] All Items were loaded by KInv" )
@@ -18,7 +28,7 @@ function Pointshop2.onDatabaseConnected( )
 end
 
 Pointshop2.FullyInitializedPromise = WhenAllFinished{ Pointshop2.ItemsLoadedPromise:Promise( ), Pointshop2.DatabaseConnectedPromise:Promise( ) }
-Pointshop2.FullyInitializedPromise:Then( function( )
+Pointshop2.FullyInitializedPromise:Done( function( )
 	KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
 end )
 
@@ -40,6 +50,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 		end
 	elseif action == "buyItem" then
 		def:Resolve( )
+	elseif action == "equipItem" or action == "unequipItem" then
+		def:Resolve( )
 	else
 		def:Reject( 1, "Permission denied" )
 	end
@@ -47,7 +59,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 end
 
 function Pointshop2Controller:initializeInventory( ply )
-	KInventory.Inventory.findByOwnerId( ply.kPlayerId )
+	return KInventory.Inventory.findByOwnerId( ply.kPlayerId )
 	:Then( function( inventory )
 		--Check for Inventory and create if necessary
 		if inventory then
@@ -64,8 +76,10 @@ function Pointshop2Controller:initializeInventory( ply )
 		--Load Items
 		return inventory:loadItems( )
 		:Done( function( )
+			print( "items loaded ", #inventory.Items )
 			--Network the Inventory to the player
 			self:startView( "Pointshop2View", "receiveInventory", ply, inventory )
+			self:startView( "InventoryView", "receiveInventory", ply, inventory )
 		end )
 		:Fail( function( errid, err )
 			KLogf( 2, "Error loading items %i %s", errid, err )
@@ -73,6 +87,13 @@ function Pointshop2Controller:initializeInventory( ply )
 	end,
 	function( errid, err )
 		KLogf( 2, "Error creating inventory %i %s", errid, err )
+	end )
+end
+
+function Pointshop2Controller:initializeSlots( ply )
+	Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
+	:Then( function( slots )
+		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
 	end )
 end
 
@@ -99,7 +120,7 @@ function Pointshop2Controller:sendDynamicInfo( ply )
 						 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
 		}
 		:Then( function( itemMappings, categories )
-			print( "SendDynamicInfo ", ply, itemMappings, categories )
+			print( "SendDynamicInfo ", ply, itemMappings, categories, itemProperties )
 			local itemProperties = self.cachedPersistentItems
 			self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
 		end )
@@ -108,12 +129,15 @@ end
 
 local function initPlayer( ply )
 	local controller = Pointshop2Controller:getInstance( )
-	controller:initializeInventory( ply )
 	controller:sendWallet( ply )
 	
 	--
 	Pointshop2.LoadModuleItemsPromise:Done( function( )
 		controller:sendDynamicInfo( ply )
+		controller:initializeInventory( ply )
+		:Done( function( )
+			controller:initializeSlots( ply )
+		end )
 	end )
 end
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:sendDynamicInfo", function( ply )
@@ -227,11 +251,13 @@ function Pointshop2Controller:loadModuleItems( )
 end
 local function loadPersistent( )
 	KLogf( 4, "[Pointshop2] Loading Module items" )
-	Pointshop2.LoadModuleItemsPromise = Pointshop2Controller:getInstance( ):loadModuleItems( )
+	Pointshop2Controller:getInstance( ):loadModuleItems( )
 	:Done( function( )
+		Pointshop2.LoadModuleItemsPromise:Resolve( )
 		KLogf( 4, "[Pointshop2] Loaded Module items from DB" )
 	end )
 	:Fail( function( errid, err )
+		Pointshop2.LoadModuleItemsPromise:Reject( errid, err )
 		KLogf( 2, "[Pointshop2] Couldn't load persistent items: %i - %s", errid, err )
 	end )
 end
@@ -323,18 +349,133 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		local item = itemClass:new( )
 		return item:save( )
 		:Then( function( )
+			item:OnPurchased( ply )
 			return inventory:addItem( item )
 		end )
 	end )
 	:Then( function( )
-		KLogf( 2, "Error saving categories: %s", err )
+		KLogf( 2, "Player %s purchased item %s", ply:Nick( ), itemClass )
 		DATABASES[Pointshop2.Category.DB].DoQuery( "COMMIT" )
 		DATABASES[Pointshop2.Category.DB].SetBlocking( false )
+		self:sendWallet( ply )
 	end, function( errid, err )
-		KLogf( 2, "Error saving categories: %s", err )
+		KLogf( 2, "Error saving item purchase: %s", err )
 		DATABASES[Pointshop2.Category.DB].DoQuery( "ROLLBACK" )
 		DATABASES[Pointshop2.Category.DB].SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your purchase was not carried out." )
+	end )
+end
+
+function Pointshop2Controller:unequipItem( ply, slotName )
+	Pointshop2.EquipmentSlot.findWhere{ ownerId = ply.kPlayerId, slotName = slotName }
+	:Then( function( slots )
+		local slot = slots[1]
+		if not slot then
+			local def = Deferred( )
+			def:Reject( 1, "Slot " .. slotName .. " not found!" )
+			return def:Promise( )
+		end
+		
+		local item = slot.Item 
+		if not item then
+			local def = Deferred( )
+			def:Reject( 1, "Slot " .. slotName .. " holds no item!" )
+			return def:Promise( )
+		end
+		
+		return KInventory.Inventory.findByOwnerId( ply.kPlayerId )
+		:Then( function( inv )
+			item.inventory_id = inv.id
+			return item:save( )
+		end )
+	end )
+	:Then( function( item )
+		item:OnEquip( ply )
+		self:startView( "Pointshop2View", "itemChanged", ply, item )
+		return Pointshop2.EquipmentSlot.findWhere{ ownerId = ply.kPlayerId, slotName = slotName }
+	end )
+	:Then( function( updatedSlots )
+		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlots[1] )
+	end, function( errid, err )
+		self:reportError( "Pointshop2View", ply, "Error unequipping item", errid, err )
+	end )
+end
+
+function Pointshop2Controller:equipItem( ply, itemId, slotName )
+	if not Pointshop2.IsValidEquipmentSlot( slotName ) then
+		self:startView( "Pointshop2View", "displayError", ply, "Could not equip item, " .. slotName .. " is not a valid equipment slot." )
+		KLogf( 3, "[Pointshop2][WARN] Player %s tried to equip item into invalid slot %s", ply:Nick( ), slotName )
+		return
+	end
+	
+	local itemFound = nil
+	local inventoryFound = nil
+	WhenAllFinished{ KInventory.Item.findById( itemId ), KInventory.Inventory.findByOwnerId( ply.kPlayerId ) }
+	:Then( function( item, inventory ) 
+		if not item then
+			local def = Deferred( )
+			def:Reject( 1, "Invalid itemId " .. itemId )
+			return def:Promise( )
+		end
+		
+		if not Pointshop2.IsItemValidForSlot( item, slotName ) then
+			local def = Deferred( )
+			def:Reject( 1, "This item cannot be equipped into that slot!" )
+			return def:Promise( )
+		end
+		
+		if not inventory then
+			local def = Deferred( )
+			def:Reject( 1, "A technical error occured (invalid inv)" )
+			return def:Promise( )
+		end
+		
+		if item.inventory_id != inventory.id then
+			local def = Deferred( )
+			def:Reject( 1, "You don't own this item" )
+			return def:Promise( )
+		end
+		
+		inventoryFound = inventory
+		itemFound = item
+		return Pointshop2.EquipmentSlot.findWhere{ ownerId = ply.kPlayerId, slotName = slotName }
+	end )
+	:Then( function( equipmentSlots )
+		local equipmentSlot
+		if #equipmentSlots == 0 then
+			equipmentSlot = Pointshop2.EquipmentSlot:new( )
+			equipmentSlot.ownerId = ply.kPlayerId
+			equipmentSlot.slotName = slotName
+		else
+			equipmentSlot = equipmentSlots[1]
+		end
+		
+		--Move the currently equiped item back into the player's inventory
+		if equipmentSlot.Item then
+			equipmentSlot.Item.inventory_id = inventoryFound.id
+			equipmentSlot.Item:save( )
+			:Done( function( item )
+				self:startView( "Pointshop2View", "itemChanged", ply, item )
+			end )
+			equipmentSlot.Item:OnHolster( ply )
+		end
+		
+		--move the item into the slot
+		equipmentSlot.itemId = itemFound.id
+		itemFound.inventory_id = nil --messy switch form Item.inventory_id to referencing by slot.itemId
+		
+		return equipmentSlot:save( ):Then( function( )
+			return WhenAllFinished{ itemFound:save( ), Pointshop2.EquipmentSlot.findById( equipmentSlot.id ) }
+		end )
+	end )
+	:Then( function( item, updatedSlot )
+		item:OnEquip( ply )
+		
+		self:startView( "Pointshop2View", "itemChanged", ply, item )
+		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlot )
+	end )
+	:Fail( function( errid, err )
+		self:reportError( "Pointshop2View", ply, "Error equipping item", errid, err )
 	end )
 end

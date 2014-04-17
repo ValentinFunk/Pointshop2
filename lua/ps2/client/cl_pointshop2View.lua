@@ -20,6 +20,43 @@ function Pointshop2View:receiveInventory( inventory )
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
 end
 
+function Pointshop2View:itemChanged( item )
+	local found
+	for k, v in pairs( LocalPlayer().PS2_Inventory.Items ) do
+		if v.id == item.id then
+			found = true
+			if item.inventory_id != LocalPlayer().PS2_Inventory.id then
+				--Item was removed
+				LocalPlayer().PS2_Inventory.Items[k] = item
+				hook.Run( "PS2_ItemRemoved", item )
+			else
+				--Item was updated
+				LocalPlayer().PS2_Inventory.Items[k] = item
+				hook.Run( "PS2_ItemUpdated", item )
+			end
+		end
+	end
+	
+	if not found then
+		--Item was added
+		LocalPlayer().PS2_Inventory:addItem( item )
+	end
+end
+
+function Pointshop2View:receiveSlots( slots )
+	LocalPlayer().PS2_SlotInfo = LocalPlayer().PS2_SlotInfo or {}
+	for k, v in pairs( slots ) do
+		LocalPlayer().PS2_SlotInfo[v.slotName] = v.Item
+	end
+
+	KLogf( 5, "[PS2] Received slots, %i slots", #slots )
+end
+
+function Pointshop2View:slotChanged( slot )
+	LocalPlayer().PS2_SlotInfo[slot.slotName] = slot.Item
+	hook.Run( "PS2_SlotChanged", slot )
+end
+
 function Pointshop2View:startBuyItem( itemClass, currencyType )
 	self:controllerAction( "buyItem", itemClass.className, currencyType )
 end
@@ -86,6 +123,14 @@ end
 
 function Pointshop2View:saveCategoryOrganization( categoryItemsTable )
 	self:controllerAction( "saveCategoryOrganization", categoryItemsTable )
+end
+
+function Pointshop2View:equipItem( item, slotName )
+	if item then
+		self:controllerAction( "equipItem", item.id, slotName )
+	else
+		self:controllerAction( "unequipItem", slotName )
+	end
 end
 
 function Pointshop2View:getCategoryOrganization( )
