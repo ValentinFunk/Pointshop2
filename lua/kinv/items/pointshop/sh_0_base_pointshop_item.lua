@@ -14,7 +14,7 @@ function ITEM.static:GetBuyPrice( ply )
 	}
 end
 
-function ITEM:GetSellPrice( )
+function ITEM:GetSellPrice( ply )
 	return self.class.Price.points * 0.75
 end
 

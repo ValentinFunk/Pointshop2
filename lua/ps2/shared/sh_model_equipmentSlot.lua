@@ -10,12 +10,12 @@ EquipmentSlot.static.model = {
 		slotName = "string",
 		ownerId = "int"			--Owning player id
 	},
-	belongsTo = {
+	/*belongsTo = {
 		Item = {
 			class = "KInventory.Item",
 			foreignKey = "itemId"
 		}
-	}
+	}*/
 }
 
 EquipmentSlot:include( DatabaseModel )

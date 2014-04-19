@@ -9,3 +9,19 @@ function Pointshop2.ResetDatabase( )
 		end
 	end
 end
+
+function Pointshop2.PlayerOwnsItem( ply, item )
+	for k, v in pairs( ply.PS2_Inventory:getItems( ) ) do
+		if v.id == item.id then
+			return true
+		end
+	end
+	
+	for k, v in pairs( ply.PS2_Slots ) do
+		if v.itemId == item.id then
+			return true
+		end
+	end
+	
+	return false
+end

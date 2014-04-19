@@ -61,6 +61,10 @@ function Pointshop2View:startBuyItem( itemClass, currencyType )
 	self:controllerAction( "buyItem", itemClass.className, currencyType )
 end
 
+function Pointshop2View:startSellItem( item )
+	self:controllerAction( "sellItem", item.id )
+end
+
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
 	self.itemMappings = itemMappings
