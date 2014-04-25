@@ -18,17 +18,18 @@ function ITEM:getIcon( )
 end
 
 function ITEM:OnEquip( ply )
+	print( "Playermodel: OnEquip", ply  )
 	if not ply._oldModel then
 		ply._oldModel = ply:GetModel( )
 	end
 	
 	timer.Simple( 1, function( )
 		ply:SetModel( self.playerModel )
-		
 	end )
 end
 
 function ITEM:OnHolster( ply )
+	print( "Playermodel: OnHolster", ply )
 	if ply._oldModel then
 		ply:SetModel(ply._oldModel)
 	end

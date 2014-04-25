@@ -26,10 +26,15 @@ end
 function Pointshop2.AddItemHook( name, item )
 	if item.name == "DummyClass" then return end
 	
-	hook.Add( name, "PS2Hook_" .. item.className, function( ... )
-		for k, v in pairs( player.GetAll( ) ) do
-			if v:PS2_HasItemEquipped( item.className ) then -- hooks are only called if the player has the item equipped
-				item[name]( item, ... )
+	hook.Add( name, "PS2Hook_" .. name, function( ... )
+		for _, ply in pairs( player.GetAll( ) ) do
+			for _, slot in pairs( ply.PS2_Slots or {} ) do
+				if slot.itemId and KInventory.ITEMS[slot.itemId] then
+					local eqItem = KInventory.ITEMS[slot.itemId]
+					if item.className == eqItem.className then
+						eqItem[name]( eqItem, ... )
+					end
+				end
 			end
 		end
 	end )

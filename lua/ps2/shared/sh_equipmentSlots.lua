@@ -37,8 +37,8 @@ if CLIENT then
 			local slot = slotsLayout:Add( "DPointshopEquipmentSlot" )
 			slot:SetLabel( slotName )
 			slot.CanHoldItem = function( self, item ) return acceptFunc( item ) end
-			if LocalPlayer().PS2_SlotInfo[slotName] then
-				slot:SetItem( LocalPlayer().PS2_SlotInfo[slotName] )
+			if LocalPlayer().PS2_Slots[slotName] then
+				slot:SetItem( LocalPlayer().PS2_Slots[slotName] )
 			end
 		end
 	end )

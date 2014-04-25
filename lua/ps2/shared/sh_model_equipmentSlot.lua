@@ -10,12 +10,25 @@ EquipmentSlot.static.model = {
 		slotName = "string",
 		ownerId = "int"			--Owning player id
 	},
-	/*belongsTo = {
+	belongsTo = {
 		Item = {
 			class = "KInventory.Item",
 			foreignKey = "itemId"
 		}
-	}*/
+	}
 }
 
 EquipmentSlot:include( DatabaseModel )
+
+function EquipmentSlot:removeItem( item )
+	local def = Deferred( )
+	
+	if self.itemId != item.id then
+		def:Reject( -1, "Slot doesn't hold this item" )
+		return def:Promise( )
+	end
+	
+	self.itemId = nil
+	self.Item = nil
+	return self:save( )
+end

@@ -44,16 +44,16 @@ function Pointshop2View:itemChanged( item )
 end
 
 function Pointshop2View:receiveSlots( slots )
-	LocalPlayer().PS2_SlotInfo = LocalPlayer().PS2_SlotInfo or {}
+	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
 	for k, v in pairs( slots ) do
-		LocalPlayer().PS2_SlotInfo[v.slotName] = v.Item
+		LocalPlayer().PS2_Slots[v.slotName] = v.Item
 	end
 
 	KLogf( 5, "[PS2] Received slots, %i slots", #slots )
 end
 
 function Pointshop2View:slotChanged( slot )
-	LocalPlayer().PS2_SlotInfo[slot.slotName] = slot.Item
+	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item
 	hook.Run( "PS2_SlotChanged", slot )
 end
 

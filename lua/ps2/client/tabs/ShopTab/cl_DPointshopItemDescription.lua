@@ -127,12 +127,12 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 	end
 end
 
-function PANEL:SetItem( item )
+function PANEL:SetItem( item, noButtons )
 	self.item = item
 	self:SetItemClass( item.class, true )
 	
 	self.buttonsPanel:Reset( )
-	if item:CanBeSold( ) then --todo
+	if item:CanBeSold( ) and not noButtons then --todo
 		self.buttonsPanel:AddSellButton( item:GetSellPrice( ) )
 	end
 end

@@ -149,6 +149,9 @@ local function initPlayer( ply )
 		end )
 	end )
 end
+hook.Add( "PlayerInitialSpawn", "fadsfads", function( ply )
+	dp( ply )
+end )
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	timer.Simple( 1, function( )
@@ -308,6 +311,11 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	end
 	local price = itemClass:GetBuyPrice( ply )
 	
+	if #ply.PS2_Inventory:getItems( ) >= ply.PS2_Inventory.numSlots then
+		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, your inventory is full!" ) 
+		return
+	end
+	
 	/*
 		Wrap everything into a blocking transaction to make sure we don't get duplicate stuff
 		if mysql takes a little longer to respond and prevent any lua from queueing querys in 
@@ -322,9 +330,9 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		error( "Error starting transaction:", err )
 	end )
 	
-	if currencyType == "points" and ply.PS2_Wallet.points > price.points then
+	if currencyType == "points" and price.points and ply.PS2_Wallet.points > price.points then
 		ply.PS2_Wallet.points = ply.PS2_Wallet.points - price.points
-	elseif currencyType == "premiumPoints" and ply.PS2_Wallet.premiumPoints > price.PremiumPoints then
+	elseif currencyType == "premiumPoints" and price.premiumPoints and ply.PS2_Wallet.premiumPoints > price.premiumPoints then
 		ply.PS2_Wallet.premiumPoints = ply.PS2_Wallet.premiumPoints - price.premiumPoints
 	else
 		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. curencyType )
@@ -337,13 +345,14 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		return item:save( )
 	end )
 	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
 		return ply.PS2_Inventory:addItem( item )
-		:Done( function( )
+		:Then( function( )
 			item:OnPurchased( ply )
 		end )
 	end )
 	:Then( function( )
-		KLogf( 2, "Player %s purchased item %s", ply:Nick( ), itemClass )
+		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		Pointshop2.DB.SetBlocking( false )
 		self:sendWallet( ply )
@@ -377,16 +386,32 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		return 
 	end
 	
-	ply.PS2_Inventory:removeItem( itemId ) --Unlink from inventory
-	:Then( function( )
+	local slot
+	for k, v in pairs( ply.PS2_Slots ) do
+		if v.itemId == item.id then
+			slot = v
+		end
+	end
+	
+	local def 
+	if ply.PS2_Inventory:containsItem( item ) then
+		def = ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
+	elseif slot then
+		def = slot:removeItem( item ):Then( function( )
+			self:startView( "Pointshop2View", "slotChanged", ply, slot )
+		end )
+	end
+	
+	def:Then( function( )
 		ply.PS2_Wallet.points = ply.PS2_Wallet.points + item:GetSellPrice( ply )
 		return ply.PS2_Wallet:save( )
 	end )
 	:Then( function( ) 
+		KInventory.ITEMS[item.id] = nil
 		return item:remove( ) --remove the actual db entry
 	end )
 	:Then( function( )
-		KLogf( 2, "Player %s sold item %s", ply:Nick( ), itemClass )
+		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		Pointshop2.DB.SetBlocking( false )
 		self:sendWallet( ply )
@@ -395,7 +420,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		Pointshop2.DB.SetBlocking( false )
 		
-		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your purchase was not carried out." )
+		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your sell was not carried out." )
 	end )
 end
 
@@ -414,7 +439,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 	end
 	
 	if not slot.itemId then
-		KLogf( 3, "[ERROR] Player %s tried to unequipItem empty uncached slot %s", ply:Nick( ), slotName )
+		KLogf( 3, "[ERROR] Player %s tried to unequipItem empty slot %s", ply:Nick( ), slotName )
 		self:startView( "Pointshop2View", "displayError", ply, "Could not unequip item, " .. slotName .. " is empty!" )
 		return
 	end
@@ -436,7 +461,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 	end )
 	:Then( function( )
 		item:OnHolster( ply )
-		self:startView( "Pointshop2View", "itemChanged", ply, item )
+		--self:startView( "Pointshop2View", "itemChanged", ply, item )
 		return Pointshop2.EquipmentSlot.findWhere{ ownerId = ply.kPlayerId, slotName = slotName }
 	end )
 	:Then( function( updatedSlots )
@@ -501,8 +526,8 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		ply.PS2_Inventory:addItem( slot.Item )
 		:Then( function( )
 			moveOldItemDef:Resolve( )
-			slot.Item:OnHolster( )
-			self:startView( "Pointshop2View", "itemChanged", ply, slot.Item )
+			slot.Item:OnHolster( ply )
+			--self:startView( "Pointshop2View", "itemChanged", ply, slot.Item )
 		end, function( errid, err )
 			moveOldItemDef:Reject( errid, err )
 		end )
@@ -518,15 +543,14 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		end )
 	end )
 	:Then( function( slot )
-		ply.PS2_Slots[slot.id] = slot
-		
-		item.inventory_id = nil
-		return item:save( )
+		ply.PS2_Slots[slot.id] = slot --save to slot
+		return ply.PS2_Inventory:removeItem( item ) --unlink from inventory
 	end )
-	:Then( function( item )
+	:Then( function( )
+		return ply.PS2_Slots[slot.id]:save( )
+	end )
+	:Then( function( )
 		item:OnEquip( ply )
-		
-		self:startView( "Pointshop2View", "itemChanged", ply, item )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )

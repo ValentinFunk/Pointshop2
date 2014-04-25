@@ -33,12 +33,19 @@ function PANEL:Init( )
 	hook.Add( "PS2_ItemRemoved", self, function( self, item )
 		self.invPanel:itemRemoved( item.id )
 	end )
-	hook.Add( "KInv_ItemAdded", self, function( self, item )
+	hook.Add( "KInv_ItemAdded", self, function( self, inventory, item )
 		if item.inventory_id != LocalPlayer( ).PS2_Inventory.id then
 			return 
 		end
-		self.invPanel:itemAdded( item.id )
+		self.invPanel:itemAdded( item )
 	end )
+	hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId )
+		if inventory.id != LocalPlayer( ).PS2_Inventory.id then
+			return 
+		end
+		self.invPanel:itemRemoved( itemId )
+	end )
+	
 	
 	self.bottomPnl = vgui.Create( "DPanel", self.leftPanel )
 	self.bottomPnl:Dock( BOTTOM )
