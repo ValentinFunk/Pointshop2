@@ -32,7 +32,7 @@ function ITEM:CanBeEquipedInSlot( slotName )
 	return false
 end
 
-function ITEM:OnSold( )
+function ITEM:OnSold( ply )
 
 end
 

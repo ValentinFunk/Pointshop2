@@ -38,6 +38,7 @@ function PANEL:SetItemClass( itemClass )
 end
 
 function PANEL:SetItem( item )
+	self:SetItemClass( item.class )
 end
 
 function PANEL:DoRightClick()

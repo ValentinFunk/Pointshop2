@@ -137,6 +137,14 @@ function Pointshop2View:equipItem( item, slotName )
 	end
 end
 
+function Pointshop2View:displayItemAddedNotify( item )
+	local notify = vgui.Create( "DNewItemPopup" )
+	notify:SetItem( item )
+	notify:MakePopup( )
+	notify:InvalidateLayout( true )
+	notify:Center( )
+end
+
 function Pointshop2View:getCategoryOrganization( )
 	if not self.categoryItemsTable then
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
@@ -163,4 +171,21 @@ end
 
 function Pointshop2View:createPointshopItem( saveTable )
 	self:controllerAction( "saveModuleItem", saveTable )
+end
+
+local ITEMS = {}
+setmetatable( ITEMS, { __mode = 'v' } ) --weak reference holder
+
+function Pointshop2View:playerEquipItem( ply, item )
+	ply.PS2_EquipedItems = ply.PS2_EquipedItems or {}
+	ply.PS2_EquipedItems[item.id] = item
+	item:OnEquip( ply )
+	ITEMS[item.id] = item
+end
+
+function Pointshop2View:playerUnequipItem( ply, itemId )
+	if ITEMS[itemId] then
+		ITEMS[itemId]:OnHolster( ply )
+		ply.PS2_EquipedItems[itemId] = nil
+	end
 end

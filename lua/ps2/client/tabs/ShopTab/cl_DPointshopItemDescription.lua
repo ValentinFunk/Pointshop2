@@ -16,8 +16,6 @@ function PANEL:Init( )
 	timer.Simple( 1, function( )
 		if not IsValid( self.description ) then return end
 		self.description:SetFontInternal( self:GetSkin( ).TextFont )
-		self.description:SetText( "Please Select an Item" )
-		self.description:SetFontInternal( self:GetSkin( ).TextFont )
 	end )
 	self.description:SetText( "Please Select an Item" )
 	self.description:SetFontInternal( self:GetSkin( ).TextFont )

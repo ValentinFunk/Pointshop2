@@ -332,10 +332,10 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	
 	if currencyType == "points" and price.points and ply.PS2_Wallet.points > price.points then
 		ply.PS2_Wallet.points = ply.PS2_Wallet.points - price.points
-	elseif currencyType == "premiumPoints" and price.premiumPoints and ply.PS2_Wallet.premiumPoints > price.premiumPoints then
+	elseif currencyType == "premiumPoints" and price.premiumPoints and ply.PS2_Wallet.premiumPoints >= price.premiumPoints then
 		ply.PS2_Wallet.premiumPoints = ply.PS2_Wallet.premiumPoints - price.premiumPoints
 	else
-		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. curencyType )
+		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. currencyType )
 		return
 	end
 	
@@ -349,6 +349,7 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		return ply.PS2_Inventory:addItem( item )
 		:Then( function( )
 			item:OnPurchased( ply )
+			self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
 		end )
 	end )
 	:Then( function( )
@@ -403,6 +404,8 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 	
 	def:Then( function( )
+		item:OnHolster( ply )
+		item:OnSold( ply )
 		ply.PS2_Wallet.points = ply.PS2_Wallet.points + item:GetSellPrice( ply )
 		return ply.PS2_Wallet:save( )
 	end )
@@ -461,6 +464,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 	end )
 	:Then( function( )
 		item:OnHolster( ply )
+		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 		--self:startView( "Pointshop2View", "itemChanged", ply, item )
 		return Pointshop2.EquipmentSlot.findWhere{ ownerId = ply.kPlayerId, slotName = slotName }
 	end )
@@ -527,6 +531,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		:Then( function( )
 			moveOldItemDef:Resolve( )
 			slot.Item:OnHolster( ply )
+			self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 			--self:startView( "Pointshop2View", "itemChanged", ply, slot.Item )
 		end, function( errid, err )
 			moveOldItemDef:Reject( errid, err )
@@ -554,6 +559,8 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
+		
+		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
 		
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		Pointshop2.DB.SetBlocking( false )
