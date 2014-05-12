@@ -5,6 +5,13 @@ local function loadSkin( )
 
 SKIN.Colours = table.Copy( derma.GetDefaultSkin( ).Colours )
 
+SKIN.tex = table.Copy( derma.GetDefaultSkin( ).tex )
+
+SKIN.tex.RadioButton_Checked = GWEN.CreateTextureNormal( 448, 64, 15, 15 )
+SKIN.tex.RadioButton = GWEN.CreateTextureNormal( 464, 64, 15, 15 )
+SKIN.tex.RadioButtonD_Checked = GWEN.CreateTextureNormal( 448, 80, 15, 15 )
+SKIN.tex.RadioButtonD = GWEN.CreateTextureNormal( 464, 80, 15, 15 )
+
 SKIN.HeaderBG   = Color( 23, 23, 23 )
 SKIN.MainBG     = Color( 102, 102, 102 )
 SKIN.InnerPanel = Color( 49, 49, 49 )
@@ -16,6 +23,7 @@ SKIN.IconBackground = Color( 102, 102, 102 )
 
 SKIN.Colours.Label = {}
 SKIN.Colours.Label.Default = Color( 180, 180, 180 )
+SKIN.Colours.Label.Dark = Color( 100, 100, 100 )
 SKIN.Colours.Label.Bright = color_white
 SKIN.Colours.Label.Highlight = SKIN.Highlight
 
@@ -35,6 +43,17 @@ SKIN.Colours.Tab.Normal		= SKIN.Colours.Label.Default
 SKIN.Colours.Tab.Hover		= SKIN.Highlight
 SKIN.Colours.Tab.Down		= SKIN.Highlight
 SKIN.Colours.Tab.Disabled	= Color( 180, 180, 180 )
+
+--SKIN.Colours.Category = {}
+SKIN.Colours.Category.Header = SKIN.Highlight
+SKIN.Colours.Category.Header_Closed = SKIN.Colours.Label.Default
+--SKIN.Colours.Category.LineAlt = {}
+SKIN.Colours.Category.LineAlt.Text_Selected = SKIN.Highlight
+SKIN.Colours.Category.LineAlt.Text_Hover = SKIN.Highlight
+--SKIN.Colours.Category.Line = {}
+SKIN.Colours.Category.Line.Text = SKIN.Colours.Label.Default
+SKIN.Colours.Category.Line.Text_Selected = SKIN.Highlight
+SKIN.Colours.Category.Line.Text_Hover = SKIN.Highlight
 
 SKIN.Colours.Tab.Active 	= {
 	Normal		= color_white,
@@ -269,6 +288,39 @@ function SKIN:PaintFrame( panel, w, h )
 	draw.RoundedBox( 6, 0, 0, w, h, self.MainBG )
 	draw.RoundedBoxEx( 6, 0, 0, w, 27, self.HeaderBG, true, true )
 end
+
+function SKIN:PaintCollapsibleCategory( panel, w, h )
+	panel.Header:SetFont( "PS2_Normal" )
+	panel.Header:SetTall( 25 )
+	
+	surface.SetDrawColor( self.ButtonColor )
+	surface.DrawRect( 0, 0, panel.Header:GetWide( ), panel.Header:GetTall( ) )
+	
+	surface.SetDrawColor( self.InnerPanel )
+	surface.DrawRect( 0, panel.Header:GetTall( ), w, h - panel.Header:GetTall( ) )
+end
+
+function SKIN:PaintCategoryList( panel, w, h )
+	surface.SetDrawColor( self.InnerPanel )
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintCheckBox( panel, w, h )
+	if panel:GetChecked( ) then
+		if panel:GetDisabled( ) then
+			self.tex.RadioButtonD_Checked( 0, 0, w, h )
+		else
+			self.tex.RadioButton_Checked( 0, 0, w, h )
+		end
+	else
+		if panel:GetDisabled( ) then
+			self.tex.RadioButtonD( 0, 0, w, h )
+		else
+			self.tex.RadioButton( 0, 0, w, h )
+		end
+	end	
+end
+
 
 derma.DefineSkin( SKIN.Name, "Poinsthop2 Default", SKIN )
 

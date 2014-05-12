@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "trailmaterials/creeper"
+	"$vertexalpha" 1
+	"$vertexcolor" 1
+}

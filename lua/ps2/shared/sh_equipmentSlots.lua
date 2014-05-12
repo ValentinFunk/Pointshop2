@@ -9,7 +9,7 @@ Pointshop2.EquipmentSlots = {
 		return instanceOf( KInventory.Items.base_playermodel, item )
 	end,
 	Trail = function( item )
-		return item:CanBeEquipedInSlot( "Trail" )
+		return instanceOf( KInventory.Items.base_trail, item )
 	end,
 	Accessory = function( item )
 		return item:CanBeEquipedInSlot( "Accessory" )

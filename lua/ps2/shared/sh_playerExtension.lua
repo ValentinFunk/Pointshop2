@@ -16,3 +16,7 @@ function Player:PS2_HasItemEquipped( item )
 		end
 	end
 end
+
+function Player:PS2_GetWallet( )
+	return self.PS2_Wallet
+end

@@ -4,7 +4,7 @@ local TrailPersistence = Pointshop2.TrailPersistence
 TrailPersistence.static.DB = "Pointshop2"
 
 TrailPersistence.static.model = {
-	tableName = "ps2_playermodelpersistence",
+	tableName = "ps2_trailpersistence",
 	fields = {
 		itemPersistenceId = "int",
 		material = "string"

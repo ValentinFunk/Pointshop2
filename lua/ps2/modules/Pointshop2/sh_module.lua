@@ -14,6 +14,12 @@ MODULE.Blueprints = {
 		icon = "pointshop2/playermodel.png",
 		creator = "DPlayerModelCreator"
 	},
+	{
+		label = "Trail",
+		base = "base_trail",
+		icon = "pointshop2/winner2.png",
+		creator = "DTrailCreator"
+	}
 }
 
 Pointshop2.RegisterModule( MODULE )

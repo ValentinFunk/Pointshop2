@@ -9,15 +9,17 @@ function PANEL:Init( )
 	self.materialPanel = vgui.Create( "DImage", self.selectPlayerElem )
 	self.materialPanel:SetSize( 64, 64 )
 	self.materialPanel:Dock( LEFT )
+	self.materialPanel:SetMouseInputEnabled( true )
 	self.materialPanel:SetTooltip( "Click to Select" )
+	self.materialPanel:SetMaterial( "trailmaterials/musicalnotes" )
 	local frame = self
-	function self.materialPanel:DoClick( )
+	function self.materialPanel:OnMousePressed( )
 		--Open model selector
 		local window = vgui.Create( "DMaterialSelector" )
 		window:Center( )
 		window:MakePopup( )
 		function window:OnChange( )
-			frame.manualEntry:SetText( window.selectedMaterial )
+			frame.manualEntry:SetText( window.matName )
 			frame.materialPanel:SetMaterial( window.selectedMaterial )
 		end
 	end
@@ -30,12 +32,13 @@ function PANEL:Init( )
 	self.manualEntry = vgui.Create( "DTextEntry", rightPnl )
 	self.manualEntry:Dock( TOP )
 	self.manualEntry:DockMargin( 5, 0, 5, 5 )
+	self.manualEntry:SetText( "trailmaterials/musicalnotes" )
 	self.manualEntry:SetTooltip( "Click on the icon or manually enter the material path here and press enter" )
 	function self.manualEntry:OnEnter( )
 		frame.materialPanel:SetModel( self:GetText( ) )
 	end
 	
-	local cont = self:addFormItem( "Model", self.selectPlayerElem )
+	local cont = self:addFormItem( "Material", self.selectPlayerElem )
 	cont:SetTall( 64 )
 end
 
@@ -44,4 +47,4 @@ function PANEL:SaveItem( saveTable )
 	saveTable.material = self.manualEntry:GetText( )
 end
 
-vgui.Register( "DPlayerModelCreator", PANEL, "DItemCreator" )
+vgui.Register( "DTrailCreator", PANEL, "DItemCreator" )

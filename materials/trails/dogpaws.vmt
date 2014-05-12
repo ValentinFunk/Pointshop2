@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "trails/dogpaws"
+	"$vertexalpha" 1
+	"$vertexcolor" 1
+}

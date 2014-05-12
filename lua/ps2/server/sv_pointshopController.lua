@@ -48,6 +48,12 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
+	elseif action == "searchPlayers" then
+		if PermissionInterface.query( ply, "pointshop2 manageusers" ) then
+			def:Resolve( )
+		else
+			def:Reject( 1, "Permission Denied" )
+		end
 	elseif action == "buyItem" or action == "sellItem" then
 		def:Resolve( )
 	elseif action == "equipItem" or action == "unequipItem" then
@@ -93,16 +99,48 @@ function Pointshop2Controller:initializeInventory( ply )
 	end )
 end
 
+/*
+	After joining initialize all slots for the player
+	and equip Items he has in them
+*/
 function Pointshop2Controller:initializeSlots( ply )
 	Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
 	:Then( function( slots )
+		--Don't double equip if the script gets reloaded
+		local shouldEquipItems = true
+		if ply.PS2_Slots then
+			shouldEquipItems = false
+		end
+		
 		ply.PS2_Slots = {}
 		for _, slot in pairs( slots ) do
 			ply.PS2_Slots[slot.id] = slot
 			KLogf( 5, "[PS2] Loaded slots for player %s", ply:Nick( ) )
 		end
 		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
+	
+		if shouldEquipItems then
+			for _, slot in pairs( ply.PS2_Slots ) do
+				if not slot.itemId then continue end
+				
+				local item = slot.Item
+				item:OnEquip( ply )
+				self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
+			end
+		end
 	end )
+end
+
+--network wallets to owning players and all admins
+function Pointshop2Controller:getWalletChangeSubscribers( ply )
+	local receivers = { ply }
+	for k, v in pairs( player.GetAll( ) ) do
+		if PermissionInterface.query( v, "pointshop2 manageusers" ) then
+			if v == ply then continue end
+			table.insert( receivers, v )
+		end
+	end
+	return receivers
 end
 
 function Pointshop2Controller:sendWallet( ply )
@@ -119,7 +157,7 @@ function Pointshop2Controller:sendWallet( ply )
 	end )
 	:Then( function( wallet )
 		ply.PS2_Wallet = wallet
-		self:startView( "Pointshop2View", "walletChanged", ply, wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
 	end )
 end
 
@@ -149,9 +187,6 @@ local function initPlayer( ply )
 		end )
 	end )
 end
-hook.Add( "PlayerInitialSpawn", "fadsfads", function( ply )
-	dp( ply )
-end )
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	timer.Simple( 1, function( )
@@ -460,19 +495,13 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 	ply.PS2_Inventory:addItem( item )
 	:Then( function( )
 		slot.itemId = nil
+		slot.Item = nil
 		return slot:save( )
 	end )
-	:Then( function( )
+	:Then( function( updatedSlot )
 		item:OnHolster( ply )
 		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
-		--self:startView( "Pointshop2View", "itemChanged", ply, item )
-		return Pointshop2.EquipmentSlot.findWhere{ ownerId = ply.kPlayerId, slotName = slotName }
-	end )
-	:Then( function( updatedSlots )
-		local updatedSlot = updatedSlots[1]
-		ply.PS2_Slots[updatedSlot.id] = updatedSlot
-		updatedSlot.Item = nil
-		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlots[1] )
+		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlot )
 		
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		Pointshop2.DB.SetBlocking( false )
@@ -520,19 +549,24 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		slot = Pointshop2.EquipmentSlot:new( )
 		slot.ownerId = ply.kPlayerId
 		slot.slotName = slotName
+		ply.PS2_Slots[slot.id] = slot
 	end
 	
 	Pointshop2.DB.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	
 	local moveOldItemDef = Deferred( )
-	if slot.Item then
-		ply.PS2_Inventory:addItem( slot.Item )
+	if slot.itemId then
+		local oldItem = KInventory.ITEMS[slot.itemId]
+		if not oldItem then
+			KLogf( 2, "[ERROR] Unsynced item %i in slot %s", slot.itemId, slot.slotName )
+		end
+		
+		ply.PS2_Inventory:addItem( oldItem )
 		:Then( function( )
 			moveOldItemDef:Resolve( )
-			slot.Item:OnHolster( ply )
-			self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
-			--self:startView( "Pointshop2View", "itemChanged", ply, slot.Item )
+			oldItem:OnHolster( ply )
+			self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, oldItem.id )
 		end, function( errid, err )
 			moveOldItemDef:Reject( errid, err )
 		end )
@@ -542,17 +576,11 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 	
 	moveOldItemDef:Then( function( )
 		slot.itemId = item.id
-		
-		return slot:save( ):Then( function( )
-			return Pointshop2.EquipmentSlot.findById( slot.id )
-		end )
+		slot.Item = item
+		return slot:save( )
 	end )
 	:Then( function( slot )
-		ply.PS2_Slots[slot.id] = slot --save to slot
 		return ply.PS2_Inventory:removeItem( item ) --unlink from inventory
-	end )
-	:Then( function( )
-		return ply.PS2_Slots[slot.id]:save( )
 	end )
 	:Then( function( )
 		item:OnEquip( ply )
@@ -570,5 +598,84 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		Pointshop2.DB.SetBlocking( false )
+	end )
+end
+
+function Pointshop2Controller:loadOutfits( )
+	WhenAllFinished{ Pointshop2.StoredOutfit.getAll( ), Pointshop2.StoredOutfit.getVersionHash( ) }
+	:Then( function( outfits, versionHash )
+		
+		local outfitsAssoc = {}
+		for k, v in pairs( outfits ) do
+			outfitsAssoc[v.id] = v.outfitData
+		end
+		
+		local data = LibK.von.serialize( { outfitsAssoc } )
+		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "outfits", data )
+		resource:SetVersionHash( versionHash )
+		KLogf( 4, "[Pointshop2] Outfit package loaded, version " .. versionHash .. " " .. #outfitsAssoc .. " outfits." )
+		
+		self:startView( "Pointshop2View", "loadOutfits", player.GetAll( ), versionHash )
+	end )
+end
+Pointshop2.DatabaseConnectedPromise:Done( function( )
+	Pointshop2Controller:loadOutfits( )
+end )
+function Pointshop2Controller:SendInitialOutfitPackage( ply )
+	local resource = LibK.GLib.Resources.Resources["Pointshop2/outfits"]
+	if not resource then
+		KLogf( 4, "[Pointshop2] Outfit package not loaded yet, trying again later" )
+		timer.Simple( 1, function( ) self:SendInitialOutfitPackage( ply ) end )
+		return
+	end
+	self:startView( "Pointshop2View", "loadOutfits", player.GetAll( ), resource:GetVersionHash( ) )
+end
+hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestOutfits", function( ply )
+	timer.Simple( 1, function( )
+		Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
+	end )
+end )
+
+function Pointshop2Controller:searchPlayers( ply, subject, attribute )
+	local attributeTranslate = { ["Name"] = "name", ["Steam ID"] = "player", ["Profile ID"] = "steam64" }
+	if not attributeTranslate[attribute] then
+		local def = Deferred( )
+		def:Reject( "Invalid attribute " .. attribute )
+		return def:Promise( )
+	end
+	
+	
+	return LibK.Player.findPlayers( subject, attributeTranslate[attribute] )
+	:Then( function( players ) 
+		local ids = {}
+		local playerNames = {}
+		for k, v in pairs( players ) do
+			table.insert( ids, tonumber( v.id ) )
+			table.insert( playerNames, { id = v.id, name = v.name, lastConnected = v.updated_at } )
+		end
+		
+		local def = Deferred( )
+		
+		if #ids == 0 then
+			def:Resolve( {} )
+			return def:Promise( )
+		end
+		
+		Pointshop2.Wallet.getDbEntries( "WHERE ownerId IN (" .. table.concat( ids, ', ' ) .. ")" )
+		:Done( function( wallets )
+			for k, v in pairs( playerNames ) do
+				for _, wallet in pairs( wallets ) do
+					if wallet.ownerId == v.id then
+						v.Wallet = wallet
+					end
+				end
+			end
+			def:Resolve( playerNames )
+		end )
+		:Fail( function( errid, err )
+			def:Fail( 1, "Error fetching wallets: " .. err )
+		end	)
+		
+		return def:Promise( )
 	end )
 end

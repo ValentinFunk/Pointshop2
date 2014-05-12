@@ -10,7 +10,7 @@ function PANEL:Init( )
 	self.layout = vgui.Create( "DTileLayout", self )
 	self.layout:Dock( FILL )
 	self.layout:DockMargin( 8, 8, 8, 8 )
-	self.layout:SetBaseSize( 15 )
+	self.layout:SetBaseSize( 16 )
 	self.layout:SetSpaceY( 5 )
 	self.layout:SetSpaceX( 5 )
 end

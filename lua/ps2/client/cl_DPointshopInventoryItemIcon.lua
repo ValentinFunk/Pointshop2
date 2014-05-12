@@ -24,6 +24,10 @@ function PANEL:DoRightClick()
 end
 
 function PANEL:PaintOver( w, h )
+	if self.Selected then
+		surface.SetDrawColor( self:GetSkin( ).Highlight )
+		surface.DrawOutlinedRect( 0, 0, w, h )
+	end
 	self:DrawSelections()
 end
 

@@ -10,9 +10,13 @@ function Pointshop2View:initialize( )
 end
 
 function Pointshop2View:walletChanged( newWallet )
-	LocalPlayer().PS2_Wallet = newWallet
-	KLogf( 5, "[PS2] Received Wallet: %i pts, %i premPts", newWallet.points, newWallet.premiumPoints )
-	hook.Run( "PS2_WalletChanged", newWallet ) 
+	for k, v in pairs( player.GetAll( ) ) do
+		if v:GetNWInt( "KPlayerId" ) == newWallet.ownerId then
+			v.PS2_Wallet = newWallet
+			KLogf( 5, "[PS2] Received Wallet of %s: %i pts, %i premPts", v:Nick( ), newWallet.points, newWallet.premiumPoints )
+			hook.Run( "PS2_WalletChanged", v, newWallet ) 
+		end
+	end
 end 
 
 function Pointshop2View:receiveInventory( inventory )
@@ -131,6 +135,9 @@ end
 
 function Pointshop2View:equipItem( item, slotName )
 	if item then
+		if LocalPlayer().PS2_Slots[slotName] and LocalPlayer().PS2_Slots[slotName].id == item.id then
+			return
+		end
 		self:controllerAction( "equipItem", item.id, slotName )
 	else
 		self:controllerAction( "unequipItem", slotName )
@@ -188,4 +195,27 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 		ITEMS[itemId]:OnHolster( ply )
 		ply.PS2_EquipedItems[itemId] = nil
 	end
+end
+
+function Pointshop2View:loadOutfits( versionHash )
+	LibK.GLib.Resources.Resources["Pointshop2/outfits"] = nil --Force resource reset
+	LibK.GLib.Resources.Get( "Pointshop2", "outfits", versionHash, function( success, data )
+		if not success then 
+			KLogf( 2, "[PS2][ERROR] Couldn't load outfits resouce!" )
+			return
+		end
+		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
+		for id, outfitEncoded in pairs( Pointshop2.Outfits ) do
+			Pointshop2.Outfits[id] = LibK.luadata.Decode( outfitEncoded )
+		end
+		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %i)", #Pointshop2.Outfits, versionHash ) 
+	end )
+end
+
+function Pointshop2View:searchPlayers( subject, attribute )
+	return self:controllerTransaction( "searchPlayers", subject, attribute )
+end
+
+function Pointshop2View:getUserDetails( kPlayerId )
+	return self:controllerTransaction( "getUserDetails", kPlayerId )
 end
