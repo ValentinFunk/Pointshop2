@@ -48,7 +48,9 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action == "searchPlayers" then
+	elseif action == "searchPlayers" or
+		   action == "getUserDetails" 
+	then
 		if PermissionInterface.query( ply, "pointshop2 manageusers" ) then
 			def:Resolve( )
 		else
@@ -678,4 +680,28 @@ function Pointshop2Controller:searchPlayers( ply, subject, attribute )
 		
 		return def:Promise( )
 	end )
+end
+
+function Pointshop2Controller:getUserDetails( ply, kPlayerId )
+	local def = Deferred( )
+	
+	WhenAllFinished{ LibK.Player.findById( kPlayerId ), 
+					 Pointshop2.Wallet.findByOwnerId( kPlayerId ), 
+					 KInventory.Inventory.findByOwnerId( kPlayerId )
+	}:Then( function( ply, wallet, inventory )
+		ply.wallet = wallet
+		ply.inventory = inventory
+		return inventory:loadItems( )
+		:Then( function( )
+			return ply
+		end )
+	end )
+	:Done( function( plyInfo )
+		def:Resolve( plyInfo )
+	end )
+	:Fail( function( errid, err )
+		def:Reject( errid, err )
+	end )
+	
+	return def:Promise( )
 end

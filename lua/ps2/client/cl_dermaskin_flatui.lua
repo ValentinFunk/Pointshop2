@@ -207,12 +207,21 @@ function SKIN:PaintPointshopItemIcon( panel, w, h )
 end
 
 function SKIN:PaintButton( panel, w, h )
-	if panel.Hovered then
-		surface.SetDrawColor( self.Highlight )
-	else
-		surface.SetDrawColor( self.ButtonColor )
-	end
+	surface.SetDrawColor( self.ButtonColor )
 	surface.DrawRect( 0, 0, w, h )
+	panel:SetTextColor( self.Colours.Label.Default )
+	if IsValid( panel.m_Image ) then
+		panel.m_Image:SetImageColor( color_white )
+	end
+	
+	if panel.Hovered or panel.Highlight then
+		surface.SetDrawColor( self.Highlight )
+		surface.DrawRect( 0, 0, w, h )
+		if IsValid( panel.m_Image ) then
+			panel.m_Image:SetImageColor( self.Colours.Label.Dark )
+		end
+		panel:SetTextColor( self.Colours.Label.Dark )
+	end
 end
 
 function SKIN:PaintCreateItemButton( panel, w, h )
