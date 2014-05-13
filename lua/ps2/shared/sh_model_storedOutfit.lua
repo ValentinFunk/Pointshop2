@@ -16,6 +16,9 @@ StoredOutfit:include( DatabaseModel )
 function StoredOutfit.static.getVersionHash( )
 	return DATABASES[StoredOutfit.DB].DoQuery( "SELECT MAX( updatedAt ) AS updatedAt FROM " .. StoredOutfit.model.tableName )
 	:Then( function( rows )
+		if rows[1].updatedAt == "NULL" then
+			rows[1].updatedAt = nil
+		end
 		local versionHash = rows[1].updatedAt and tostring( rows[1].updatedAt ) or "-1"
 		return versionHash
 	end )
