@@ -67,8 +67,8 @@ function PANEL:Init( )
 				local line = self:AddLine( v:Nick( ), wallet.points, wallet.premiumPoints )
 				line.player = v
 				line.kPlayerId = v:GetNWInt( "KPlayerId" )
-				function line:WalletChanged( ply, wallet )
-					if self.player == ply then
+				function line:WalletChanged( wallet, ply )
+					if ply and self.player == ply then
 						self:SetColumnText( 2, wallet.points )
 						self:SetColumnText( 3, wallet.premiumPoints )
 					end

@@ -46,8 +46,8 @@ function PANEL:Init( )
 	end
 	
 	self.generalInfo.infoPanel.name = self.generalInfo.infoPanel:AddLabel( "Name" )
-	self.generalInfo.infoPanel.name = self.generalInfo.infoPanel:AddLabel( "Steam-ID" )
-	self.generalInfo.infoPanel.name = self.generalInfo.infoPanel:AddLabel( "Last Connected" )
+	self.generalInfo.infoPanel.steamId = self.generalInfo.infoPanel:AddLabel( "Steam-ID" )
+	self.generalInfo.infoPanel.lastConnected = self.generalInfo.infoPanel:AddLabel( "Last Connected" )
 	
 	/* Wallet */
 	self.walletInfo = self:AddCategory( "Player Wallet" )
@@ -60,6 +60,7 @@ function PANEL:Init( )
 	end
 	self.walletInfo:SetTall( 70 )
 	
+	local frame = self
 	function self.walletInfo:AddCurrencyPanel( name, label, value, icon )
 		local pnl = vgui.Create( "DPanel", self )
 		self[name .. "Panel"] = pnl
@@ -89,7 +90,21 @@ function PANEL:Init( )
 		pnl.changeButton:DockMargin( 0, 5, 0, 0 )
 		pnl.changeButton:Dock( TOP )
 		function pnl.changeButton:DoClick( )
-			--Derma_StringRequest( "
+			Derma_StringRequest( "Input", 
+				"Please enter the new amount of " .. label, 
+				tostring( value ),
+				function( newValue )
+					if not tonumber( newValue ) then
+						Derma_Message( "Please enter a number", "Error" )
+						return
+					end
+					frame:ChangePlayerWallet( name, value )
+				end
+			)				
+		end
+		
+		function pnl:SetValue( val )
+			self.label:SetText( val )
 		end
 		
 		return pnl
@@ -98,14 +113,16 @@ function PANEL:Init( )
 	self.premiumPointsPanel = self.walletInfo:AddCurrencyPanel( "premiumPoints", "Premium Points", 0, "pointshop2/donation.png" )
 
 	self.invCategory, self.invCategoryPnl = self:AddCategory( "Player Inventory" )
-	self.inventoryPanel = vgui.Create( "DItemsContainer", self.invCategory )
+	local scroll = vgui.Create( "DScrollPanel", self.invCategory )
+	scroll:Dock( FILL )
+	self.inventoryPanel = vgui.Create( "DItemsContainer", scroll )
 	self.inventoryPanel:Dock( FILL )
 	self.invCategory:Dock( FILL )
 	self.invCategoryPnl:Dock( FILL )
 	function self.inventoryPanel:Paint( w, h )
 	end
 	
-	self.invButtonPanel = vgui.Create( "DPanel", self.invCategory )
+	self.invButtonPanel = vgui.Create( "DPanel", self.invCategoryPnl )
 	self.invButtonPanel:Dock( BOTTOM )
 	self.invButtonPanel:DockMargin( 5, 5, 5, 5 )
 	self.invButtonPanel.Paint = function( ) end
@@ -133,22 +150,34 @@ function PANEL:Init( )
 	self.invButtonPanel.refreshButton:SetText( "Refresh Inventory" )
 	self.invButtonPanel:DockMargin( 5, 0, 0, 0 )
 	function self.invButtonPanel.refreshButton.DoClick( )
-		self:refreshInventory( )
+		self:RefreshInventory( )
 	end
 	
-	--self.inventoryPanel:setCategoryName( "Pointshop2_AdminInventory" )
-	--self.invPanel:setItems( LocalPlayer( ).PS2_Inventory:getItems( ) )
-	--self.invPanel:initSlots( LocalPlayer( ).PS2_Inventory:getNumSlots( ) )
 	self.detailsPanel:SetDisabled( true )
+end
+
+function PANEL:ChangePlayerWallet( name, value )
+	self:NotifyLoading( true )
+	Pointshop2View:getInstance( ):adminChangeWallet( name, value )
+	:Done( function( wallet )
+		self.pointsPanel:SetValue( wallet.points )
+		self.premiumPointsPanel:SetValue(  wallet.premiumPoints ) 
+	end )
+	:Fail( function( errid, err )
+		Derma_Message( err, "Error loading" )
+	end )
+	:Always( function( )
+		self:NotifyLoading( false )
+	end )
 end
 
 function PANEL:NotifyLoading( bIsLoading )
 	if bIsLoading then
 		self.loadingNotifier:Expand( )
-		self:SetDisabled( true )
+		self.detailsPanel:SetDisabled( true )
 	else
 		self.loadingNotifier:Collapse( )
-		self:SetDisabled( false )
+		self.detailsPanel:SetDisabled( false )
 	end
 end
 
@@ -177,17 +206,41 @@ function PANEL:AddCategory( name )
 end
 
 function PANEL:SetPlayerData( playerData )
-	PrintTable( playerData )
+	self.playerData = playerData
+	
 	self.generalInfo.avatar:SetSteamID( playerData.steam64, 64 )
 	self.generalInfo.infoPanel.name:SetText( playerData.name )
+	self.generalInfo.infoPanel.steamId:SetText( playerData.player )
+	self.generalInfo.infoPanel.lastConnected:SetText( os.date( "%Y-%m-%d %H:%M", playerData.updated_at ) )
+	
+	self.pointsPanel:SetValue( playerData.wallet.points )
+	self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints ) 
+	
+	self.inventoryPanel:setCategoryName( "Pointshop2_AdminInventory" .. playerData.id )
+	self.inventoryPanel:setItems( playerData.inventory:getItems( ) )
+	self.inventoryPanel:initSlots( playerData.inventory:getNumSlots( ) )
 end
 
 function PANEL:OpenGiveItemDialog( )
-
+	
 end
 
 function PANEL:RefreshInventory( )
-
+	if not self.playerData then
+		ErrorNoHalt( "Couldn't refresh user: no previous user selected!" )
+	end
+	
+	self:NotifyLoading( true )
+	Pointshop2View:getInstance( ):getUserDetails( self.playerData.id )
+	:Done( function( result )
+		self:SetPlayerData( result )
+	end )
+	:Fail( function( errid, err )
+		Derma_Message( err, "Error loading" )
+	end )
+	:Always( function( )
+		self:NotifyLoading( false )
+	end )
 end
 
 function PANEL:Paint( )

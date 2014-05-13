@@ -10,13 +10,16 @@ function Pointshop2View:initialize( )
 end
 
 function Pointshop2View:walletChanged( newWallet )
+	local ply
 	for k, v in pairs( player.GetAll( ) ) do
 		if v:GetNWInt( "KPlayerId" ) == newWallet.ownerId then
 			v.PS2_Wallet = newWallet
 			KLogf( 5, "[PS2] Received Wallet of %s: %i pts, %i premPts", v:Nick( ), newWallet.points, newWallet.premiumPoints )
-			hook.Run( "PS2_WalletChanged", v, newWallet ) 
+			ply = v
 		end
 	end
+	hook.Run( "PS2_WalletChanged", newWallet, ply ) 
+	adminChangeWallet
 end 
 
 function Pointshop2View:receiveInventory( inventory )
