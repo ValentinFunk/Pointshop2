@@ -92,13 +92,13 @@ function PANEL:Init( )
 		function pnl.changeButton:DoClick( )
 			Derma_StringRequest( "Input", 
 				"Please enter the new amount of " .. label, 
-				tostring( value ),
+				tostring( pnl.label:GetText( ) ),
 				function( newValue )
 					if not tonumber( newValue ) then
 						Derma_Message( "Please enter a number", "Error" )
 						return
 					end
-					frame:ChangePlayerWallet( name, value )
+					frame:ChangePlayerWallet( name, newValue )
 				end
 			)				
 		end
@@ -111,6 +111,7 @@ function PANEL:Init( )
 	end
 	self.pointsPanel = self.walletInfo:AddCurrencyPanel( "points", "Points", 0, "pointshop2/dollar103.png" )
 	self.premiumPointsPanel = self.walletInfo:AddCurrencyPanel( "premiumPoints", "Premium Points", 0, "pointshop2/donation.png" )
+	hook.Add( "PS2_WalletChanged", self, self.PlayerWalletChanged )
 
 	self.invCategory, self.invCategoryPnl = self:AddCategory( "Player Inventory" )
 	local scroll = vgui.Create( "DScrollPanel", self.invCategory )
@@ -158,7 +159,7 @@ end
 
 function PANEL:ChangePlayerWallet( name, value )
 	self:NotifyLoading( true )
-	Pointshop2View:getInstance( ):adminChangeWallet( name, value )
+	Pointshop2View:getInstance( ):adminChangeWallet( self.playerData.id, name, value )
 	:Done( function( wallet )
 		self.pointsPanel:SetValue( wallet.points )
 		self.premiumPointsPanel:SetValue(  wallet.premiumPoints ) 
@@ -219,6 +220,15 @@ function PANEL:SetPlayerData( playerData )
 	self.inventoryPanel:setCategoryName( "Pointshop2_AdminInventory" .. playerData.id )
 	self.inventoryPanel:setItems( playerData.inventory:getItems( ) )
 	self.inventoryPanel:initSlots( playerData.inventory:getNumSlots( ) )
+end
+
+function PANEL:PlayerWalletChanged( wallet, ply )
+	if not self.playerData then return end
+	
+	if wallet.ownerId == self.playerData.id then
+		self.pointsPanel:SetValue( wallet.points )
+		self.premiumPointsPanel:SetValue( wallet.premiumPoints ) 
+	end
 end
 
 function PANEL:OpenGiveItemDialog( )

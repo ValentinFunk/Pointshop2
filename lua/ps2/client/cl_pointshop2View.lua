@@ -19,7 +19,6 @@ function Pointshop2View:walletChanged( newWallet )
 		end
 	end
 	hook.Run( "PS2_WalletChanged", newWallet, ply ) 
-	adminChangeWallet
 end 
 
 function Pointshop2View:receiveInventory( inventory )
@@ -221,4 +220,8 @@ end
 
 function Pointshop2View:getUserDetails( kPlayerId )
 	return self:controllerTransaction( "getUserDetails", kPlayerId )
+end
+
+function Pointshop2View:adminChangeWallet( kPlayerId, currencyType, newValue )
+	return self:controllerTransaction( "adminChangeWallet", kPlayerId, currencyType, newValue )
 end

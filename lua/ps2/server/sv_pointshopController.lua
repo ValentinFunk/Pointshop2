@@ -49,7 +49,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 			def:Reject( 1, "Permission Denied" )
 		end
 	elseif action == "searchPlayers" or
-		   action == "getUserDetails" 
+		   action == "getUserDetails" or
+		   action == "adminChangeWallet"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageusers" ) then
 			def:Resolve( )
@@ -353,12 +354,12 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		return
 	end
 	
-	/*
+	--[[
 		Wrap everything into a blocking transaction to make sure we don't get duplicate stuff
 		if mysql takes a little longer to respond and prevent any lua from queueing querys in 
 		between.
 		TODO: look into alternative methods of locking the database as this is a bit performance heavy because it blocks the game thread, 
-	*/
+	]]--
 	Pointshop2.DB.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	:Fail( function( errid, err ) 
@@ -704,4 +705,50 @@ function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 	end )
 	
 	return def:Promise( )
+end
+
+function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, newValue )
+	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
+		local def = Deferred( )
+		def:Reject( 0, "Invalid currency type " .. currencyType )
+		return def:Promise( )
+	end
+	
+	local walletPromise = Deferred( ) 
+	local walletFound = false
+	for k, v in pairs( player.GetAll( ) ) do
+		if v.kPlayerId == kPlayerId then
+			if ply.PS2_Wallet then 
+				walletPromise:Resolve( ply.PS2_Wallet )
+				walletFound = true
+			end
+		end
+	end
+	
+	if not walletFound then
+		Pointshop2.Wallet.findByOwnerId( kPlayerId )
+		:Done( function( wallet )
+			walletPromise:Resolve( wallet )
+		end )
+		:Fail( function( errid, err )
+			walletPromise:Reject( errid, err )
+		end )
+	end
+	
+	if walletFound then
+		Pointshop2.DB:SetBlocking( true ) --don't want player to sell/buy stuff during our update
+	end
+	
+	return walletPromise:Then( function( wallet )
+		wallet[currencyType] = newValue
+		return wallet:save( )
+	end )
+	:Done( function( wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
+	end )
+	:Always( function( )
+		if walletFound then
+			Pointshop2.DB:SetBlocking( false )
+		end
+	end )
 end
