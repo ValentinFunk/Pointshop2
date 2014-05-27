@@ -64,7 +64,7 @@ function PANEL:Init( )
 		
 		local function updatePrices( )
 			--Check 
-			local pts = LocalPlayer( ).PS2_Wallet[type]
+			local pts = tonumber( LocalPlayer( ).PS2_Wallet[type] )
 			if pts < price then
 				--pnl.label:SetColor( Color( 255, 0, 0 ) )
 				pnl.buyBtn:SetDisabled( true )

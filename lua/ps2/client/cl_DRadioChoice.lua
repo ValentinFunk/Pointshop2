@@ -8,7 +8,7 @@ function PANEL:AddOption( optionText )
 	local choice = vgui.Create( "DCheckBoxLabel", self )
 	choice.ID = table.insert( self.Choices, choice )
 	choice:SetText( optionText )
-	Derma_Hook( PANEL, "Paint", "Paint", "RadioButton" )
+	Derma_Hook( choice.Button, "Paint", "Paint", "RadioButton" )
 
 	function choice.OnChange( pnl, val )
 		self:ChoiceSelected( pnl, val )
@@ -24,11 +24,17 @@ function PANEL:AddOption( optionText )
 		setValue( btn, value )
 	end
 	
+	if #self.Choices > 1 then
+		choice:DockMargin( 0, 5, 0, 0 )
+	end
+	
 	choice:Dock( TOP )
 	
 	if #self:GetChildren( ) == 1 then
 		self:SelectChoice( 1 )
 	end
+	
+	return choice
 end
 
 function PANEL:SelectChoice( id )

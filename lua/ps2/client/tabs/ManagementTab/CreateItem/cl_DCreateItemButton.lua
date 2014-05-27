@@ -29,6 +29,7 @@ function PANEL:OnMousePressed( )
 	creator:Center( )
 	creator:MakePopup( )
 	creator:SetItemBase( self.itemInfo.base )
+	creator:SetSkin( Pointshop2.Config.DermaSkin )
 end
 
 function PANEL:SetItemInfo( itemInfo )

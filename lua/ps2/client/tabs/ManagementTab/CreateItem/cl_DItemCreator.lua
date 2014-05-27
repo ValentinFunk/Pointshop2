@@ -6,6 +6,8 @@ function PANEL:Init( )
 	self:SetTitle( "Create a Pointshop Item" )
 	self:SetSize( 410, 308 )
 	
+	self:addSectionTitle( "Basic Settings" )
+	
 	self.buttonBar = vgui.Create( "DIconLayout", self )
 	self.buttonBar:SetBorder( 5 )
 	self.buttonBar:SetSpaceX( 5 )
@@ -135,6 +137,16 @@ function PANEL:addFormItem( desc, panel )
 	table.insert( self.items, container )
 	
 	return container
+end
+
+function PANEL:addSectionTitle( text )
+	local title = vgui.Create( "DLabel", self )
+	title:Dock( TOP )
+	title:SetFont( self:GetSkin().SmallTitleFont )
+	title:SetColor( self:GetSkin().Colours.Label.Bright )
+	title:SetText( text ) 
+	title:SizeToContents( )
+	title:DockMargin( 5, 5, 5, 10 )
 end
 
 function PANEL:PerformLayout( )

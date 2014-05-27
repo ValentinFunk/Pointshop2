@@ -1,6 +1,8 @@
 local PANEL = {}
 
 function PANEL:Init( )
+	self:addSectionTitle( "Model Selection" )
+	
 	self.selectPlayerElem = vgui.Create( "DPanel" )
 	self.selectPlayerElem:SetTall( 64 )
 	self.selectPlayerElem:SetWide( self:GetWide( ) )

@@ -9,6 +9,7 @@ SKIN.tex = table.Copy( derma.GetDefaultSkin( ).tex )
 
 SKIN.tex.RadioButton_Checked = GWEN.CreateTextureNormal( 448, 64, 15, 15 )
 SKIN.tex.RadioButton = GWEN.CreateTextureNormal( 464, 64, 15, 15 )
+
 SKIN.tex.RadioButtonD_Checked = GWEN.CreateTextureNormal( 448, 80, 15, 15 )
 SKIN.tex.RadioButtonD = GWEN.CreateTextureNormal( 464, 80, 15, 15 )
 
@@ -294,8 +295,8 @@ function SKIN:PaintFrame( panel, w, h )
 	end
 	
 	Derma_DrawBackgroundBlur( panel, panel.startTime )
-	draw.RoundedBox( 6, 0, 0, w, h, self.MainBG )
-	draw.RoundedBoxEx( 6, 0, 0, w, 27, self.HeaderBG, true, true )
+	draw.RoundedBox( 0, 0, 0, w, h, self.MainBG )
+	draw.RoundedBoxEx( 0, 0, 0, w, 27, self.HeaderBG, true, true )
 end
 
 function SKIN:PaintCollapsibleCategory( panel, w, h )
@@ -314,7 +315,7 @@ function SKIN:PaintCategoryList( panel, w, h )
 	surface.DrawRect( 0, 0, w, h )
 end
 
-function SKIN:PaintCheckBox( panel, w, h )
+function SKIN:PaintRadioButton( panel, w, h )
 	if panel:GetChecked( ) then
 		if panel:GetDisabled( ) then
 			self.tex.RadioButtonD_Checked( 0, 0, w, h )

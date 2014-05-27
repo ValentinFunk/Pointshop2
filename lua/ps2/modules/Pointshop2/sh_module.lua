@@ -19,6 +19,12 @@ MODULE.Blueprints = {
 		base = "base_trail",
 		icon = "pointshop2/winner2.png",
 		creator = "DTrailCreator"
+	},
+	{
+		label = "Hat",
+		base = "base_hat",
+		icon = "pointshop2/fedora.png",
+		creator = "DHatCreator"
 	}
 }
 
