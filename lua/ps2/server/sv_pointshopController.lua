@@ -542,6 +542,9 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		return
 	end
 	
+	Pointshop2.DB.SetBlocking( true )
+	Pointshop2.DB.DoQuery( "BEGIN" )
+	
 	local slot
 	for k, v in pairs( ply.PS2_Slots ) do
 		if v.slotName == slotName then
@@ -552,11 +555,10 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		slot = Pointshop2.EquipmentSlot:new( )
 		slot.ownerId = ply.kPlayerId
 		slot.slotName = slotName
+		slot:save( )
 		ply.PS2_Slots[slot.id] = slot
 	end
 	
-	Pointshop2.DB.SetBlocking( true )
-	Pointshop2.DB.DoQuery( "BEGIN" )
 	
 	local moveOldItemDef = Deferred( )
 	if slot.itemId then
@@ -585,7 +587,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 	:Then( function( slot )
 		return ply.PS2_Inventory:removeItem( item ) --unlink from inventory
 	end )
-	:Then( function( )
+	:Done( function( )
 		item:OnEquip( ply )
 		
 		slot.Item = item

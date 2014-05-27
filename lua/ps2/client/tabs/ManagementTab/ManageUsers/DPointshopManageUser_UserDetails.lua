@@ -212,7 +212,7 @@ function PANEL:SetPlayerData( playerData )
 	self.generalInfo.avatar:SetSteamID( playerData.steam64, 64 )
 	self.generalInfo.infoPanel.name:SetText( playerData.name )
 	self.generalInfo.infoPanel.steamId:SetText( playerData.player )
-	self.generalInfo.infoPanel.lastConnected:SetText( os.date( "%Y-%m-%d %H:%M", playerData.updated_at ) )
+	self.generalInfo.infoPanel.lastConnected:SetText( "Last Connected: " .. os.date( "%Y-%m-%d %H:%M", playerData.updated_at ) )
 	
 	self.pointsPanel:SetValue( playerData.wallet.points )
 	self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints ) 

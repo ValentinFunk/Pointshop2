@@ -9,6 +9,13 @@ function Pointshop2.ResetDatabase( )
 			KLogf( 5, "Dropped %s", v.name )
 		end
 	end
+	
+	for k, v in pairs( KInventory ) do
+		if istable( v ) and v.dropTable then
+			v.dropTable( )
+			KLogf( 5, "Dropped %s", v.name )
+		end
+	end
 end
 
 function Pointshop2.PlayerOwnsItem( ply, item )
