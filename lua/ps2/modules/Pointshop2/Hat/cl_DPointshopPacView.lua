@@ -65,7 +65,7 @@ local oldT, oldV2S, oldS2V, oldGMP, oldPaceOpenMenu
 local oldGuiMousePos = gui.MousePos
 hook.Add( "InitPostEntity", "faff", function( )
 	GAMEMODE.hookRestore = {
-		oldT = pace.mctrl.GetTarget,
+		--oldT = pace.mctrl.GetTarget,
 		oldV2S = pace.mctrl.VecToScreen,
 		oldS2V = pace.mctrl.ScreenToVec,
 		oldGuiMousePos = gui.MousePos,
@@ -84,6 +84,10 @@ local function hookPac( panel )
 	local pnl = vgui.GetControlTable( "pace_properties_model" )
 	pnl._SpecialCallback = pnl.SpecialCallback
 	pnl.SpecialCallback = this_is_so_lame
+	
+	local pnl = vgui.GetControlTable( "pace_editor" )
+	pnl.Base = "DPanel"
+	pace.RegisterPanel(pnl)
 	
 	function pace.mctrl.VecToScreen( vec )
 		local x, y, vis = W2S(
@@ -105,7 +109,6 @@ local function hookPac( panel )
 			result.angles,
 			math.rad(result.fov)
 		)
-		print( "s2v", vec ) 
 		return vec
 	end
 	
@@ -126,22 +129,39 @@ local function unHookPac( )
 	pace.OnOpenMenu = GAMEMODE.hookRestore.oldPaceOpenMenu
 	
 	local pnl = vgui.GetControlTable( "pace_properties_model" )
-	pnl._SpecialCallback = pnl.SpecialCallback
+	pnl.SpecialCallback = pnl._SpecialCallback
 end
 
 function PANEL:Init( )
 	self:SetMouseInputEnabled( true )
 	Pointshop2.EditorWin = self
 	
+	self.dbg = vgui.Create( "DLabel", self )
+	self.dbg:Dock( TOP )
+	
 	hook.Add( "pace_OnPartSelected", self, self.Pace_OnPartSelected )
+	
+	timer.Simple( 1, function( ) include( "pac3/core/client/drawing.lua" ) end ) --idk
+	self:InvalidateLayout( )
 end
 
 function PANEL:Pace_OnPartSelected( part )
+	if not IsValid(part) then return end
 	local root = part:GetRootPart( )
 	root:SetOwner( self.Entity )
+	--root:SetOwnerName( "persist " .. pac.CalcEntityCRC(self.Entity) )
+	--pac.HookEntityRender(self.Entity, part)		
 end
 
 function PANEL:Paint( w, h )
+	--pace.current_part:GetRootPart( ):SetOwner( self.Entity )
+	--pace.current_part:SetOwner( self.Entity )
+	--pace.current_part:Think( )
+
+	if not IsValid( self.Entity ) then return end
+	
+	self.dbg:SetText( pace.current_part:IsValid( ) and ( tostring( pace.current_part:GetOwner() ) .. " - " .. tostring( self.Entity ) ) or "No Part" )
+
 	local PrevMins, PrevMaxs = self.Entity:GetRenderBounds()
 	self:SetLookAt((PrevMaxs + PrevMins) / 2 + Vector( 0, 0, 10 ) )
 	
@@ -156,7 +176,8 @@ function PANEL:Paint( w, h )
 	self.result = result
 	
 	pace.HUDPaint() --Update View pos (movement is done here )
-	
+	pac.Think()
+	pac.ShowEntityParts( self.Entity )
 	local x, y = self:LocalToScreen( 0, 0 )
 	cam.Start3D( pos, ang, fov, x, y, w, h, 5, 4096 )
 		cam.IgnoreZ( true )
@@ -178,7 +199,7 @@ function PANEL:Paint( w, h )
 			pac.RenderOverride( self.Entity, "opaque" )
 			pac.RenderOverride( self.Entity, "translucent", false )
 			self.Entity:DrawModel( )
-			
+			pac.RenderOverride( self.Entity, "translucent", false )
 		pac.ForceRendering( false )
 		--pac.UnhookEntityRender( self.Entity, self.pacOutfit )
 		
@@ -222,11 +243,11 @@ function PANEL:OnOpenMenu( )
 	menu:AddSpacer()
 		
 		--menu:AddOption(L"toggle basic mode", function() pace.ToggleBasicMode() end)
-		menu:AddOption(L"toggle t pose", function() pace.SetTPose(not pace.GetTPose()) end)
+		--menu:AddOption(L"toggle t pose", function() pace.SetTPose(not pace.GetTPose()) end)
 		
-	menu:AddSpacer()
+	--menu:AddSpacer()
 		
-		menu:AddOption(L"PAC Help", function() pace.ShowWiki() end)
+		menu:AddOption(L"PAC3 Help", function() pace.ShowWiki() end)
 		
 	menu:Open()
 	menu:MakePopup()
@@ -248,6 +269,8 @@ function this_is_so_lame( self )
 
 	local divider = vgui.Create("DVerticalDivider", frame)
 	divider:Dock(FILL)
+	divider:SetMouseInputEnabled( true ) 
+	divider:RequestFocus( true )
 			
 	local top = vgui.Create("DPanelList")
 		top:EnableVerticalScrollbar(true)		
