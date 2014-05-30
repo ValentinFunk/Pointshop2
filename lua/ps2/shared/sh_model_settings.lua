@@ -4,7 +4,7 @@ local StoredSetting = Pointshop2.StoredSetting
 StoredSetting.static.DB = "Pointshop2"
 
 StoredSetting.static.model = {
-	tableName = "ps2_outfits",
+	tableName = "ps2_settings",
 	fields = {
 		name = "string",
 		value = "luadata"
