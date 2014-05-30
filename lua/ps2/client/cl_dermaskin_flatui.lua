@@ -246,12 +246,14 @@ end
 function SKIN:PaintMenuOption( panel, w, h )
 	surface.SetDrawColor( self.ButtonColor )
 	surface.DrawRect( 0, 0, w, h )
-	panel.m_Image:SetImageColor( color_white )
+	if panel.m_Image then panel.m_Image:SetImageColor( color_white ) end
 	panel:SetTextColor( self.Colours.Label.Default )
 	if panel.Hovered or panel.Highlight then
 		surface.SetDrawColor( self.Highlight )
 		surface.DrawOutlinedRect( 0, 0, w, h )
-		panel.m_Image:SetImageColor( self.Highlight )
+		if panel.m_Image then
+			panel.m_Image:SetImageColor( self.Highlight )
+		end
 		panel:SetTextColor( self.Highlight )
 	end
 end
@@ -294,7 +296,13 @@ function SKIN:PaintFrame( panel, w, h )
 		panel.lblTitle:SetFont( "PS2_Normal" )
 	end
 	
-	Derma_DrawBackgroundBlur( panel, panel.startTime )
+	local c 
+	for k, v in pairs( panel:GetChildren( ) ) do
+		if v:HasFocus( ) then
+			c = true 
+		end
+	end
+	if panel:HasHierarchicalFocus() then Derma_DrawBackgroundBlur( panel, panel.startTime ) end
 	draw.RoundedBox( 0, 0, 0, w, h, self.MainBG )
 	draw.RoundedBoxEx( 0, 0, 0, w, 27, self.HeaderBG, true, true )
 end

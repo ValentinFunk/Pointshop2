@@ -15,11 +15,11 @@ function PANEL:Init( )
 	
 	self.items = {}
 	
-	self.itemNameTextbox = vgui.Create( "DTextEntry" )
+	self.itemNameTextbox = vgui.Create( "DTextEntry", self )
 	self.itemNameTextbox:SetWide( 400 )
 	self:addFormItem( "Item Name", self.itemNameTextbox )
 	
-	self.descriptionBox = vgui.Create( "DTextEntry" )
+	self.descriptionBox = vgui.Create( "DTextEntry", self )
 	self.descriptionBox:SetMultiline( true )
 	self.descriptionBox:SetWide( 400 )
 	local item = self:addFormItem( "Description", self.descriptionBox )
@@ -74,7 +74,7 @@ function PANEL:Init( )
 	self.normalPrice = createCheckboxedPriceInput( "Points" )
 	self.pricePremium = createCheckboxedPriceInput( "Donator Points" )
 	
-	self.saveButton = self:addFormButton( vgui.Create( "DButton" ) )
+	self.saveButton = self:addFormButton( vgui.Create( "DButton", self ) )
 	self.saveButton:SetText( "Save Item" )
 	self.saveButton:SetSize( 80, 25 )
 	self.saveButton:PerformLayout( )
