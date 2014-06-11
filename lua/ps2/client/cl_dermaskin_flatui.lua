@@ -223,6 +223,17 @@ function SKIN:PaintButton( panel, w, h )
 		end
 		panel:SetTextColor( self.Colours.Label.Dark )
 	end
+	
+	if panel:GetDisabled( ) then
+		surface.SetDrawColor( Color( self.ButtonColor.r - 20, self.ButtonColor.g - 20, self.ButtonColor.b - 20 ) )
+		surface.DrawRect( 0, 0, w, h )
+		surface.SetDrawColor( Color( 200, 200, 200 ) )
+		--surface.DrawOutlinedRect( 0, 0, w, h )
+		if IsValid( panel.m_Image ) then
+			panel.m_Image:SetImageColor( Color( 100, 100, 100 ) )
+		end
+		panel:SetTextColor( self.Colours.Label.Dark )
+	end
 end
 
 function SKIN:PaintCreateItemButton( panel, w, h )

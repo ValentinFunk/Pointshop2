@@ -6,6 +6,9 @@ function PANEL:Init( )
 	self:SetTitle( "Create a Pointshop Item" )
 	self:SetSize( 410, 308 )
 	
+	self.loadingNotifier = vgui.Create( "DLoadingNotifier", self )
+	self.loadingNotifier:Dock( TOP )
+	
 	self:addSectionTitle( "Basic Settings" )
 	
 	self.buttonBar = vgui.Create( "DIconLayout", self )
@@ -178,6 +181,16 @@ function PANEL:PerformLayout( )
 	self.buttonBar:SetWide( self:GetWide( ) - 10 )
 	
 	self:SetTall( maxY + self.buttonBar:GetTall( ) + 15 )
+end
+
+function PANEL:NotifyLoading( bIsLoading )
+	if bIsLoading then
+		self.loadingNotifier:Expand( )
+		self:SetDisabled( true )
+	else
+		self.loadingNotifier:Collapse( )
+		self:SetDisabled( false )
+	end
 end
 
 vgui.Register( "DItemCreator", PANEL, "DFrame" )

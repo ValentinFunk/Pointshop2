@@ -207,9 +207,6 @@ function Pointshop2View:loadOutfits( versionHash )
 			return
 		end
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
-		for id, outfitEncoded in pairs( Pointshop2.Outfits ) do
-			Pointshop2.Outfits[id] = LibK.luadata.Decode( outfitEncoded )
-		end
 		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %i)", #Pointshop2.Outfits, versionHash ) 
 	end )
 end
@@ -224,4 +221,8 @@ end
 
 function Pointshop2View:adminChangeWallet( kPlayerId, currencyType, newValue )
 	return self:controllerTransaction( "adminChangeWallet", kPlayerId, currencyType, newValue )
+end
+
+function Pointshop2View:saveOutfit( modelId, outfit )
+	
 end

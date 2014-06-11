@@ -39,7 +39,7 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	
 	itemTable.outfitId = persistenceItem.outfitId
 	itemTable.iconMaterial = persistenceItem.iconMaterial
-	itemtable.useMaterialIcon = persistenceItem.useMaterialIcon
+	itemTable.useMaterialIcon = persistenceItem.useMaterialIcon
 end
 
 function ITEM.static.GetPointshopIconDimensions( )

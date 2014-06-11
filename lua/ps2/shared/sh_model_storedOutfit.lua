@@ -6,7 +6,7 @@ StoredOutfit.static.DB = "Pointshop2"
 StoredOutfit.static.model = {
 	tableName = "ps2_outfits",
 	fields = {
-		outfitData = "text", --contains lua data encoded outfits that are decoded on the client
+		outfitData = "luadata", --contains lua data encoded outfits that are decoded on the client
 		updatedAt = "updatedTime"
 	}
 }
@@ -20,6 +20,6 @@ function StoredOutfit.static.getVersionHash( )
 			rows[1].updatedAt = nil
 		end
 		local versionHash = rows[1].updatedAt and tostring( rows[1].updatedAt ) or "-1"
-		return versionHash
+		return util.CRC( versionHash )
 	end )
 end

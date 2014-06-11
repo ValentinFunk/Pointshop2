@@ -81,10 +81,6 @@ local function hookPac( panel )
 	--	return outfit
 	--end
 	
-	local pnl = vgui.GetControlTable( "pace_properties_model" )
-	pnl._SpecialCallback = pnl.SpecialCallback
-	pnl.SpecialCallback = this_is_so_lame
-	
 	local pnl = vgui.GetControlTable( "pace_editor" )
 	pnl.Base = "DPanel"
 	pace.RegisterPanel(pnl)
@@ -127,19 +123,18 @@ local function unHookPac( )
 	pace.mctrl.ScreenToVec = GAMEMODE.hookRestore.oldS2V
 	pace.mctrl.GetMousePos = GAMEMODE.hookRestore.oldGMP
 	pace.OnOpenMenu = GAMEMODE.hookRestore.oldPaceOpenMenu
-	
-	local pnl = vgui.GetControlTable( "pace_properties_model" )
-	pnl.SpecialCallback = pnl._SpecialCallback
 end
 
 function PANEL:Init( )
 	self:SetMouseInputEnabled( true )
 	Pointshop2.EditorWin = self
 	
-	self.dbg = vgui.Create( "DLabel", self )
-	self.dbg:Dock( TOP )
+	--self.dbg = vgui.Create( "DLabel", self )
+--	self.dbg:Dock( TOP )
 	
 	hook.Add( "pace_OnPartSelected", self, self.Pace_OnPartSelected )
+	
+	RunConsoleCommand( "pac_in_editor", 1 )
 	
 	timer.Simple( 1, function( ) include( "pac3/core/client/drawing.lua" ) end ) --idk
 	self:InvalidateLayout( )
@@ -160,7 +155,7 @@ function PANEL:Paint( w, h )
 
 	if not IsValid( self.Entity ) then return end
 	
-	self.dbg:SetText( pace.current_part:IsValid( ) and ( tostring( pace.current_part:GetOwner() ) .. " - " .. tostring( self.Entity ) ) or "No Part" )
+	--self.dbg:SetText( pace.current_part:IsValid( ) and ( tostring( pace.current_part:GetOwner() ) .. " - " .. tostring( self.Entity ) ) or "No Part" )
 
 	local PrevMins, PrevMaxs = self.Entity:GetRenderBounds()
 	self:SetLookAt((PrevMaxs + PrevMins) / 2 + Vector( 0, 0, 10 ) )
@@ -219,6 +214,7 @@ end
 
 function PANEL:OnRemove( )
 	unHookPac( )
+	RunConsoleCommand( "pac_in_editor", 0 )
 end
 
 function PANEL:OnMouseWheeled( delta )
@@ -254,108 +250,3 @@ function PANEL:OnOpenMenu( )
 end
 
 vgui.Register( "DPointshopPacView", PANEL, "DModelPanel" )
-
---By CapsAdmin. "This is so lame" - Caps Admin
-function this_is_so_lame( self )
-	pace.SafeRemoveSpecialPanel()
-
-	local frame = vgui.Create("DFrame")
-	frame:SetTitle(L"models")
-	frame:SetPos(pace.Editor:GetWide(), 0)
-	frame:SetSize(800, 600)
-	frame:MakePopup( )
-	frame:SetMouseInputEnabled( true ) 
-	frame:RequestFocus( true )
-
-	local divider = vgui.Create("DVerticalDivider", frame)
-	divider:Dock(FILL)
-	divider:SetMouseInputEnabled( true ) 
-	divider:RequestFocus( true )
-			
-	local top = vgui.Create("DPanelList")
-		top:EnableVerticalScrollbar(true)		
-	divider:SetTop(top)
-
-	local bottom = vgui.Create("DPanelList")
-		bottom:Dock(FILL)
-		bottom:EnableHorizontal(true)
-		bottom:EnableVerticalScrollbar(true)
-		bottom:SetSpacing(4, 4)
-	divider:SetBottom(bottom)
-
-	local function GetParentFolder(str)
-		return str:match("(.*/)" .. (".*/"):rep(1)) or ""
-	end
-
-	local function populate(dir)
-		frame:SetTitle(dir)
-		
-		local a,b = file.Find(dir .. "*", "GAME")
-		local files = table.Merge(a or {}, b or {})
-		
-		if GetParentFolder(dir):find("/", nil, true) then
-			local btn = vgui.Create("DButton")
-				btn:SetText("..")
-				top:AddItem(btn)
-			
-			function btn:DoClick()
-				for k,v in pairs(top:GetItems()) do v:Remove() end
-				for k,v in pairs(bottom:GetItems()) do v:Remove() end
-				populate(GetParentFolder(dir))
-			end
-		end
-				
-		for _, name in pairs(files) do
-			if not name:find("%.", nil, true) then
-				local btn = vgui.Create("DButton")
-				btn:SetText(name)
-				top:AddItem(btn)
-				
-				function btn:DoClick()
-					for k,v in pairs(top:GetItems()) do v:Remove() end
-					for k,v in pairs(bottom:GetItems()) do v:Remove() end
-					populate(dir .. name .. "/")
-				end
-			end
-		end
-		
-		for _, name in pairs(files) do
-			local dir = dir:match("../.-/(.+)")
-
-			if name:find(".mdl", nil, true) then
-				local btn = vgui.Create("SpawnIcon")
-				btn:SetIconSize(64)
-				btn:SetSize(64, 64)
-										
-				btn:SetModel(dir .. name)
-				bottom:AddItem(btn)
-				
-				function btn.DoClick()
-					pace.current_part:SetModel(dir .. name)
-				end
-			end
-			
-			-- umm
-			
-			if name:find(".vmt", nil, true) then
-				local image = vgui.Create("DImageButton")
-				image:SetSize(64, 64)
-				local path = (dir .. name):match("materials/(.-)%.vmt")
-				image:SetMaterial(path)
-				image:SetTooltip(path)
-				bottom:AddItem(image)
-				
-				function image.DoClick()
-					pace.current_part:SetMaterial(path)
-				end
-			end
-		end
-		
-		top:InvalidateLayout(true)
-		bottom:InvalidateLayout(true)
-	end
-
-	populate("")
-
-	pace.ActiveSpecialPanel = frame
-end

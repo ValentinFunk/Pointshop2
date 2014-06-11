@@ -61,8 +61,50 @@ function PANEL:Init( )
 	self.modelPanel:Dock( FILL )
 	self.modelPanel:SetModel( "models/player/kleiner.mdl" )
 	
+	self.bottomButtons = vgui.Create( "DPanel", self )
+	self.bottomButtons:Dock( BOTTOM )
+	self.bottomButtons:DockMargin( 0, 5, 0, 0 )
+	self.bottomButtons:SetTall( 30 )
+	self.bottomButtons:MoveToBack( )
+	self.bottomButtons.Paint = function( ) end
+	
+	local cancel = vgui.Create( "DButton", self.bottomButtons )
+	cancel:SetText( "Cancel" )
+	cancel:Dock( RIGHT )
+	cancel:SetWide( 150 )
+	cancel:DockMargin( 5, 0, 5, 0 )
+	function cancel.DoClick( )
+		self:Remove( )
+	end
+	
+	local save = vgui.Create( "DButton", self.bottomButtons )
+	save:SetText( "Save" )
+	save:Dock( RIGHT )
+	save:SetWide( 150 )
+	save:SetImage( "pointshop2/floppy1.png" )
+	save.m_Image:SetSize( 16, 16 )
+	function save.DoClick( )
+		local partTable = {}
+		for key, part in pairs(pac.GetParts(true)) do
+			if not part:HasParent() then
+				table.insert(partTable, part:ToTable())
+			end
+		end
+		if self:OnSave( partTable ) then
+			self:Remove( )
+		end
+	end
+	
 	
 	self:SetTitle( "Hat Maker - powered by PAC3" )
+end
+
+function PANEL:OnSave( partTable )
+	--For overwriting
+end
+
+function PANEL:SetModel( mdlPath )
+	self.modelPanel:SetModel( mdlPath )
 end
 
 function PANEL:NewEmptyOutfit( )
@@ -74,7 +116,16 @@ function PANEL:NewEmptyOutfit( )
 		end	
 			
 		pace.TrySelectPart()
+		pace.ResetView( )
 	end)
+end
+
+function PANEL:LoadOutfit( outfitPart )
+	timer.Simple( 0.01, function( )
+		if not pace.Editor:IsValid() then return end
+		
+		pace.LoadPartsFromTable( outfitPart )
+	end )
 end
 
 function PANEL:ImportPacOutfit( )
