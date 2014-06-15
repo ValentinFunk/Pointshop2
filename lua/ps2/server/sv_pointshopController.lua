@@ -335,6 +335,11 @@ end
 function Pointshop2Controller:moduleItemsChanged( )
 	self:loadModuleItems( )
 	:Then( function( )
+		print( "Module Items Loaded" )
+		return self:loadOutfits( )
+	end )
+	:Then( function( )
+		print( "Sending dyn info" )
 		for k, v in pairs( player.GetAll( ) ) do
 			self:sendDynamicInfo( v )
 		end
@@ -607,7 +612,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 end
 
 function Pointshop2Controller:loadOutfits( )
-	WhenAllFinished{ Pointshop2.StoredOutfit.getAll( ), Pointshop2.StoredOutfit.getVersionHash( ) }
+	return WhenAllFinished{ Pointshop2.StoredOutfit.getAll( ), Pointshop2.StoredOutfit.getVersionHash( ) }
 	:Then( function( outfits, versionHash )
 		
 		local outfitsAssoc = {}
