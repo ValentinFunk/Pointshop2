@@ -22,7 +22,12 @@ function PANEL:Init( )
 			frame.manualEntry.IgnoreChange = true
 			frame.manualEntry:SetText( window.selectedModel )
 			frame.manualEntry.IgnoreChange = false
-			frame.mdlPanel:SetModel( window.selectedModel )
+			frame.mdlPanel:SetModel( window.selectedModel, window.skin )
+			
+			for k, v in pairs( string.Explode( " ", window.bodygroups ) ) do
+				k, v = tonumber( k ), tonumber( v )
+				frame.mdlPanel:BodyGroupChanged( k, v )
+			end
 			frame.bodygroups = window.bodygroups
 			frame.skin = window.skin
 		end
