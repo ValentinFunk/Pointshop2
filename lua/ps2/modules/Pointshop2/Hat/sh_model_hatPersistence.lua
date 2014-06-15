@@ -11,6 +11,7 @@ HatPersistence.static.model = {
 	fields = {
 		itemPersistenceId = "int",
 		iconMaterial = "string",
+		iconViewInfo = "luadata",
 		useMaterialIcon = "bool"
 	},
 	belongsTo = {
@@ -37,7 +38,7 @@ function HatPersistence.static.createFromSaveTable( saveTable )
 		hat.itemPersistenceId = itemPersistence.id
 		hat.outfitId = saveTable.outfitId
 		hat.iconMaterial = saveTable.iconMaterial or ""
-		print( "UseMaterialIcon: ", saveTable.useMaterialIcon, type( saveTable.useMaterialIcon ) )
+		hat.iconViewInfo = saveTable.iconViewInfo or {}
 		hat.useMaterialIcon = saveTable.useMaterialIcon
 		return hat:save( )
 	end )

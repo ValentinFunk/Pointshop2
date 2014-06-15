@@ -95,11 +95,25 @@ function PANEL:Init( )
 		end
 	end
 	
+	local save = vgui.Create( "DButton", self.bottomButtons )
+	save:SetText( "Icon Snapshot" )
+	save:Dock( RIGHT )
+	save:SetWide( 150 )
+	save:DockMargin( 0, 0, 5, 0 )
+	save:SetImage( "pointshop2/floppy1.png" )
+	save.m_Image:SetSize( 16, 16 )
+	function save.DoClick( )
+		self:OnSaveIconViewInfo( self.modelPanel.result )
+	end
 	
 	self:SetTitle( "Hat Maker - powered by PAC3" )
 end
 
 function PANEL:OnSave( partTable )
+	--For overwriting
+end
+
+function PANEL:OnSaveIconViewInfo( partTable )
 	--For overwriting
 end
 

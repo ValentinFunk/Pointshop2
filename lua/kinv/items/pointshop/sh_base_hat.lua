@@ -1,7 +1,8 @@
 ITEM.PrintName = "Pointshop Hat Base"
 ITEM.baseClass = "base_pointshop_item"
 
-ITEM.outfitId = 0
+ITEM.static.outfitIds = {} --Model -> Outfit ID map
+ITEM.static.iconViewInfo = {} --Table: fov, angles, origin used for preview rendering
 
 ITEM.category = "Hats"
 ITEM.color = ""
@@ -34,14 +35,24 @@ function ITEM.static.getPersistence( )
 	return Pointshop2.HatPersistence
 end
 
+/*
+	Creates a new class that inherits this base
+*/
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
-	
-	itemTable.outfitId = persistenceItem.outfitId
-	itemTable.iconMaterial = persistenceItem.iconMaterial
-	itemTable.useMaterialIcon = persistenceItem.useMaterialIcon
+	itemTable.static.iconViewInfo = persistenceItem.iconViewInfo
+	itemTable.static.useMaterialIcon = persistenceItem.useMaterialIcon
+	itemTable.static.iconMaterial = persistenceItem.iconMaterial
+	itemTable.static.outfitIds = {}
+	for k, mapping in pairs( persistenceItem.OutfitHatPersistenceMapping ) do
+		itemTable.static.outfitIds[mapping.model] = mapping.outfitId
+	end
+	function itemTable.static.getBaseOutfit( )
+		local outfitId = itemTable.outfitIds[Pointshop2.HatPersistence.ALL_MODELS]
+		return Pointshop2.Outfits[outfitId]
+	end
 end
 
 function ITEM.static.GetPointshopIconDimensions( )
-	return 74, 64
+	return 108, 128
 end

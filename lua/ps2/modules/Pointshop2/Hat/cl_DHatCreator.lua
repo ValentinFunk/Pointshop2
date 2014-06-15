@@ -1,5 +1,17 @@
 local PANEL = {}
 
+local function createHatPositioner( parentPanel )
+	local f = vgui.Create( "DHatPositioner" )
+	function f.OnSave( _self, outfit )
+		return parentPanel:OutfitSaved( outfit )
+	end
+	function f.OnSaveIconViewInfo( _self, viewInfo )
+		return parentPanel:IconViewInfoSaved( viewInfo )
+	end
+	f:Center( )
+	return f
+end
+
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
@@ -17,30 +29,18 @@ function PANEL:Init( )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 		if self.baseOutfit then
 			menu:AddOption( "Edit Outfit", function( )
-				local f = vgui.Create( "DHatPositioner" )
-				f:Center( )
+				local f = createHatPositioner( self )
 				f:LoadOutfit( self.baseOutfit )
-				function f.OnSave( _self, outfit )
-					return self:OutfitSaved( outfit )
-				end
 			end )
 			menu:AddSpacer( )
 		end
 		
 		menu:AddOption( "Create new Outfit", function( )
-			local f = vgui.Create( "DHatPositioner" )
-			f:Center( )
-			function f.OnSave( _self, outfit )
-				return self:OutfitSaved( outfit )
-			end
+			local f = createHatPositioner( self )
 			f:NewEmptyOutfit( )
 		end )
 		menu:AddOption( "Import existing PAC Outfit", function( )
-			local f = vgui.Create( "DHatPositioner" )
-			f:Center( )
-			function f.OnSave( _self, outfit )
-				return self:OutfitSaved( outfit )
-			end
+			local f = createHatPositioner( self )
 			f:ImportPacOutfit( )
 		end )
 		menu:Open( )
@@ -71,11 +71,7 @@ function PANEL:Init( )
 			local function openEditor( )
 				self.currentModel = modelPath
 				local line = self.listView:AddLine( modelPath, "No", "" )
-				local f = vgui.Create( "DHatPositioner" )
-				f:Center( )
-				function f.OnSave( _self, outfit )
-					return self:OutfitSaved( outfit )
-				end
+				local f = createHatPositioner( self )
 				if modelPath == Pointshop2.HatPersistence.ALL_CSS_MODELS then
 					line.model = "models/player/t_guerilla.mdl"
 				elseif modelPath == Pointshop2.HatPersistence.ALL_MODELS then
@@ -177,17 +173,29 @@ function PANEL:Init( )
 	
 	local iconBox = vgui.Create( "DPanel", self )
 	iconBox:Dock( TOP )
-	iconBox:SetTall( 65 )
+	iconBox:SetTall( 175 )
 	function iconBox:Paint( ) end
 	
 	self.choice = vgui.Create( "DRadioChoice", iconBox )
 	self.choice:Dock( FILL )
-	self.choice:AddOption( "Automatic" )
+	local snapshotChoice = self.choice:AddOption( "Use Snapshot" )
+	local container = vgui.Create( "DPanel", snapshotChoice )
+	container:Dock( TOP )
+	container:DockMargin( 100, 0, 0, 0 )
+	container:SetTall( 128 )
+	function container:Paint( ) end
+	snapshotChoice:SetTall( 128 )
+	
+	self.snapshotPreview = vgui.Create( "DPreRenderedModelPanel", container )
+	self.snapshotPreview:SetSize( 128, 128 )
+	self.snapshotPreview:SetModel( "models/player/kleiner.mdl" )
+	
 	local materialChoice = self.choice:AddOption( "Use Material" )
 	local materialInputBox = vgui.Create( "DTextEntry", materialChoice )
 	materialInputBox:Dock( LEFT )
 	materialInputBox:DockMargin( 100, 0, 0, 0 )
 	materialInputBox:SetWide( 250 )
+	materialInputBox:SetTall( 30 )
 	self.materialInputBox = materialInputBox
 	
 	self.choice:DockMargin( 5, 5, 5, 5 )
@@ -202,11 +210,17 @@ function PANEL:Init( )
 	self.choice:OnChange( )
 end
 
+function PANEL:IconViewInfoSaved( viewInfo )
+	self.iconViewInfo = viewInfo
+	self.snapshotPreview:SetViewInfo( viewInfo )
+end
+
 function PANEL:OutfitSaved( outfit )
 	pace.Backup( outfit, os.time( ) .. self.currentModel ) --Just to be save
 	
 	if self.currentModel == Pointshop2.HatPersistence.ALL_MODELS then
 		self.baseOutfit = outfit
+		self.snapshotPreview:SetPacOutfit( self.baseOutfit )
 		self.addBtn:SetDisabled( false )
 	else
 		for k, v in pairs( self.listView:GetLines( ) ) do
@@ -218,6 +232,11 @@ function PANEL:OutfitSaved( outfit )
 	end
 	
 	return true
+end
+
+function PANEL:Validate( )
+	self.BaseClass.Validate( self )
+	
 end
 
 function PANEL:SaveItem( saveTable )
@@ -238,9 +257,8 @@ function PANEL:SaveItem( saveTable )
 	else
 		saveTable.useMaterialIcon = false
 		saveTable.iconMaterial = ""
+		saveTable.iconViewInfo = self.iconViewInfo
 	end
-	PrintTable( saveTable )
-	
 end
 
 vgui.Register( "DHatCreator", PANEL, "DItemCreator" )
