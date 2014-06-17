@@ -17,6 +17,12 @@ function PANEL:Init( )
 	
 	self:addSectionTitle( "Model and Positioning" )
 	
+	self.iconViewInfo = {
+		["fov"] = 75,
+		["angles"] = Angle(7.5625, 182.59375, 0),
+		["origin"] = Vector(35.5625, 0.125, 69.84375),
+	}
+	
 	local openBtn = vgui.Create( "DButton", self )
 	openBtn:SetText( "Open Editor" )
 	openBtn:SetWide( 120 )
@@ -187,8 +193,103 @@ function PANEL:Init( )
 	snapshotChoice:SetTall( 128 )
 	
 	self.snapshotPreview = vgui.Create( "DPreRenderedModelPanel", container )
-	self.snapshotPreview:SetSize( 128, 128 )
+	self.snapshotPreview:SetSize( KInventory.Items.base_hat.GetPointshopIconDimensions( ) )
+	self.snapshotPreview.forceRender = true
 	self.snapshotPreview:SetModel( "models/player/kleiner.mdl" )
+	
+	local sliders = vgui.Create( "DPanel", container )
+	sliders:Dock( FILL )
+	sliders:DockMargin( self.snapshotPreview:GetWide( ) + 5, 0, 5, 5 )
+	function sliders:Paint( w, h )
+	end
+	
+	local params = {
+		x = { function( newVal ) 
+				self.iconViewInfo.origin.x = newVal
+			end, 
+			-1000,
+			1000,
+			self.iconViewInfo.origin.x
+		},
+		y = { function( newVal )
+				self.iconViewInfo.origin.y = newVal
+			end,
+			-1000,
+			1000,
+			self.iconViewInfo.origin.y
+		}, 
+		z = { function( newVal ) 
+				self.iconViewInfo.origin.z = newVal
+			end, 
+			-1000,
+			1000,
+			self.iconViewInfo.origin.z
+		},
+		pitch = { function( newVal )
+				self.iconViewInfo.angles.p = newVal
+			end,
+			-360, 
+			360,
+			self.iconViewInfo.angles.p
+		},
+		yaw = { function( newVal ) 
+				self.iconViewInfo.angles.y = newVal
+			end,
+			-360, 
+			360,
+			self.iconViewInfo.angles.y
+		},
+		fov = {
+			function( newVal ) 
+				self.iconViewInfo.fov = newVal 
+			end,
+			10,
+			90,
+			self.iconViewInfo.fov
+		}
+	}
+	
+	local label = vgui.Create( "DLabel", sliders )
+	label:SetText( "Drag the grey buttons to adjust" )
+	label.OwnLine = true
+	label:SizeToContents( )
+	label:Dock( TOP )
+	
+	for name, infoTbl in pairs( params ) do
+		local slider = vgui.Create( "DPanel", sliders )
+		slider:SetTall( 12 )
+		slider:Dock( TOP )
+		slider:DockMargin( 0, 5, 0, 0 )
+		function slider.Paint( ) end
+		
+		slider.lbl = vgui.Create( "DLabel", slider )
+		slider.lbl:SetText( name )
+		slider.lbl:Dock( LEFT )
+		slider.lbl:SizeToContents( )
+		slider.lbl:SetWide( 50 )
+		
+		slider.scratch = vgui.Create( "DNumberScratch", slider )
+		slider.scratch:SetImageVisible( false )
+		slider.scratch:SetWide( 25 ) 
+		slider.scratch:Dock( LEFT )
+		slider.scratch.OnValueChanged = function( _self )
+			infoTbl[1]( _self:GetFloatValue( ) )
+			self.snapshotPreview:SetViewInfo( self.iconViewInfo )
+			slider.lbl2:SetText( math.Round( _self:GetFloatValue( ), 2 ) )
+		end
+		slider.scratch:SetMin( infoTbl[2] )
+		slider.scratch:SetMax( infoTbl[3] )
+		slider.scratch:SetValue( infoTbl[1] )
+		
+		slider.lbl2 = vgui.Create( "DLabel", slider )
+		slider.lbl2:SetText( 12 )
+		slider.lbl2:Dock( LEFT )
+		slider.lbl2:DockMargin( 5, 0, 0, 0 )
+		
+		infoTbl.slider = slider.scratch
+	end
+	self.params = params
+	self.snapshotPreview:SetViewInfo( self.iconViewInfo )
 	
 	local materialChoice = self.choice:AddOption( "Use Material" )
 	local materialInputBox = vgui.Create( "DTextEntry", materialChoice )
@@ -213,6 +314,12 @@ end
 function PANEL:IconViewInfoSaved( viewInfo )
 	self.iconViewInfo = viewInfo
 	self.snapshotPreview:SetViewInfo( viewInfo )
+	self.params.x.slider:SetValue( viewInfo.origin.x )
+	self.params.y.slider:SetValue( viewInfo.origin.y )
+	self.params.z.slider:SetValue( viewInfo.origin.z )
+	self.params.fov.slider:SetValue( viewInfo.fov )
+	self.params.pitch.slider:SetValue( viewInfo.angles.p )
+	self.params.yaw.slider:SetValue( viewInfo.angles.y )
 end
 
 function PANEL:OutfitSaved( outfit )

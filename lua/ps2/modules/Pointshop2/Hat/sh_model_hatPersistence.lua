@@ -12,7 +12,8 @@ HatPersistence.static.model = {
 		itemPersistenceId = "int",
 		iconMaterial = "string",
 		iconViewInfo = "luadata",
-		useMaterialIcon = "bool"
+		useMaterialIcon = "bool",
+		slotType = "string"
 	},
 	belongsTo = {
 		ItemPersistence = {

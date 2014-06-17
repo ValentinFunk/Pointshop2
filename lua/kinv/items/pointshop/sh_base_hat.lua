@@ -43,6 +43,7 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.static.iconViewInfo = persistenceItem.iconViewInfo
 	itemTable.static.useMaterialIcon = persistenceItem.useMaterialIcon
 	itemTable.static.iconMaterial = persistenceItem.iconMaterial
+	itemTable.static.slotType = persistenceItem.slotType
 	itemTable.static.outfitIds = {}
 	for k, mapping in pairs( persistenceItem.OutfitHatPersistenceMapping ) do
 		itemTable.static.outfitIds[mapping.model] = mapping.outfitId
@@ -50,6 +51,9 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	function itemTable.static.getBaseOutfit( )
 		local outfitId = itemTable.outfitIds[Pointshop2.HatPersistence.ALL_MODELS]
 		return Pointshop2.Outfits[outfitId]
+	end
+	function itemTable.static.getSlotType( )
+		return itemTable.static.slotType
 	end
 end
 

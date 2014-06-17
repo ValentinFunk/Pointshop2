@@ -5,6 +5,12 @@ function PANEL:Init( )
 end
 
 function PANEL:SetPacOutfit( outfit )
+	if self.pacOutfit and IsValid( self.Entity ) then
+		for k, oldOutf in pairs( self.Entity.pac_outfits ) do
+			self.Entity:RemovePACPart( oldOutf )
+		end
+	end
+	
 	self.pacOutfit = outfit
 	if IsValid( self.Entity ) then
 		self.Entity:AttachPACPart( self.pacOutfit )
@@ -26,7 +32,7 @@ end
 function PANEL:Paint( w, h )
 	if not self.rt then
 		local uid = "PS2RT_PreRender" .. math.random( 0, 1000000000 ) --not the cleanest but should work
-		self.rt = GetRenderTarget( uid, 128, 128 )
+		self.rt = GetRenderTarget( uid, 256, 256 )
 		self.mat = CreateMaterial( uid .. "mat", "UnlitGeneric", {
 			["$basetexture"] = self.rt,
 			--["$vertexcolor"] = 1,
@@ -35,16 +41,9 @@ function PANEL:Paint( w, h )
 	end
 	
 	if not self.dirty and not self.forceRender then
-		render.PushFilterMin( TEXFILTER.ANISOTROPIC );
-		render.PushFilterMag( TEXFILTER.ANISOTROPIC );
-			surface.SetMaterial( self.mat )
-			surface.DrawTexturedRect( 0, 0, w, h )
-		render.PopFilterMag( )
-		render.PopFilterMin( )
+		self:PaintCached( w, h )
 		return
 	end
-	
-
 	
 	local oldRt = render.GetRenderTarget( )
 	render.SetRenderTarget( self.rt )
@@ -54,28 +53,38 @@ function PANEL:Paint( w, h )
 	
 	self.mat:SetTexture( "$basetexture", self.rt )
 	
+	self:PaintCached( w, h )
+	
+	self.LastPaint = RealTime()
+	self.framesDrawn = self.framesDrawn or 0
+	self.framesDrawn = self.framesDrawn + 1
+	if self.framesDrawn > 10 then
+		self.dirty = false
+	end
+end
+
+function PANEL:PaintCached( w, h )
 	render.PushFilterMin( TEXFILTER.ANISOTROPIC );
 	render.PushFilterMag( TEXFILTER.ANISOTROPIC );
 		surface.SetMaterial( self.mat )
-		surface.DrawTexturedRect( 0, 0, w, h )
+		surface.DrawTexturedRectUV( 0, 0, w, h, 0, 0, w / 128, h / 128 )
 	render.PopFilterMag( )
 	render.PopFilterMin( )
-	
-	self.LastPaint = RealTime()
-	self.dirty = false
 end
 
 function PANEL:PaintActual( w, h )
 	if not IsValid( self.Entity ) or
 	   not self.pacOutfit or
 	   not self.viewInfo then 
-		surface.SetDrawColor( 255, 0, 0, 150 )
-		surface.DrawRect( 0, 0, w, h )
+		/*cam.Start2D( 0, 0, w, h )
+			surface.SetDrawColor( 255, 0, 0, 150 )
+			surface.DrawRect( 0, 0, 256, 256 )
+		cam.End2D( )*/
 		return
 	end
 	
 	pac.Think()
-	cam.Start3D( self.viewInfo.origin, self.viewInfo.angles, self.viewInfo.fov - 30, 0, 0, w, h, 5, 4096 )
+	cam.Start3D( self.viewInfo.origin, self.viewInfo.angles, self.viewInfo.fov - 20, 0, 0, 256, 256, 5, 4096 )
 		cam.IgnoreZ( true )
 		render.SuppressEngineLighting( true )
 		render.SetLightingOrigin( self.Entity:GetPos() )

@@ -96,7 +96,7 @@ function PANEL:Init( )
 	end
 	
 	local save = vgui.Create( "DButton", self.bottomButtons )
-	save:SetText( "Icon Snapshot" )
+	save:SetText( "Use as Icon View" )
 	save:Dock( RIGHT )
 	save:SetWide( 150 )
 	save:DockMargin( 0, 0, 5, 0 )
