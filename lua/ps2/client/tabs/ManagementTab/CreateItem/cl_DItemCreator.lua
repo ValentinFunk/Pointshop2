@@ -58,7 +58,7 @@ function PANEL:Init( )
 		panel.label:SizeToContents( )
 		
 		panel.wang = vgui.Create( "DNumberWang", panel )
-		panel.checkBox:SetValue( true )
+		panel.checkBox:SetValue( false )
 		
 		function panel:GetPrice( )
 			if self.wang:GetDisabled( ) then
@@ -87,6 +87,10 @@ function PANEL:Init( )
 	function self.saveButton:DoClick( )
 		local saveTable = { }
 		frame:SaveItem( saveTable )
+		local succ, err = frame:Validate( saveTable )
+		if not succ then
+			return Derma_Message( err, "Error" )
+		end
 		Pointshop2View:getInstance( ):createPointshopItem( saveTable )
 		frame:Close( )
 	end
@@ -94,14 +98,6 @@ end
 
 function PANEL:SetItemBase( itembase )
 	self.itembase = itembase
-end
-
-function PANEL:SaveItem( saveTable )
-	saveTable.name = self.itemNameTextbox:GetText( )
-	saveTable.description = self.descriptionBox:GetText( )
-	saveTable.price = self.normalPrice:GetPrice( )
-	saveTable.pricePremium = self.pricePremium:GetPrice( )
-	saveTable.baseClass = self.itembase
 end
 
 function PANEL:addFormButton( btn )
@@ -191,6 +187,49 @@ function PANEL:NotifyLoading( bIsLoading )
 		self.loadingNotifier:Collapse( )
 		self:SetDisabled( false )
 	end
+end
+
+/*
+	Called after save table generation to validate the created
+	table against errors
+*/
+function PANEL:Validate( saveTable )
+	if #saveTable.name == 0 then
+		return false, "Please specify a name"
+	end
+	
+	if not saveTable.price and not saveTable.pricePremium then
+		return false, "Please add at least one price"
+	end
+	
+	return true
+end
+
+/*
+	Generate a table that is sent to the server, then passed to 
+	the persistence model for saving
+*/
+function PANEL:SaveItem( saveTable )
+	saveTable.name = self.itemNameTextbox:GetText( )
+	saveTable.description = self.descriptionBox:GetText( )
+	saveTable.price = self.normalPrice:GetPrice( )
+	saveTable.pricePremium = self.pricePremium:GetPrice( )
+	saveTable.baseClass = self.itembase
+	
+	saveTable.persistenceId = self.persistenceId
+end
+
+/*
+	Load a persistence model for editing
+*/
+function PANEL:EditItem( persistence )
+	self.itembase = persistence.baseClass
+	self.persistenceId = persistence.id
+	
+	self.itemNameTextbox:SetText( persistence.name )
+	self.descriptionBox:SetText( persistence.description )
+	self.normalPrice:SetPrice( persistence.price )
+	self.pricePremium:SetPrice( persistence.pricePremium )
 end
 
 vgui.Register( "DItemCreator", PANEL, "DFrame" )

@@ -284,6 +284,22 @@ function SKIN:LayoutPropertySheetSheet( panel, sheet )
 	sheet.Panel:Dock( FILL )
 end
 
+function SKIN:LayoutInlineSheetSheet( panel, sheet )
+	function sheet.Tab:ApplySchemeSettings( )
+		local active = self:GetPropertySheet( ):GetActiveTab( ) == self
+		local w, h = self:GetContentSize()
+		self:SetTextInset( 10, -0 )
+		self:SetSize( w + 10, self:GetParent( ):GetTall( ) )
+		
+		self:SetFont( SKIN.fontName )
+		self:SetContentAlignment( 5 )
+		
+		DLabel.ApplySchemeSettings( self )
+	end
+	sheet.Panel:Dock( FILL )
+end
+
+
 function SKIN:PaintTab( panel, w, h )
 	if panel:IsActive( ) or panel.Hovered then
 		surface.SetDrawColor( self.Highlight )

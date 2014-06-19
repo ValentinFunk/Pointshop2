@@ -2,7 +2,6 @@ ITEM.PrintName = "Pointshop Hat Base"
 ITEM.baseClass = "base_pointshop_item"
 
 ITEM.static.outfitIds = {} --Model -> Outfit ID map
-ITEM.static.iconViewInfo = {} --Table: fov, angles, origin used for preview rendering
 
 ITEM.category = "Hats"
 ITEM.color = ""
@@ -27,6 +26,10 @@ end
 function ITEM:OnHolster( ply )
 end
 
+function ITEM:CanBeEquippedInSlot( slotName )
+	return table.HasValue( self.class.validSlots, slotName )
+end
+
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopHatIcon"
 end
@@ -40,10 +43,8 @@ end
 */
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
-	itemTable.static.iconViewInfo = persistenceItem.iconViewInfo
-	itemTable.static.useMaterialIcon = persistenceItem.useMaterialIcon
-	itemTable.static.iconMaterial = persistenceItem.iconMaterial
-	itemTable.static.slotType = persistenceItem.slotType
+	itemTable.static.iconInfo = persistenceItem.iconInfo
+	itemTable.static.validSlots = persistenceItem.validSlots
 	itemTable.static.outfitIds = {}
 	for k, mapping in pairs( persistenceItem.OutfitHatPersistenceMapping ) do
 		itemTable.static.outfitIds[mapping.model] = mapping.outfitId
@@ -51,9 +52,6 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	function itemTable.static.getBaseOutfit( )
 		local outfitId = itemTable.outfitIds[Pointshop2.HatPersistence.ALL_MODELS]
 		return Pointshop2.Outfits[outfitId]
-	end
-	function itemTable.static.getSlotType( )
-		return itemTable.static.slotType
 	end
 end
 

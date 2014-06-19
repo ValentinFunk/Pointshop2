@@ -54,9 +54,21 @@ end
 
 function PANEL:SaveItem( saveTable )
 	self.BaseClass.SaveItem( self, saveTable )
+	
 	saveTable.playerModel = self.manualEntry:GetText( )
 	saveTable.skin = self.skin
 	saveTable.bodygroups = self.bodygroups
+end
+
+function PANEL:EditItem( persistence )
+	self.BaseClass.EditItem( persistence.ItemPersistence )
+	
+	self.manualEntry:SetText( persistence.playerModel )
+	self.mdlPanel:SetModel( persistence.playerModel, persistence.skin )
+	for k, v in pairs( string.Explode( " ", persistence.bodygroups ) ) do
+		k, v = tonumber( k ), tonumber( v )
+		self.mdlPanel:BodyGroupChanged( k, v )
+	end
 end
 
 vgui.Register( "DPlayerModelCreator", PANEL, "DItemCreator" )

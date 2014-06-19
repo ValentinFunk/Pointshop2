@@ -10,10 +10,8 @@ HatPersistence.static.model = {
 	tableName = "ps2_HatPersistence",
 	fields = {
 		itemPersistenceId = "int",
-		iconMaterial = "string",
-		iconViewInfo = "luadata",
-		useMaterialIcon = "bool",
-		slotType = "string"
+		iconInfo = "luadata",
+		validSlots = "luadata"
 	},
 	belongsTo = {
 		ItemPersistence = {
@@ -39,8 +37,9 @@ function HatPersistence.static.createFromSaveTable( saveTable )
 		hat.itemPersistenceId = itemPersistence.id
 		hat.outfitId = saveTable.outfitId
 		hat.iconMaterial = saveTable.iconMaterial or ""
-		hat.iconViewInfo = saveTable.iconViewInfo or {}
+		hat.iconInfo = saveTable.iconInfo or {}
 		hat.useMaterialIcon = saveTable.useMaterialIcon
+		hat.validSlots = saveTable.validSlots
 		return hat:save( )
 	end )
 	:Then( function( hat )

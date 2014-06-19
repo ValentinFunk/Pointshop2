@@ -1,23 +1,4 @@
-Pointshop2.EquipmentSlots = {
-	Hat = function( item )
-		return item:CanBeEquipedInSlot( "Hat" )
-	end,
-	Eyewear = function( item )
-		return item:CanBeEquipedInSlot( "Eyewear" )
-	end,
-	Model = function( item )
-		return instanceOf( KInventory.Items.base_playermodel, item )
-	end,
-	Trail = function( item )
-		return instanceOf( KInventory.Items.base_trail, item )
-	end,
-	Accessory = function( item )
-		return item:CanBeEquipedInSlot( "Accessory" )
-	end,
-	["Accessory 2"] = function( item )
-		return item:CanBeEquipedInSlot( "Accessory" )
-	end
-}
+Pointshop2.EquipmentSlots = { } -- { { name = validationFunction }, ... }
 
 function Pointshop2.IsItemValidForSlot( item, slotName )
 	return Pointshop2.EquipmentSlots[slotName]( item )

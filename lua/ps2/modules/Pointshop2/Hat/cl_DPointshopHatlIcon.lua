@@ -12,7 +12,7 @@ function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
 	self.image:SetModel( "models/player/kleiner.mdl" )
 	self.image:SetPacOutfit( itemClass:getBaseOutfit( ) )
-	self.image:SetViewInfo( itemClass.iconViewInfo )
+	self.image:SetViewInfo( itemClass.iconInfo.shop.iconViewInfo )
 end
 
 function PANEL:SetItem( item )

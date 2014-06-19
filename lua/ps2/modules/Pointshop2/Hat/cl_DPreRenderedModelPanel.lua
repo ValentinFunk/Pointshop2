@@ -7,7 +7,7 @@ end
 function PANEL:SetPacOutfit( outfit )
 	if self.pacOutfit and IsValid( self.Entity ) then
 		for k, oldOutf in pairs( self.Entity.pac_outfits ) do
-			self.Entity:RemovePACPart( oldOutf )
+			self.Entity:RemovePACPart( oldOutf:ToTable( ) )
 		end
 	end
 	
@@ -15,10 +15,12 @@ function PANEL:SetPacOutfit( outfit )
 	if IsValid( self.Entity ) then
 		self.Entity:AttachPACPart( self.pacOutfit )
 	end
+	self:MarkDirty( )
 end
 
 function PANEL:SetViewInfo( viewInfo )
 	self.viewInfo = viewInfo
+	self:MarkDirty( )
 end
 
 function PANEL:SetModel( mdl )
@@ -63,6 +65,11 @@ function PANEL:Paint( w, h )
 	end
 end
 
+function PANEL:MarkDirty( )
+	self.framesDrawn = 0
+	self.dirty = true
+end
+
 function PANEL:PaintCached( w, h )
 	render.PushFilterMin( TEXFILTER.ANISOTROPIC );
 	render.PushFilterMag( TEXFILTER.ANISOTROPIC );
@@ -76,10 +83,8 @@ function PANEL:PaintActual( w, h )
 	if not IsValid( self.Entity ) or
 	   not self.pacOutfit or
 	   not self.viewInfo then 
-		/*cam.Start2D( 0, 0, w, h )
-			surface.SetDrawColor( 255, 0, 0, 150 )
-			surface.DrawRect( 0, 0, 256, 256 )
-		cam.End2D( )*/
+		surface.SetDrawColor( 255, 0, 255, 100 )
+		surface.DrawRect( 0, 0, w, h )
 		return
 	end
 	
