@@ -19,13 +19,28 @@ ItemPersistence.static.model = {
 
 ItemPersistence:include( DatabaseModel )
 
-function ItemPersistence.static.createFromSaveTable( saveTable )
-	local instance = ItemPersistence:new( )
-	instance.price = saveTable.price
-	instance.pricePremium = saveTable.pricePremium
-	instance.ranks = ""
-	instance.name = saveTable.name
-	instance.baseClass = saveTable.baseClass
-	instance.description = saveTable.description
-	return instance:save( )
+function ItemPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
+	local def = Deferred( )
+	if doUpdate then
+		ItemPersistence.findById( saveTable.persistenceId )
+		:Done( function( persistence )
+			def:Resolve( persistence )
+		end )
+		:Fail( function( errid, err )
+			def:Reject( errid, err )
+		end )
+	else
+		local instance = ItemPersistence:new( )
+		def:Resolve( instance )
+	end
+	
+	return def:Then( function( instance )
+		instance.price = saveTable.price
+		instance.pricePremium = saveTable.pricePremium
+		instance.ranks = ""
+		instance.name = saveTable.name
+		instance.baseClass = saveTable.baseClass
+		instance.description = saveTable.description
+		return instance:save( )
+	end )
 end

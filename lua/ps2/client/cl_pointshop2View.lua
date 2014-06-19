@@ -131,6 +131,13 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	hook.Call( "PS2_DynamicItemsUpdated" )
 end
 
+function Pointshop2View:getPersistenceForClass( itemClass )
+	if itemClass._persistenceId == "STATIC" then
+		return "STATIC"
+	end
+	return self.itemProperties[itemClass._persistenceId]
+end
+
 function Pointshop2View:saveCategoryOrganization( categoryItemsTable )
 	self:controllerAction( "saveCategoryOrganization", categoryItemsTable )
 end

@@ -182,6 +182,14 @@ function PANEL:GetIconInfo( )
 	return info
 end
 
+function PANEL:SetIconInfo( iconInfo )
+	self:SetViewInfo( iconInfo.iconViewInfo )
+	if iconInfo.useMaterialIcon then
+		self.choice:SelectChoice( 2 )
+		self.materialInputBox:SetText( iconInfo.iconMaterial )
+	end
+end
+
 function PANEL:Paint( w, h )
 end
 

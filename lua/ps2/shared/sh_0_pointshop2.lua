@@ -1,9 +1,5 @@
 Pointshop2 = {}
 
-function Pointshop2.LoadCategorySettings( )
-
-end
-
 --Find all registered items that use the pointshop base
 function Pointshop2.GetRegisteredItems( )
 	local pointshopItems = {}
@@ -58,6 +54,7 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	KInventory.Items[className] = class( internalName, baseClass )
 	KInventory.Items[className].static.className = className
 	KInventory.Items[className].static.originFilePath = "Pointshop2_Generated"
+	KInventory.Items[className].static._persistenceId = persistentItem.id
 	KInventory.Items[className].static.isBase = false
 	
 	baseClass.generateFromPersistence( KInventory.Items[className], persistentItem )
@@ -74,4 +71,15 @@ function Pointshop2.GetPersistentItems( )
 		end
 	end
 	return persistent
+end
+
+function Pointshop2.GetCreatorControlForClass( itemClass )
+	local base = itemClass.super.className
+	for _, mod in pairs( Pointshop2.Modules ) do
+		for _, itemInfo in pairs( mod.Blueprints ) do
+			if itemInfo.base == base then
+				return itemInfo.creator
+			end
+		end
+	end
 end

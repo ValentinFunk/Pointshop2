@@ -49,4 +49,11 @@ function PANEL:SaveItem( saveTable )
 	saveTable.material = self.manualEntry:GetText( )
 end
 
+function PANEL:EditItem( persistence, itemClass )
+	self.BaseClass.EditItem( self, persistence, itemClass )
+	
+	self.manualEntry:SetText( persistence.material )
+	self.materialPanel:SetMaterial( persistence.materials )
+end
+
 vgui.Register( "DTrailCreator", PANEL, "DItemCreator" )

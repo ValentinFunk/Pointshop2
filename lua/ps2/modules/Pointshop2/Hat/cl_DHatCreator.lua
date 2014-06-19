@@ -292,8 +292,31 @@ function PANEL:SaveItem( saveTable )
 	end
 end
 
-function PANEL:EditItem( persistence )
-
+function PANEL:EditItem( persistence, itemClass )
+	self.BaseClass.EditItem( self, persistence.ItemPersistence, itemClass )
+	
+	self.baseOutfit = itemClass.getBaseOutfit( )
+	for model, outfitId in pairs( itemClass.outfitIds ) do
+		--Don't add the base item to the list
+		if model == Pointshop2.HatPersistence.ALL_MODELS then
+			continue
+		end
+		
+		local line = self.listView:AddLine( model, "Yes", "" )
+		line.outfit = Pointshop2.Outfits[outfitId]
+	end
+	
+	for k, slotName in pairs( itemClass.validSlots ) do
+		if self.checkBoxes[slotName] then
+			self.checkBoxes[slotName]:SetChecked( true )
+		end
+	end
+	
+	self.shopIconEditor:SetIconInfo( itemClass.iconInfo.shop )
+	self.invIconEditor:SetIconInfo( itemClass.iconInfo.inv )
+	
+	self.shopIconEditor:SetPacOutfit( self.baseOutfit )
+	self.invIconEditor:SetPacOutfit( self.baseOutfit )
 end
 
 vgui.Register( "DHatCreator", PANEL, "DItemCreator" )

@@ -19,11 +19,18 @@ TrailPersistence.static.model = {
 
 TrailPersistence:include( DatabaseModel )
 
-function TrailPersistence.static.createFromSaveTable( saveTable )
-	return Pointshop2.ItemPersistence.createFromSaveTable( saveTable )
+function TrailPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
+	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable, doUpdate )
 	:Then( function( itemPersistence )
-		local trail = TrailPersistence:new( )
-		trail.itemPersistenceId = itemPersistence.id
+		if doUpdate then
+			return TrailPersistence.findByItemPersistenceId( itemPersistence.id )
+		else
+			local trail = TrailPersistence:new( )
+			trail.itemPersistenceId = itemPersistence.id
+			return trail
+		end
+	end )
+	:Then( function( trail )
 		trail.material = saveTable.material
 		return trail:save( )
 	end )

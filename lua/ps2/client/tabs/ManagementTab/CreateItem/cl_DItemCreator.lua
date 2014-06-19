@@ -67,6 +67,13 @@ function PANEL:Init( )
 			return self.wang:GetValue( )
 		end
 		
+		function panel:SetPrice( price )
+			self.checkBox:SetValue( price != nil )
+			if price then
+				self.wang:SetValue( price )
+			end
+		end
+		
 		function panel:IsEnabled( )
 			return self.checkbox:GetValue( )
 		end
@@ -220,9 +227,10 @@ function PANEL:SaveItem( saveTable )
 end
 
 /*
-	Load a persistence model for editing
+	Load a persistence model for editing. Can also access the
+	item class for convenience
 */
-function PANEL:EditItem( persistence )
+function PANEL:EditItem( persistence, itemClass )
 	self.itembase = persistence.baseClass
 	self.persistenceId = persistence.id
 	

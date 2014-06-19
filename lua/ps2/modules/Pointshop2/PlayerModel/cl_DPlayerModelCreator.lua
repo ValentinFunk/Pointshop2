@@ -60,8 +60,8 @@ function PANEL:SaveItem( saveTable )
 	saveTable.bodygroups = self.bodygroups
 end
 
-function PANEL:EditItem( persistence )
-	self.BaseClass.EditItem( persistence.ItemPersistence )
+function PANEL:EditItem( persistence, itemClass )
+	self.BaseClass.EditItem( self, persistence.ItemPersistence, itemClass )
 	
 	self.manualEntry:SetText( persistence.playerModel )
 	self.mdlPanel:SetModel( persistence.playerModel, persistence.skin )

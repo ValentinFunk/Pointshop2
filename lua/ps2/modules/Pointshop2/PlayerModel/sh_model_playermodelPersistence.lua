@@ -21,14 +21,21 @@ PlayermodelPersistence.static.model = {
 
 PlayermodelPersistence:include( DatabaseModel )
 
-function PlayermodelPersistence.static.createFromSaveTable( saveTable )
-	return Pointshop2.ItemPersistence.createFromSaveTable( saveTable )
+function PlayermodelPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
+	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable, doUpdate )
 	:Then( function( itemPersistence )
-		local playermodel = PlayermodelPersistence:new( )
-		playermodel.itemPersistenceId = itemPersistence.id
-		playermodel.playerModel = saveTable.playerModel
-		playermodel.bodygroups = saveTable.bodygroups
-		playermodel.skin = saveTable.skin
-		return playermodel:save( )
+		if doUpdate then
+			return PlayermodelPersistence.findByItemPersistenceId( itemPersistence.id )
+		else
+			local playermodelPersistence = PlayermodelPersistence:new( )
+			playermodelPersistence.itemPersistenceId = itemPersistence.id
+			return playermodelPersistence
+		end
+	end )
+	:Then( function( playermodelPersistence )
+		playermodelPersistence.playerModel = saveTable.playerModel
+		playermodelPersistence.bodygroups = saveTable.bodygroups
+		playermodelPersistence.skin = saveTable.skin
+		return playermodelPersistence:save( )
 	end )
 end

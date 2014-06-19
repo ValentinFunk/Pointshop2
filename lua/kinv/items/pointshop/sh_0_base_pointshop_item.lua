@@ -1,3 +1,7 @@
+--Indicates that this item base is statically lua defined and not loaded from a 
+--persistence. This means that it cannot be edited dynamically
+ITEM.static._persistenceId = "STATIC" 
+
 ITEM.PrintName = "Pointshop Item Base"
 ITEM.Material = "materials/error"
 ITEM.Description = "Pointshop Item Base"

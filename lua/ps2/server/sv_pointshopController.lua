@@ -323,7 +323,9 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 		KLogf( 3, "[Pointshop2] Couldn't save item %s: invalid baseclass", saveTable.name, saveTable.baseClass )
 		return self:reportError( "Pointshop2View", ply, "Error saving item", 1, "Invalid Baseclass " .. saveTable.baseClass )
 	end
-	class.getPersistence( ).createFromSaveTable( saveTable )
+	--If persistenceId != nil update existing
+	print( saveTable.persistenceId != nil, saveTable.persistenceId )
+	class.getPersistence( ).createOrUpdateFromSaveTable( saveTable, saveTable.persistenceId != nil )
 	:Then( function( saved )
 		KLogf( 4, "[Pointshop2] Saved item %s", saveTable.name )
 		self:moduleItemsChanged( )
@@ -339,10 +341,12 @@ function Pointshop2Controller:moduleItemsChanged( )
 		return self:loadOutfits( )
 	end )
 	:Then( function( )
-		print( "Sending dyn info" )
-		for k, v in pairs( player.GetAll( ) ) do
-			self:sendDynamicInfo( v )
-		end
+		timer.Simple( 0.5, function( ) --Give players a chance to grab the new outfits
+			print( "Sending dyn info" )
+			for k, v in pairs( player.GetAll( ) ) do
+				self:sendDynamicInfo( v )
+			end
+		end )
 	end )
 end
 
@@ -623,6 +627,7 @@ function Pointshop2Controller:loadOutfits( )
 		local data = LibK.von.serialize( { outfitsAssoc } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "outfits", data )
 		resource:SetVersionHash( versionHash )
+		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Outfit package loaded, version " .. versionHash .. " " .. #outfitsAssoc .. " outfits." )
 		
 		self:startView( "Pointshop2View", "loadOutfits", player.GetAll( ), versionHash )

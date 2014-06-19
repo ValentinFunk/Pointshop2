@@ -29,18 +29,52 @@ HatPersistence.static.model = {
 
 HatPersistence:include( DatabaseModel )
 
-function HatPersistence.static.createFromSaveTable( saveTable )
-	return Pointshop2.ItemPersistence.createFromSaveTable( saveTable )
+--Removes all outfits and mappings for this HatPersistence from the database
+function HatPersistence:removeOutfits( )
+	return Pointshop2.OutfitHatPersistenceMapping.findAllByHatPersistenceId( self.itemPersistenceId )
+	:Then( function( mappings )
+		local mappingIds = {}
+		for k, v in pairs( mappings ) do
+			table.insert( mappingIds, v.id )
+		end
+		
+		local outfitIds = {}
+		for k, v in pairs( mappings ) do
+			if not table.HasValue( outfitIds ) then
+				table.insert( outfitIds, v.outfitId )
+			end
+		end
+		
+		--Remove all persistence mappings
+		local removeMappings = Pointshop2.OutfitHatPersistenceMapping.removeDbEntries( Format( "WHERE id IN (%s)", table.concat( mappingIds, "," ) ) )
+		
+		--Remove all outfits
+		local removeOutfits = Pointshop2.StoredOutfit.removeDbEntries( Format( "WHERE id IN (%s)", table.concat( outfitIds, "," ) ) )
+		
+		return WhenAllFinished{ removeMappings, removeOutfits }
+	end )
+end
+
+function HatPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
+	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable )
 	:Then( function( itemPersistence )
-		--Save Hat persistence
-		local hat = HatPersistence:new( )
-		hat.itemPersistenceId = itemPersistence.id
-		hat.outfitId = saveTable.outfitId
-		hat.iconMaterial = saveTable.iconMaterial or ""
+		if doUpdate then
+			return HatPersistence.findByItemPersistenceId( itemPersistence.id )
+		else
+			local hat = HatPersistence:new( )
+			hat.itemPersistenceId = itemPersistence.id
+			return hat
+		end
+	end )
+	:Then( function( hat )
 		hat.iconInfo = saveTable.iconInfo or {}
-		hat.useMaterialIcon = saveTable.useMaterialIcon
 		hat.validSlots = saveTable.validSlots
-		return hat:save( )
+		if doUpdate then
+			--For simplicity remove all OutfitMappings and recreate them
+			return WhenAllFinished{ hat:save( ), hat:removeOutfits( ) }
+		else
+			return hat:save( )
+		end
 	end )
 	:Then( function( hat )
 		local outfitPromises = {}
