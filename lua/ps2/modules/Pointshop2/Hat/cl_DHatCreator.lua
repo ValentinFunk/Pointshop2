@@ -17,12 +17,6 @@ function PANEL:Init( )
 	
 	self:addSectionTitle( "Model and Positioning" )
 	
-	self.iconViewInfo = {
-		["fov"] = 75,
-		["angles"] = Angle(7.5625, 182.59375, 0),
-		["origin"] = Vector(35.5625, 0.125, 69.84375),
-	}
-	
 	local openBtn = vgui.Create( "DButton", self )
 	openBtn:SetText( "Open Editor" )
 	openBtn:SetWide( 120 )
@@ -177,149 +171,58 @@ function PANEL:Init( )
 	
 	self:addSectionTitle( "Item Icon" )
 	
-	local iconBox = vgui.Create( "DPanel", self )
-	iconBox:Dock( TOP )
-	iconBox:SetTall( 175 )
-	function iconBox:Paint( ) end
-	
-	self.choice = vgui.Create( "DRadioChoice", iconBox )
-	self.choice:Dock( FILL )
-	local snapshotChoice = self.choice:AddOption( "Use Snapshot" )
-	local container = vgui.Create( "DPanel", snapshotChoice )
-	container:Dock( TOP )
-	container:DockMargin( 100, 0, 0, 0 )
-	container:SetTall( 128 )
-	function container:Paint( ) end
-	snapshotChoice:SetTall( 128 )
-	
-	self.snapshotPreview = vgui.Create( "DPreRenderedModelPanel", container )
-	self.snapshotPreview:SetSize( KInventory.Items.base_hat.GetPointshopIconDimensions( ) )
-	self.snapshotPreview.forceRender = true
-	self.snapshotPreview:SetModel( "models/player/kleiner.mdl" )
-	
-	local sliders = vgui.Create( "DPanel", container )
-	sliders:Dock( FILL )
-	sliders:DockMargin( self.snapshotPreview:GetWide( ) + 5, 0, 5, 5 )
-	function sliders:Paint( w, h )
+	local iconSheet = vgui.Create( "DPropertySheet", self )
+	iconSheet:Dock( TOP )
+	iconSheet:SetTall( 200 )
+	iconSheet.tabScroller:SetTall( 40 )
+	iconSheet:DockMargin( 5, 5, 5, 5 )
+	iconSheet.Paint = function( s, w, h )
 	end
 	
-	local params = {
-		x = { function( newVal ) 
-				self.iconViewInfo.origin.x = newVal
-			end, 
-			-1000,
-			1000,
-			self.iconViewInfo.origin.x
-		},
-		y = { function( newVal )
-				self.iconViewInfo.origin.y = newVal
-			end,
-			-1000,
-			1000,
-			self.iconViewInfo.origin.y
-		}, 
-		z = { function( newVal ) 
-				self.iconViewInfo.origin.z = newVal
-			end, 
-			-1000,
-			1000,
-			self.iconViewInfo.origin.z
-		},
-		pitch = { function( newVal )
-				self.iconViewInfo.angles.p = newVal
-			end,
-			-360, 
-			360,
-			self.iconViewInfo.angles.p
-		},
-		yaw = { function( newVal ) 
-				self.iconViewInfo.angles.y = newVal
-			end,
-			-360, 
-			360,
-			self.iconViewInfo.angles.y
-		},
-		fov = {
-			function( newVal ) 
-				self.iconViewInfo.fov = newVal 
-			end,
-			10,
-			90,
-			self.iconViewInfo.fov
-		}
-	}
+	self.shopIconEditor = vgui.Create( "DHatIconEditor", iconSheet )
+	self.shopIconEditor:SetIconSize( KInventory.Items.base_hat.GetPointshopIconDimensions( ) )
 	
-	local label = vgui.Create( "DLabel", sliders )
-	label:SetText( "Drag the grey buttons to adjust" )
-	label.OwnLine = true
-	label:SizeToContents( )
-	label:Dock( TOP )
+	local shopIconSheet = iconSheet:AddSheet( "Shop Icon", self.shopIconEditor )
+	derma.SkinHook( "Layout", "InlineSheetSheet", self, shopIconSheet )
 	
-	for name, infoTbl in pairs( params ) do
-		local slider = vgui.Create( "DPanel", sliders )
-		slider:SetTall( 12 )
-		slider:Dock( TOP )
-		slider:DockMargin( 0, 5, 0, 0 )
-		function slider.Paint( ) end
-		
-		slider.lbl = vgui.Create( "DLabel", slider )
-		slider.lbl:SetText( name )
-		slider.lbl:Dock( LEFT )
-		slider.lbl:SizeToContents( )
-		slider.lbl:SetWide( 50 )
-		
-		slider.scratch = vgui.Create( "DNumberScratch", slider )
-		slider.scratch:SetImageVisible( false )
-		slider.scratch:SetWide( 25 ) 
-		slider.scratch:Dock( LEFT )
-		slider.scratch.OnValueChanged = function( _self )
-			infoTbl[1]( _self:GetFloatValue( ) )
-			self.snapshotPreview:SetViewInfo( self.iconViewInfo )
-			slider.lbl2:SetText( math.Round( _self:GetFloatValue( ), 2 ) )
-		end
-		slider.scratch:SetMin( infoTbl[2] )
-		slider.scratch:SetMax( infoTbl[3] )
-		slider.scratch:SetValue( infoTbl[1] )
-		
-		slider.lbl2 = vgui.Create( "DLabel", slider )
-		slider.lbl2:SetText( 12 )
-		slider.lbl2:Dock( LEFT )
-		slider.lbl2:DockMargin( 5, 0, 0, 0 )
-		
-		infoTbl.slider = slider.scratch
+	self.invIconEditor = vgui.Create( "DHatIconEditor", iconSheet )
+	self.invIconEditor:SetIconSize( 64, 64 )
+	
+	local invIconSheet = iconSheet:AddSheet( "Inventory Icon", self.invIconEditor )
+	derma.SkinHook( "Layout", "InlineSheetSheet", self, invIconSheet )
+	invIconSheet.Tab:SetFont( self:GetSkin( ).TextFont )
+	
+	self:addSectionTitle( "Slots" )
+	
+	local lbl = vgui.Create( "DLabel", self )
+	lbl:Dock( TOP )
+	lbl:SetText( "Select the slots that this item can be equipped in" )
+	lbl:SizeToContents( )
+	lbl:DockMargin( 5, 0, 5, 5 )
+	
+	self.slotLayout = vgui.Create( "DIconLayout", self )
+	self.slotLayout:Dock( TOP )
+	self.slotLayout:DockMargin( 5, 5, 5, 5 )
+	self.slotLayout:SetSpaceX( 10 )
+	self.slotLayout:SetSpaceY( 5 )
+	local old = self.slotLayout.PerformLayout
+	function self.slotLayout:PerformLayout( )
+		old( self )
 	end
-	self.params = params
-	self.snapshotPreview:SetViewInfo( self.iconViewInfo )
 	
-	local materialChoice = self.choice:AddOption( "Use Material" )
-	local materialInputBox = vgui.Create( "DTextEntry", materialChoice )
-	materialInputBox:Dock( LEFT )
-	materialInputBox:DockMargin( 100, 0, 0, 0 )
-	materialInputBox:SetWide( 250 )
-	materialInputBox:SetTall( 30 )
-	self.materialInputBox = materialInputBox
-	
-	self.choice:DockMargin( 5, 5, 5, 5 )
-	function self.choice.OnChange( )
-		if materialChoice:GetChecked( ) then
-			materialInputBox:SetDisabled( false )
-		else
-			materialInputBox:SetDisabled( true )
-		end
-		self.useCustomMaterial = materialChoice:GetChecked( )
+	self.checkBoxes = {}
+	for _, name in pairs( Pointshop2.ValidHatSlots ) do
+		local chkBox = vgui.Create( "DCheckBoxLabel", self.slotLayout )
+		chkBox:SetText( name )
+		chkBox:SizeToContents( )
+		self.checkBoxes[name] = chkBox
 	end
-	self.choice:OnChange( )
+	
 end
 
 function PANEL:IconViewInfoSaved( viewInfo )
-	self.iconViewInfo = viewInfo
-	self.snapshotPreview:SetViewInfo( viewInfo )
-	self.params.x.slider:SetValue( viewInfo.origin.x )
-	self.params.y.slider:SetValue( viewInfo.origin.y )
-	self.params.z.slider:SetValue( viewInfo.origin.z )
-	self.params.fov.slider:SetValue( viewInfo.fov )
-	self.params.pitch.slider:SetValue( viewInfo.angles.p )
-	self.params.yaw.slider:SetValue( viewInfo.angles.y )
+	self.shopIconEditor:SetViewInfo( viewInfo )
+	self.invIconEditor:SetViewInfo( viewInfo )
 end
 
 function PANEL:OutfitSaved( outfit )
@@ -327,7 +230,8 @@ function PANEL:OutfitSaved( outfit )
 	
 	if self.currentModel == Pointshop2.HatPersistence.ALL_MODELS then
 		self.baseOutfit = outfit
-		self.snapshotPreview:SetPacOutfit( self.baseOutfit )
+		self.shopIconEditor:SetPacOutfit( outfit )
+		self.invIconEditor:SetPacOutfit( outfit )
 		self.addBtn:SetDisabled( false )
 	else
 		for k, v in pairs( self.listView:GetLines( ) ) do
@@ -341,13 +245,30 @@ function PANEL:OutfitSaved( outfit )
 	return true
 end
 
-function PANEL:Validate( )
-	self.BaseClass.Validate( self )
+function PANEL:Validate( saveTable )
+	local succ, err = self.BaseClass.Validate( self, saveTable )
+	if not succ then
+		return false, err
+	end
 	
+	if table.Count( saveTable.outfits ) == 0 then
+		return false, "Please create at least one outfit"
+	end
+	
+	if saveTable.useMaterialIcon and #saveTable.iconMaterial == 0 then
+		return false, "Please supply a material path"
+	end
+	
+	if table.Count( saveTable.validSlots ) == 0 then
+		return false, "Please select one or more slots"
+	end
+	
+	return true
 end
 
 function PANEL:SaveItem( saveTable )
-	self.BaseClass.SaveItem( self, saveTable )
+	self.BaseClass.SaveItem( self, saveTable ) 
+	
 	saveTable.outfits = { }
 	saveTable.outfits[Pointshop2.HatPersistence.ALL_MODELS] = self.baseOutfit
 	
@@ -358,14 +279,21 @@ function PANEL:SaveItem( saveTable )
 		end
 	end
 	
-	if self.useCustomMaterial then
-		saveTable.useMaterialIcon = true
-		saveTable.iconMaterial = materialInputBox:GetText( )
-	else
-		saveTable.useMaterialIcon = false
-		saveTable.iconMaterial = ""
-		saveTable.iconViewInfo = self.iconViewInfo
+	saveTable.iconInfo = { 
+		shop = self.shopIconEditor:GetIconInfo( ),
+		inv = self.invIconEditor:GetIconInfo( ),
+	}
+	
+	saveTable.validSlots = {}
+	for slotName, checkBox in pairs( self.checkBoxes ) do
+		if checkBox:GetChecked( ) then
+			table.insert( saveTable.validSlots, slotName )
+		end
 	end
+end
+
+function PANEL:EditItem( persistence )
+
 end
 
 vgui.Register( "DHatCreator", PANEL, "DItemCreator" )
