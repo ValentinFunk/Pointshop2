@@ -42,12 +42,11 @@ function PANEL:SetItem( item )
 end
 
 function PANEL:DoRightClick()
-	local pCanvas = self:GetSelectionCanvas()
-	if ( IsValid( pCanvas ) && pCanvas:NumSelectedChildren() > 0 ) then
-		return hook.Run( "PS2_SpawnlistOpenGenericMenu", pCanvas )
-	end
+	self:OpenMenu( )
+end
 
-	self:OpenMenu()
+function PANEL:OpenMenu( )
+	--For override
 end
 
 function PANEL:PaintOver( w, h )
@@ -63,6 +62,11 @@ end
 
 function PANEL:OnMousePressed( mcode )
 	DPanel.OnMousePressed( self, mcode )
+	
+	if mcode == MOUSE_RIGHT then
+		self:DoRightClick( )
+	end
+	
 	self.Selected = true
 	hook.Run( "PS2_ItemIconSelected", self, self.item or self.itemClass )
 	self:OnSelected( )
