@@ -91,7 +91,7 @@ function Pointshop2Controller:initializeInventory( ply )
 			
 			--Network the Inventory to the player
 			self:startView( "Pointshop2View", "receiveInventory", ply, inventory )
-			self:startView( "InventoryView", "receiveInventory", ply, inventory )
+			--self:startView( "InventoryView", "receiveInventory", ply, inventory )
 		end )
 		:Fail( function( errid, err )
 			KLogf( 2, "Error loading items %i %s", errid, err )
@@ -704,6 +704,11 @@ function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 	}:Then( function( ply, wallet, inventory )
 		ply.wallet = wallet
 		ply.inventory = inventory
+		if not wallet or not inventory then
+			local def = Deferred( )
+			def:Reject( 1, "Player is not a Pointshop2 User" )
+			return def:Promise( )
+		end
 		return inventory:loadItems( )
 		:Then( function( )
 			return ply

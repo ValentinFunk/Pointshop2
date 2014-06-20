@@ -81,7 +81,6 @@ function SetupCategoryNode( node, pnlContent )
 						local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
 						assert( persistence )
 						if not creatorControl or persistence == "STATIC" then
-							PrintTable( itemClass )
 							return Derma_Message( "This item is Lua defined and cannot be edited ingame. To configure it edit " .. itemClass.originFilePath, "Error" )
 						end
 						

@@ -55,7 +55,6 @@ function PANEL:Clear()
 end
 
 function PANEL:OnModified()
-	dp( "OnModified" )
 	if ( !self:GetTriggerSpawnlistChange() ) then return end
 	hook.Run( "PS2_SpawnlistContentChanged" )
 end

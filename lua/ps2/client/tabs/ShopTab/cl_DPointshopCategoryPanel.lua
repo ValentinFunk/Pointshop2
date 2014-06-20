@@ -60,7 +60,6 @@ function PANEL:SetCategory( category, depth )
 	self:AddItems( )
 	self:AddSubcategories( )
 	
-	print( "Hooking layout ", "CategoryPanelLevel" .. self.depth, category.self.label )
 	derma.SkinHook( "Layout", "CategoryPanelLevel" .. self.depth, self )
 	Derma_Hook( self, "Paint", "Paint", "CategoryPanelLevel" .. self.depth )
 end

@@ -37,7 +37,7 @@ function PANEL:Init( )
 	self.manualEntry:SetText( "trailmaterials/musicalnotes" )
 	self.manualEntry:SetTooltip( "Click on the icon or manually enter the material path here and press enter" )
 	function self.manualEntry:OnEnter( )
-		frame.materialPanel:SetModel( self:GetText( ) )
+		frame.materialPanel:SetMaterial( self:GetText( ) )
 	end
 	
 	local cont = self:addFormItem( "Material", self.selectPlayerElem )
@@ -50,10 +50,10 @@ function PANEL:SaveItem( saveTable )
 end
 
 function PANEL:EditItem( persistence, itemClass )
-	self.BaseClass.EditItem( self, persistence, itemClass )
+	self.BaseClass.EditItem( self, persistence.ItemPersistence, itemClass )
 	
 	self.manualEntry:SetText( persistence.material )
-	self.materialPanel:SetMaterial( persistence.materials )
+	self.materialPanel:SetMaterial( persistence.material )
 end
 
 vgui.Register( "DTrailCreator", PANEL, "DItemCreator" )

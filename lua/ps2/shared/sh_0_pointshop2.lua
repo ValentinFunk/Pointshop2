@@ -19,16 +19,20 @@ function Pointshop2.GetItemClassByName( name )
 	return KInventory.Items[name]
 end
 
-function Pointshop2.AddItemHook( name, item )
-	if item.name == "DummyClass" then return end
+/*
+	The hook specified in name is called for every item that is equipped by a player.
+	Arguments are passed unmodified and unfiltered.
+*/
+function Pointshop2.AddItemHook( name, itemClass )
+	if itemClass.name == "DummyClass" then return end
 	
 	if SERVER then
-		hook.Add( name, "PS2Hook_" .. name, function( ... )
+		hook.Add( name, "PS2Hook_" .. name .. itemClass.name, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
 				for _, slot in pairs( ply.PS2_Slots or {} ) do
 					if slot.itemId and KInventory.ITEMS[slot.itemId] then
 						local eqItem = KInventory.ITEMS[slot.itemId]
-						if item.className == eqItem.className then
+						if itemClass.name == eqItem.class.name then
 							eqItem[name]( eqItem, ... )
 						end
 					end
@@ -36,10 +40,12 @@ function Pointshop2.AddItemHook( name, item )
 			end
 		end )
 	else
-		hook.Add( name, "PS2_Hook_" .. name, function( ... )
+		hook.Add( name, "PS2_Hook_" .. name .. itemClass.name, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
 				for k, item in pairs( ply.PS2_EquipedItems or {} ) do
-					item[name]( item, ... )
+					if item.class.name == itemClass.name then
+						item[name]( item, ... )
+					end
 				end
 			end 
 		end )
@@ -79,6 +85,17 @@ function Pointshop2.GetCreatorControlForClass( itemClass )
 		for _, itemInfo in pairs( mod.Blueprints ) do
 			if itemInfo.base == base then
 				return itemInfo.creator
+			end
+		end
+	end
+end
+
+function Pointshop2.GetPersistenceClassForItemClass( itemClass )
+	for _, mod in pairs( Pointshop2.Modules ) do
+		for _, itemInfo in pairs( mod.Blueprints ) do
+			local baseClass = Pointshop2.GetItemClassByName( itemInfo.base )
+			if subclassOf( baseClass, itemClass ) then
+				return baseClass.getPersistence( )
 			end
 		end
 	end

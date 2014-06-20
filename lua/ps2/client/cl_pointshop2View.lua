@@ -22,6 +22,7 @@ function Pointshop2View:walletChanged( newWallet )
 end 
 
 function Pointshop2View:receiveInventory( inventory )
+	InventoryView:getInstance( ):receiveInventory( inventory ) --Needed for KInventory to work properly
 	LocalPlayer().PS2_Inventory = inventory
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
 end
@@ -131,11 +132,18 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	hook.Call( "PS2_DynamicItemsUpdated" )
 end
 
+--This is a bit confusing, sorry
 function Pointshop2View:getPersistenceForClass( itemClass )
 	if itemClass._persistenceId == "STATIC" then
 		return "STATIC"
 	end
-	return self.itemProperties[itemClass._persistenceId]
+	for k, v in pairs( self.itemProperties ) do
+		local persistenceClass = Pointshop2.GetPersistenceClassForItemClass( itemClass )
+		if v.id == itemClass._persistenceId and instanceOf( persistenceClass, v ) then
+			return v
+		end
+	end
+	return nil
 end
 
 function Pointshop2View:saveCategoryOrganization( categoryItemsTable )

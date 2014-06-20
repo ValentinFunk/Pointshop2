@@ -84,10 +84,8 @@ function PANEL:Init( )
 	self.label:SetContentAlignment( 5 )
 
 	hook.Add( "PS2_SlotChanged", self, function( self, slot )
-		print( slot.slotName, self.actualSlot.slotName )
 		if slot.slotName == self.slotName then
-			print( "RemoveItem:",
-			self.actualSlot:removeItem( ) )
+			self.actualSlot:removeItem( )
 			if slot.Item then
 				self.actualSlot:addItem( slot.Item )
 			end
