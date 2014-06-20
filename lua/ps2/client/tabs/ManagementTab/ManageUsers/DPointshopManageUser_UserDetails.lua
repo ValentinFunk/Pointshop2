@@ -163,22 +163,24 @@ function PANEL:ChangePlayerWallet( name, value )
 	:Done( function( wallet )
 		self.pointsPanel:SetValue( wallet.points )
 		self.premiumPointsPanel:SetValue(  wallet.premiumPoints ) 
+		self:NotifyLoading( false, true )
 	end )
 	:Fail( function( errid, err )
 		Derma_Message( err, "Error loading" )
-	end )
-	:Always( function( )
-		self:NotifyLoading( false )
+		self:NotifyLoading( false, false )
 	end )
 end
 
-function PANEL:NotifyLoading( bIsLoading )
+function PANEL:NotifyLoading( bIsLoading, success )
 	if bIsLoading then
 		self.loadingNotifier:Expand( )
-		self.detailsPanel:SetDisabled( true )
 	else
 		self.loadingNotifier:Collapse( )
-		self.detailsPanel:SetDisabled( false )
+		if success then
+			self.detailsPanel:SetDisabled( false )
+		else
+			self.detailsPanel:SetDisabled( true )
+		end
 	end
 end
 
@@ -249,7 +251,7 @@ function PANEL:RefreshInventory( )
 		Derma_Message( err, "Error loading" )
 	end )
 	:Always( function( )
-		self:NotifyLoading( false )
+		self:NotifyLoading( false, true )
 	end )
 end
 
