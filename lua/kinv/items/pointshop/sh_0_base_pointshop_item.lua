@@ -52,6 +52,11 @@ function ITEM:OnHolster( ply )
 
 end
 
+--Get the player owner
+function ITEM:GetOwner( )
+	return self.owner
+end
+
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopItemIcon"
 end

@@ -32,3 +32,22 @@ function EquipmentSlot:removeItem( item )
 	self.Item = nil
 	return self:save( )
 end
+
+function EquipmentSlot:getOwner( )
+	for k, v in pairs( player.GetAll( ) ) do
+		if tonumber( v:GetNWInt( "KPlayerId" ) ) == self.ownerId then
+			return v
+		end
+	end
+end
+
+function EquipmentSlot:postLoad( )
+	local def = Deferred( )
+	
+	if self.Item then
+		self.Item.owner = self:getOwner( )
+	end
+	
+	def:Resolve( )
+	return def:Promise( )
+end
