@@ -238,6 +238,6 @@ function Pointshop2View:adminChangeWallet( kPlayerId, currencyType, newValue )
 	return self:controllerTransaction( "adminChangeWallet", kPlayerId, currencyType, newValue )
 end
 
-function Pointshop2View:saveOutfit( modelId, outfit )
-	
+function Pointshop2View:addToPointFeed( ply, message, points, small )
+	Pointshop2.PointFeed:AddPointNotification( message, points, small )
 end

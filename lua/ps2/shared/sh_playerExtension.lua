@@ -20,3 +20,10 @@ end
 function Player:PS2_GetWallet( )
 	return self.PS2_Wallet
 end
+
+function Player:PS2_AddStandardPoints( points, message, small )
+	Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "points", points )
+	if message then
+		Pointshop2Controller:getInstance( ):addToPointFeed( self, message, points, small )
+	end
+end
