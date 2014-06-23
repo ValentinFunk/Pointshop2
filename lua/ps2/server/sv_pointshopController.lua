@@ -724,7 +724,7 @@ function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 	return def:Promise( )
 end
 
-function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, newValue )
+function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newValue )
 	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
 		local def = Deferred( )
 		def:Reject( 0, "Invalid currency type " .. currencyType )
@@ -752,7 +752,7 @@ function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, n
 		end )
 	end
 	
-	if walletFound then
+	if walletFound then --no need to block if player is offline
 		Pointshop2.DB:SetBlocking( true ) --don't want player to sell/buy stuff during our update
 	end
 	
@@ -760,12 +760,39 @@ function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, n
 		wallet[currencyType] = newValue
 		return wallet:save( )
 	end )
-	:Done( function( wallet )
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
-	end )
 	:Always( function( )
 		if walletFound then
 			Pointshop2.DB:SetBlocking( false )
 		end
 	end )
+end
+
+function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, newValue )
+	self:updatePlayerWallet( kPlayerId, currencyType, newValue )
+	:Done( function( wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
+	end )
+end
+
+function Pointshop2Controller:addToPlayerWallet( ply, currencyType, addition )
+	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
+		local def = Deferred( )
+		def:Reject( -2, "Invalid currency type " .. currencyType )
+		return def:Promise( )
+	end
+	
+	if not ply.PS2_Wallet then
+		local def = Deferred( )
+		def:Reject( -3, "Player wallet not loaded" )
+		return def:Promise( )
+	end
+	
+	self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
+	:Done( function( wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
+	end )
+end
+
+function Pointshop2Controller:addToPointFeed( ply, message, points, small )
+	self:startView( "Pointshop2View", "addToPointFeed", ply, message, points, small )
 end
