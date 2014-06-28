@@ -99,20 +99,26 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 	local newSettings = LibK.von.deserialize( serializedData )
 	Pointshop2.StoredSetting.findAllByPlugin( modName )
 	:Then( function( stored )
+		local promises = {}
+		
 		for settingPath, settingValue in pairs( newSettings ) do
-			local needsUpdate = false
+			local needsUpdate, settingToUpdate
 			for k, storedSetting in pairs( stored ) do
 				if storedSetting.path == settingPath then
 					--Need to compare them as serialized versions, might be tables or other data structures
 					if LibK.von.serialize( {settingValue} ) != LibK.von.serialize( {storedSetting.value} ) then
-						needsUpdate = storedSetting
+						needsUpdate = true
 					end
+					settingToUpdate = storedSetting
 				end
 			end
-			if needsUpdate then
-				needsUpdate.value = settingValue
-				needsUpdate:save( )
-				continue
+			if settingToUpdate then
+				if needsUpdate then
+					--setting exists and needs to be updated
+					settingToUpdate.value = settingValue
+					table.insert( promises, settingToUpdate:save( ) )
+				end
+				continue --Setting already exists in the database
 			end
 			
 			--Doesn't exist, create new:
@@ -120,10 +126,12 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 			storedSetting.plugin = modName
 			storedSetting.path = settingPath
 			storedSetting.value = settingValue
-			storedSetting:save( )
+			table.insert( promises, storedSetting:save( ) )
 		end
+		return WhenAllFinished( promises )
 	end )
-	
-	local dontSendToClients = ( realm == "Server" ) 
-	Pointshop2Controller:getInstance( ):loadSettings( dontSendToClients )
+	:Done( function( )
+		local dontSendToClients = ( realm == "Server" ) 
+		Pointshop2Controller:getInstance( ):loadSettings( dontSendToClients )
+	end )
 end )

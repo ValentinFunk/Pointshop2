@@ -18,6 +18,7 @@ function PANEL:Init( )
 	self.saveButton:Paint( 10, 10 )
 	function self.saveButton.DoClick( )
 		self:DoSave( )
+		self:Close( )
 	end
 end
 
