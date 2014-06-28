@@ -1,11 +1,13 @@
-local TTTConfig = Pointshop2.Config.TTT.PointsAwarded
-
+local S = function( id )
+	return Pointshop2.GetSetting( "TTT Integration", id )
+end
+	
 local delayedRewards = {}
 local function delayReward( ply, points, message, small )
-	if TTTConfig.Kills.DelayReward then
+	if S("Kills.DelayReward") then
 		table.insert( delayedRewards, { ply = ply, points = points, message = message, small = small } )
 	else
-	
+		ply:PS2_AddStandardPoints( points, message, small )
 	end
 end
 
@@ -23,14 +25,14 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 			if v:IsActiveTraitor( ) then
 				continue
 			end
-			if v:GetCleanRound( ) and TTTConfig.RoundWin.CleanRound then
-				v:PS2_AddStandardPoints( TTTConfig.RoundWin.CleanRound, "Clean round bonus", true )
+			if v:GetCleanRound( ) and S("RoundWin.CleanRound") then
+				v:PS2_AddStandardPoints( S("RoundWin.CleanRound"), "Clean round bonus", true )
 			end
-			if v:Alive( ) and TTTConfig.RoundWin.InnocentAlive then
-				v:PS2_AddStandardPoints( TTTConfig.RoundWin.InnocentAlive, "Alive bonus", true )
+			if v:Alive( ) and S("RoundWin.InnocentAlive") then
+				v:PS2_AddStandardPoints( S("RoundWin.InnocentAlive"), "Alive bonus", true )
 			end
-			if TTTConfig.RoundWin.Innocent then
-				v:PS2_AddStandardPoints( TTTConfig.RoundWin.Innocent, "Winning the round" )
+			if S("RoundWin.Innocent") then
+				v:PS2_AddStandardPoints( S("RoundWin.Innocent"), "Winning the round" )
 			end
 			
 		end
@@ -39,19 +41,19 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 			if not v:IsActiveTraitor( ) then
 				continue
 			end
-			if v:Alive( ) and TTTConfig.RoundWin.TraitorAlive then
-				v:PS2_AddStandardPoints( TTTConfig.RoundWin.TraitorAlive, "Alive bonus", true )
+			if v:Alive( ) and S("RoundWin.TraitorAlive") then
+				v:PS2_AddStandardPoints( S("RoundWin.TraitorAlive"), "Alive bonus", true )
 			end
-			if TTTConfig.RoundWin.Traitor then
-				v:PS2_AddStandardPoints( TTTConfig.RoundWin.Traitor, "Winning the round" )
+			if S("RoundWin.Traitor") then
+				v:PS2_AddStandardPoints( S("RoundWin.Traitor"), "Winning the round" )
 			end
 		end
 	end
 end )
 
 hook.Add( "TTTFoundDNA", "PS2_TTTFoundDNA", function( ply, dnaOwner, ent )
-	if TTTConfig.Misc.DnaFound then
-		v:PS2_AddStandardPoints( TTTConfig.RoundWin.DnaFound, "Retrieved DNA", true )
+	if S("Detective.DnaFound") then
+		v:PS2_AddStandardPoints( S("Detective.DnaFound"), "Retrieved DNA", true )
 	end
 	
 	ply.hasDnaOn = ply.hasDnaOn or {}
@@ -67,21 +69,21 @@ hook.Add( "PlayerDeath", "PS2_PlayerDeath", function( victim, inflictor, attacke
 	local attackerRole = attacker:GetRole( )
 	
 	if attackerRole == ROLE_TRAITOR then
-		if victimRole == ROLE_INNOCENT and TTTConfig.Kills.TraitorKillsInno then
-			attacker:PS2_AddStandardPoints( TTTConfig.Kills.TraitorKillsInno, "Killed Innocent" )
-		elseif victimRole == ROLE_DETECTIVE and TTTConfig.Kills.TraitorKillsDetective then
-			attacker:PS2_AddStandardPoints( TTTConfig.Kills.TraitorKillsDetective, "Killed Detective" )
+		if victimRole == ROLE_INNOCENT and S("Kills.TraitorKillsInno") then
+			attacker:PS2_AddStandardPoints( S("Kills.TraitorKillsInno"), "Killed Innocent" )
+		elseif victimRole == ROLE_DETECTIVE and S("Kills.TraitorKillsDetective") then
+			attacker:PS2_AddStandardPoints( S("Kills.TraitorKillsDetective"), "Killed Detective" )
 		end
 	elseif attackerRole == ROLE_DETECTIVE then
-		if victimRole == ROLE_TRAITOR and TTTConfig.Kills.DetectiveKillsTraitor then
+		if victimRole == ROLE_TRAITOR and S("Kills.DetectiveKillsTraitor") then
 			if TTTConfig.Kills.DetectiveDnaBonus and attacker.hasDnaOn and attacker.hasDnaOn[victim] then
-				delayReward( attacker, TTTConfig.Kills.DetectiveDnaBonus, "DNA bonus" )
+				delayReward( attacker, S("Kills.DetectiveDnaBonus"), "DNA bonus" )
 			end
-			delayReward( attacker, TTTConfig.Kills.DetectiveKillsTraitor, "Killed Traitor" )
+			delayReward( attacker, S("Kills.DetectiveKillsTraitor"), "Killed Traitor" )
 		end
 	elseif attackerRole == ROLE_INNOCENT then
-		if victimRole == ROLE_TRAITOR and TTTConfig.Kills.InnoKillsTraitor then
-			delayReward( attacker, TTTConfig.Kills.InnoKillsTraitor, "Killed Traitor" )
+		if victimRole == ROLE_TRAITOR and S("Kills.InnoKillsTraitor") then
+			delayReward( attacker, S("Kills.InnoKillsTraitor"), "Killed Traitor" )
 		end
 	end
 end )

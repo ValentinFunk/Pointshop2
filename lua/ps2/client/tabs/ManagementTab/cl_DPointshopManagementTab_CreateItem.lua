@@ -13,6 +13,10 @@ function PANEL:Init( )
 	label:Dock( TOP )
 	
 	for k, mod in pairs( Pointshop2.Modules ) do
+		if not mod.Blueprints or #mod.Blueprints == 0 then
+			continue
+		end
+	
 		local modPanel = vgui.Create( "DPanel", self )
 		Derma_Hook( modPanel, "Paint", "Paint", "InnerPanel" )
 		modPanel:DockMargin( 0, 5, 0, 5 )

@@ -6,8 +6,9 @@ StoredSetting.static.DB = "Pointshop2"
 StoredSetting.static.model = {
 	tableName = "ps2_settings",
 	fields = {
-		name = "string",
-		value = "luadata"
+		plugin = "string",
+		path = "string",
+		value = "json"
 	}
 }
 

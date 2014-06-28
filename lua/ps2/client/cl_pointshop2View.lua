@@ -2,6 +2,8 @@ Pointshop2View = class( "Pointshop2View" )
 Pointshop2View.static.controller = "Pointshop2Controller" 
 Pointshop2View:include( BaseView )
 
+local GLib = LibK.GLib
+
 function Pointshop2View:initialize( )
 	--Dynamic Properties
 	self.itemMappings = {}
@@ -222,7 +224,7 @@ function Pointshop2View:loadOutfits( versionHash )
 			return
 		end
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
-		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %i)", #Pointshop2.Outfits, versionHash ) 
+		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash ) 
 	end )
 end
 
@@ -240,4 +242,26 @@ end
 
 function Pointshop2View:addToPointFeed( ply, message, points, small )
 	Pointshop2.PointFeed:AddPointNotification( message, points, small )
+end
+
+function Pointshop2View:loadSettings( versionHash )
+	GLib.Resources.Resources["Pointshop2/settings"] = nil --Force resource reset
+	GLib.Resources.Get( "Pointshop2", "settings", versionHash, function( success, data )
+		if not success then 
+			KLogf( 2, "[PS2][ERROR] Couldn't load settings resouce!" )
+			return
+		end
+		print( data )
+		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
+		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
+	end )
+end
+
+function Pointshop2View:saveSettings( mod, realm, settingsTbl )
+	local outBuffer = GLib.StringOutBuffer( )
+	outBuffer:String( mod.Name )
+	outBuffer:String( realm )
+	outBuffer:LongString( LibK.von.serialize( settingsTbl ) )
+	
+	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )	
 end

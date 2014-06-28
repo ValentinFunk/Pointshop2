@@ -1,8 +1,79 @@
 Pointshop2.Modules = {}
 
+function Pointshop2.GetModule( modName )
+	for k, v in pairs( Pointshop2.Modules ) do
+		if v.Name == modName then
+			return v
+		end
+	end
+end
+
+Pointshop2.Settings = {
+	Server = {},
+	Shared = {}
+}
+
 function Pointshop2.RegisterModule( modTable )
 	table.insert( Pointshop2.Modules, modTable )
 	KLogf( 4, "     -> Module %s registered!", modTable.Name )
+end
+
+function Pointshop2.GetSetting( modName, path )
+	if not Pointshop2.Settings.Shared[modName] and not ointshop2.Settings.Shared[modName]  then
+		error( "Invalid module " .. modName .. ": Couldn't find any settings" )
+	end
+	local setting
+	if Pointshop2.Settings.Shared[modName][path] != nil then
+		setting = Pointshop2.Settings.Shared[modName][path]
+	elseif Pointshop2.Settings.Server[modName][path] != nil then
+		setting = Pointshop2.Settings.Server[modName][path]
+	end
+	if setting == nil then
+		error( "Setting " .. path .. " could not be found" )
+	end
+	return Pointshop2.Settings[modName][path]
+end
+
+local function recursiveSettingsInitialize( settings, storedSettings, cacheTable, path )
+	for name, value in pairs( settings ) do
+		local newPath
+		if path then
+			newPath = path .. "." .. name
+		else
+			newPath = name
+		end
+		if istable( value ) then
+			recursiveSettingsInitialize( value, storedSettings, cacheTable, newPath )
+		else
+			cacheTable[newPath] = storedSettings[newPath] or value --Use stored or default
+		end
+	end
+end
+
+--Called by controller
+function Pointshop2.InitializeModuleSettings( modTable )
+	if not modTable.Settings then
+		local def = Deferred( )
+		def:Resolve( )
+		return def:Promise( )
+	end
+	
+	return Pointshop2.StoredSetting.findAllByPlugin( modTable.Name )
+	:Done( function( storedSettings )
+		local storedMap = {}
+		for k, v in pairs( storedSettings ) do
+			storedMap[v.path] = v.value
+		end
+		
+		for k, realm in pairs{"Shared", "Server"} do
+			if not modTable.Settings[realm] then
+				continue
+			end
+			
+			Pointshop2.Settings[realm][modTable.Name] = {}
+			recursiveSettingsInitialize( modTable.Settings[realm], storedMap, Pointshop2.Settings[realm][modTable.Name] )
+		end
+	end )
 end
 
 local function includeFolder( folder )

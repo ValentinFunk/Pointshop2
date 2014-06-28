@@ -236,12 +236,17 @@ function SKIN:PaintButton( panel, w, h )
 	end
 end
 
-function SKIN:PaintCreateItemButton( panel, w, h )
+function SKIN:PaintBigButton( panel, w, h )
 	if panel.Hovered then
 		surface.SetDrawColor( self.Highlight )
 	else
 		surface.SetDrawColor( self.ButtonColor )
 	end
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintBigButtonLabel( panel, w, h )
+	surface.SetDrawColor( panel:GetSkin( ).ButtonColor )
 	surface.DrawRect( 0, 0, w, h )
 end
 
