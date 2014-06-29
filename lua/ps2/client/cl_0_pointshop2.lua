@@ -6,7 +6,7 @@ function Pointshop2:OpenMenu( )
 		Pointshop2.Menu = vgui.Create( "DPointshopFrame" )
 		Pointshop2.Menu:Center( )
 	end
-	Pointshop2.Menu:Show( )
+	Pointshop2.Menu:SetVisible( true )
 	CloseDermaMenus( )
 	Pointshop2.Menu:MakePopup( )
 	Pointshop2.Menu:SetKeyboardInputEnabled( false )
@@ -53,9 +53,19 @@ function Pointshop2:CloseMenu( )
 	if not IsValid( Pointshop2.Menu ) then
 		return 
 	end
-	Pointshop2.Menu:Hide( )
-	Pointshop2.Menu:Remove( )
+	Pointshop2.Menu:SetVisible( false )
+	if LibK.Debug then
+		Pointshop2.Menu:Remove( )
+	end
 	gui.EnableScreenClicker( false )
+end
+
+function Pointshop2:ToggleMenu( )
+	if IsValid( Pointshop2.Menu ) and Pointshop2.Menu:IsVisible( ) then
+		Pointshop2.CloseMenu( )
+	else
+		Pointshop2.OpenMenu( )
+	end
 end
 
 function Pointshop2:AddTab( title, controlName )

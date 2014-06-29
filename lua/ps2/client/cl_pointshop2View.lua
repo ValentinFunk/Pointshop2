@@ -11,6 +11,10 @@ function Pointshop2View:initialize( )
 	self.itemProperties = {}
 end
 
+function Pointshop2View:toggleMenu( )
+	Pointshop2:ToggleMenu( )
+end
+
 function Pointshop2View:walletChanged( newWallet )
 	local ply
 	for k, v in pairs( player.GetAll( ) ) do
@@ -251,7 +255,6 @@ function Pointshop2View:loadSettings( versionHash )
 			KLogf( 2, "[PS2][ERROR] Couldn't load settings resouce!" )
 			return
 		end
-		print( data )
 		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
 	end )

@@ -65,7 +65,14 @@ hook.Add( "PlayerDeath", "PS2_PlayerDeath", function( victim, inflictor, attacke
 		return
 	end
 	
+	if not victim.GetRole then
+		return
+	end
 	local victimRole = victim:GetRole( )
+	
+	if not attacker.GetRole then
+		return
+	end
 	local attackerRole = attacker:GetRole( )
 	
 	if attackerRole == ROLE_TRAITOR then

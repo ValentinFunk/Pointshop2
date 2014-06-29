@@ -27,9 +27,15 @@ function Pointshop2.onDatabaseConnected( )
 	Pointshop2.DatabaseConnectedPromise:Resolve( )
 end
 
+Pointshop2.SettingsLoadedPromise = Deferred( )
+Pointshop2.SettingsLoadedPromise:Done( function( )
+	KLogf( 4, "[Pointshop2] Settings have been loaded" )
+end )
+
 Pointshop2.FullyInitializedPromise = WhenAllFinished{ 
 	Pointshop2.ItemsLoadedPromise:Promise( ),
 	Pointshop2.DatabaseConnectedPromise:Promise( ),
+	Pointshop2.SettingsLoadedPromise:Promise( )
 }
 Pointshop2.FullyInitializedPromise:Done( function( )
 	KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
@@ -374,3 +380,26 @@ end
 function Pointshop2Controller:addToPointFeed( ply, message, points, small )
 	self:startView( "Pointshop2View", "addToPointFeed", ply, message, points, small )
 end
+
+--Lookup table taken from adamburton/pointshop
+local KeyToHook = {
+	F1 = "ShowHelp",
+	F2 = "ShowTeam",
+	F3 = "ShowSpare1",
+	F4 = "ShowSpare2",
+	None = "ThisHookDoesNotExist"
+}
+function Pointshop2Controller:registerShopOpenHook( )
+	for key, hookName in pairs( KeyToHook ) do
+		hook.Remove( hookName, "PS2_MenuOpen" )
+	end
+	hook.Add( KeyToHook[Pointshop2.GetSetting( "Pointshop 2", "GUISettings.ShopKey" )], "PS2_MenuOpen", function( ply )
+		self:startView( "Pointshop2View", "toggleMenu", ply )
+	end )
+end
+hook.Add( "PS2_OnSettingsUpdate", "ChangeKeyHook", function( )
+	Pointshop2Controller:getInstance( ):registerShopOpenHook( )
+end )
+Pointshop2.SettingsLoadedPromise:Done( function( )
+	Pointshop2Controller:getInstance( ):registerShopOpenHook( )
+end )

@@ -19,11 +19,11 @@ function Pointshop2.RegisterModule( modTable )
 end
 
 function Pointshop2.GetSetting( modName, path )
-	if not Pointshop2.Settings.Shared[modName] and not ointshop2.Settings.Shared[modName]  then
+	if not Pointshop2.Settings.Server[modName] and not Pointshop2.Settings.Shared[modName]  then
 		error( "Invalid module " .. modName .. ": Couldn't find any settings" )
 	end
 	local setting
-	if Pointshop2.Settings.Shared[modName][path] != nil then
+	if Pointshop2.Settings.Shared[modName] and Pointshop2.Settings.Shared[modName][path] != nil then
 		setting = Pointshop2.Settings.Shared[modName][path]
 	elseif Pointshop2.Settings.Server[modName][path] != nil then
 		setting = Pointshop2.Settings.Server[modName][path]

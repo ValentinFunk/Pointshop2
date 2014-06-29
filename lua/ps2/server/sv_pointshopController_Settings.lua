@@ -7,7 +7,7 @@ function Pointshop2Controller:loadSettings( noTransmit )
 		table.insert( moduleInitPromises, Pointshop2.InitializeModuleSettings( mod ) )
 	end
 	
-	WhenAllFinished( moduleInitPromises )
+	return WhenAllFinished( moduleInitPromises )
 	:Then( function( )
 		local data = LibK.von.serialize( { Pointshop2.Settings.Shared } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "settings", data )
@@ -17,6 +17,12 @@ function Pointshop2Controller:loadSettings( noTransmit )
 		if not noTransmit then
 			self:startView( "Pointshop2View", "loadSettings", player.GetAll( ), resource:GetVersionHash( ) )
 		end
+	end )
+	:Done( function( )
+		Pointshop2.SettingsLoadedPromise:Resolve( )
+	end )
+	:Fail( function( )
+		Pointshop2.SettingsLoadedPromise:Reject( )
 	end )
 end
 Pointshop2.DatabaseConnectedPromise:Done( function( )
@@ -130,8 +136,11 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 		end
 		return WhenAllFinished( promises )
 	end )
-	:Done( function( )
+	:Then( function( )
 		local dontSendToClients = ( realm == "Server" ) 
-		Pointshop2Controller:getInstance( ):loadSettings( dontSendToClients )
+		return Pointshop2Controller:getInstance( ):loadSettings( dontSendToClients )
+	end )
+	:Done( function( )
+		hook.Run( "PS2_OnSettingsUpdate" )
 	end )
 end )
