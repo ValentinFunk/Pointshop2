@@ -52,9 +52,33 @@ function PANEL:CreateNumberSetting( lbl, settingsPath )
 	return panel
 end
 
+function PANEL:CreateCheckboxSetting( lbl, settingsPath )
+	local panel = self:CreateBaseSettingPanel( lbl )
+	
+	panel.container = vgui.Create( "DPanel", panel )
+	panel.container.Paint = function( ) end
+	panel.container:Dock( RIGHT )
+	function panel.container:PerformLayout( )
+		self:SizeToChildren( true, false )
+		self.checkbox:SetPos( 0, ( self:GetTall( ) - self.checkbox:GetTall( ) ) / 2 )
+	end
+	
+	panel.container.checkbox = vgui.Create( "DCheckBox", panel.container )
+	function panel.container.checkbox.OnChange( chkbox, val )
+		self.listener:OnValueChanged( settingsPath, val )
+	end
+	
+	function panel.SetValue( panel, val )
+		panel.container.checkbox:SetChecked( val )
+		self.listener:OnValueChanged( settingsPath, val )
+	end
+	
+	return panel
+end
+
 function PANEL:AddSettingByType( lbl, settingsPath, value )
 	local typeLookup = {
-		--boolean = "CreateCheckboxSetting",
+		boolean = "CreateCheckboxSetting",
 		number = "CreateNumberSetting",
 	}
 	local creatorFn = typeLookup[type( value )]

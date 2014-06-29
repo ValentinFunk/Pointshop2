@@ -39,7 +39,7 @@ end
 
 function PANEL:SetData( data )
 	self.settings = data
-	
+
 	self:InitSettings( )
 end
 

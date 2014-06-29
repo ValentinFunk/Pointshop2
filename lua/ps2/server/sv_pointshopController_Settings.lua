@@ -55,13 +55,13 @@ GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, 
 	end
 	
 	if not PermissionInterface.query( ply, "pointshop2 managemodules" ) then
-		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %i, not allowed", userId )
+		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %s, not allowed", userId )
 		return false
 	end
 	
 	local settings = Pointshop2.Settings.Server[modName] 
 	if not settings then
-		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %i, settings %s not found", userId, modName )
+		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %s, settings %s not found", userId, modName )
 		return false
 	end
 	
