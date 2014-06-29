@@ -80,7 +80,7 @@ function Pointshop2Controller:initializeInventory( ply )
 		
 		inventory = KInventory.Inventory:new( )
 		inventory.ownerId = ply.kPlayerId
-		inventory.numSlots = Pointshop2.Config.DefaultSlots
+		inventory.numSlots = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultSlots" )
 		inventory.maxWeight = 0 --Not using weight for ps items
 		return inventory:save( )
 	end )
@@ -154,8 +154,8 @@ function Pointshop2Controller:sendWallet( ply )
 	:Then( function( wallet )
 		if not wallet then
 			local wallet = Pointshop2.Wallet:new( )
-			wallet.points = Pointshop2.Config.DefaultWallet.Points
-			wallet.premiumPoints = Pointshop2.Config.DefaultWallet.PremiumPoints
+			wallet.points = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.Points" )
+			wallet.premiumPoints = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.PremiumPoints" )
 			wallet.ownerId = ply.kPlayerId
 			return wallet:save( )
 		end

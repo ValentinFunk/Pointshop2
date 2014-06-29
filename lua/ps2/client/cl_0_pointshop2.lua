@@ -68,6 +68,7 @@ function Pointshop2:AddTab( title, controlName )
 	table.insert( Pointshop2.RegisteredTabs, { title = title, control = controlName } )
 end
 
+
 --debug
 concommand.Add( "pointshop2_reload", function( )
 	Pointshop2.CloseMenu( )

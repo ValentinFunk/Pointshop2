@@ -31,24 +31,32 @@ function Pointshop2.GetSetting( modName, path )
 	if setting == nil then
 		error( "Setting " .. path .. " could not be found" )
 	end
-	return Pointshop2.Settings[modName][path]
+	local setting = Pointshop2.Settings.Server[modName][path]
+	if setting == nil then
+		setting = Pointshop2.Settings.Shared[modName][path]
+	end
+	return setting
 end
 
 local function recursiveSettingsInitialize( settings, storedSettings, cacheTable, path )
 	for name, value in pairs( settings ) do
+		if name == "info" then
+			continue
+		end
+		
 		local newPath
 		if path then
 			newPath = path .. "." .. name
 		else
 			newPath = name
 		end
-		if istable( value ) then
+		if istable( value ) and value.value == nil then
 			recursiveSettingsInitialize( value, storedSettings, cacheTable, newPath )
 		else
 			if storedSettings[newPath] != nil then
 				cacheTable[newPath] = storedSettings[newPath]
 			else
-				cacheTable[newPath] = value
+				cacheTable[newPath] = value.value
 			end
 		end
 	end

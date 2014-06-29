@@ -22,26 +22,89 @@ MODULE.Settings.Shared = { }
 --These are not sent
 MODULE.Settings.Server = {
 	Kills = {
-		DelayReward = true,
+		info = {
+			label = "Kill Rewards"
+		},
 		
-		TraitorKillsInno = 100,
-		TraitorKillsDetective = 150,
+		DelayReward = {
+			value = true,
+			label = "Delay Rewards until round end",
+			tooltip = "Use this to prevent players to meta-game using the kill notifications. Kill points are collected and awarded at round end.",
+		},
 		
-		DetectiveKillsTraitor = 200,
-		DetectiveDnaBonus = 50,
+		TraitorKillsInno = {
+			value = 100,
+			label = "Traitor kills Innocent",
+			tooltip = "Points awarded to a traitor when he kills an innocent player",
+		},
 		
-		InnoKillsTraitor = 200,
+		TraitorKillsDetective = {
+			value = 150, 
+			label = "Traitor kills Detective",
+			tooltip = "Points awarded to a traitor when he kills a detective",
+		},
+		
+		DetectiveKillsTraitor = {
+			value = 200,
+			label = "Traitor kills Detective",
+			tooltip = "Points awarded to a traitor when he kills a detective",
+		},
+		
+		DetectiveDnaBonus = { 
+			value = 50,
+			label = "Detective DNA Bonus",
+			tooltip = "Additional points awarded to a detective if he had DNA on a traitor he killed"
+		},
+		
+		InnoKillsTraitor = { 
+			value = 250,
+			label = "Innocent kills Traitor",
+			tooltip = "Points awarded to an innocent when he kills a traitor",
+		},
 	},
 	RoundWin = {
-		Innocent = 300,
-		CleanRound = 100,
-		InnocentAlive = 100,
+		info = {
+			label = "Round Win Rewards"
+		},
+		Innocent = {
+			value = 300,
+			label = "Innocents win",
+			tooltip = "Points awarded to every innocent when they win the round"
+		},
 		
-		Traitor = 300,
-		TraitorAlive = 50,
+		CleanRound = { 
+			value = 100,
+			label = "Clean round bonus",
+			tooltip = "Bonus given to players if they did not hurt a teammate (no karma loss)"
+		},
+		
+		InnocentAlive = {
+			value = 100,
+			label = "Innocent alive bonus",
+			tooltip = "Bonus given to innocents that are alive at the end of the round",
+		},
+		
+		Traitor = {
+			value = 300,
+			label = "Traitors win",
+			tooltip = "Points awarded to every traitor when they win the round"
+		},
+		
+		TraitorAlive = {
+			value = 100,
+			label = "Traitor alive bonus",
+			tooltip = "Bonus given to traitors if they are alive at the end of the round"
+		}
 	},
 	Detective = {
-		DnaFound = 50,
+		info = {
+			label = "Detective Rewards" 
+		},
+		DnaFound = { 
+			value = 50,
+			label = "DNA Found",
+			tooltip = "Points awarded to a detective upon collecting DNA"
+		},
 	},
 }
 	

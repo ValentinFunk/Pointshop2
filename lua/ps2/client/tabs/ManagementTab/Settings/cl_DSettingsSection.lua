@@ -19,13 +19,14 @@ function PANEL:PerformLayout( )
 	self:SizeToChildren( false, true )
 end
 
-function PANEL:CreateBaseSettingPanel( lbl )
+function PANEL:CreateBaseSettingPanel( settingsPath, settingInfo )
 	local panel = vgui.Create( "DPanel" )
 	panel.Paint = function( ) end
 	panel:DockPadding( 10, 0, 10, 0 )
+	panel:SetTooltip( settingInfo.tooltip or "" )
 	
 	local label = vgui.Create( "DLabel", panel )
-	label:SetText( lbl )
+	label:SetText( settingInfo.label )
 	label:Dock( LEFT )
 	label:SizeToContents( )
 	label:SetContentAlignment( 6 )
@@ -34,8 +35,8 @@ function PANEL:CreateBaseSettingPanel( lbl )
 	return panel
 end
 
-function PANEL:CreateNumberSetting( lbl, settingsPath )
-	local panel = self:CreateBaseSettingPanel( lbl )
+function PANEL:CreateNumberSetting( settingsPath, settingInfo )
+	local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
 	
 	panel.numberWang = vgui.Create( "DNumberWang", panel )
 	panel.numberWang:Dock( RIGHT )
@@ -52,8 +53,8 @@ function PANEL:CreateNumberSetting( lbl, settingsPath )
 	return panel
 end
 
-function PANEL:CreateCheckboxSetting( lbl, settingsPath )
-	local panel = self:CreateBaseSettingPanel( lbl )
+function PANEL:CreateCheckboxSetting( settingsPath, settingInfo )
+	local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
 	
 	panel.container = vgui.Create( "DPanel", panel )
 	panel.container.Paint = function( ) end
@@ -76,18 +77,41 @@ function PANEL:CreateCheckboxSetting( lbl, settingsPath )
 	return panel
 end
 
-function PANEL:AddSettingByType( lbl, settingsPath, value )
+function PANEL:CreateComboboxSetting( settingsPath, settingInfo )
+	local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
+	
+	panel.combobox = vgui.Create( "DComboBox", panel )
+	panel.combobox:Dock( RIGHT )
+	for k, v in pairs( settingInfo.possibleValues ) do
+		panel.combobox:AddChoice( v )
+	end
+	function panel.combobox.OnSelect( _self, index, val )
+		self.listener:OnValueChanged( settingsPath, val )
+	end
+
+	function panel.SetValue( panel, val )
+		panel.combobox:ChooseOption( val )
+		self.listener:OnValueChanged( settingsPath, val )
+	end
+	
+	return panel
+end 
+
+function PANEL:AddSettingByType( settingsPath, settingInfo )
 	local typeLookup = {
 		boolean = "CreateCheckboxSetting",
 		number = "CreateNumberSetting",
+		option = "CreateComboboxSetting",
 	}
-	local creatorFn = typeLookup[type( value )]
+	
+	local valueType = settingInfo.type or type( settingInfo.value )
+	local creatorFn = typeLookup[valueType]
 	if not creatorFn then
 		ErrorNoHalt( "No creator function found for " .. type( value ) )
 		return
 	end
 	
-	local settingPanel = self[creatorFn]( self, lbl, settingsPath )
+	local settingPanel = self[creatorFn]( self, settingsPath, settingInfo )
 	self:AddSettingPanel( settingPanel )
 	return settingPanel
 end

@@ -39,7 +39,6 @@ end
 
 function PANEL:SetData( data )
 	self.settings = data
-
 	self:InitSettings( )
 end
 
@@ -59,12 +58,18 @@ function PANEL:AutoAddSettingsTable( tbl, settingListener )
 	rootPath = rootPath or ""
 	
 	self.settingsLookup = {}
-	for catName, settings in pairs( tbl ) do
-		self[catName] = self:AddSection( catName )
-		self[catName]:SetSettingsListener( self )
-		for settingName, settingValue in pairs( settings ) do
-			local path = rootPath .. catName .. "." .. settingName
-			local panel = self[catName]:AddSettingByType( settingName, path, settingValue )
+	for catPath, settingsTable in pairs( tbl ) do
+		self[catPath] = self:AddSection( settingsTable.info and settingsTable.info.label or catPath )
+		self[catPath]:SetSettingsListener( self )
+		
+		for settingPath, settingInfo in pairs( settingsTable ) do
+			if settingPath == "info" then
+				--Info about the category
+				continue
+			end
+			
+			local path = rootPath .. catPath .. "." .. settingPath
+			local panel = self[catPath]:AddSettingByType( path, settingInfo )
 			self.settingsLookup[path] = panel
 		end
 	end
