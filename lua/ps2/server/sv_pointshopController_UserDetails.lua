@@ -82,8 +82,8 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 	local walletFound = false
 	for k, v in pairs( player.GetAll( ) ) do
 		if v.kPlayerId == kPlayerId then
-			if ply.PS2_Wallet then 
-				walletPromise:Resolve( ply.PS2_Wallet )
+			if v.PS2_Wallet then 
+				walletPromise:Resolve( v.PS2_Wallet )
 				walletFound = true
 			end
 		end
