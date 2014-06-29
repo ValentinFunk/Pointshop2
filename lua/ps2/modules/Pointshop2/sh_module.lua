@@ -28,4 +28,51 @@ MODULE.Blueprints = {
 	}
 }
 
+MODULE.SettingButtons = {
+	{
+		label = "Basic Settings",
+		icon = "pointshop2/small43.png",
+		control = "DPointshop2Configurator"
+	}
+}
+
+MODULE.Settings = {}
+MODULE.Settings.Server = {
+	BasicSettings = {
+		info = {
+			label = "Player Defaults"
+		},
+		DefaultSlots = {
+			value = 40,
+			label = "Starting inventory slots",
+			tooltip = "Size of the inventory when a player first joins",
+		},
+		["DefaultWallet.Points"] = {
+			label = "Starting points",
+			value = 1000
+		},
+		["DefaultWallet.PremiumPoints"] = {
+			label = "Starting donator points",
+			value = 1000
+		},
+	},
+	GUISettings = {
+		info = {
+			label = "GUI Settings",
+		},
+		ShopKey = {
+			value = "F3",
+			possibleValues = {
+				"F1",
+				"F2",
+				"F3",
+				"F4",
+			},
+			type = "option",
+			label = "Shop Key",
+			tooltip = "Key used to open the shop"
+		}
+	}
+}
+
 Pointshop2.RegisterModule( MODULE )
