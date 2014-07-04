@@ -1,0 +1,1 @@
+LibK.SetupDatabase( "KInventory", KInventory )
