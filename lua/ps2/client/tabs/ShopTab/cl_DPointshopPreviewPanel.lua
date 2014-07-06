@@ -1,6 +1,7 @@
 local PANEL = {}
 
 function PANEL:Init( )
+	hook.Call( "PS2_PreviewPanelPaint_Init", GAMEMODE, self )
 end
 
 function PANEL:LayoutEntity( entity )

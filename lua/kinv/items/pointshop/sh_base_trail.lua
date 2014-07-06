@@ -23,7 +23,7 @@ function ITEM:RemoveTrail( )
 end
 
 function ITEM:OnEquip( ply )
-	if ply:Alive( ) then
+	if ply:Alive( ) and not (ply.IsSpec and ply:IsSpec()) then
 		self:PlayerSpawn( ply )
 	end
 end
@@ -40,7 +40,7 @@ function ITEM:PlayerDeath( victim, inflictor, attacker )
 		self:RemoveTrail( )
 	end
 end
-Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
+Pointshop2.AddItemHook( "PlayerDeath", ITEM )
 
 function ITEM:OnHolster( ply )
 	self:RemoveTrail( )

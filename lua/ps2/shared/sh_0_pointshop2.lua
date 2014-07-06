@@ -36,7 +36,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 				for _, slot in pairs( ply.PS2_Slots or {} ) do
 					if slot.itemId and KInventory.ITEMS[slot.itemId] then
 						local eqItem = KInventory.ITEMS[slot.itemId]
-						if itemClass.name == eqItem.class.name then
+						if instanceOf( itemClass, eqItem ) then
 							eqItem[name]( eqItem, ... )
 						end
 					end
