@@ -1,9 +1,9 @@
 local MODULE = {}
 
 --Pointshop2 TTT integration
-MODULE.Name = "TTT Integration"
+MODULE.Name = "Deathrun Integration"
 MODULE.Author = "Kamshak"
-MODULE.RestrictGamemodes = { "terrortown" } --Only load for TTT
+MODULE.RestrictGamemodes = { "deathrun" } --Only load for TTT
 
 MODULE.Blueprints = {}
 
@@ -11,7 +11,7 @@ MODULE.SettingButtons = {
 	{
 		label = "Point Rewards",
 		icon = "pointshop2/hand129.png",
-		control = "DTerrortownConfigurator"
+		control = "DDeathrunConfigurator"
 	}
 }
 

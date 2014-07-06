@@ -100,7 +100,6 @@ local function includeFolder( folder )
 		if SERVER and ( realmPrefix == "sh" or realmPrefix == "cl" ) then
 			AddCSLuaFile( fullpath )
 		end
-		print( filename, realmPrefix )
 		if SERVER and ( realmPrefix == "sh" or realmPrefix == "sv" ) then
 			include( fullpath )
 		elseif CLIENT then
@@ -112,5 +111,36 @@ local function includeFolder( folder )
 		includeFolder( folder .. "/" .. v )
 	end
 end
- 
-includeFolder( "ps2/modules" )
+
+function Pointshop2.LoadModules( )
+	local files, folders = file.Find( "ps2/modules/*", "LUA" )
+	for k, folder in pairs( folders ) do
+		local shouldLoad, detectedName = true, ""
+		local env = {
+			Pointshop2 = {
+				RegisterModule = function( mod )
+					detectedName = mod.Name
+					if mod.RestrictGamemodes then
+						if not table.HasValue( mod.RestrictGamemodes, engine.ActiveGamemode( ) ) then
+							shouldLoad = false
+						end
+					end
+				end
+			}
+		}
+		
+		local func = CompileFile( "ps2/modules/" .. folder .. "/sh_module.lua" )
+		if func then
+			setfenv( func, env )
+			func( )
+			if shouldLoad then
+				includeFolder( "ps2/modules/" .. folder )
+			else
+				KLogf( 4, "\t-> Module %s not loaded, not valid for gamemode %s", detectedName, engine.ActiveGamemode() )
+			end
+		else
+			KLogf( 3, "Error loading module %s, sh_module.lua not found", folder )
+		end
+	end
+end
+Pointshop2.LoadModules( )
