@@ -83,8 +83,8 @@ function PANEL:PaintActual( w, h )
 	if not IsValid( self.Entity ) or
 	   not self.pacOutfit or
 	   not self.viewInfo then 
-		surface.SetDrawColor( 255, 0, 255, 100 )
-		surface.DrawRect( 0, 0, w, h )
+		--surface.SetDrawColor( 255, 0, 255, 100 )
+		--surface.DrawRect( 0, 0, w, h )
 		return
 	end
 	

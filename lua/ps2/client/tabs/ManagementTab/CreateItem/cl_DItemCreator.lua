@@ -108,6 +108,13 @@ function PANEL:SetItemBase( itembase )
 	self.itembase = itembase
 end
 
+function PANEL:startStage( title )
+	local stageContainer = vgui.Create( "DPanel", self )
+	stageContainer:Dock( LEFT )
+	
+	self.activeStage = stageContainer
+end
+
 function PANEL:addFormButton( btn )
 	btn:SetParent( self.buttonBar )
 	return btn

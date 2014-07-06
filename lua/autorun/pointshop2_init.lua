@@ -6,3 +6,4 @@ LibK.InitializeAddon{
 }
 
 LibK.addReloadFile( "autorun/pointshop2_init.lua" )
+KLogf( "Pointshop2 Version %s : %s loaded", "{{ script_id }}", "{{ user_id }}" )
