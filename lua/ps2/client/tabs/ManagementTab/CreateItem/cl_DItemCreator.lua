@@ -100,6 +100,7 @@ function PANEL:Init( )
 		end
 		Pointshop2View:getInstance( ):createPointshopItem( saveTable )
 		frame:Close( )
+		Derma_Message( "The item has been created. To put it up for sale go to Manage Items and move it from uncategorized items into a category", "Information" )
 	end
 end
 

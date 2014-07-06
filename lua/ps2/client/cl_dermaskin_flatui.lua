@@ -286,6 +286,7 @@ function SKIN:LayoutPropertySheetSheet( panel, sheet )
 		
 		DLabel.ApplySchemeSettings( self )
 	end
+	sheet.Tab:SetTooltip( false )
 	sheet.Panel:Dock( FILL )
 end
 
