@@ -36,4 +36,6 @@ end
 
 derma.DefineControl( "DPointshopManagementTab_Users", "", PANEL, "DPanel" )
 
-Pointshop2:AddManagementPanel( "Manage Users", "pointshop2/user48.png", "DPointshopManagementTab_Users" )
+Pointshop2:AddManagementPanel( "Manage Users", "pointshop2/user48.png", "DPointshopManagementTab_Users", function( )
+	return PermissionInterface.query( LocalPlayer(), "pointshop2 manageusers" )
+end )

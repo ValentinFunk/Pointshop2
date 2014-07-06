@@ -68,14 +68,14 @@ function Pointshop2:ToggleMenu( )
 	end
 end
 
-function Pointshop2:AddTab( title, controlName )
+function Pointshop2:AddTab( title, controlName, shouldShow )
 	KLogf( 4, "     - Tab %s: %s added", title, controlName )
 	for k, v in pairs( Pointshop2.RegisteredTabs ) do
 		if v.title == title then
 			return
 		end
 	end
-	table.insert( Pointshop2.RegisteredTabs, { title = title, control = controlName } )
+	table.insert( Pointshop2.RegisteredTabs, { title = title, control = controlName, shouldShow = shouldShow } )
 end
 
 

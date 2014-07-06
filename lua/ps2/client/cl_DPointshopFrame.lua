@@ -103,6 +103,10 @@ function PANEL:Init( )
 	self.contentsPanel.tabScroller:SetZPos( 1 )
 	
 	for _, tabTbl in pairs( Pointshop2.RegisteredTabs ) do
+		if tabTbl.shouldShow and not tabTbl.shouldShow( ) then
+			continue
+		end
+		
 		local sheet = self.contentsPanel:AddSheet( tabTbl.title, vgui.Create( tabTbl.control ), false, false, false, "" )
 		sheet.Panel:SetPos( self.contentsPanel:GetPadding( ), self.contentsPanel:GetPadding( ) )
 		derma.SkinHook( "Layout", "PropertySheetSheet", self, sheet )

@@ -22,4 +22,6 @@ end
 
 derma.DefineControl( "DPointshopManagementTab_Items", "", PANEL, "DPanel" )
 
-Pointshop2:AddManagementPanel( "Manage Items", "pointshop2/settings12.png", "DPointshopManagementTab_Items" )
+Pointshop2:AddManagementPanel( "Manage Items", "pointshop2/settings12.png", "DPointshopManagementTab_Items", function( )
+	return PermissionInterface.query( LocalPlayer(), "pointshop2 manageitems" )
+end )
