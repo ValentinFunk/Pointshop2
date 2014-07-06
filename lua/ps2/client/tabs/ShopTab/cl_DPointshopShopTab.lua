@@ -9,7 +9,6 @@ function PANEL:Init( )
 	self.previewPanel = vgui.Create( "DPointshopPreviewPanel", self.rightBar )
 	self.previewPanel:Dock( TOP )
 	self.previewPanel:SetTall( 320 )
-	self.previewPanel:SetModel( LocalPlayer( ):GetModel( ) )
 	self.previewPanel:SetFOV( 43 )
 	self.previewPanel:SetAnimated( true )
 	

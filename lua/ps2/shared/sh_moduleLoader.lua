@@ -143,4 +143,11 @@ function Pointshop2.LoadModules( )
 		end
 	end
 end
-Pointshop2.LoadModules( )
+hook.Add( "InitPostEntity", "Load", function()
+	Pointshop2.LoadModules( )
+end )
+
+--For reloads
+if GAMEMODE then
+	Pointshop2.LoadModules( )
+end

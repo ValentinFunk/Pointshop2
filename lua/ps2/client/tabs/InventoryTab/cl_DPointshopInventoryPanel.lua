@@ -86,7 +86,6 @@ function PANEL:Init( )
 	self.preview = vgui.Create( "DPointshopInventoryPreviewPanel", self.topContainer )
 	self.preview:DockMargin( 0, 0, 8, 0 )
 	self.preview:Dock( FILL )
-	self.preview:SetModel( LocalPlayer( ):GetModel( ) )
 	self.preview:SetFOV( 45 ) 
 	self.preview:SetAnimated( true )
 	Pointshop2.InventoryPreviewPanel = self.preview

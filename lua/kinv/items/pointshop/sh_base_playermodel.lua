@@ -18,7 +18,6 @@ function ITEM:getIcon( )
 end
 
 function ITEM:OnEquip( ply )
-	print( "Playermodel: OnEquip", ply  )
 	if not ply._oldModel then
 		ply._oldModel = ply:GetModel( )
 	end
@@ -29,7 +28,6 @@ function ITEM:OnEquip( ply )
 end
 
 function ITEM:OnHolster( ply )
-	print( "Playermodel: OnHolster", ply )
 	if ply._oldModel then
 		ply:SetModel(ply._oldModel)
 	end
@@ -51,6 +49,7 @@ end
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
 	itemTable.playerModel = persistenceItem.playerModel
+	util.PrecacheModel( itemTable.playerModel )
 	itemTable.skin = persistenceItem.skin
 	itemTable.bodygroups = persistenceItem.bodygroups
 end

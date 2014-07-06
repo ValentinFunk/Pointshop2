@@ -1,6 +1,8 @@
 local PANEL = {}
 
 function PANEL:Init( )
+	self:SetModel( Pointshop2:GetPreviewModel( ) )
+	
 	hook.Call( "PS2_PreviewPanelPaint_Init", GAMEMODE, self )
 end
 

@@ -78,6 +78,16 @@ function Pointshop2:AddTab( title, controlName, shouldShow )
 	table.insert( Pointshop2.RegisteredTabs, { title = title, control = controlName, shouldShow = shouldShow } )
 end
 
+function Pointshop2:GetPreviewModel( )
+	local model = hook.Run( "PS2_GetPreviewModel" )
+	
+	--Get item equipped in Model slot
+	if LocalPlayer( ).PS2_Slots["Model"] then
+		return LocalPlayer( ).PS2_Slots["Model"].playerModel
+	end
+	
+	return model or LocalPlayer( ):GetModel( )
+end
 
 --debug
 concommand.Add( "pointshop2_reload", function( )
