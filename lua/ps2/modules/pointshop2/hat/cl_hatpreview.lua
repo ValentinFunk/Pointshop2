@@ -1,0 +1,105 @@
+local previewItemClass
+
+local function validateOutfitList( previewPanel, ignorePreview )
+	previewPanel.outfits = {}
+
+	for _, item in pairs( LocalPlayer().PS2_EquippedItems ) do 
+		local isHat = instanceOf( Pointshop2.GetItemClassByName( "base_hat" ), item )
+		if isHat then
+			local outfit, id = item.class.getOutfitForModel( previewPanel.Entity:GetModel() )
+			previewPanel.outfits[id] = outfit
+		end
+	end
+	if previewItemClass and not ignorePreview then
+		local outfit, id = previewItemClass.getOutfitForModel( previewPanel.Entity:GetModel( ) )
+		previewPanel.outfits[id] = outfit
+	end
+	
+	previewPanel.Entity.attachedOutfits = previewPanel.Entity.attachedOutfits or {}
+	
+	--Remove outfits not valid anymore
+	for id, outfit in pairs( previewPanel.Entity.attachedOutfits ) do
+		if not previewPanel.outfits[id] then
+			print( "detaching", id )
+			previewPanel.Entity:RemovePACPart( outfit )
+			previewPanel.Entity.attachedOutfits[id] = nil
+		end
+	end
+	
+	--Add outfits that are not added yet
+	for id, outfit in pairs( previewPanel.outfits ) do
+		if not previewPanel.Entity.attachedOutfits[id] then
+			print( "attaching", id, outfit )
+			previewPanel.Entity:AttachPACPart( outfit )
+			timer.Simple(0, function( )
+				previewPanel.Entity:AttachPACPart( outfit )
+			end )
+			previewPanel.Entity.attachedOutfits[id] = outfit
+		end
+	end
+end
+
+hook.Add( "PACItemSelected", "ItemSelected", function( itemClass )
+	--print( "Select", itemClass )
+	previewItemClass = itemClass
+end )
+
+hook.Add( "PACItemDeSelected", "ItemDeselected", function( itemClass )
+	--print( "Deselect", itemClass )
+	if previewItemClass == itemClass then
+		previewItemClass = nil
+	end
+end )
+
+local function preStart3d( self, ignorePreview )
+	if not self.Entity.FindPACPart then
+		--print( "Setting ent up for PAC", self.Entity )
+		pac.SetupENT( self.Entity )
+	end
+	
+	validateOutfitList( self, ignorePreview )
+	
+	for k, v in pairs( self.Entity.pac_outfits or {} ) do
+		pac.HookEntityRender( self.Entity, v )
+	end
+end
+
+local function preDrawModel( self )
+	pac.ForceRendering(true)	
+	pac.RenderOverride(self.Entity, "opaque")
+end
+
+local function postDrawModel( self )
+	pac.RenderOverride(self.Entity, "translucent", true)
+	pac.ForceRendering(false)
+
+	for k, v in pairs( self.Entity.pac_outfits or {} ) do
+		pac.UnhookEntityRender( self.Entity, v )
+	end
+end
+
+--Inventory Hooks
+hook.Add( "PS2_InvPreviewPanelPaint_PreStart3D", "PACPreview", function( self )
+	preStart3d( self, true )
+end )
+
+hook.Add( "PS2_InvPreviewPanelPaint_PreDrawModel", "prepac", function( self )
+	preDrawModel( self )
+end )	
+	
+hook.Add( "PS2_InvPreviewPanelPaint_PostDrawModel", "postpac", function( self )
+	postDrawModel( self )
+end )
+
+--Shop Hooks
+hook.Add( "PS2_PreviewPanelPaint_PreStart3D", "PACPreview", function( self )
+	preStart3d( self )
+end )
+
+hook.Add( "PS2_PreviewPanelPaint_PreDrawModel", "prepac", function( self )
+	preDrawModel( self )
+end )	
+	
+hook.Add( "PS2_PreviewPanelPaint_PostDrawModel", "postpac", function( self )
+	postDrawModel( self )
+end )
