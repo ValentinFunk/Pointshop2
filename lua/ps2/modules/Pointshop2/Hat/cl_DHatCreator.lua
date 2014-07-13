@@ -305,6 +305,7 @@ function PANEL:EditItem( persistence, itemClass )
 		local line = self.listView:AddLine( model, "Yes", "" )
 		line.outfit = Pointshop2.Outfits[outfitId]
 	end
+	self.addBtn:SetDisabled( false )
 	
 	for k, slotName in pairs( itemClass.validSlots ) do
 		if self.checkBoxes[slotName] then

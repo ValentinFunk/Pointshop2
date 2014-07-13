@@ -207,17 +207,19 @@ local ITEMS = {}
 setmetatable( ITEMS, { __mode = 'v' } ) --weak reference holder
 
 function Pointshop2View:playerEquipItem( ply, item )
-	ply.PS2_EquipedItems = ply.PS2_EquipedItems or {}
-	ply.PS2_EquipedItems[item.id] = item
+	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
+	ply.PS2_EquippedItems[item.id] = item
 	item:OnEquip( ply )
 	ITEMS[item.id] = item
+	hook.Run( "PS2_ItemEquipped", ply, item )
 end
 
 function Pointshop2View:playerUnequipItem( ply, itemId )
 	if ITEMS[itemId] then
 		ITEMS[itemId]:OnHolster( ply )
-		ply.PS2_EquipedItems[itemId] = nil
+		ply.PS2_EquippedItems[itemId] = nil
 	end
+	hook.Run( "PS2_ItemUnequipped", ply, item )
 end
 
 function Pointshop2View:loadOutfits( versionHash )

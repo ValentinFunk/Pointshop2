@@ -10,6 +10,7 @@ end
 
 function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
+	
 	self.image:SetModel( "models/player/kleiner.mdl" )
 	self.image:SetPacOutfit( itemClass:getBaseOutfit( ) )
 	self.image:SetViewInfo( itemClass.iconInfo.shop.iconViewInfo )
@@ -26,10 +27,12 @@ end
 
 function PANEL:OnSelected( )
 	self.image.forceRender = true
+	hook.Run( "PACItemSelected", self.itemClass )
 end
 
 function PANEL:OnDeselected( )
 	self.image.forceRender = false
+	hook.Run( "PACItemDeSelected", self.itemClass )
 end
 
 derma.DefineControl( "DPointshopHatIcon", "", PANEL, "DPointshopItemIcon" )

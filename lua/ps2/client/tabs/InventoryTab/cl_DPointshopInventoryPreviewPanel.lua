@@ -42,15 +42,15 @@ function PANEL:Paint( w, h )
 		end
 	end
 	
-	hook.Call( "PS2_InvPreviewPanelPaint_PreDrawModel", GAMEMODE, self )
+	hook.Run( "PS2_InvPreviewPanelPaint_PreDrawModel", self )
 	self.Entity:DrawModel()
-	hook.Call( "PS2_InvPreviewPanelPaint_PostDrawModel", GAMEMODE, self )
+	hook.Run( "PS2_InvPreviewPanelPaint_PostDrawModel", self )
 	
 	render.SuppressEngineLighting( false )
 	cam.IgnoreZ( false )
 	cam.End3D()
 	
-	hook.Call( "PS2_InvPreviewPanelPaint_PostStart3D", GAMEMODE, self )
+	hook.Run( "PS2_InvPreviewPanelPaint_PostStart3D", self )
 	
 	self.LastPaint = RealTime()
 end

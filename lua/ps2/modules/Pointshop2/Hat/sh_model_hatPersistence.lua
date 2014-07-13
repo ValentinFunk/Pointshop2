@@ -31,7 +31,7 @@ HatPersistence:include( DatabaseModel )
 
 --Removes all outfits and mappings for this HatPersistence from the database
 function HatPersistence:removeOutfits( )
-	return Pointshop2.OutfitHatPersistenceMapping.findAllByHatPersistenceId( self.itemPersistenceId )
+	return Pointshop2.OutfitHatPersistenceMapping.findAllByHatPersistenceId( self.id )
 	:Then( function( mappings )
 		local mappingIds = {}
 		for k, v in pairs( mappings ) do
@@ -56,7 +56,7 @@ function HatPersistence:removeOutfits( )
 end
 
 function HatPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
-	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable )
+	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable, doUpdate )
 	:Then( function( itemPersistence )
 		if doUpdate then
 			return HatPersistence.findByItemPersistenceId( itemPersistence.id )

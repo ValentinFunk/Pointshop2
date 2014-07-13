@@ -75,10 +75,10 @@ function PANEL:Think( )
 end
 
 function PANEL:OnModified( )
-	print("OnModified", self )
+	--print("OnModified", self )
 	for k, s in pairs( self:GetChildren( ) ) do
 		if s.itemStack and s.itemStack.items and s.itemStack.items[1] then
-			print( s.itemStack.items[1].id )
+			--print( s.itemStack.items[1].id )
 		end
 	end
 	self:savePositions( )

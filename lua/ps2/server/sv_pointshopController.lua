@@ -349,7 +349,7 @@ function Pointshop2Controller:moduleItemsChanged( )
 		return self:loadOutfits( )
 	end )
 	:Then( function( )
-		timer.Simple( 0.5, function( ) --Give players a chance to grab the new outfits
+		timer.Simple( 1, function( ) --Give players a chance to grab the new outfits
 			print( "Sending dyn info" )
 			for k, v in pairs( player.GetAll( ) ) do
 				self:sendDynamicInfo( v )
