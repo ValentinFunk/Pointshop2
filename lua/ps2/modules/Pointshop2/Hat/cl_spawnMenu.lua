@@ -1,7 +1,13 @@
 --Catches gm_spawn on gamemodes other than sandbox
 if engine.ActiveGamemode( ) == "sandbox" then return end
 
-concommand.Add("gm_spawn", function( ply, cmd, args, mdl, flUnknown, iUnknown )
+local old = concommand.GetTable( )[1]["gm_spawn"]
+
+concommand.Add("gm_spawn", function( ply, cmd, args, mdl, flUnknown, iUnknown, ... )
+	if not ply:GetNWBool("in pac3 editor") then
+		return old( ply, cmd, args, mdl, flUnknown, iUnknown, ... )
+	end
+	
 	Pointshop2.SpawnMenu = g_SpawnMenu or Pointshop2.SpawnMenu
 	local mdl = args[1]
 	if pace.close_spawn_menu then
