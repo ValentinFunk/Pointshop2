@@ -2,6 +2,12 @@ Pointshop2View = class( "Pointshop2View" )
 Pointshop2View.static.controller = "Pointshop2Controller" 
 Pointshop2View:include( BaseView )
 
+hook.Add( "InitPostEntity", "InitializePlayers", function( )
+	for k, ply in pairs( player.GetAll( ) ) do
+		ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
+	end
+end )
+
 local GLib = LibK.GLib
 
 function Pointshop2View:initialize( )
