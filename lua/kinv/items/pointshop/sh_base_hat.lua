@@ -7,23 +7,60 @@ ITEM.category = "Hats"
 ITEM.color = ""
 
 function ITEM:initialize( )
-	print( "CONSTRUCT: Item Hat" )
 end
 
+function ITEM:AttachOutfit( ply )
+	if SERVER then
+		return 
+	end
+	
+	if not ply.AttachPACPart then
+		pac.SetupENT( ply )
+		ply:SetShowPACPartsInEditor( false )
+	end
+	
+	local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
+	ply:AttachPACPart( outfit )
+end
+
+function ITEM:RemoveOutfit( ply )
+	if SERVER then
+		return 
+	end
+	
+	if not ply.AttachPACPart then
+		return
+	end
+	
+	local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
+	ply:RemovePACPart( outfit )
+end
+
+function ITEM:OnEquip( ply )
+	if ply:Alive( ) and not (ply.IsSpec and ply:IsSpec()) then
+		self:PlayerSpawn( ply )
+	end
+end
+
+function ITEM:OnHolster( ply )
+	self:RemoveOutfit( ply )
+end
+
+function ITEM:PlayerSpawn( ply )
+	if ply == self:GetOwner( ) then
+		self:AttachOutfit( ply )
+	end
+end
+Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
+
 /*
-	Inventory icon
+	Tech stuff
 */
 function ITEM:getIcon( )
 	self.icon = vgui.Create( "DPointshopHatInvIcon" )
 	self.icon:SetItem( self )
 	self.icon:SetSize( 64, 64 )
 	return self.icon
-end
-
-function ITEM:OnEquip( ply )
-end
-
-function ITEM:OnHolster( ply )
 end
 
 function ITEM:CanBeEquippedInSlot( slotName )

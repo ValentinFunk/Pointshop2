@@ -7,7 +7,6 @@ ITEM.category = "Trails"
 ITEM.color = ""
 
 function ITEM:initialize( )
-	print( "CONSTRUCT: Item Trail" )
 end
 
 function ITEM:AttachTrail( ply )
