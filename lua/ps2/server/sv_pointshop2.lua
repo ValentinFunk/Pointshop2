@@ -1,5 +1,5 @@
 LibK.addContentFolder( "materials/pointshop2" )
-LibK.addContentFolder( "materials/trailmaterials" )
+LibK.addContentFolder( "materials/trails" )
 LibK.SetupDatabase( "Pointshop2", Pointshop2 )
 
 function Pointshop2.ResetDatabase( )
