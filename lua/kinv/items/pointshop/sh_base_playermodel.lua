@@ -55,5 +55,5 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 end
 
 function ITEM.static.GetPointshopIconDimensions( )
-	return 100, 128
+	return Pointshop2.GenerateIconSize( 4, 6 )
 end

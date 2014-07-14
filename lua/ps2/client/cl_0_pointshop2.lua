@@ -89,6 +89,10 @@ function Pointshop2:GetPreviewModel( )
 	return model or LocalPlayer( ):GetModel( )
 end
 
+function Pointshop2.GenerateIconSize( ratioX, ratioY )
+	return ratioX * 32 - 5, ratioY * 32 - 5
+end
+
 --debug
 concommand.Add( "pointshop2_reload", function( )
 	Pointshop2.CloseMenu( )

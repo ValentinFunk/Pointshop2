@@ -66,7 +66,7 @@ function ITEM.static.GetPointshopDescriptionControl( )
 end
 
 function ITEM.static:GetPointshopIconDimensions( )
-	return 100, 100
+	return Pointshop2.GenerateIconSize( 2, 2 )
 end
 
 /*

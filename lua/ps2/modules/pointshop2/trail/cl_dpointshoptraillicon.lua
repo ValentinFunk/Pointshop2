@@ -41,7 +41,9 @@ function PANEL:Think( )
 end
 
 function PANEL:PerformLayout( )
-	self:SetTall( self.image:GetTall( ) + self.Label:GetTall( ) + 10 )
+	self.image:SetTall( self.image:GetWide( ) )
+	local border = ( ( self:GetTall( ) - self.Label:GetTall( ) ) - self.image:GetTall( ) ) / 2
+	self.image:DockMargin( 5, border, 5, border )
 end
 
 derma.DefineControl( "DPointshopTrailIcon", "", PANEL, "DPointshopItemIcon" )

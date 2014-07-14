@@ -142,6 +142,9 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.categoryItemsTable = categoryItemsTable
 	
 	hook.Call( "PS2_DynamicItemsUpdated" )
+	timer.Simple( 0.1, function( )
+		hook.Call( "PS2_DynamicItemsUpdated" )
+	end )
 end
 
 --This is a bit confusing, sorry

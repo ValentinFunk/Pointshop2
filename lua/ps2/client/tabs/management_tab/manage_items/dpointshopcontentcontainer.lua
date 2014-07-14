@@ -13,7 +13,7 @@ function PANEL:Init()
 	self:SetPaintBackground( false )
 	
 	self.IconList = vgui.Create( "DTileLayout", self:GetCanvas() )
-	self.IconList:SetBaseSize( 8 )
+	self.IconList:SetBaseSize( 16 )
 	self.IconList:MakeDroppable( "SandboxContentPanel", true )
 	self.IconList:SetSelectionCanvas( true )
 	--self.IconList:SetUseLiveDrag( true )

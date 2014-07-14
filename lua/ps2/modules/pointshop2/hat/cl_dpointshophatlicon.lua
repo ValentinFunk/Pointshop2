@@ -2,8 +2,8 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self.image = vgui.Create( "DPreRenderedModelPanel", self )
-	self.image:Dock( TOP )
-	self.image:SetSize( 128, 128 )
+	self.image:Dock( FILL )
+	--self.image:SetSize( 128, 128 )
 	self.image:DockMargin( 5, 0, 5, 5 )
 	self.image:SetMouseInputEnabled( false )
 end
@@ -22,7 +22,7 @@ end
 
 function PANEL:PerformLayout( )
 	if not IsValid( self.image ) then return end
-	self:SetTall( self.image:GetTall( ) + self.Label:GetTall( ) + 10 )
+	--self:SetTall( self.image:GetTall( ) + self.Label:GetTall( ) + 10 )
 end
 
 function PANEL:OnSelected( )
