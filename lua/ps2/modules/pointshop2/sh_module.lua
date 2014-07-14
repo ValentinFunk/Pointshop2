@@ -56,6 +56,7 @@ MODULE.Settings.Server = {
 			value = 1000
 		},
 		SellRatio = {
+			tooltip = "The price is multiplied with this to calculate the sell price",
 			label = "Sale repay ratio", 
 			value = 0.75
 		},
