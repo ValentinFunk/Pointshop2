@@ -1,5 +1,33 @@
 local SetupCategoryNode
 
+local function addEditMenu( panel, itemClass )
+	function panel:OpenMenu( )
+		local menu = DermaMenu( )
+		menu:SetSkin( self:GetSkin( ).Name )
+		
+		local btn = menu:AddOption( "Edit", function( )
+			local creatorControl = Pointshop2.GetCreatorControlForClass( itemClass )
+			
+			local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
+			assert( persistence )
+			if not creatorControl or persistence == "STATIC" then
+				return Derma_Message( "This item is Lua defined and cannot be edited ingame. To configure it edit " .. itemClass.originFilePath, "Error" )
+			end
+			
+			local creator = vgui.Create( creatorControl )
+			creator:Center( )
+			creator:MakePopup( )
+			creator:SetItemBase( itemClass.name )
+			creator:SetSkin( Pointshop2.Config.DermaSkin )
+			creator:EditItem( persistence, itemClass )
+		end )
+		btn:SetImage( "pointshop2/pencil54.png" )
+		btn.m_Image:SetSize( 16, 16 )
+		
+		menu:Open( )
+	end
+end
+
 local function AddCategoryNode( pnlContent, name, icon, parent )
 	local node = parent:AddNode( name, icon )
 	SetupCategoryNode( node, pnlContent )
@@ -76,31 +104,7 @@ function SetupCategoryNode( node, pnlContent )
 				self.PropPanel:Add( panel )
 				panel:SetItemClass( itemClass )
 				
-				function panel:OpenMenu( )
-					local menu = DermaMenu( )
-					menu:SetSkin( self:GetSkin( ).Name )
-					
-					local btn = menu:AddOption( "Edit", function( )
-						local creatorControl = Pointshop2.GetCreatorControlForClass( itemClass )
-						
-						local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
-						assert( persistence )
-						if not creatorControl or persistence == "STATIC" then
-							return Derma_Message( "This item is Lua defined and cannot be edited ingame. To configure it edit " .. itemClass.originFilePath, "Error" )
-						end
-						
-						local creator = vgui.Create( creatorControl )
-						creator:Center( )
-						creator:MakePopup( )
-						creator:SetItemBase( itemClass.name )
-						creator:SetSkin( Pointshop2.Config.DermaSkin )
-						creator:EditItem( persistence, itemClass )
-					end )
-					btn:SetImage( "pointshop2/pencil54.png" )
-					btn.m_Image:SetSize( 16, 16 )
-					
-					menu:Open( )
-				end
+				addEditMenu( panel, itemClass )
 			end
 		end
 	end
@@ -207,6 +211,7 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 			local panel = vgui.Create( itemClass:GetPointshopIconControl( ) )
 			self.PropPanel:Add( panel )
 			panel:SetItemClass( itemClass )
+			addEditMenu( panel, itemClass )
 		end
 	end
 end )
