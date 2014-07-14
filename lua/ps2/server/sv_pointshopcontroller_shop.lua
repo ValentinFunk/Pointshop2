@@ -17,7 +17,7 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		between.
 		TODO: look into alternative methods of locking the database as this is a bit performance heavy because it blocks the game thread, 
 	]]--
-	Pointshop2.DB.SetBlocking( true )
+	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	:Fail( function( errid, err ) 
 		KLogf( 2, "Error starting transaction: %s", err )
@@ -50,19 +50,19 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	:Then( function( )
 		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 		self:sendWallet( ply )
 	end, function( errid, err )
 		KLogf( 2, "Error saving item purchase: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your purchase was not carried out." )
 	end )
 end
 
 function Pointshop2Controller:sellItem( ply, itemId )
-	Pointshop2.DB.SetBlocking( true )
+	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	:Fail( function( errid, err ) 
 		KLogf( 2, "Error starting transaction: %s", err )
@@ -111,12 +111,12 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	:Then( function( )
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 		self:sendWallet( ply )
 	end, function( errid, err )
 		KLogf( 2, "Error selling item: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your sell was not carried out." )
 	end )
@@ -149,7 +149,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 		return
 	end
 	
-	Pointshop2.DB.SetBlocking( true )
+	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	
 	ply.PS2_Inventory:addItem( item )
@@ -164,12 +164,12 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlot )
 		
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 	end, function( errid, err )
 		self:reportError( "Pointshop2View", ply, "Error unequipping item", errid, err )
 		
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 	end )
 end
 
@@ -199,9 +199,8 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		return
 	end
 	
-	Pointshop2.DB.SetBlocking( true )
+	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
-	
 	local slot
 	for k, v in pairs( ply.PS2_Slots ) do
 		if v.slotName == slotName then
@@ -251,14 +250,13 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
 		
 		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
-		
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 	end )
 	:Fail( function( errid, err )
 		self:reportError( "Pointshop2View", ply, "Error equipping item", errid, err )
 		
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 	end )
 end

@@ -222,7 +222,7 @@ end )
 local function performSafeCategoryUpdate( categoryItemsTable )
 	--Repopulate Categories Table
 	Pointshop2.Category.truncateTable( )
-	:Fail( function( errid, err ) error( "Couldn't tructate categories", errid, err ) end )
+	:Fail( function( errid, err ) error( "Couldn't truncate categories", errid, err ) end )
 	
 	local function recursiveAddCategory( category, parentId )
 		local dbCategory = Pointshop2.Category:new( )
@@ -244,7 +244,7 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	
 	--Repopulate Item Mappings Table
 	Pointshop2.ItemMapping.truncateTable( )
-	:Fail( function( errid, err ) error( "Couldn't tructate item mappings", errid, err ) end )
+	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
 	
 	local function recursiveAddItems( category )
 		for _, itemClassName in pairs( category.items ) do
@@ -267,7 +267,7 @@ end
 function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable )
 	--Wrap it into a transaction in case anything happens.
 	--since tables are cleared and refilled for this it could fuck up the whole pointshop
-	Pointshop2.DB.SetBlocking( true )
+	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	:Fail( function( errid, err ) 
 		KLogf( 2, "Error starting transaction: %s", err )
@@ -279,13 +279,13 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 	if not success then
 		KLogf( 2, "Error saving categories: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured, your changes could not be saved!" )
 	else
 		KLogf( 4, "Categories Updated" )
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		Pointshop2.DB.SetBlocking( false )
+		LibK.SetBlocking( false )
 		
 		for k, v in pairs( player.GetAll( ) ) do
 			self:sendDynamicInfo( v )
