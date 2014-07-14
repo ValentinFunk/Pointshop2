@@ -19,10 +19,9 @@ function ITEM.static:GetBuyPrice( ply )
 end
 
 function ITEM:GetSellPrice( ply )
-	return math.floor( self.class.Price.points * 0.75 )
+	return math.floor( self.class.Price.points * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) )
 end
 
---TODO add to editor
 function ITEM:CanBeSold( )
 	return self.class.Price.points != nil
 end
@@ -31,7 +30,7 @@ function ITEM:OnPurchased( ply )
 
 end
 
---TODO add to editor
+-- [TODO add to editor] -> Done for Hat 
 function ITEM:CanBeEquipedInSlot( slotName )
 	return false
 end

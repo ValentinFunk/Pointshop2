@@ -81,7 +81,15 @@ function Pointshop2View:startBuyItem( itemClass, currencyType )
 end
 
 function Pointshop2View:startSellItem( item )
-	self:controllerAction( "sellItem", item.id )
+	self:controllerTransaction( "sellItem", item.id )
+	:Done( function( )
+		--TODO: Sound
+		--Reset selection
+		hook.Run( "PS2_InvItemIconSelected" )
+	end )
+	:Fail( function( err )
+		self:displayError( "Error selling the item: " .. err, "Error" )
+	end )
 end
 
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )

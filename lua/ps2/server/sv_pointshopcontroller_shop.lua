@@ -62,12 +62,15 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 end
 
 function Pointshop2Controller:sellItem( ply, itemId )
+	local transctionDef = Deferred( )
+	
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	:Fail( function( errid, err ) 
 		KLogf( 2, "Error starting transaction: %s", err )
-		self:startView( "Pointshop2View", "displayError", ply, "A Technical error occured(1), your purchase was not carried out." )
-		return
+		
+		transctionDef:Reject( 0, "A Technical error occured(1), your purchase was not carried out." )
+		return transctionDef:Promise()
 	end )
 	
 	
@@ -78,8 +81,8 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 	
 	if not Pointshop2.PlayerOwnsItem( ply, item ) then
-		self:startView( "Pointshop2View", "displayError", ply, "Couldn't sell item: You don't own this item." )
-		return 
+		transctionDef:Reject( 0, "Couldn't sell item: You don't own this item." )
+		return transctionDef:Promise( )
 	end
 	
 	local slot
@@ -113,13 +116,17 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
+		
+		transactionDef:Resolve( )
 	end, function( errid, err )
 		KLogf( 2, "Error selling item: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		LibK.SetBlocking( false )
 		
-		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your sell was not carried out." )
+		transactionDef:Reject( errid, "A technical error occured (2), your sale was not carried out." )
 	end )
+	
+	return transactionDef:Promise( )
 end
 
 function Pointshop2Controller:unequipItem( ply, slotName )

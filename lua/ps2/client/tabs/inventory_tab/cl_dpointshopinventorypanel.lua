@@ -60,7 +60,7 @@ function PANEL:Init( )
 	self.rightPanel = vgui.Create( "DPanel", self )
 	self.rightPanel:Dock( FILL )
 	self.rightPanel:DockMargin( 0, 8, 8, 8 )
-	self.rightPanel:DockPadding( 8, 8, 8, 8 )
+	self.rightPanel:DockPadding( 0, 8, 8, 8 )
 	Derma_Hook( self.rightPanel, "Paint", "Paint", "InnerPanel" )
 
 	self.topContainer = vgui.Create( "DPanel", self.rightPanel )
@@ -108,7 +108,7 @@ function PANEL:Init( )
 			self.descPanel = vgui.Create( item.class:GetPointshopDescriptionControl( ), self.rightPanel )
 			self.descPanel:Dock( TOP )
 		end
-		self.descPanel:SetItem( item, true )
+		self.descPanel:SetItem( item, false )
 	end )
 end
 
