@@ -11,7 +11,7 @@ end
 function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
 	
-	self.image:SetModel( LocalPlayer():GetModel() or "models/player/kleiner.mdl" )
+	self.image:SetModel( Pointshop2:GetPreviewModel() or "models/player/kleiner.mdl" )
 	self.image:SetPacOutfit( itemClass:getBaseOutfit( ) )
 	self.image:SetViewInfo( itemClass.iconInfo.shop.iconViewInfo )
 end

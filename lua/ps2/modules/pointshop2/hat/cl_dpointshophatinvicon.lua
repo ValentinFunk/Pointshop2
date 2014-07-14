@@ -8,7 +8,7 @@ function PANEL:Init( )
 end
 
 function PANEL:SetItem( item )
-	self.image:SetModel( LocalPlayer():GetModel() or "models/player/kleiner.mdl" )
+	self.image:SetModel( Pointshop2:GetPreviewModel() or "models/player/kleiner.mdl" )
 	self.item = item 
 	self.image:SetPacOutfit( item.class:getBaseOutfit( ) )
 	self.image:SetViewInfo( item.class.iconInfo.inv.iconViewInfo )
