@@ -43,9 +43,11 @@ end
 function PANEL:DoPopulate( )
 	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
 	for k, category in pairs( dataNode ) do 
-		local panel = vgui.Create( "DPointshopCategoryPanel" )
+		local sp = vgui.Create("DScrollPanel")
+		local panel = vgui.Create( "DPointshopCategoryPanel", sp )
+		panel:Dock(FILL)
 		panel:SetCategory( category )
-		self:addMenuEntry( category.self.label, category.self.icon, panel )
+		self:addMenuEntry( category.self.label, category.self.icon, sp )
 	end
 end
 
