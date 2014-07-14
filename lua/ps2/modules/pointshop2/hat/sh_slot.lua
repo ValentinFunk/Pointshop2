@@ -4,7 +4,7 @@ local function addHatSlot( name )
 	Pointshop2.AddEquipmentSlot( name, function( item )
 		local isHat = instanceOf( Pointshop2.GetItemClassByName( "base_hat" ), item )
 		
-		if isHat and not item:CanBeEquippedInSlot( name ) then
+		if not isHat or not item:CanBeEquippedInSlot( name ) then
 			return false
 		end
 		
