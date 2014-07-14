@@ -22,6 +22,8 @@ function ITEM:OnEquip( ply )
 		ply._oldModel = ply:GetModel( )
 	end
 	
+	hook.Run( "PS2_DoUpdatePreviewModel" )
+	
 	timer.Simple( 1, function( )
 		ply:SetModel( self.playerModel )
 	end )
@@ -31,6 +33,9 @@ function ITEM:OnHolster( ply )
 	if ply._oldModel then
 		ply:SetModel(ply._oldModel)
 	end
+	timer.Simple( 0, function( )
+		hook.Run( "PS2_DoUpdatePreviewModel" )
+	end )
 end
 
 function ITEM:PlayerSetModel( ply )
