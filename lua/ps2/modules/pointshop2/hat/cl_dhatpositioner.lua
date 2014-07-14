@@ -59,7 +59,7 @@ function PANEL:Init( )
 	
 	self.modelPanel = vgui.Create( "DPointshopPacView", self )
 	self.modelPanel:Dock( FILL )
-	self.modelPanel:SetModel( "models/player/kleiner.mdl" )
+	self.modelPanel:SetModel( Pointshop2:GetPreviewModel() or "models/player/kleiner.mdl" )
 	
 	self.bottomButtons = vgui.Create( "DPanel", self )
 	self.bottomButtons:Dock( BOTTOM )
