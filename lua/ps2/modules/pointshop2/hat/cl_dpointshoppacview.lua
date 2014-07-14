@@ -122,6 +122,10 @@ local function unHookPac( )
 	pace.mctrl.ScreenToVec = GAMEMODE.hookRestore.oldS2V
 	pace.mctrl.GetMousePos = GAMEMODE.hookRestore.oldGMP
 	pace.OnOpenMenu = GAMEMODE.hookRestore.oldPaceOpenMenu
+	
+	local pnl = vgui.GetControlTable( "pace_editor" )
+	pnl.Base = "DFrame"
+	pace.RegisterPanel(pnl)
 end
 
 function PANEL:Init( )
