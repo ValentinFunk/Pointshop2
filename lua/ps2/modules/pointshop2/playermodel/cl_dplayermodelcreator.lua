@@ -65,6 +65,8 @@ function PANEL:EditItem( persistence, itemClass )
 	
 	self.manualEntry:SetText( persistence.playerModel )
 	self.mdlPanel:SetModel( persistence.playerModel, persistence.skin )
+	self.skin = persistence.skin
+	self.bodygroups = persistence.bodygroups
 	for k, v in pairs( string.Explode( " ", persistence.bodygroups ) ) do
 		k, v = tonumber( k ), tonumber( v )
 		self.mdlPanel:BodyGroupChanged( k, v )
