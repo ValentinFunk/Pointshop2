@@ -65,7 +65,7 @@ GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, 
 		return false
 	end
 	
-	local settings = Pointshop2.Settings.Server[modName] 
+	local settings = table.Merge( Pointshop2.Settings.Server, Pointshop2.Settings.Shared )[modName] 
 	if not settings then
 		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %s, settings %s not found", userId, modName )
 		return false

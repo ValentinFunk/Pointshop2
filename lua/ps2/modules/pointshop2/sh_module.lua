@@ -37,6 +37,16 @@ MODULE.SettingButtons = {
 }
 
 MODULE.Settings = {}
+MODULE.Settings.Shared = {
+	BasicSettings = {
+		SellRatio = {
+			tooltip = "The price is multiplied with this to calculate the sell price",
+			label = "Sale repay ratio", 
+			value = 0.75
+		},
+	}
+}
+
 MODULE.Settings.Server = {
 	BasicSettings = {
 		info = {
@@ -54,11 +64,6 @@ MODULE.Settings.Server = {
 		["DefaultWallet.PremiumPoints"] = {
 			label = "Starting donator points",
 			value = 1000
-		},
-		SellRatio = {
-			tooltip = "The price is multiplied with this to calculate the sell price",
-			label = "Sale repay ratio", 
-			value = 0.75
 		},
 	},
 	GUISettings = {

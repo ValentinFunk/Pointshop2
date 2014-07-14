@@ -57,10 +57,10 @@ end
 function PANEL:AutoAddSettingsTable( tbl, settingListener )
 	rootPath = rootPath or ""
 	
-	self.settingsLookup = {}
+	self.settingsLookup = self.settingsLookup or {}
 	for catPath, settingsTable in pairs( tbl ) do
 		self[catPath] = self:AddSection( settingsTable.info and settingsTable.info.label or catPath )
-		self[catPath]:SetSettingsListener( self )
+		self[catPath]:SetSettingsListener( settingListener )
 		
 		for settingPath, settingInfo in pairs( settingsTable ) do
 			if settingPath == "info" then

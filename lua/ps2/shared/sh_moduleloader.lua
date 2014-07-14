@@ -31,7 +31,8 @@ function Pointshop2.GetSetting( modName, path )
 	if setting == nil then
 		error( "Setting " .. path .. " could not be found" )
 	end
-	local setting = Pointshop2.Settings.Server[modName][path]
+	
+	local setting = Pointshop2.Settings.Server[modName] and Pointshop2.Settings.Server[modName][path]
 	if setting == nil then
 		setting = Pointshop2.Settings.Shared[modName][path]
 	end
