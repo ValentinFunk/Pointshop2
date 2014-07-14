@@ -63,16 +63,15 @@ end
 
 local oldT, oldV2S, oldS2V, oldGMP, oldPaceOpenMenu
 local oldGuiMousePos = gui.MousePos
-hook.Add( "InitPostEntity", "faff", function( )
-	GAMEMODE.hookRestore = {
-		--oldT = pace.mctrl.GetTarget,
-		oldV2S = pace.mctrl.VecToScreen,
-		oldS2V = pace.mctrl.ScreenToVec,
-		oldGuiMousePos = gui.MousePos,
-		oldGMP = pace.mctrl.GetMousePos,
-		oldPaceOpenMenu = pace.OnOpenMenu
-	}
-end )
+
+GAMEMODE.hookRestore = {
+	--oldT = pace.mctrl.GetTarget,
+	oldV2S = pace.mctrl.VecToScreen,
+	oldS2V = pace.mctrl.ScreenToVec,
+	oldGuiMousePos = gui.MousePos,
+	oldGMP = pace.mctrl.GetMousePos,
+	oldPaceOpenMenu = pace.OnOpenMenu
+}
 
 local function hookPac( panel )
 	local result, w, h = panel.result, panel:GetWide( ), panel:GetTall( )
