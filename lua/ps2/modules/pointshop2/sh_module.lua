@@ -55,6 +55,10 @@ MODULE.Settings.Server = {
 			label = "Starting donator points",
 			value = 1000
 		},
+		SellRatio = {
+			label = "Sale repay ratio", 
+			value = 0.75
+		},
 	},
 	GUISettings = {
 		info = {

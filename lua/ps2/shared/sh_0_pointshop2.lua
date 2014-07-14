@@ -104,3 +104,15 @@ function Pointshop2.GetPersistenceClassForItemClass( itemClass )
 		end
 	end
 end
+
+function Pointshop2.GetItemInSlot( ply, slotName )
+	if CLIENT then
+		return ply.PS2_Slots[slotName]
+	end
+	
+	for k, slot in pairs( ply.PS2_Slots ) do
+		if slot.itemId then
+			return KInventory.ITEMS[slot.itemId]
+		end
+	end
+end

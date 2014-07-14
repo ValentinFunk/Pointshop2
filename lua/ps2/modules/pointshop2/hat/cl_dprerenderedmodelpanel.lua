@@ -12,6 +12,9 @@ function PANEL:SetPacOutfit( outfit )
 	end
 	
 	self.pacOutfit = outfit
+	if not self.pacOutfit then
+		return debug.Trace()
+	end
 	if IsValid( self.Entity ) then
 		self.Entity:AttachPACPart( self.pacOutfit )
 	end
