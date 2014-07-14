@@ -112,6 +112,21 @@ function PANEL:Init( )
 		slider.scratch:SetMin( infoTbl[2] )
 		slider.scratch:SetMax( infoTbl[3] )
 		
+		local targetContainer = self.choice
+		function slider.scratch:PaintScratchWindow()
+
+			if ( !self:GetActive() ) then return end
+
+			if ( self:GetZoom() == 0 ) then self:SetZoom( self:IdealZoom() ) end
+
+			local w, h = targetContainer:GetWide() + 20, 196
+			local x, y = ScrW()/2 - w/2, ScrH()/2 - 86
+
+			render.SetScissorRect( x, y, x+w, y+h, true )
+				self:DrawScreen( x, y, w, h )
+			render.SetScissorRect( x, y, w, h, false )
+
+		end		
 		
 		slider.lbl2 = vgui.Create( "DLabel", slider )
 		slider.lbl2:SetText( 1 )
