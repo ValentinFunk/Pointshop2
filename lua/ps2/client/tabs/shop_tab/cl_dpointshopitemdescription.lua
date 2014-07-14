@@ -109,6 +109,7 @@ function PANEL:SelectionReset( )
 	self.titleLabel:SetText( "No Item selected" )
 	self.titleLabel:SizeToContents( )
 	self.description:SetText( "Please Select an Item" )
+	self.buttonsPanel:Reset( )
 end
 
 function PANEL:SetItemClass( itemClass, noBuyPanel )
