@@ -32,6 +32,9 @@ local function validateOutfitList( previewPanel, ignorePreview )
 			print( "attaching", id, outfit )
 			previewPanel.Entity:AttachPACPart( outfit )
 			timer.Simple(0, function( )
+				if not previewPanel.Entity.AttachPACPart then
+					pac.SetupENT( self.Entity ) --why u do dis?
+				end
 				previewPanel.Entity:AttachPACPart( outfit )
 			end )
 			previewPanel.Entity.attachedOutfits[id] = outfit
