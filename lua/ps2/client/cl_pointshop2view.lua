@@ -5,6 +5,7 @@ Pointshop2View:include( BaseView )
 hook.Add( "InitPostEntity", "InitializePlayers", function( )
 	for k, ply in pairs( player.GetAll( ) ) do
 		ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
+		ply.PS2_Slots = {}
 	end
 end )
 
