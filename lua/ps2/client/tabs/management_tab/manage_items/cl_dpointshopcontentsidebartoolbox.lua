@@ -48,6 +48,13 @@ function PANEL:Init()
 			hook.Run( "PS2_SpawnlistContentChanged" )
 		end
 	end )
+	
+	hook.Add( "PS2_ToolboxFocus", self, function( _self )
+		label:SelectAllOnFocus()
+		label:RequestFocus()
+		label:SelectAll()
+		hook.Run( "OnTextEntryGetFocus", label )
+	end )
 end
 
 function PANEL:Think()

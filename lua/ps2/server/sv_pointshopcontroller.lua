@@ -91,6 +91,13 @@ function Pointshop2Controller:initializeInventory( ply )
 		return inventory:save( )
 	end )
 	:Then( function( inventory )
+		if inventory.numSlots < Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultSlots" ) then
+			inventory.numSlots = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultSlots" )
+			return inventory:save( )
+		end
+		return inventory
+	end )
+	:Then( function( inventory )
 		--Load Items
 		return inventory:loadItems( )
 		:Done( function( )
