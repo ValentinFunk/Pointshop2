@@ -62,15 +62,15 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 end
 
 function Pointshop2Controller:sellItem( ply, itemId )
-	local transctionDef = Deferred( )
+	local transactionDef = Deferred( )
 	
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	:Fail( function( errid, err ) 
 		KLogf( 2, "Error starting transaction: %s", err )
 		
-		transctionDef:Reject( 0, "A Technical error occured(1), your purchase was not carried out." )
-		return transctionDef:Promise()
+		transactionDef:Reject( 0, "A Technical error occured(1), your purchase was not carried out." )
+		return transactionDef:Promise()
 	end )
 	
 	
@@ -81,8 +81,8 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 	
 	if not Pointshop2.PlayerOwnsItem( ply, item ) then
-		transctionDef:Reject( 0, "Couldn't sell item: You don't own this item." )
-		return transctionDef:Promise( )
+		transactionDef:Reject( 0, "Couldn't sell item: You don't own this item." )
+		return transactionDef:Promise( )
 	end
 	
 	local slot
