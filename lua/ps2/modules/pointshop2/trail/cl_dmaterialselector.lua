@@ -16,7 +16,6 @@ function PANEL:Init( )
 	self.layout:SetWide( 25 + 64*8+63*4 )
 	
 	Pointshop2.RequestServerTrails( function( files )
-		print( "y", #files, self, self.a )
 		self:SetTrails( files )
 	end )
 end
