@@ -67,27 +67,27 @@ SKIN.Colours.Tab.Inactive = SKIN.Colours.Tab
 
 surface.CreateFont( "PS2_LargeHeading", {
 	font = "Segoe UI 8",
-	size = 48,
+	size = 46,
 } )
 
 surface.CreateFont( "PS2_MediumLarge", {
 	font = "Segoe UI 8",
-	size = 32,
+	size = 28,
 } )
 
 surface.CreateFont( "PS2_SmallHeading", {
 	font = "Segoe UI 8",
-	size = 26,
+	size = 24,
 } )
 
 surface.CreateFont( "PS2_Normal", {
 	font = "Segoe UI Semilight 8",
-	size = 22,
+	size = 20,
 } )
 
 surface.CreateFont( "PS2_Text", {
 	font = "Segoe UI Semilight 8",
-	size = 16,
+	size = 14,
 } )
 
 SKIN.fontName = "PS2_Normal"

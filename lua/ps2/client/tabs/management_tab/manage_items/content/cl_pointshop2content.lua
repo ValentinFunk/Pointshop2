@@ -34,7 +34,8 @@ function SetupCategoryNode( node, pnlContent )
 		btn = menu:AddOption( "New Category", function()
 			local node = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", self );
 			self:SetExpanded( true )
-			timer.Simple( 0.5, function( )
+			self:InstallDraggable(node)
+			timer.Simple( 0.1, function( )
 				node:DoClick( )
 				node:InternalDoClick()
 				hook.Run( "PS2_ToolboxFocus" )  
@@ -125,12 +126,19 @@ end
 local categoriesNode
 hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tree, node )
 	local node = AddCategoryNode( pnlContent, "Categories", "pointshop2/folder62.png", tree )
+	node:SetDraggableName( "CustomContent" )
 	function node:DoRightClick( )
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
 		local btn = menu:AddOption( "New Category", function( )
-			AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", node )
+			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", node )
 			node:SetExpanded( true )
+			node:InstallDraggable(n2)
+			timer.Simple( 0.1, function( )
+				n2:DoClick( )
+				n2:InternalDoClick()
+				hook.Run( "PS2_ToolboxFocus" )  
+			end )
 			hook.Run( "PS2_SpawnlistContentChanged" )
 			hook.Run( "PS2_OpenToolbox" )
 		end )
@@ -172,6 +180,7 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 		lbl:DockMargin( 0, 5, 0, 5 )
 	end
 	categoriesNode = node
+	node:InternalDoClick()
 	
 	--Populate with existing stuff
 	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
