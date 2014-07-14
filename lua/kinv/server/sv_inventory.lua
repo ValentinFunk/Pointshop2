@@ -45,6 +45,8 @@ function Inventory:addItem( item )
 			table.insert( self.Items, item )
 		end
 		
+		item.owner = self:getOwner()
+		
 		--Network change
 		InventoryController:getInstance( ):itemAdded( self, item )
 		
