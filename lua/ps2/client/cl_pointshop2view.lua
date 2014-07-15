@@ -249,6 +249,7 @@ function Pointshop2View:loadOutfits( versionHash )
 		end
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash ) 
+		self:controllerAction( "outfitsReceived" )
 	end )
 end
 

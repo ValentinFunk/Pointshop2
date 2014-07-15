@@ -34,3 +34,9 @@ hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestOutfits", function( ply )
 		Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
 	end )
 end )
+
+--Player notifies us that he has loaded and decoded all PAC outfits
+function Pointshop2Controller:outfitsReceived( ply )
+	KLogf( 5, "Received outfits from %s", ply:Name( ) )
+	ply.outfitsReceivedPromise:Resolve( )
+end

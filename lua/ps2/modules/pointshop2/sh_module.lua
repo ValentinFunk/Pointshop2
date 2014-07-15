@@ -21,7 +21,7 @@ MODULE.Blueprints = {
 		creator = "DTrailCreator"
 	},
 	{
-		label = "Hat",
+		label = "Accessory/Hat",
 		base = "base_hat",
 		icon = "pointshop2/fedora.png",
 		creator = "DHatCreator"

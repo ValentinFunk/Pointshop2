@@ -57,6 +57,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
+	elseif action == "outfitsReceived" then
+		def:Resolve( )
 	elseif action == "searchPlayers" or
 		   action == "getUserDetails" or
 		   action == "adminChangeWallet"
@@ -139,13 +141,16 @@ function Pointshop2Controller:initializeSlots( ply )
 		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
 	
 		if shouldEquipItems then
-			for _, slot in pairs( ply.PS2_Slots ) do
-				if not slot.itemId then continue end
-				
-				local item = slot.Item
-				item:OnEquip( ply )
-				self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
-			end
+			ply.outfitsReceivedPromise:Done( function( )
+				for _, slot in pairs( ply.PS2_Slots ) do
+					if not slot.itemId then continue end
+					
+					local item = slot.Item
+					item:OnEquip( ply )
+					
+					self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
+				end
+			end )
 		end
 	end )
 end
@@ -192,11 +197,28 @@ function Pointshop2Controller:sendDynamicInfo( ply )
 	end )
 end
 
+--[[
+	Send equipped items of players to "late" joiners
+]]--
+function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
+	for _, ply in pairs( player.GetAll( ) ) do
+		for _, slot in pairs( ply.PS2_Slots ) do
+			if not slot.itemId then continue end
+			
+			self:startView( "Pointshop2View", "playerEquipItem", plyToSendTo, ply, item )
+		end
+	end
+end
+
 local function initPlayer( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	local controller = Pointshop2Controller:getInstance( )
 	controller:sendWallet( ply )
 	
+	ply.outfitsReceivedPromise = Deferred( )
+	ply.outfitsReceivedPromise:Done( function( )
+		controller:sendActiveEquipmentTo( ply )
+	end )
 	Pointshop2.LoadModuleItemsPromise:Done( function( )
 		controller:sendDynamicInfo( ply )
 		controller:initializeInventory( ply )
@@ -350,18 +372,21 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 end
 
 function Pointshop2Controller:moduleItemsChanged( )
+	for k, v in pairs( player.GetAll( ) ) do
+		v.outfitsReceivedPromise = Deferred( )
+	end
+	
 	self:loadModuleItems( )
 	:Then( function( )
-		print( "Module Items Loaded" )
 		return self:loadOutfits( )
 	end )
-	:Then( function( )
-		timer.Simple( 1, function( ) --Give players a chance to grab the new outfits
-			print( "Sending dyn info" )
-			for k, v in pairs( player.GetAll( ) ) do
+	:Done( function( )
+		for k, v in pairs( player.GetAll( ) ) do
+			print( v )
+			v.outfitsReceivedPromise:Done( function( )
 				self:sendDynamicInfo( v )
-			end
-		end )
+			end )
+		end
 	end )
 end
 
