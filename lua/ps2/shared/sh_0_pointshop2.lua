@@ -59,7 +59,7 @@ end
 function Pointshop2.LoadPersistentItem( persistentItem )
 	local baseClass = Pointshop2.GetItemClassByName( persistentItem.ItemPersistence.baseClass )
 	
-	local className = persistentItem.ItemPersistence.id
+	local className = tostring( persistentItem.ItemPersistence.id )
 	local internalName = "KInventory.Items." .. className
 	KInventory.Items[className] = class( internalName, baseClass )
 	KInventory.Items[className].static.className = className
