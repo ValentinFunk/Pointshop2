@@ -202,9 +202,18 @@ end
 ]]--
 function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 	for _, ply in pairs( player.GetAll( ) ) do
+		if ply == plyToSendTo then
+			continue --handled in the slot-sender
+		end
+		
 		for _, slot in pairs( ply.PS2_Slots ) do
 			if not slot.itemId then continue end
 			
+			local item = KInventory.ITEMS[slot.itemId]
+			if not item then
+				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.name )
+				continue
+			end
 			self:startView( "Pointshop2View", "playerEquipItem", plyToSendTo, ply, item )
 		end
 	end
