@@ -5,6 +5,8 @@ WIP Project.
 
 ## Requirements
 - [LibK](https://github.com/Kamshak/LibK)
-- KInventory
+- [PAC 3](https://github.com/CapsAdmin/pac3)
 
-## Docs: http://pointshop2.kamshak.com/en/latest/
+## Docs
+Documentation: http://pointshop2.kamshak.com/en/latest/
+Documentation source: https://github.com/Kamshak/Pointshop2-Docs/
