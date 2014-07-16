@@ -9,4 +9,5 @@ WIP Project.
 
 ## Docs
 Documentation: http://pointshop2.kamshak.com/en/latest/
+
 Documentation source: https://github.com/Kamshak/Pointshop2-Docs/
