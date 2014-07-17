@@ -230,9 +230,10 @@ local function initPlayer( ply )
 		
 		--TODO: Make a proper promise/transaction for this
 		timer.Simple( 1, function( )
-			local slotsAndInvLoaded = WhenAllFinished{ controller:initializeInventory( ply ), controller:initializeSlots( ply ) }
-			
-			WhenAllFinished{ slotsAndInvLoaded, ply.outfitsReceivedPromise }
+			WhenAllFinished{ controller:initializeInventory( ply ),
+				controller:initializeSlots( ply ),
+				ply.outfitsReceivedPromise 
+			}
 			:Done( function( )
 				controller:sendActiveEquipmentTo( ply )
 			end )
