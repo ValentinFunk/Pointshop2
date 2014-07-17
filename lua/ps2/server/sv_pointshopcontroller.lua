@@ -125,7 +125,7 @@ end
 	and equip Items he has in them
 */
 function Pointshop2Controller:initializeSlots( ply )
-	Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
+	return Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
 	:Then( function( slots )
 		--Don't double equip if the script gets reloaded
 		local shouldEquipItems = true
@@ -225,14 +225,20 @@ local function initPlayer( ply )
 	controller:sendWallet( ply )
 	
 	ply.outfitsReceivedPromise = Deferred( )
-	ply.outfitsReceivedPromise:Done( function( )
-		controller:sendActiveEquipmentTo( ply )
-	end )
 	Pointshop2.LoadModuleItemsPromise:Done( function( )
 		controller:sendDynamicInfo( ply )
-		controller:initializeInventory( ply )
-		:Done( function( )
-			controller:initializeSlots( ply )
+		
+		--TODO: Make a proper promise/transaction for this
+		timer.Simple( 1, function( )
+			local slotsAndInvLoaded = controller:initializeInventory( ply )
+			:Then( function( )
+				return controller:initializeSlots( ply )
+			end )
+			
+			WhenAllFinished{ slotsAndInvLoaded, ply.outfitsReceivedPromise }
+			:Done( function( )
+				controller:sendActiveEquipmentTo( ply )
+			end )
 		end )
 	end )
 end
