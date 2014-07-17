@@ -229,7 +229,7 @@ local function initPlayer( ply )
 		controller:sendDynamicInfo( ply )
 		
 		--TODO: Make a proper promise/transaction for this
-		timer.Simple( 1, function( )
+		timer.Simple( 2, function( )
 			WhenAllFinished{ controller:initializeInventory( ply ),
 				controller:initializeSlots( ply ),
 				ply.outfitsReceivedPromise 
