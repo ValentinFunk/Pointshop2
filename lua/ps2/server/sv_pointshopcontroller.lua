@@ -391,7 +391,6 @@ function Pointshop2Controller:moduleItemsChanged( )
 	end )
 	:Done( function( )
 		for k, v in pairs( player.GetAll( ) ) do
-			print( v )
 			v.outfitsReceivedPromise:Done( function( )
 				self:sendDynamicInfo( v )
 			end )
