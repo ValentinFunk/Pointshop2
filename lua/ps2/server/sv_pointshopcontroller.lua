@@ -406,7 +406,7 @@ function Pointshop2Controller:moduleItemsChanged( )
 		v.outfitsReceivedPromise = Deferred( )
 	end
 	
-	self:loadModuleItems( )
+	return self:loadModuleItems( )
 	:Then( function( )
 		return self:loadOutfits( )
 	end )

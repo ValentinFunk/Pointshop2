@@ -19,6 +19,27 @@ local function generateExportTable( class )
 	end )
 end
 
+local copyModelFields = LibK.copyModelFields
+local function importDataFromTable( class, exportTable )
+	local promises = {}
+	
+	for _, instanceExport in pairs( exportTable ) do
+		local itemPersistence = Pointshop2.ItemPersistence:new( )
+		copyModelFields( itemPersistence, instanceExport.ItemPersistence, Pointshop2.ItemPersistence.model )
+		
+		local promise = itemPersistence:save( )
+		:Then( function( itemPersistence )
+			local actualPersistence = class:new( )
+			copyModelFields( actualPersistence, instanceExport, class.model )
+			actualPersistence.itemPersistenceId = itemPersistence.id
+			return actualPersistence:save( )
+		end )
+		table.insert( promises, promise )
+	end
+	
+	return WhenAllFinished( promises )
+end
+
 function EasyExport:included( class )
 	--Bind generateExportTable to class
 	class.generateExportTable = function( )
@@ -41,29 +62,4 @@ function EasyExport:generateInstanceExportTable( )
 	cleanTable.ItemPersistence = self.ItemPersistence:generateInstanceExportTable( )
 	
 	return cleanTable
-end
-
-local function copyModelFields( destination, source, model )
-	for k, v in pairs( source ) do
-		if model.fields[k] then
-			destination[k] = v
-		end
-	end	
-end
-
-local function importDataFromTable( class, exportTable )
-	local promises = {}
-	
-	for _, instanceExport in pairs( exportTable ) do
-		local itemPersistence = Pointshop2.ItemPersistence:new( )
-		copyModelFields( itemPersistence, instanceExport.ItemPersistence, Pointshop2.ItemPersistence.model )
-		
-		local promise = itemPersistence:save( )
-		:Then( function( itemPersistence )
-			local actualPersistence = class:New( )
-			copyModelFields( actualPersistence, instanceExport, class.model )
-			actualPersistence.itemPersistenceId = itemPersistence.id
-			return actualPersistence:save( )
-		end )
-	end
 end

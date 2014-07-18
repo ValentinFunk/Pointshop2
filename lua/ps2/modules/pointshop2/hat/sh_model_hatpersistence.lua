@@ -96,3 +96,67 @@ function HatPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate 
 		return WhenAllFinished( outfitPromises )
 	end )
 end
+
+HatPersistence:include( Pointshop2.EasyExport )
+
+--Nice and easy
+function HatPersistence:generateInstanceExportTable( )
+	local cleanTable = Pointshop2.EasyExport.generateInstanceExportTable( self )
+	cleanTable.OutfitHatPersistenceMapping = {}
+	for _, mapping in pairs( self.OutfitHatPersistenceMapping ) do
+		table.insert( cleanTable.OutfitHatPersistenceMapping, {
+			model = mapping.model,
+			outfit = Pointshop2.Outfits[mapping.outfitId],
+		} )
+	end
+	return cleanTable
+end
+
+--Not so easy
+local copyModelFields = LibK.copyModelFields
+function HatPersistence.static.importDataFromTable( exportTable )
+	local promises = {}
+	
+	for _, instanceExport in pairs( exportTable ) do
+		--Create basic persistence
+		local itemPersistence = Pointshop2.ItemPersistence:new( )
+		copyModelFields( itemPersistence, instanceExport.ItemPersistence, Pointshop2.ItemPersistence.model )
+		
+		local promise = itemPersistence:save( )
+		:Then( function( itemPersistence )
+			--Create hat persistence
+			local actualPersistence = HatPersistence:new( )
+			copyModelFields( actualPersistence, instanceExport, HatPersistence.model )
+			actualPersistence.itemPersistenceId = itemPersistence.id
+			return actualPersistence:save( )
+		end )
+		:Then( function( actualPersistence )
+			local mappingPromises = {}
+			
+			--Create outfits and set up mappings
+			for k, mappingExport in pairs( instanceExport.OutfitHatPersistenceMapping ) do
+				--Create outfit
+				local outfit = Pointshop2.StoredOutfit:new( )
+				outfit.outfitData = mappingExport.outfit
+				
+				local mappingPromise = outfit:save( )
+				:Then( function( outfit )
+					--Create mapping
+					local mapping = Pointshop2.OutfitHatPersistenceMapping:new( )
+					mapping.model = mappingExport.model
+					mapping.hatPersistenceId = actualPersistence.id
+					mapping.outfitId = outfit.id
+					
+					return mapping:save( )
+				end )
+				table.insert( mappingPromises, mappingPromise )
+			end
+			
+			return WhenAllFinished( mappingPromises )
+		end )
+		
+		table.insert( promises, promise )
+	end
+	
+	return WhenAllFinished( promises )
+end
