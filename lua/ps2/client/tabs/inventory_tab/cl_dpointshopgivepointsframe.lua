@@ -47,7 +47,7 @@ function PANEL:Init( )
 	self.wang:DockMargin( 5, 7, 5, 0 )
 	self.wang:SetDisabled( true )
 	function self.wang.OnValueChanged( )
-		self:SetPoints( self.wang:GetValue( ) )
+		self:SetPoints( math.Clamp( self.wang:GetValue( ), 0, LocalPlayer().PS2_Wallet.points ) )
 	end	
 	function self.wang.OnKeyCodeTyped( pnl, code )
 		if code == KEY_ENTER then
