@@ -116,3 +116,7 @@ function Pointshop2.GetItemInSlot( ply, slotName )
 		end
 	end
 end
+
+function Pointshop2.GetCurrentServerId( )
+	return Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.ServerId" )
+end

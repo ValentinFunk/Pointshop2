@@ -93,7 +93,7 @@ function PANEL:savePositions( )
 			end
 		end
 	end
-	file.Write( "itempositions_" .. self.categoryName .. ".txt", util.TableToJSON( self.itemPositions ) )
+	file.Write( "itempositions_" .. Pointshop2.GetCurrentServerId( ) .. self.categoryName .. ".txt", util.TableToJSON( self.itemPositions ) )
 end
 
 /*

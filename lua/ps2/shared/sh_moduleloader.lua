@@ -129,6 +129,7 @@ function Pointshop2.LoadModules( )
 				end
 			}
 		}
+		setmetatable( env, { __index = _G } )
 		
 		local func = CompileFile( "ps2/modules/" .. folder .. "/sh_module.lua" )
 		if func then

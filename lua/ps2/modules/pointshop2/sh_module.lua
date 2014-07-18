@@ -39,11 +39,19 @@ MODULE.SettingButtons = {
 MODULE.Settings = {}
 MODULE.Settings.Shared = {
 	BasicSettings = {
+		info = {
+			label = "General Settings"
+		},
 		SellRatio = {
 			tooltip = "The price is multiplied with this to calculate the sell price",
-			label = "Sale repay ratio", 
+			label = "Item sell repay ratio", 
 			value = 0.75
 		},
+		ServerId = {
+			tooltip = "Generated from the ip and hostname, if you switch hosts/ips save this and change it back on the new host.",
+			label = "Server Id",
+			value = util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) ),
+		}
 	}
 }
 
