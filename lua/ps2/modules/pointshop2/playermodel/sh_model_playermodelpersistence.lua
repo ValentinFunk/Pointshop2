@@ -20,6 +20,7 @@ PlayermodelPersistence.static.model = {
 }
 
 PlayermodelPersistence:include( DatabaseModel )
+PlayermodelPersistence:include( Pointshop2.EasyExport )
 
 function PlayermodelPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
 	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable, doUpdate )

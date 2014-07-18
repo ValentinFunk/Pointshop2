@@ -44,3 +44,10 @@ function ItemPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate
 		return instance:save( )
 	end )
 end
+
+function ItemPersistence:generateInstanceExportTable( )
+	local cleanTable = generateNetTable( self )
+	cleanTable.id = nil
+	cleanTable._classname = nil
+	return cleanTable
+end

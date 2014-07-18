@@ -333,10 +333,9 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 		end
 	end
 end	
-	
-function Pointshop2Controller:loadModuleItems( )
-	local promises = {}
-	self.cachedPersistentItems = {}
+
+function Pointshop2Controller:getPersistenceModels( )
+	local persistences = {}
 	for _, mod in pairs( Pointshop2.Modules ) do
 		for k, v in pairs( mod.Blueprints ) do
 			local class = Pointshop2.GetItemClassByName( v.base )
@@ -344,16 +343,28 @@ function Pointshop2Controller:loadModuleItems( )
 				KLogf( 2, "[Pointshop2][Error] Blueprint %s: couldn't find baseclass", v.base )
 				continue
 			end
-			local promise = class.getPersistence( ).getDbEntries( "WHERE 1" )
-			:Then( function( persistentItems ) 
-				for _, persistentItem in pairs( persistentItems ) do
-					table.insert( self.cachedPersistentItems, persistentItem )
-					Pointshop2.LoadPersistentItem( persistentItem )
-				end
-			end )
-			table.insert( promises, promise )
+			
+			table.insert( persistences, class.getPersistence( ) )
 		end
 	end
+	return persistences
+end
+	
+function Pointshop2Controller:loadModuleItems( )
+	local promises = {}
+	self.cachedPersistentItems = {}
+	
+	for _, persistence in pairs( Pointshop2Controller:getPersistenceModels( ) ) do
+		local promise = persistence.getDbEntries( "WHERE 1" )
+		:Then( function( persistentItems ) 
+			for _, persistentItem in pairs( persistentItems ) do
+				table.insert( self.cachedPersistentItems, persistentItem )
+				Pointshop2.LoadPersistentItem( persistentItem )
+			end
+		end )
+		table.insert( promises, promise )
+	end
+
 	return WhenAllFinished( promises )
 end
 local function loadPersistent( )

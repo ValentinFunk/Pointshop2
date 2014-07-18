@@ -18,6 +18,8 @@ TrailPersistence.static.model = {
 }
 
 TrailPersistence:include( DatabaseModel )
+TrailPersistence:include( Pointshop2.EasyExport )
+
 
 function TrailPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate )
 	return Pointshop2.ItemPersistence.createOrUpdateFromSaveTable( saveTable, doUpdate )
