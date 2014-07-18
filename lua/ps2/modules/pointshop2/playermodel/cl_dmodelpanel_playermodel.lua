@@ -99,7 +99,7 @@ function PANEL:Paint( w, h )
 			end
 		end
 		
-		self.Entity:DrawModel()
+		self:DrawModel()
 		
 		render.SuppressEngineLighting( false )
 	cam.IgnoreZ( false )
@@ -135,4 +135,4 @@ function PANEL:PlayIdleAnimation( )
 	if ( iSeq > 0 ) then self.Entity:ResetSequence( iSeq ) end
 end
 
-derma.DefineControl( "DModelPanel_PlayerModel", "", PANEL, "DModelPanel" )
+derma.DefineControl( "DModelPanel_PlayerModel", "", PANEL, "DFixedModelPanel" )
