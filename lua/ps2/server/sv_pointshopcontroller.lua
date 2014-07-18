@@ -72,6 +72,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 		def:Resolve( )
 	elseif action == "equipItem" or action == "unequipItem" then
 		def:Resolve( )
+	elseif action == "sendPoints" then
+		def:Resolve( )
 	else
 		def:Reject( 1, "Permission denied" )
 	end
@@ -203,6 +205,10 @@ end
 function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 	for _, ply in pairs( player.GetAll( ) ) do
 		if ply == plyToSendTo then
+			continue --handled in the slot-sender
+		end
+		
+		if not ply.PS2_Slots then
 			continue --handled in the slot-sender
 		end
 		
@@ -447,3 +453,33 @@ end )
 Pointshop2.SettingsLoadedPromise:Done( function( )
 	Pointshop2Controller:getInstance( ):registerShopOpenHook( )
 end )
+
+function Pointshop2Controller:sendPoints( ply, targetPly, points )
+	if points < 0 then
+		KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
+		return
+	end
+	
+	if points > ply.PS2_Wallet.points then
+		KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
+		return
+	end
+	
+	if not IsValid( targetPly ) then
+		--This could legitimately happen
+		KLogf( 4, "Player %s tried to send points to an invalid player!", ply:Nick( ) )
+		return
+	end
+	
+	self:updatePlayerWallet( ply.kPlayerId, "points", ply.PS2_Wallet.points - points )
+	:Done( function( wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
+	end )
+	
+	self:updatePlayerWallet( targetPly.kPlayerId, "points", targetPly.PS2_Wallet.points + points )
+	:Done( function( wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( targetPly ), wallet )
+	end )
+	
+	--TODO: Send the targetPlayer a nice notification, similar to iten added
+end

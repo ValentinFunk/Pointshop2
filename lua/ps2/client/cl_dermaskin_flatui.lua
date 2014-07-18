@@ -215,7 +215,7 @@ function SKIN:PaintButton( panel, w, h )
 		panel.m_Image:SetImageColor( color_white )
 	end
 	
-	if panel.Hovered or panel.Highlight then
+	if panel.Hovered or panel.Highlight or panel.Selected then
 		surface.SetDrawColor( self.Highlight )
 		surface.DrawRect( 0, 0, w, h )
 		if IsValid( panel.m_Image ) then

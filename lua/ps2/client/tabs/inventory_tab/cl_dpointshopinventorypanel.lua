@@ -51,7 +51,21 @@ function PANEL:Init( )
 	self.bottomPnl:Dock( BOTTOM )
 	self.bottomPnl:SetTall( 50 )
 	self.bottomPnl:DockMargin( 0, 8, 0, 0 )
+	self.bottomPnl:DockPadding( 5, 5, 5, 5 )
 	Derma_Hook( self.bottomPnl, "Paint", "Paint", "InnerPanel" )
+	
+	self.sendPointsBtn = vgui.Create( "DButton", self.bottomPnl )
+	self.sendPointsBtn:Dock( FILL )
+	self.sendPointsBtn:SetText( "Send Points" )
+	self.sendPointsBtn:SetImage( "pointshop2/transfer.png")
+	self.sendPointsBtn.m_Image:SetSize( 22, 22 )
+	function self.sendPointsBtn:DoClick( )
+		local giveFrame = vgui.Create( "DPointshopGivePointsFrame" )
+		giveFrame:MakePopup( )
+		giveFrame:DoModal( )
+		giveFrame:SetSkin( Pointshop2.Config.DermaSkin )
+		giveFrame:Center( )
+	end
 	
 	/*
 		RIGHT BAR: Preview, Equip Slots, Item Description

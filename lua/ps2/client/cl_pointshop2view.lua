@@ -289,3 +289,7 @@ function Pointshop2View:saveSettings( mod, realm, settingsTbl )
 	
 	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )	
 end
+
+function Pointshop2View:sendPoints( ply, points )
+	self:controllerAction( "sendPoints", ply, points )
+end
