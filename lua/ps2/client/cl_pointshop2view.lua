@@ -293,3 +293,7 @@ end
 function Pointshop2View:sendPoints( ply, points )
 	self:controllerAction( "sendPoints", ply, points )
 end
+
+function Pointshop2View:resetToDefaults( )
+	self:controllerAction( "resetToDefaults" )
+end

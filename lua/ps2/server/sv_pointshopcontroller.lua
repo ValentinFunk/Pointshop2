@@ -1,52 +1,56 @@
 Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
 
---TODO:
---	- Cache player inventories
---	- Cache player items
--- Why? For proper, persistent OO and reduction in queries
+function Pointshop2.InitPromises( )
+	Pointshop2.LoadModuleItemsPromise = Deferred( )
+	Pointshop2.LoadModuleItemsPromise:Done( function( )
+		KLogf( 4, "[Pointshop2] All Module items were loaded" )
+	end )
 
-Pointshop2.LoadModuleItemsPromise = Deferred( )
-Pointshop2.LoadModuleItemsPromise:Done( function( )
-	KLogf( 4, "[Pointshop2] All Module items were loaded" )
-end )
+	Pointshop2.ItemsLoadedPromise = Deferred( )
+	Pointshop2.ItemsLoadedPromise:Done( function( )
+		KLogf( 4, "[Pointshop2] All Items were loaded by KInv" )
+	end )
+	hook.Add( "KInv_ItemsLoaded", "ResolveDeferred", function( )
+		Pointshop2.ItemsLoadedPromise:Resolve( ) --Trigger ready for all listeners
+	end )
 
-Pointshop2.ItemsLoadedPromise = Deferred( )
-Pointshop2.ItemsLoadedPromise:Done( function( )
-	KLogf( 4, "[Pointshop2] All Items were loaded by KInv" )
-end )
-hook.Add( "KInv_ItemsLoaded", "ResolveDeferred", function( )
-	Pointshop2.ItemsLoadedPromise:Resolve( ) --Trigger ready for all listeners
-end )
+	Pointshop2.DatabaseConnectedPromise = Deferred( )
+	Pointshop2.DatabaseConnectedPromise:Done( function( )
+		KLogf( 4, "[Pointshop2] The database was connected" )
+	end )
+	function Pointshop2.onDatabaseConnected( )
+		Pointshop2.DatabaseConnectedPromise:Resolve( )
+	end
 
-Pointshop2.DatabaseConnectedPromise = Deferred( )
-Pointshop2.DatabaseConnectedPromise:Done( function( )
-	KLogf( 4, "[Pointshop2] The database was connected" )
-end )
-function Pointshop2.onDatabaseConnected( )
-	Pointshop2.DatabaseConnectedPromise:Resolve( )
+	Pointshop2.SettingsLoadedPromise = Deferred( )
+	Pointshop2.SettingsLoadedPromise:Done( function( )
+		KLogf( 4, "[Pointshop2] Settings have been loaded" )
+	end )
+
+	Pointshop2.FullyInitializedPromise = WhenAllFinished{ 
+		Pointshop2.ItemsLoadedPromise:Promise( ),
+		Pointshop2.DatabaseConnectedPromise:Promise( ),
+		Pointshop2.SettingsLoadedPromise:Promise( )
+	}
+	Pointshop2.FullyInitializedPromise:Done( function( )
+		KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
+	end )
 end
-
-Pointshop2.SettingsLoadedPromise = Deferred( )
-Pointshop2.SettingsLoadedPromise:Done( function( )
-	KLogf( 4, "[Pointshop2] Settings have been loaded" )
-end )
-
-Pointshop2.FullyInitializedPromise = WhenAllFinished{ 
-	Pointshop2.ItemsLoadedPromise:Promise( ),
-	Pointshop2.DatabaseConnectedPromise:Promise( ),
-	Pointshop2.SettingsLoadedPromise:Promise( )
-}
-Pointshop2.FullyInitializedPromise:Done( function( )
-	KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
-end )
-
+Pointshop2.InitPromises( )
+	
 --Override for access controll
 --returns a promise, resolved if user can do it, rejected with error if he cant
 function Pointshop2Controller:canDoAction( ply, action )
 	local def = Deferred( )
 	if action == "saveCategoryOrganization" then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
+			def:Resolve( )
+		else
+			def:Reject( 1, "Permission Denied" )
+		end
+	elseif action == "resetToDefaults" then
+		if PermissionInterface.query( ply, "pointshop2 reset" ) then
 			def:Resolve( )
 		else
 			def:Reject( 1, "Permission Denied" )

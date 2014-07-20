@@ -3,19 +3,29 @@ LibK.addContentFolder( "materials/trails" )
 LibK.SetupDatabase( "Pointshop2", Pointshop2 )
 
 function Pointshop2.ResetDatabase( )
-	for k, v in pairs( Pointshop2 ) do
-		if istable( v ) and v.dropTable then
-			v.dropTable( )
-			KLogf( 5, "Dropped %s", v.name )
+	local models = {}
+	local function add( tbl ) 
+		for k, v in pairs( tbl ) do
+			if istable( v ) and v.dropTable then
+				table.insert( models, v )
+			end
 		end
 	end
+	add( Pointshop2 )
+	add( KInventory )
 	
-	for k, v in pairs( KInventory ) do
-		if istable( v ) and v.dropTable then
-			v.dropTable( )
-			KLogf( 5, "Dropped %s", v.name )
-		end
+	local promises = {}
+	for k, v in pairs( models ) do
+		local promise = v.dropTable( )
+		:Then( function( )
+			v:initializeTable( )
+		end )
+		:Done( function( )
+			KLogf( 5, "Reset table %s", v.name )
+		end )
+		table.insert( promises, promise )
 	end
+	return WhenAllFinished( promises )
 end
 
 function Pointshop2.PlayerOwnsItem( ply, item )
