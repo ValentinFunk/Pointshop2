@@ -144,7 +144,7 @@ function PANEL:Init( )
 	function left.radioBtns:PerformLayout( )
 		self:SizeToContents( false, true )
 	end
-	left.radioBtns:SetTall( 50 )
+	left.radioBtns:SetTall( 60 )
 	left.radioBtns:Dock( TOP )
 	left.radioBtns:DockMargin( 0, 5, 5, 0 )
 	
