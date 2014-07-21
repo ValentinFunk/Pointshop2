@@ -297,3 +297,7 @@ end
 function Pointshop2View:resetToDefaults( )
 	self:controllerAction( "resetToDefaults" )
 end
+
+function Pointshop2View:removeItem( itemClass, refund )
+	self:controllerAction( "removeItem", itemClass, refund )
+end
