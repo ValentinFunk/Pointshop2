@@ -16,7 +16,7 @@ Documentation source: https://github.com/Kamshak/Pointshop2-Docs/
 # Pointshop 2
 
 ## Welcome to Pointshop 2
-Pointshop 2 is the next generation pointshop, designed to provide a better experience to both, sever administrators and players. Its main features include easy creation and management of items, categories, players and settings through in-game menus as well as an innovative, inventory-based approach to item equipment. 
+Pointshop 2 is the next generation pointshop, coded from scratch to provide a better experience to both, server administrators and players. Its main features include easy creation and management of items, categories, players and settings through in-game menus as well as an innovative, inventory-based approach to item equipment. 
 
 ## Shop Management
 It can be very frustrating as a server administrator to manage a shop system. Previously, items and categories would be created in Lua files, which is error prone, complicated and often a very tedious task. Frequently changing the map during modifications was very time consuming as well as making it impossible to play on the server.
@@ -56,3 +56,20 @@ Looking to create a pointshop 2 addon? Request a discounted [developer license](
 
 # Installation and Setup
 Installing the script is very simple. To keep all information in one place please refer to [the official documentation](http://pointshop2.kamshak.com/en/latest/installation.html) for setup and usage instructions.
+
+## Credits
+
+Pointshop 2 wouldn't be possible without the help of many people. 
+Thanks go to:
+- The CyberGmod community, especially Dazzaoh, STEEZE, Phoenixf129 and Reuben. Thank you for hosting the test server and the help with testing and developing the script. Special thanks for the generous donation of the PAC items included.
+- NiandraLades for pointshop 2 exclusive trails and allowing the inclusion of her numerous trail Packs and her kind help with writing documentation.
+- !cake for his remarkable work with GLib, a technical tool that is used throughout the script and makes it possible to handle large amounts of data very efficiently.
+- MDave for his help on complex questions, especially on topics such as stencils.
+- adamburton aka _Undefined for the original pointshop script
+- CapsAdmin for PAC3, which is used to provide the advanced hat/accessory positioning editor and the rendering of advanced items, as well as ludata
+- Vercas for vON, the flexible lua serializer
+- Lexic for the creation of the lua Promises system used throughout the script to provide non-blocking, blazing fast mysql queries
+
+- To the server/community owners for sharing their experience with pointshop and giving great input on how to improve:
+ - TODO: List them here
+
