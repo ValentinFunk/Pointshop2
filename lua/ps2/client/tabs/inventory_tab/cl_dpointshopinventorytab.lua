@@ -1,11 +1,20 @@
+Pointshop2.InventoryPanels = { }
+function Pointshop2:AddInventoryPanel( label, icon, controlName, shouldShow )
+	table.insert( Pointshop2.InventoryPanels, { label = label, icon = icon, controlName = controlName, shouldShow = shouldShow } )
+end
+
+
 local PANEL = {}
 
 function PANEL:Init( )
-	self.invPage =  vgui.Create( "DPointshopInventoryPanel", self )
-	self:addMenuEntry( "Items", "pointshop2/briefcase3.png", self.invPage )
-	
-	--self.tradePanel = vgui.Create( "DPanel" )
-	--self:addMenuEntry( "Trade", "pointshop2/transfer.png", self.tradePanel )
+	for k, btnInfo in pairs( Pointshop2.InventoryPanels ) do
+		if btnInfo.shouldShow and not btnInfo.shouldShow() then
+			continue
+		end
+		
+		local panel = vgui.Create( btnInfo.controlName )
+		self:addMenuEntry( btnInfo.label, btnInfo.icon, panel )
+	end
 end
 
 Derma_Hook( PANEL, "Paint", "Paint", "PointshopInventoryTab" )
