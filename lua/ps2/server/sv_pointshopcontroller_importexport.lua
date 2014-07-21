@@ -196,11 +196,12 @@ end
 function Pointshop2Controller:resetToDefaults( )
 	--Just to be sure...
 	WhenAllFinished{ self:exportItems( ), self:exportCategoryOrganization( ) }
-	:Done( function( )
+	:Then( function( )
 		--Reset All
 		return Pointshop2.ResetDatabase( )
 	end )
 	:Done( function( )
+		hook.Run( "Pointshop2_FullReset" )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
 	end )
 end
