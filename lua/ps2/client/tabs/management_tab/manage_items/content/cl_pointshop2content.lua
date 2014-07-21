@@ -24,6 +24,20 @@ local function addEditMenu( panel, itemClass )
 		btn:SetImage( "pointshop2/pencil54.png" )
 		btn.m_Image:SetSize( 16, 16 )
 		
+		local btn = menu:AddOption( "Delete", function( )
+			Derma_Query( "Do you really want to permanently delete this item?", "Confirm",
+				"Yes and refund players", function( )
+					Pointshop2View:getInstance( ):removeItem( itemClass, true )
+				end,
+				"Yes", function( )
+					Pointshop2View:getInstance( ):removeItem( itemClass )
+				end, 
+				"No", function( )
+				end
+			)
+		end )
+		btn:SetImage( "pointshop2/cross66.png" )
+		
 		menu:Open( )
 	end
 end
