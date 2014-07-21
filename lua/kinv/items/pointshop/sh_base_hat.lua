@@ -53,6 +53,13 @@ function ITEM:PlayerSpawn( ply )
 end
 Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
 
+function ITEM:PlayerDeath( victim, inflictor, attacker )
+	if victim == self:GetOwner( ) then
+		self:RemoveOutfit( self:GetOwner( ) )
+	end
+end
+Pointshop2.AddItemHook( "PlayerDeath", ITEM )
+
 /*
 	Tech stuff
 */
