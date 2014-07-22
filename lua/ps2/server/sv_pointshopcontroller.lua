@@ -268,7 +268,7 @@ end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )
 	--Repopulate Categories Table
-	Pointshop2.Category.removeWhere{ [1] = 1 }
+	Pointshop2.Category.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate categories", errid, err ) end )
 	
 	local function recursiveAddCategory( category, parentId )
@@ -290,7 +290,7 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	end
 	
 	--Repopulate Item Mappings Table
-	Pointshop2.ItemMapping.removeWhere{ [1] = 1 }
+	Pointshop2.ItemMapping.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
 	
 	local function recursiveAddItems( category )
@@ -508,7 +508,7 @@ end
 function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	
-	return Pointshop2.ItemMapping.removeWhere{ itemPersistenceId = itemClassName }
+	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClassName }
 	:Then( function( )
 		return KInventory.Item.removeWhere{ itemclass = itemClassName }
 	end )
