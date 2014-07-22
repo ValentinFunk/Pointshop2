@@ -43,7 +43,9 @@ Pointshop2.InitPromises( )
 --returns a promise, resolved if user can do it, rejected with error if he cant
 function Pointshop2Controller:canDoAction( ply, action )
 	local def = Deferred( )
-	if action == "saveCategoryOrganization" then
+	if action == "saveCategoryOrganization" or
+	   action == "removeItem"
+	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
 			def:Resolve( )
 		else
@@ -266,7 +268,7 @@ end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )
 	--Repopulate Categories Table
-	Pointshop2.Category.truncateTable( )
+	Pointshop2.Category.removeWhere{ [1] = 1 }
 	:Fail( function( errid, err ) error( "Couldn't truncate categories", errid, err ) end )
 	
 	local function recursiveAddCategory( category, parentId )
@@ -288,7 +290,7 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	end
 	
 	--Repopulate Item Mappings Table
-	Pointshop2.ItemMapping.truncateTable( )
+	Pointshop2.ItemMapping.removeWhere{ [1] = 1 }
 	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
 	
 	local function recursiveAddItems( category )
@@ -320,16 +322,20 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 		error( "Error starting transaction:", err )
 	end )
 	
+	--Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=0" ) --sorry
+	
 	local success, err = pcall( performSafeCategoryUpdate, categoryItemsTable )
 	if not success then
 		KLogf( 2, "Error saving categories: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
+		--Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
 		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured, your changes could not be saved!" )
 	else
 		KLogf( 4, "Categories Updated" )
 		Pointshop2.DB.DoQuery( "COMMIT" )
+		--Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
 		LibK.SetBlocking( false )
 		
 		for k, v in pairs( player.GetAll( ) ) do
@@ -497,4 +503,27 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 	end )
 	
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
+end
+
+function Pointshop2Controller:removeItem( ply, itemClassName, refund )
+	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+	
+	return Pointshop2.ItemMapping.removeWhere{ itemPersistenceId = itemClassName }
+	:Then( function( )
+		return KInventory.Item.removeWhere{ itemclass = itemClassName }
+	end )
+	:Then( function( )
+		if not itemClass then
+			local def = Deferred( )
+			def:Reject( "An item " .. itemClassName .. " doesn't exist!" )
+			return def:Promise( )
+		end
+		if itemClass:getPersistence( ).customRemove then
+			return itemClass:getPersistence( ).customRemove( itemClass )
+		end
+		return Pointshop2.ItemPersistence.removeWhere{ id = itemClassName }
+	end )
+	:Then( function( )
+		return self:moduleItemsChanged( )
+	end )
 end

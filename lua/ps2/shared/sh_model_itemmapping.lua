@@ -6,8 +6,14 @@ ItemMapping.static.DB = "Pointshop2"
 ItemMapping.static.model = {
 	tableName = "ps2_itemmapping",
 	fields = {
-		categoryId = "optKey",
-		itemClass = "string"
+		categoryId = "int",
+		itemPersistenceId = "string"
+	},
+	belongsTo = {
+		Category = {
+			class = "Pointshop2.Category",
+			foreignKey = "categoryId"
+		}
 	}
 }
 

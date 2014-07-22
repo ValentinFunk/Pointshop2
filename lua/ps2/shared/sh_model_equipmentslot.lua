@@ -14,7 +14,11 @@ EquipmentSlot.static.model = {
 		Item = {
 			class = "KInventory.Item",
 			foreignKey = "itemId"
-		}
+		},
+		/*Owner = {
+			class = "LibK.Player",
+			foreignKey = "ownerId"
+		}*/
 	}
 }
 

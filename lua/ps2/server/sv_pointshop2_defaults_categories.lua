@@ -1,0 +1,3 @@
+Pointshop2.DefaultCategories = {
+
+}

@@ -26,10 +26,15 @@ local function addEditMenu( panel, itemClass )
 		
 		local btn = menu:AddOption( "Delete", function( )
 			Derma_Query( "Do you really want to permanently delete this item?", "Confirm",
-				"Yes and refund players", function( )
+				/*"Yes and refund players", function( )
 					Pointshop2View:getInstance( ):removeItem( itemClass, true )
-				end,
+				end,*/
 				"Yes", function( )
+					local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
+					if persistence == "STATIC" then
+						return Derma_Message( "This item is Lua defined and cannot be deleted ingame. To delete it remove " .. itemClass.originFilePath, "Error" )
+					end
+			
 					Pointshop2View:getInstance( ):removeItem( itemClass )
 				end, 
 				"No", function( )
@@ -37,6 +42,7 @@ local function addEditMenu( panel, itemClass )
 			)
 		end )
 		btn:SetImage( "pointshop2/cross66.png" )
+		btn.m_Image:SetSize( 16, 16 )
 		
 		menu:Open( )
 	end
@@ -98,6 +104,7 @@ function SetupCategoryNode( node, pnlContent )
 			hook.Run( "PS2_SpawnlistContentChanged" ) 
 		end )
 		btn:SetImage( "pointshop2/category1.png" )
+		btn.m_Image:SetSize( 16, 16 )
 		btn.m_Image:SetSize( 16, 16 )
 		
 		menu:Open()

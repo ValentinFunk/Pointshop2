@@ -35,7 +35,7 @@ MODULE.SettingButtons = {
 		control = "DPointshop2Configurator"
 	},
 	{
-		label = "Reset Everything",
+		label = "Reset All",
 		icon = "pointshop2/restart1.png",
 		control = "DPointshopReset"
 	}

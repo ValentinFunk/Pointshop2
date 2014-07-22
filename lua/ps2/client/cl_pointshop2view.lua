@@ -150,6 +150,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	end
 	self.categoryItemsTable = categoryItemsTable
 	
+	--Hacky, dunno why this is needed
 	hook.Call( "PS2_DynamicItemsUpdated" )
 	timer.Simple( 0.1, function( )
 		hook.Call( "PS2_DynamicItemsUpdated" )
@@ -299,5 +300,8 @@ function Pointshop2View:resetToDefaults( )
 end
 
 function Pointshop2View:removeItem( itemClass, refund )
-	self:controllerAction( "removeItem", itemClass, refund )
+	self:controllerTransaction( "removeItem", itemClass.className, refund )
+	:Done( function( )
+		KInventory.Items[itemClass.className] = nil
+	end )
 end

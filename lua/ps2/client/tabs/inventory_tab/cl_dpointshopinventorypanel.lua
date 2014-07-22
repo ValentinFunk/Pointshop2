@@ -129,4 +129,4 @@ end
 Derma_Hook( PANEL, "Paint", "Paint", "PointshopInventoryPanel" )
 derma.DefineControl( "DPointshopInventoryPanel", "", PANEL, "DPanel" )
 
-Pointshop2.AddInventoryPanel( "Items", "pointshop2/briefcase3.png", "DPointshopInventoryPanel" )
+Pointshop2:AddInventoryPanel( "Items", "pointshop2/briefcase3.png", "DPointshopInventoryPanel" )

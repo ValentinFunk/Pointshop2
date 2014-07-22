@@ -16,7 +16,8 @@ HatPersistence.static.model = {
 	belongsTo = {
 		ItemPersistence = {
 			class = "Pointshop2.ItemPersistence",
-			foreignKey = "itemPersistenceId"
+			foreignKey = "itemPersistenceId",
+			onDelete = "CASCADE"
 		}
 	},
 	hasMany = {
@@ -159,4 +160,16 @@ function HatPersistence.static.importDataFromTable( exportTable )
 	end
 	
 	return WhenAllFinished( promises )
+end
+
+function HatPersistence.static.customRemove( itemClass )
+	local ids = { "NULL" }
+	for k, v in pairs( itemClass.outfitIds ) do
+		table.insert( ids, tonumber(v) )
+	end
+	
+	return WhenAllFinished{
+		Pointshop2.StoredOutfit.removeDbEntries( "WHERE id IN (" .. table.concat( ids, ',' ) .. ")" ),
+		Pointshop2.ItemPersistence.removeWhere{ id = itemClass.className }
+	}
 end

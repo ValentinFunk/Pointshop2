@@ -12,7 +12,8 @@ TrailPersistence.static.model = {
 	belongsTo = {
 		ItemPersistence = {
 			class = "Pointshop2.ItemPersistence",
-			foreignKey = "itemPersistenceId"
+			foreignKey = "itemPersistenceId",
+			onDelete = "CASCADE"
 		}
 	}
 }

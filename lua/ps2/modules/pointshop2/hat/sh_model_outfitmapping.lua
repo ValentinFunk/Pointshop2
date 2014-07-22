@@ -9,6 +9,18 @@ OutfitHatPersistenceMapping.static.model = {
 		hatPersistenceId = "int",
 		outfitId = "int",
 		model = "string", --can be a full model path or HatPersistence constants
+	},
+	belongsTo = {
+		HatPersistence = {
+			class = "Pointshop2.HatPersistence",
+			foreignKey = "hatPersistenceId",
+			onDelete = "CASCADE",
+		},
+		Outfit = {
+			class = "Pointshop2.StoredOutfit", 
+			foreignKey = "outfitId",
+			onDelete = "CASCADE"
+		}
 	}
 }
 

@@ -14,17 +14,29 @@ function Pointshop2.ResetDatabase( )
 	add( Pointshop2 )
 	add( KInventory )
 	
+	LibK.SetBlocking( true )
+	Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=0" ) --sorry
 	local promises = {}
 	for k, v in pairs( models ) do
 		local promise = v.dropTable( )
-		:Then( function( )
-			v:initializeTable( )
-		end )
 		:Done( function( )
-			KLogf( 5, "Reset table %s", v.name )
+			KLogf( 5, "Dropped table %s", v.name )
 		end )
 		table.insert( promises, promise )
 	end
+	
+	LibK.ResetTableCache( )
+	
+	for k, v in pairs( models ) do
+		local promise = v:initializeTable( )
+		:Done( function( )
+			KLogf( 5, "Reset Table %s", v.name )
+		end )
+		table.insert( promises, promise )
+	end
+	Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" ) --sorry
+	LibK.SetBlocking( false )
+	
 	return WhenAllFinished( promises )
 end
 
