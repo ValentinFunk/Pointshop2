@@ -7,7 +7,7 @@ ItemMapping.static.model = {
 	tableName = "ps2_itemmapping",
 	fields = {
 		categoryId = "int",
-		itemPersistenceId = "string"
+		itemClass = "string"
 	},
 	belongsTo = {
 		Category = {
