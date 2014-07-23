@@ -15,7 +15,7 @@ function PANEL:Init( )
 	
 	self.snapshotPreview = vgui.Create( "DPreRenderedModelPanel", container )
 	self.snapshotPreview.forceRender = true
-	self.snapshotPreview:SetModel( Pointshop2:GetPreviewModel() or "models/player/kleiner.mdl" )
+	self.snapshotPreview:SetModel( "models/player/kleiner.mdl" )
 	
 	local sliders = vgui.Create( "DPanel", container )
 	sliders:Dock( FILL )

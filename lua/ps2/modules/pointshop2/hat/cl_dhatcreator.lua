@@ -144,14 +144,14 @@ function PANEL:Init( )
 			function f.OnSave( _self, outfit )
 				return self:OutfitSaved( outfit )
 			end
-			if modelPath == Pointshop2.HatPersistence.ALL_CSS_MODELS then
+			if model == Pointshop2.HatPersistence.ALL_CSS_MODELS then
 				line.model = "models/player/t_guerilla.mdl"
-			elseif modelPath == Pointshop2.HatPersistence.ALL_MODELS then
+			elseif model == Pointshop2.HatPersistence.ALL_MODELS then
 				line.model = "models/player/kliener.mdl"
 			else
-				line.model = modelPath
+				line.model = model
 			end
-			self.currentModel = line.modelPath
+			self.currentModel = line.model
 			f:SetModel( line.model )
 			if line.outfit then
 				f:LoadOutfit( line.outfit )
