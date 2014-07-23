@@ -372,6 +372,37 @@ function SKIN:PaintRadioButton( panel, w, h )
 	end	
 end
 
+function SKIN:PaintScrollBarGrip( panel, w, h )
+	if panel.Depressed then
+		surface.SetDrawColor( self.Highlight )
+	else
+		surface.SetDrawColor( self.ButtonColor )
+	end
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintVScrollBar( panel, w, h )
+	surface.SetDrawColor( self.InnerPanel )
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintButtonDown( panel, w, h )
+	self:PaintButton( panel, w, h )
+	if not panel.m_Image then
+		panel:SetImage( "pointshop2/little9.png" )
+		panel.m_Image:SetSize( 8, 8 )
+	end
+end
+
+function SKIN:PaintButtonUp( panel, w, h )
+	self:PaintButton( panel, w, h )
+	if not panel.m_Image then
+		panel:SetImage( "pointshop2/little16.png" )
+		panel.m_Image:SetSize( 8, 8 )
+	end
+end
+
+
 
 derma.DefineSkin( SKIN.Name, "Poinsthop2 Default", SKIN )
 
