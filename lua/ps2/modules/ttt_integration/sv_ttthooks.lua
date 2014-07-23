@@ -83,7 +83,7 @@ hook.Add( "PlayerDeath", "PS2_PlayerDeath", function( victim, inflictor, attacke
 		end
 	elseif attackerRole == ROLE_DETECTIVE then
 		if victimRole == ROLE_TRAITOR and S("Kills.DetectiveKillsTraitor") then
-			if TTTConfig.Kills.DetectiveDnaBonus and attacker.hasDnaOn and attacker.hasDnaOn[victim] then
+			if attacker.hasDnaOn and attacker.hasDnaOn[victim] then
 				delayReward( attacker, S("Kills.DetectiveDnaBonus"), "DNA bonus" )
 			end
 			delayReward( attacker, S("Kills.DetectiveKillsTraitor"), "Killed Traitor" )
