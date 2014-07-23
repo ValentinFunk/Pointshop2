@@ -18,12 +18,16 @@ function PANEL:OnMousePressed( )
 		
 		local data = LibK.von.deserialize( serializedData )
 		
-		local creator = vgui.Create( self.settingsInfo.control )
-		creator:Center( )
-		creator:MakePopup( )
-		creator:SetSkin( Pointshop2.Config.DermaSkin )
-		creator:SetModule( self.mod )
-		creator:SetData( data )
+		if self.settingsInfo.onClick then
+			self.settingsInfo.onClick( )
+		else
+			local creator = vgui.Create( self.settingsInfo.control )
+			creator:Center( )
+			creator:MakePopup( )
+			creator:SetSkin( Pointshop2.Config.DermaSkin )
+			creator:SetModule( self.mod )
+			creator:SetData( data )
+		end
 	end )
 	transfer:AddEventListener( "RequestRejected", function( )
 		self:OnLoadFinished( false, "Transfer Request was rejected" )

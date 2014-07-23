@@ -264,7 +264,8 @@ hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
 		
 		table.insert( tbl, nodeInTable )
 	end
-	for k, v in pairs( categoriesNode.ChildNodes:GetChildren( ) ) do
+	for k, v in ipairs( categoriesNode.ChildNodes:GetChildren( ) ) do
+		print( v:GetText( ) )
 		recursiveAddCategory( v, categoriesWithItems )
 	end
 	

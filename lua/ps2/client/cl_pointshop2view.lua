@@ -127,7 +127,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		--Put it in the right place into the tree
 		if not dbCategory.parent then
 			--Create Category in root
-			categoryItemsTable[newCategory.self.id] = newCategory
+			table.insert( categoryItemsTable, newCategory )
 		else
 			local function findAndAddToParent( tree, parentId, subcategory )
 				if tree.self.id ==  parentId then
@@ -149,6 +149,13 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		end
 	end
 	self.categoryItemsTable = categoryItemsTable
+	
+	local function sortCategories( cat )
+		table.sort( self.categoryItemsTable, function( a, b )
+			return a.self.id < b.self.id
+		end )
+	end
+	sortCategories( cat )
 	
 	--Hacky, dunno why this is needed
 	hook.Call( "PS2_DynamicItemsUpdated" )
@@ -304,4 +311,8 @@ function Pointshop2View:removeItem( itemClass, refund )
 	:Done( function( )
 		KInventory.Items[itemClass.className] = nil
 	end )
+end
+
+function Pointshop2View:installDefaults( )
+	self:controllerAction( "installDefaults" )
 end
