@@ -38,6 +38,14 @@ MODULE.SettingButtons = {
 		label = "Reset All",
 		icon = "pointshop2/restart1.png",
 		control = "DPointshopReset"
+	},
+	{
+		label = "Install Default Items",
+		icon = "pointshop2/download7.png",
+		onClick = function( )
+			Pointshop2View:getInstance( ):installDefaults( )
+			Derma_Message( "We're installing the default items for you. Please give us about a minute, your shop will update automatically once the items are installed", "Information" )
+		end 
 	}
 }
 

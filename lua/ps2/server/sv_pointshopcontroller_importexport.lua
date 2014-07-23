@@ -25,12 +25,18 @@ function Pointshop2Controller:exportItems( )
 	end )
 end
 
-function Pointshop2Controller:importItems( filename )
+function Pointshop2Controller:importItemsFromFile( filename )
+	KLogf( 4, "[Pointshop2] Starting import of %s", filename )
+	local exportTable = LibK.luadata.ReadFile( filename )
+	return self:importItems( exportTable )
+	:Then( function( )
+		return self:moduleItemsChanged( )
+	end )
+end
+
+function Pointshop2Controller:importItems( exportTable )
 	local promises = {}
 	
-	KLogf( 4, "[Pointshop2] Starting import of %s", filename )
-	
-	local exportTable = LibK.luadata.ReadFile( filename )
 	for persistenceClassName, exportData in pairs( exportTable ) do
 		local persistenceClass = getClass( persistenceClassName )
 		if not persistenceClass then
@@ -51,9 +57,6 @@ function Pointshop2Controller:importItems( filename )
 	end
 	
 	return WhenAllFinished( promises )
-	:Then( function( )
-		return self:moduleItemsChanged( )
-	end )
 end
 
 function Pointshop2Controller:exportCategoryOrganization( )
@@ -123,24 +126,31 @@ function Pointshop2Controller:exportCategoryOrganization( )
 	end )
 end
 
-function Pointshop2Controller:importCategoryOrganization( filename )
+function Pointshop2Controller:importCategoriesFromFile( filename )
 	local importTable = LibK.luadata.ReadFile( filename )
-	
-	local importPromises = {}
-	
+	return self:importCategoryOrganization( importTable )
+	:Done( function( )
+		return self:moduleItemsChanged( )
+	end )
+end
+
+function Pointshop2Controller:importCategoryOrganization( importTable )
+	local addCatPromises = {}
 	local function recursiveAddCategory( category, parentId )
-		local promises = {}
-		
 		local dbCategory = Pointshop2.Category:new( )
 		dbCategory.label = category.self.label
 		dbCategory.icon = category.self.icon
 		dbCategory.parent = parentId
 		return dbCategory:save( )
-		:Then( function( x )
+		:Done( function( )
+			print( "Saved", category.self.label)
+		end) 
+		:Then( function( dbCategory )
 			local promises = {}
 			
 			category.id = dbCategory.id --need this later for the items
 			for _, subcategory in pairs( category.subcategories ) do
+				print( "Subcat", subcategory.self.label, dbCategory.id )
 				local promise = recursiveAddCategory( subcategory, dbCategory.id )
 				table.insert( promises, promise )
 			end
@@ -151,45 +161,54 @@ function Pointshop2Controller:importCategoryOrganization( filename )
 	end
 	for k, category in pairs( importTable ) do
 		local promise = recursiveAddCategory( category )
-		table.insert( importPromises, promise )
+		table.insert( addCatPromises, promise )
 	end
 	
-	local function recursiveAddItems( category )
-		local promises = {}
-		for _, crc in pairs( category.items ) do
-			local promise = Pointshop2.DB.DoQuery( Format( "SELECT id FROM ps2_itempersistence WHERE CRC32(CONCAT(baseClass,name,description)) = %s",
-				Pointshop2.DB.SQLStr( crc )
-			) )
-			:Then( function( result )
-				if not result or not result[1] then
-					ErrorNoHalt( "Couldn't find item id, skipping" )
-					return
-				end
-				
-				local itemMapping = Pointshop2.ItemMapping:new( )
-				itemMapping.itemClass = result[1].id
-				itemMapping.categoryId = category.id
-				return itemMapping:save( )
-			end )
-			:Fail( function( errid, err ) error( "Error saving item mapping", errid, err ) end )
-			table.insert( promises, promise )
+	
+	return WhenAllFinished( addCatPromises )
+	:Then( function( )
+		local importPromises = {}
+		local function recursiveAddItems( category )
+			local promises = {}
+			for _, crc in pairs( category.items ) do
+				local promise = Pointshop2.DB.DoQuery( Format( "SELECT id FROM ps2_itempersistence WHERE CRC32(CONCAT(baseClass,name,description)) = %s",
+					Pointshop2.DB.SQLStr( crc )
+				) )
+				:Then( function( result )
+					if not result or not result[1] then
+						ErrorNoHalt( "Couldn't find item id, skipping" )
+						return
+					end
+					
+					if not category.id then
+						print( "Item " .. result[1].id .. " invalid category " )
+						PrintTable( category )
+						return
+					end
+					
+					local itemMapping = Pointshop2.ItemMapping:new( )
+					itemMapping.itemClass = result[1].id
+					itemMapping.categoryId = category.id
+					return itemMapping:save( )
+				end )
+				:Fail( function( errid, err ) error( "Error saving item mapping", errid, err ) end )
+				table.insert( promises, promise )
+			end
+			
+			for _, subcategory in pairs( category.subcategories ) do
+				local promise = recursiveAddItems( subcategory )
+				table.insert( promises, promise )
+			end
+			
+			return WhenAllFinished( promises )
 		end
 		
-		for _, subcategory in pairs( category.subcategories ) do
-			local promise = recursiveAddItems( subcategory )
-			table.insert( promises, promise )
+		for k, category in pairs( importTable ) do
+			local promise = recursiveAddItems( category )
+			table.insert( importPromises, promise )
 		end
-		return WhenAllFinished( promises )
-	end
-	
-	for k, category in pairs( importTable ) do
-		local promise = recursiveAddItems( category )
-		table.insert( importPromises, promise )
-	end
-	
-	return WhenAllFinished( importPromises )
-	:Done( function( )
-		return self:moduleItemsChanged( )
+		
+		return WhenAllFinished( importPromises )
 	end )
 end
 
@@ -203,5 +222,18 @@ function Pointshop2Controller:resetToDefaults( )
 	:Done( function( )
 		hook.Run( "Pointshop2_FullReset" )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
+	end )
+end
+
+function Pointshop2Controller:installDefaults( )
+	WhenAllFinished{ self:exportItems( ), self:exportCategoryOrganization( ) }
+	:Then( function( )
+		return self:importItems( Pointshop2.DefaultItems )
+	end )
+	:Then( function( )
+		return self:importCategoryOrganization( Pointshop2.DefaultCategories )
+	end )
+	:Done( function( )
+		return self:moduleItemsChanged( )
 	end )
 end

@@ -51,7 +51,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action == "resetToDefaults" then
+	elseif action == "resetToDefaults" or action == "installDefaults" then
 		if PermissionInterface.query( ply, "pointshop2 reset" ) then
 			def:Resolve( )
 		else
@@ -267,6 +267,7 @@ hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
 end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )
+	PrintTable( categoryItemsTable )
 	--Repopulate Categories Table
 	Pointshop2.Category.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate categories", errid, err ) end )
@@ -322,20 +323,20 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 		error( "Error starting transaction:", err )
 	end )
 	
-	--Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=0" ) --sorry
+	Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=0" ) --sorry
 	
 	local success, err = pcall( performSafeCategoryUpdate, categoryItemsTable )
 	if not success then
 		KLogf( 2, "Error saving categories: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		--Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
+		Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
 		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured, your changes could not be saved!" )
 	else
 		KLogf( 4, "Categories Updated" )
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		--Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
+		Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
 		LibK.SetBlocking( false )
 		
 		for k, v in pairs( player.GetAll( ) ) do
