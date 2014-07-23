@@ -12,7 +12,8 @@ ItemMapping.static.model = {
 	belongsTo = {
 		Category = {
 			class = "Pointshop2.Category",
-			foreignKey = "categoryId"
+			foreignKey = "categoryId",
+			onDelete = "CASCADE"
 		}
 	}
 }

@@ -134,6 +134,7 @@ local function CreateSpawnMenu()
 	-- Add the tabs to the tool menu before trying
 	-- to populate them with tools.
 	hook.Run( "PopulateToolMenu" )
+	hook.Run("PopulateContent")
 
 	Pointshop2.SpawnMenu = vgui.Create( "SpawnMenu" )
 	Pointshop2.SpawnMenu:SetVisible( false )
@@ -142,8 +143,6 @@ local function CreateSpawnMenu()
 end
 
 -- Hook to create the spawnmenu at the appropriate time (when all sents and sweps are loaded)
-hook.Add( "OnGamemodeLoaded", "CreateSpawnMenu", CreateSpawnMenu )
+CreateSpawnMenu()
 
-hook.Add( "OnGamemodeLoaded", "LoadSpawnlists", function( )
-	spawnmenu.PopulateFromEngineTextFiles()
-end )
+spawnmenu.PopulateFromEngineTextFiles()
