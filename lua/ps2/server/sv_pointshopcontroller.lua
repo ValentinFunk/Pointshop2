@@ -20,7 +20,13 @@ function Pointshop2.InitPromises( )
 		KLogf( 4, "[Pointshop2] The database was connected" )
 	end )
 	function Pointshop2.onDatabaseConnected( )
-		Pointshop2.DatabaseConnectedPromise:Resolve( )
+		if Pointshop2.ModulesLoaded then
+			Pointshop2.DatabaseConnectedPromise:Resolve( )
+		else
+			hook.Add( "PS2_ModulesLoaded", "load", function( )
+				Pointshop2.DatabaseConnectedPromise:Resolve( )
+			end )
+		end
 	end
 
 	Pointshop2.SettingsLoadedPromise = Deferred( )
@@ -323,20 +329,20 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 		error( "Error starting transaction:", err )
 	end )
 	
-	Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=0" ) --sorry
+	Pointshop2.DB.DisableForeignKeyChecks( true )
 	
 	local success, err = pcall( performSafeCategoryUpdate, categoryItemsTable )
 	if not success then
 		KLogf( 2, "Error saving categories: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
+		Pointshop2.DB.DisableForeignKeyChecks( false )
 		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured, your changes could not be saved!" )
 	else
 		KLogf( 4, "Categories Updated" )
 		Pointshop2.DB.DoQuery( "COMMIT" )
-		Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" )
+		Pointshop2.DB.DisableForeignKeyChecks( false )
 		LibK.SetBlocking( false )
 		
 		for k, v in pairs( player.GetAll( ) ) do

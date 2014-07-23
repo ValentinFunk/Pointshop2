@@ -145,8 +145,11 @@ function Pointshop2.LoadModules( )
 		end
 	end
 end
+Pointshop2.ModulesLoaded = false
 hook.Add( "InitPostEntity", "Load", function()
 	Pointshop2.LoadModules( )
+	Pointshop2.ModulesLoaded = true
+	hook.Run( "PS2_ModulesLoaded" )
 end )
 
 --For reloads

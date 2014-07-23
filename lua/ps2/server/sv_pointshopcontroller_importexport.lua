@@ -163,6 +163,40 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 		local promise = recursiveAddCategory( category )
 		table.insert( addCatPromises, promise )
 	end
+
+	
+	--Fucking sqlite...
+	local findItemIdByCRC 
+	if Pointshop2.DB.CONNECTED_TO_MYSQL then
+		findItemIdByCRC = function( crc )
+			return Pointshop2.DB.DoQuery( Format( "SELECT id FROM ps2_itempersistence WHERE CRC32(CONCAT(baseClass, name, description)) = %s",
+				Pointshop2.DB.SQLStr( crc )
+			) )
+			:Then( function( result )
+				if result and result[1] then
+					return result[1].id
+				end
+			end )
+		end
+	else
+		LibK.DB.SetBlocking( true )
+		local itemPersistenceIdMap = {}
+		Pointshop2.ItemPersistence.getDbEntries( "WHERE 1" )
+		:Done( function( persistences ) 
+			for k, v in pairs( persistences ) do
+				local hash = util.CRC( v.baseClass .. v.name .. v.description )
+				print( hash )
+				itemPersistenceIdMap[hash] = v.id
+			end 
+		end )
+		LibK.DB.SetBlocking( false )
+		
+		findItemIdByCRC = function( crc )
+			local def = Deferred( )
+			def:Resolve( itemPersistenceIdMap[crc] )
+			return def:Promise( )
+		end
+	end
 	
 	
 	return WhenAllFinished( addCatPromises )
@@ -171,23 +205,21 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 		local function recursiveAddItems( category )
 			local promises = {}
 			for _, crc in pairs( category.items ) do
-				local promise = Pointshop2.DB.DoQuery( Format( "SELECT id FROM ps2_itempersistence WHERE CRC32(CONCAT(baseClass,name,description)) = %s",
-					Pointshop2.DB.SQLStr( crc )
-				) )
-				:Then( function( result )
-					if not result or not result[1] then
-						ErrorNoHalt( "Couldn't find item id, skipping" )
+				findItemIdByCRC( crc )
+				:Then( function( id )
+					if not id then
+						ErrorNoHalt( "Couldn't find item id, skipping", crc )
 						return
 					end
 					
 					if not category.id then
-						print( "Item " .. result[1].id .. " invalid category " )
+						print( "Item " .. id .. " invalid category " )
 						PrintTable( category )
 						return
 					end
 					
 					local itemMapping = Pointshop2.ItemMapping:new( )
-					itemMapping.itemClass = result[1].id
+					itemMapping.itemClass = id
 					itemMapping.categoryId = category.id
 					return itemMapping:save( )
 				end )

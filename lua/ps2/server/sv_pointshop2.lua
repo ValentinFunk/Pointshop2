@@ -15,7 +15,7 @@ function Pointshop2.ResetDatabase( )
 	add( KInventory )
 	
 	LibK.SetBlocking( true )
-	Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=0" ) --sorry
+	Pointshop2.DB.DisableForeignKeyChecks( true )
 	local promises = {}
 	for k, v in pairs( models ) do
 		local promise = v.dropTable( )
@@ -34,7 +34,7 @@ function Pointshop2.ResetDatabase( )
 		end )
 		table.insert( promises, promise )
 	end
-	Pointshop2.DB.DoQuery( "SET FOREIGN_KEY_CHECKS=1" ) --sorry
+	Pointshop2.DB.DisableForeignKeyChecks( false )
 	LibK.SetBlocking( false )
 	
 	return WhenAllFinished( promises )
