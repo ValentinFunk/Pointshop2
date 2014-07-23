@@ -211,17 +211,25 @@ end
 function PANEL:SetPlayerData( playerData )
 	self.playerData = playerData
 	
-	self.generalInfo.avatar:SetSteamID( playerData.steam64, 64 )
-	self.generalInfo.infoPanel.name:SetText( playerData.name )
-	self.generalInfo.infoPanel.steamId:SetText( playerData.player )
-	self.generalInfo.infoPanel.lastConnected:SetText( "Last Connected: " .. os.date( "%Y-%m-%d %H:%M", playerData.updated_at ) )
+	self.generalInfo.avatar:SetSteamID( playerData.steam64 or "BOT", 64 )
+	self.generalInfo.infoPanel.name:SetText( playerData.name or "ERROR" )
+	self.generalInfo.infoPanel.steamId:SetText( playerData.player or "ERROR" )
+	self.generalInfo.infoPanel.lastConnected:SetText( "Last Connected: " .. os.date( "%Y-%m-%d %H:%M", playerData.updated_at or 0 ) )
 	
-	self.pointsPanel:SetValue( playerData.wallet.points )
-	self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints ) 
+	if not playerData.wallet or not playerData.steam64 then
+		local str = "Error: Couldn't get the info! Take a screen of this:"
+		str = str .. LibK.luadata.Encode( playerData or {} )
+		Derma_Message( str, "Warning" )
+	else
+		self.pointsPanel:SetValue( playerData.wallet.points )
+		self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints ) 
+	end
 	
-	self.inventoryPanel:setCategoryName( "Pointshop2_AdminInventory" .. playerData.id )
-	self.inventoryPanel:setItems( playerData.inventory:getItems( ) )
-	self.inventoryPanel:initSlots( playerData.inventory:getNumSlots( ) )
+	if playerData.inventory then
+		self.inventoryPanel:setCategoryName( "Pointshop2_AdminInventory" .. playerData.id )
+		self.inventoryPanel:setItems( playerData.inventory:getItems( ) )
+		self.inventoryPanel:initSlots( playerData.inventory:getNumSlots( ) )
+	end
 end
 
 function PANEL:PlayerWalletChanged( wallet, ply )

@@ -43,12 +43,10 @@ local function validateOutfitList( previewPanel, ignorePreview )
 end
 
 hook.Add( "PACItemSelected", "ItemSelected", function( itemClass )
-	--print( "Select", itemClass )
 	previewItemClass = itemClass
 end )
 
 hook.Add( "PACItemDeSelected", "ItemDeselected", function( itemClass )
-	--print( "Deselect", itemClass )
 	if previewItemClass == itemClass then
 		previewItemClass = nil
 	end
