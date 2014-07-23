@@ -4,7 +4,7 @@ setmetatable(KInventory.ITEMS, { __mode = 'v' }) --weak table, allow collection 
 local Item = class( "KInventory.Item" )
 KInventory.Item = Item
 
-Item.static.DB = "KInventory"
+Item.static.DB = "Pointshop2"
 Item.static.printName = "Basic Item"
 Item.static.description = { "This is a basic item." }
 Item.static.droppable = true

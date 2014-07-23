@@ -1,1 +1,1 @@
-LibK.SetupDatabase( "KInventory", KInventory )
+//LibK.SetupDatabase( "KInventory", KInventory )

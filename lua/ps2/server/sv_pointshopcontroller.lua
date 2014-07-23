@@ -20,6 +20,7 @@ function Pointshop2.InitPromises( )
 		KLogf( 4, "[Pointshop2] The database was connected" )
 	end )
 	function Pointshop2.onDatabaseConnected( )
+		DATABASES["KInventory"] = Pointshop2.DB
 		if Pointshop2.ModulesLoaded then
 			Pointshop2.DatabaseConnectedPromise:Resolve( )
 		else

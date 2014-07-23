@@ -1,1 +1,1 @@
-KInventory = { }
+KInventory = Pointshop2

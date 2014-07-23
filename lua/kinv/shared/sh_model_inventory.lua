@@ -4,7 +4,7 @@ setmetatable(KInventory.INVENTORIES, { __mode = 'v' }) --weak table, allow colle
 local Inventory = class( "KInventory.Inventory" )
 KInventory.Inventory = Inventory
 
-Inventory.static.DB = "KInventory"
+Inventory.static.DB = "Pointshop2"
 Inventory.static.model = {
 	tableName = "inventories",
 	fields = {
