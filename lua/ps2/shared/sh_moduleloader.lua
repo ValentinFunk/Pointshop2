@@ -14,7 +14,7 @@ Pointshop2.Settings = {
 }
 
 function Pointshop2.RegisterModule( modTable )
-	PrintTable( modTable )
+
 	for k, v in pairs( Pointshop2.Modules ) do
 		if v.Name == modTable.Name then
 			ModuleLoaded = true
