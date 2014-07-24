@@ -98,10 +98,25 @@ MODULE.Settings.Server = {
 				"F2",
 				"F3",
 				"F4",
+				"None"
 			},
 			type = "option",
 			label = "Shop Key",
 			tooltip = "Key used to open the shop"
+		},
+		ShopChat = { 
+			value = "!shop",
+			possibleValues = {
+				"!shop",
+				"!ps", 
+				"!ps2",
+				"!pointshop",
+				"!pointshop2",
+				"!points"
+			},
+			type = "option",
+			label = "Shop Chat Command",
+			tooltip = "Chat command used to open the shop"
 		}
 	}
 }

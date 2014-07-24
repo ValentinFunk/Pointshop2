@@ -14,6 +14,16 @@ Pointshop2.Settings = {
 }
 
 function Pointshop2.RegisterModule( modTable )
+	PrintTable( modTable )
+	for k, v in pairs( Pointshop2.Modules ) do
+		if v.Name == modTable.Name then
+			ModuleLoaded = true
+			break
+		end
+	end
+	
+	if ModuleLoaded then return end -- AutoReload/module reload support right here.
+	
 	table.insert( Pointshop2.Modules, modTable )
 	KLogf( 4, "     -> Module %s registered!", modTable.Name )
 end

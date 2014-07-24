@@ -475,6 +475,15 @@ function Pointshop2Controller:registerShopOpenHook( )
 	hook.Add( KeyToHook[Pointshop2.GetSetting( "Pointshop 2", "GUISettings.ShopKey" )], "PS2_MenuOpen", function( ply )
 		self:startView( "Pointshop2View", "toggleMenu", ply )
 	end )
+	
+	local ChatCommand = Pointshop2.GetSetting("Pointshop 2", "GUISettings.ShopChat")
+	hook.Add( "PlayerSay", "PS2_MenuOpen", function( ply, msg )
+		if string.len( ChatCommand ) > 0 then
+			if string.sub( msg, 0, string.len( ChatCommand ) ) == ChatCommand then
+				self:startView( "Pointshop2View", "toggleMenu", ply )
+			end
+		end
+	end )
 end
 hook.Add( "PS2_OnSettingsUpdate", "ChangeKeyHook", function( )
 	Pointshop2Controller:getInstance( ):registerShopOpenHook( )
