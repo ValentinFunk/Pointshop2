@@ -15,6 +15,7 @@ local function applyDelayedRewards( )
 	for k, v in ipairs( delayedRewards )  do
 		v.ply:PS2_AddStandardPoints( v.points, v.message, v.small )
 	end
+	delayedRewards = {}
 end
 
 hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
@@ -25,10 +26,11 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 			if v:IsActiveTraitor( ) then
 				continue
 			end
+		
 			if v:GetCleanRound( ) and S("RoundWin.CleanRound") then
 				v:PS2_AddStandardPoints( S("RoundWin.CleanRound"), "Clean round bonus", true )
 			end
-			if v:Alive( ) and S("RoundWin.InnocentAlive") then
+			if v:Alive( ) and not (v:IsSpec() or (v.IsGhost and v:IsGhost())) and S("RoundWin.InnocentAlive") then
 				v:PS2_AddStandardPoints( S("RoundWin.InnocentAlive"), "Alive bonus", true )
 			end
 			if S("RoundWin.Innocent") then
@@ -41,7 +43,8 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 			if not v:IsActiveTraitor( ) then
 				continue
 			end
-			if v:Alive( ) and S("RoundWin.TraitorAlive") then
+			
+			if v:Alive( ) and not (v:IsSpec() or (v.IsGhost and v:IsGhost())) and S("RoundWin.TraitorAlive") then
 				v:PS2_AddStandardPoints( S("RoundWin.TraitorAlive"), "Alive bonus", true )
 			end
 			if S("RoundWin.Traitor") then
@@ -64,6 +67,7 @@ hook.Add( "PlayerDeath", "PS2_PlayerDeath", function( victim, inflictor, attacke
 	if ply == attacker then
 		return
 	end
+	if (attacker.IsGhost and attacker:IsGhost()) then return end --SpecDM Support.
 	
 	if not victim.GetRole then
 		return
