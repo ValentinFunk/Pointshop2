@@ -5,4 +5,4 @@ LibK.InitializeAddon{
 	loadAfterGamemode = false
 }
 
-LibK.addReloadFile( "autorun/kinv_init.lua" )
+LibK.addReloadFile( "autorun/ps2_kinv_init.lua" )
