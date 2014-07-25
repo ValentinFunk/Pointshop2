@@ -2,6 +2,11 @@ Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
 
 function Pointshop2.InitPromises( )
+	Pointshop2.LoadModulesPromise = Deferred( )
+	Pointshop2.LoadModulesPromise:Done( function( )
+		KLogf( 4, "[Pointshop 2] All Modules were loaded" )
+	end )
+
 	Pointshop2.LoadModuleItemsPromise = Deferred( )
 	Pointshop2.LoadModuleItemsPromise:Done( function( )
 		KLogf( 4, "[Pointshop2] All Module items were loaded" )
@@ -38,13 +43,22 @@ function Pointshop2.InitPromises( )
 	Pointshop2.FullyInitializedPromise = WhenAllFinished{ 
 		Pointshop2.ItemsLoadedPromise:Promise( ),
 		Pointshop2.DatabaseConnectedPromise:Promise( ),
-		Pointshop2.SettingsLoadedPromise:Promise( )
+		Pointshop2.SettingsLoadedPromise:Promise( ),
+		Pointshop2.LoadModulesPromise:Promise( )
 	}
 	Pointshop2.FullyInitializedPromise:Done( function( )
 		KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
 	end )
 end
 Pointshop2.InitPromises( )
+
+--Modules can contain own models and are loaded on InitPostEntity.
+--Wait for this hook until initializing the database
+Pointshop2.LoadModulesPromise:Done( function( )
+	KLogf( 4, "[Pointshop2] Starting Database initialization" )
+	LibK.SetupDatabase( "Pointshop2", Pointshop2 )
+	Pointshop2.DBInitialize( )
+end )
 	
 --Override for access controll
 --returns a promise, resolved if user can do it, rejected with error if he cant
@@ -377,6 +391,7 @@ function Pointshop2Controller:loadModuleItems( )
 		:Then( function( persistentItems ) 
 			for _, persistentItem in pairs( persistentItems ) do
 				table.insert( self.cachedPersistentItems, persistentItem )
+				PrintTable( persistentItem )
 				Pointshop2.LoadPersistentItem( persistentItem )
 			end
 		end )

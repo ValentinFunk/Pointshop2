@@ -60,6 +60,7 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	if not persistentItem then
 		debug.Trace( )
 	end
+	
 	local baseClass = Pointshop2.GetItemClassByName( persistentItem.ItemPersistence.baseClass )
 	
 	local className = tostring( persistentItem.ItemPersistence.id )
