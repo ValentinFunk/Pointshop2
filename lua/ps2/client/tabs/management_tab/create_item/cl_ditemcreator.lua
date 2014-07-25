@@ -70,6 +70,7 @@ function PANEL:Init( )
 		function panel:SetPrice( price )
 			self.checkBox:SetValue( price != nil )
 			if price then
+				self.wang:SetMax( price )
 				self.wang:SetValue( price )
 			end
 		end
