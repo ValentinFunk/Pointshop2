@@ -18,7 +18,7 @@ function Pointshop2Controller:loadOutfits( )
 	end )
 end
 Pointshop2.DatabaseConnectedPromise:Done( function( )
-	Pointshop2Controller:loadOutfits( )
+	Pointshop2Controller:getInstance( ):loadOutfits( )
 end )
 
 function Pointshop2Controller:SendInitialOutfitPackage( ply )
@@ -39,5 +39,7 @@ end )
 --Player notifies us that he has loaded and decoded all PAC outfits
 function Pointshop2Controller:outfitsReceived( ply )
 	KLogf( 5, "Received outfits from %s", ply:Name( ) )
-	ply.outfitsReceivedPromise:Resolve( )
+	if ply.outfitsReceivedPromise._promise._state == "pending" then
+		ply.outfitsReceivedPromise:Resolve( )
+	end
 end

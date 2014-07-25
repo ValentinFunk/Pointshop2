@@ -26,13 +26,9 @@ function Pointshop2.InitPromises( )
 	end )
 	function Pointshop2.onDatabaseConnected( )
 		DATABASES["KInventory"] = Pointshop2.DB
-		if Pointshop2.ModulesLoaded then
+		Pointshop2.LoadModulesPromise:Done( function( )
 			Pointshop2.DatabaseConnectedPromise:Resolve( )
-		else
-			hook.Add( "PS2_ModulesLoaded", "load", function( )
-				Pointshop2.DatabaseConnectedPromise:Resolve( )
-			end )
-		end
+		end )
 	end
 
 	Pointshop2.SettingsLoadedPromise = Deferred( )
@@ -56,7 +52,8 @@ Pointshop2.InitPromises( )
 --Wait for this hook until initializing the database
 Pointshop2.LoadModulesPromise:Done( function( )
 	KLogf( 4, "[Pointshop2] Starting Database initialization" )
-	LibK.SetupDatabase( "Pointshop2", Pointshop2 )
+	
+	LibK.SetupDatabase( "Pointshop2", Pointshop2, nil, true )
 	Pointshop2.DBInitialize( )
 end )
 	
@@ -280,6 +277,10 @@ hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function
 	end )
 end )
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
+	for _, ply in pairs( player.GetAll( ) ) do
+		ply.outfitsReceivedPromise = Deferred( )
+		ply.settingsReceivedPromise = Deferred( )
+	end
 	timer.Simple( 1, function( )
 		for _, ply in pairs( player.GetAll( ) ) do
 			initPlayer( ply )

@@ -32,6 +32,7 @@ function Pointshop2.GetSetting( modName, path )
 	if not Pointshop2.Settings.Server[modName] and not Pointshop2.Settings.Shared[modName]  then
 		error( "Invalid module " .. modName .. ": Couldn't find any settings" )
 	end
+	
 	local setting
 	if Pointshop2.Settings.Shared[modName] and Pointshop2.Settings.Shared[modName][path] != nil then
 		setting = Pointshop2.Settings.Shared[modName][path]
@@ -154,18 +155,21 @@ function Pointshop2.LoadModules( )
 			KLogf( 3, "Error loading module %s, sh_module.lua not found", folder )
 		end
 	end
-end
-Pointshop2.ModulesLoaded = false
-hook.Add( "InitPostEntity", "Load", function()
-	Pointshop2.LoadModules( )
+	
 	Pointshop2.ModulesLoaded = true
 	hook.Run( "PS2_ModulesLoaded" )
 	if SERVER then
 		Pointshop2.LoadModulesPromise:Resolve( )
 	end
+end
+Pointshop2.ModulesLoaded = false
+hook.Add( "InitPostEntity", "Load", function()
+	Pointshop2.LoadModules( )
 end )
 
---For reloads
+hook.Add( "OnReloaded", "Do", function( )
+--For reloads.
 if GAMEMODE then
 	Pointshop2.LoadModules( )
 end
+end )

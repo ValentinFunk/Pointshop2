@@ -28,9 +28,6 @@ end
 Pointshop2.DatabaseConnectedPromise:Done( function( )
 	Pointshop2Controller:getInstance( ):loadSettings( )
 end )
-hook.Add( "OnReloaded", "HandleModSettingsReload", function( )
-	Pointshop2Controller:getInstance( ):loadSettings( )
-end )
 
 function Pointshop2Controller:SendInitialSettingsPackage( ply )
 	local resource = LibK.GLib.Resources.Resources["Pointshop2/settings"]

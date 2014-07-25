@@ -64,7 +64,12 @@ MODULE.Settings.Shared = {
 			tooltip = "Generated from the ip and hostname, if you switch hosts/ips save this and change it back on the new host.",
 			label = "Server Id",
 			value = util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) ),
-		}
+		},
+		SendPointsEnabled = {
+			label = "Allow players to send points",
+			tooltip = "This can be used to disable the possibility to send points to other players",
+			value = true
+		},
 	}
 }
 

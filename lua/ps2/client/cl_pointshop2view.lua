@@ -42,6 +42,12 @@ function Pointshop2View:initialize( )
 	end )
 end
 
+local function resolveIfWaiting( deferred )
+	if deferred._promise._state == "pending" then
+		deferred:Resolve( )
+	end
+end
+
 function Pointshop2View:toggleMenu( )
 	if self.loaderAttached then	
 		--In the loading message, handlers are already registered
@@ -55,7 +61,7 @@ function Pointshop2View:toggleMenu( )
 		
 		local f = vgui.Create("DFrame" )
 		f:SetSkin( Pointshop2.Config.DermaSkin )
-		f:SetSize( 300, 150 )
+		f:SetSize( 300, 130 )
 		f:SetPos( ScrW() / 2 - f:GetWide( ) / 2, 0 )
 		f:SetTitle( "Pointshop 2" )
 		
@@ -98,9 +104,7 @@ function Pointshop2View:receiveInventory( inventory )
 	LocalPlayer().PS2_Inventory = inventory
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
 	
-	if not self.fullyInitialized then
-		self.clPromises.InventoryReceived:Resolve( )
-	end
+	resolveIfWaiting( self.clPromises.InventoryReceived )
 end
 
 function Pointshop2View:itemChanged( item )
@@ -226,9 +230,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		hook.Call( "PS2_DynamicItemsUpdated" )
 	end )
 	
-	if not self.fullyInitialized then
-		self.clPromises.DynamicsReceived:Resolve()
-	end
+	resolveIfWaiting( self.clPromises.DynamicsReceived )
 end
 
 --This is a bit confusing, sorry
@@ -325,9 +327,8 @@ function Pointshop2View:loadOutfits( versionHash )
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash ) 
 		self:controllerAction( "outfitsReceived" )
-		if not Pointshop2View:getInstance( ).fullyInitialized then
-			Pointshop2View:getInstance( ).clPromises.OutfitsReceived:Resolve( )
-		end
+
+		resolveIfWaiting( Pointshop2View:getInstance( ).clPromises.OutfitsReceived )
 	end )
 end
 
@@ -356,9 +357,9 @@ function Pointshop2View:loadSettings( versionHash )
 		end
 		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
-		if not Pointshop2View:getInstance( ).fullyInitialized then
-			Pointshop2View:getInstance( ).clPromises.SettingsReceived:Resolve( )
-		end
+		
+		resolveIfWaiting( Pointshop2View:getInstance( ).clPromises.SettingsReceived )
+		hook.Run( "PS2_SettingsUpdated" )
 	end )
 end
 
