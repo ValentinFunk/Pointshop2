@@ -7,6 +7,9 @@ hook.Add( "InitPostEntity", "InitializePlayers", function( )
 		ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 		ply.PS2_Slots = {}
 	end
+	LocalPlayer().PS2_Inventory = {}
+	
+	Pointshop2View:getInstance( ) --Create the view
 end )
 
 local GLib = LibK.GLib
@@ -16,10 +19,66 @@ function Pointshop2View:initialize( )
 	self.itemMappings = {}
 	self.itemCategories = {}
 	self.itemProperties = {}
+	
+	self.fullyInitialized = false
+	
+	self.clPromises = {
+		InventoryReceived = Deferred( ),
+		OutfitsReceived = Deferred( ),
+		SettingsReceived = Deferred( ),
+		DynamicsReceived = Deferred( )
+	}
+	
+	local promises = {}
+	for k, v in pairs( self.clPromises ) do
+		table.insert( promises, v:Promise( ) )
+	end
+	
+	Pointshop2.ClInitialized = WhenAllFinished( promises )
+	
+	Pointshop2.ClInitialized:Done( function( )
+		self.fullyInitialized = true
+		KLogf( 5, "[Pointshop2] Pointshop2 is now ready for use" )
+	end )
 end
 
 function Pointshop2View:toggleMenu( )
-	Pointshop2:ToggleMenu( )
+	if self.loaderAttached then	
+		--In the loading message, handlers are already registered
+		return 
+	end
+	
+	if self.fullyInitialized then
+		Pointshop2:ToggleMenu( )
+	else
+		self.loaderAttached = true
+		
+		local f = vgui.Create("DFrame" )
+		f:SetSkin( Pointshop2.Config.DermaSkin )
+		f:SetSize( 300, 150 )
+		f:SetPos( ScrW() / 2 - f:GetWide( ) / 2, 0 )
+		f:SetTitle( "Pointshop 2" )
+		
+		local lbl = vgui.Create( "DLabel", f )
+		lbl:SetText( "Loading Pointshop2, please wait a second.\nThe menu will open automatically." )
+		lbl:Dock( TOP )
+		lbl:SizeToContents( )
+		
+		local loading = vgui.Create( "DLoadingNotifier", f )
+		loading:Dock( TOP )
+		loading:Expand( )
+		
+		Pointshop2.ClInitialized:Done( function( )
+			Pointshop2:ToggleMenu( ) --Open the menu
+		end )
+		:Fail( function( errid, err )
+			self:displayError( "There was an error loading Pointshop 2. Please tell an admin: " .. errid .. ": " .. err, "Error" )
+		end )
+		:Always( function( )
+			f:Remove( )
+			self.loaderAttached = false
+		end )
+	end
 end
 
 function Pointshop2View:walletChanged( newWallet )
@@ -38,6 +97,7 @@ function Pointshop2View:receiveInventory( inventory )
 	InventoryView:getInstance( ):receiveInventory( inventory ) --Needed for KInventory to work properly
 	LocalPlayer().PS2_Inventory = inventory
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
+	self.clPromises.InventoryReceived:Resolve( )
 end
 
 function Pointshop2View:itemChanged( item )
@@ -162,6 +222,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	timer.Simple( 0.1, function( )
 		hook.Call( "PS2_DynamicItemsUpdated" )
 	end )
+	self.clPromises.DynamicsReceived:Resolve()
 end
 
 --This is a bit confusing, sorry
@@ -258,6 +319,7 @@ function Pointshop2View:loadOutfits( versionHash )
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash ) 
 		self:controllerAction( "outfitsReceived" )
+		Pointshop2View:getInstance( ).clPromises.OutfitsReceived:Resolve( )
 	end )
 end
 
@@ -286,6 +348,7 @@ function Pointshop2View:loadSettings( versionHash )
 		end
 		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
+		Pointshop2View:getInstance( ).clPromises.SettingsReceived:Resolve( )
 	end )
 end
 
