@@ -39,6 +39,28 @@ function Pointshop2.ResetDatabase( )
 	return WhenAllFinished( promises )
 end
 
+function Pointshop2.FixDatabase( )
+	local promises = {}
+	local persistences = Pointshop2Controller:getPersistenceModels( )
+	for _, persistenceModel in pairs( persistences ) do
+		local promise = persistenceModel.getDbEntries( "WHERE 1" )
+		:Then( function( persistentItems ) 
+			local promises = {}
+			for _, item in pairs( persistentItems ) do
+				if not item.ItemPersistence then
+					table.insert( promises, item:remove( ) )
+				end
+			end
+			return WhenAllFinished( promises )
+		end )
+		table.insert( promises, promise )
+	end
+	WhenAllFinished( promises ) 
+	:Done( function( )
+		RunConsoleCommand( "changelevel", game.GetMap( ) )
+	end )
+end
+
 function Pointshop2.PlayerOwnsItem( ply, item )
 	for k, v in pairs( ply.PS2_Inventory:getItems( ) ) do
 		if v.id == item.id then

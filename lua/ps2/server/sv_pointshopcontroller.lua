@@ -391,7 +391,6 @@ function Pointshop2Controller:loadModuleItems( )
 		:Then( function( persistentItems ) 
 			for _, persistentItem in pairs( persistentItems ) do
 				table.insert( self.cachedPersistentItems, persistentItem )
-				PrintTable( persistentItem )
 				Pointshop2.LoadPersistentItem( persistentItem )
 			end
 		end )
