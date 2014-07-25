@@ -17,6 +17,22 @@ function ITEM:getIcon( )
 	return self.icon
 end
 
+function ITEM:ApplyModel( )
+	local ply = self:GetOwner( )
+	
+	ply:SetModel( self.playerModel )
+	
+	local groups = string.Explode( " ", self.bodygroups ) 
+	for k = 0, ply:GetNumBodyGroups( ) - 1 do
+		if ( ply:GetBodygroupCount( k ) <= 1 ) then continue end
+		ply:SetBodygroup( k, groups[ k + 1 ] or 0 )
+	end
+	
+	if ply:SkinCount( ) - 1 > 0 then
+		ply:SetSkin( self.skin )
+	end
+end
+
 function ITEM:OnEquip( ply )
 	if not ply._oldModel then
 		ply._oldModel = ply:GetModel( )
@@ -25,7 +41,7 @@ function ITEM:OnEquip( ply )
 	hook.Run( "PS2_DoUpdatePreviewModel" )
 	
 	timer.Simple( 1, function( )
-		ply:SetModel( self.playerModel )
+		self:ApplyModel( )
 	end )
 end
 
@@ -39,9 +55,16 @@ function ITEM:OnHolster( ply )
 end
 
 function ITEM:PlayerSetModel( ply )
-	ply:SetModel( self.playerModel )
+	self:ApplyModel( self )
 end
 Pointshop2.AddItemHook( "PlayerSetModel", ITEM )
+
+function ITEM:PlayerSpawn( ply )
+	if ply == self:GetOwner( ) then
+		self:OnEquip( ply )
+	end
+end
+Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
 
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopPlayerModelIcon"
