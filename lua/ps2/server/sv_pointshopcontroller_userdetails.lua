@@ -103,6 +103,7 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 		Pointshop2.DB:SetBlocking( true ) --don't want player to sell/buy stuff during our update
 	end
 	
+	newValue = tonumber( newValue )
 	return walletPromise:Then( function( wallet )
 		wallet[currencyType] = newValue
 		return wallet:save( )
@@ -115,7 +116,7 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 end
 
 function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, newValue )
-	self:updatePlayerWallet( kPlayerId, currencyType, newValue )
+	return self:updatePlayerWallet( kPlayerId, currencyType, newValue )
 	:Done( function( wallet )
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
 	end )
