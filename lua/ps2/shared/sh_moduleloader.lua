@@ -160,7 +160,9 @@ hook.Add( "InitPostEntity", "Load", function()
 	Pointshop2.LoadModules( )
 	Pointshop2.ModulesLoaded = true
 	hook.Run( "PS2_ModulesLoaded" )
-	Pointshop2.LoadModulesPromise:Resolve( )
+	if SERVER then
+		Pointshop2.LoadModulesPromise:Resolve( )
+	end
 end )
 
 --For reloads
