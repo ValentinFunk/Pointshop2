@@ -67,6 +67,17 @@ function PANEL:Init( )
 		giveFrame:Center( )
 	end
 	
+	local function sendButtonCheck( )
+		if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SendPointsEnabled" ) == false then
+			self.sendPointsBtn:SetDisabled( true )
+			self.sendPointsBtn:SetTooltip( "The administrator of this server has diabled this functionality" )
+		end
+	end
+	hook.Add( "PS2_SettingsUpdated", self, function( self )
+		sendButtonCheck( )
+	end )
+	sendButtonCheck( )
+	
 	/*
 		RIGHT BAR: Preview, Equip Slots, Item Description
 	*/

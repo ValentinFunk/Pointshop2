@@ -524,6 +524,11 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return
 	end
 	
+	if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SendPointsEnabled" ) == false then
+		KLogf( 3, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
+		return
+	end
+	
 	self:updatePlayerWallet( ply.kPlayerId, "points", ply.PS2_Wallet.points - points )
 	:Done( function( wallet )
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
