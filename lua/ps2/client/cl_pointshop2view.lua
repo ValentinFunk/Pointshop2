@@ -97,7 +97,10 @@ function Pointshop2View:receiveInventory( inventory )
 	InventoryView:getInstance( ):receiveInventory( inventory ) --Needed for KInventory to work properly
 	LocalPlayer().PS2_Inventory = inventory
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
-	self.clPromises.InventoryReceived:Resolve( )
+	
+	if not self.fullyInitialized then
+		self.clPromises.InventoryReceived:Resolve( )
+	end
 end
 
 function Pointshop2View:itemChanged( item )
@@ -222,7 +225,10 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	timer.Simple( 0.1, function( )
 		hook.Call( "PS2_DynamicItemsUpdated" )
 	end )
-	self.clPromises.DynamicsReceived:Resolve()
+	
+	if not self.fullyInitialized then
+		self.clPromises.DynamicsReceived:Resolve()
+	end
 end
 
 --This is a bit confusing, sorry
@@ -319,7 +325,9 @@ function Pointshop2View:loadOutfits( versionHash )
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash ) 
 		self:controllerAction( "outfitsReceived" )
-		Pointshop2View:getInstance( ).clPromises.OutfitsReceived:Resolve( )
+		if not Pointshop2View:getInstance( ).fullyInitialized then
+			Pointshop2View:getInstance( ).clPromises.OutfitsReceived:Resolve( )
+		end
 	end )
 end
 
@@ -348,7 +356,9 @@ function Pointshop2View:loadSettings( versionHash )
 		end
 		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
 		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
-		Pointshop2View:getInstance( ).clPromises.SettingsReceived:Resolve( )
+		if not Pointshop2View:getInstance( ).fullyInitialized then
+			Pointshop2View:getInstance( ).clPromises.SettingsReceived:Resolve( )
+		end
 	end )
 end
 
