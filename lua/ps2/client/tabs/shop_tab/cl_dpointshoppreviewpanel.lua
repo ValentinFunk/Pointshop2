@@ -1,12 +1,25 @@
 local PANEL = {}
 
 function PANEL:Init( )
-	self:SetModel( Pointshop2:GetPreviewModel( ) )
+	self:ApplyModelInfo( Pointshop2:GetPreviewModel( ) )
 	hook.Add( "PS2_DoUpdatePreviewModel", self, function( self )
-		self:SetModel( Pointshop2:GetPreviewModel( ) )
+		self:ApplyModelInfo( Pointshop2:GetPreviewModel( ) )
 	end )
 	
 	hook.Call( "PS2_PreviewPanelPaint_Init", GAMEMODE, self )
+end
+
+function PANEL:ApplyModelInfo( modelInfo )
+	self:SetModel( modelInfo.model )
+	local groups = string.Explode( " ", modelInfo.bodygroups ) 
+	for k = 0, self.Entity:GetNumBodyGroups( ) - 1 do
+		if ( self.Entity:GetBodygroupCount( k ) <= 1 ) then continue end
+		self.Entity:SetBodygroup( k, groups[ k + 1 ] or 0 )
+	end
+	
+	if self.Entity:SkinCount( ) - 1 > 0 then
+		self.Entity:SetSkin( modelInfo.skin )
+	end
 end
 
 function PANEL:LayoutEntity( entity )

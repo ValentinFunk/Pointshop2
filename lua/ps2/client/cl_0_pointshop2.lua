@@ -78,15 +78,33 @@ function Pointshop2:AddTab( title, controlName, shouldShow )
 	table.insert( Pointshop2.RegisteredTabs, { title = title, control = controlName, shouldShow = shouldShow } )
 end
 
-function Pointshop2:GetPreviewModel( )
-	local model = hook.Run( "PS2_GetPreviewModel" )
-	
-	--Get item equipped in Model slot
+function Pointshop2:IsPlayerModelEquipped( )
 	if LocalPlayer( ).PS2_Slots["Model"] then
-		return LocalPlayer( ).PS2_Slots["Model"].playerModel
+		return LocalPlayer( ).PS2_Slots["Model"] != nil
+	end
+	return false
+end
+
+function Pointshop2:GetPreviewModel( )
+	local previewInfo = hook.Run( "PS2_GetPreviewModel" )
+	if previewInfo then
+		return previewInfo
 	end
 	
-	return model or LocalPlayer( ):GetModel( )
+	if self:IsPlayerModelEquipped( ) then
+		local playerModelItem = LocalPlayer( ).PS2_Slots["Model"]
+		return {
+			model = playerModelItem.playerModel,
+			skin =  playerModelItem.skin,
+			bodygroups = playerModelItem.bodygroups
+		}
+	end
+	
+	return {
+		model = LocalPlayer( ):GetModel( ),
+		bodygroups = "0",
+		skin = 0
+	}
 end
 
 function Pointshop2.GenerateIconSize( ratioX, ratioY )

@@ -34,6 +34,20 @@ function PANEL:SetModel( mdl )
 	end
 end
 
+function PANEL:ApplyModelInfo( modelInfo )
+	self:SetModel( modelInfo.model )
+
+	local groups = string.Explode( " ", modelInfo.bodygroups ) 
+	for k = 0, self.Entity:GetNumBodyGroups( ) - 1 do
+		if ( self.Entity:GetBodygroupCount( k ) <= 1 ) then continue end
+		self.Entity:SetBodygroup( k, groups[ k + 1 ] or 0 )
+	end
+	
+	if self.Entity:SkinCount( ) - 1 > 0 then
+		self.Entity:SetSkin( modelInfo.skin )
+	end
+end
+
 function PANEL:Paint( w, h )
 	if not self.rt then
 		local uid = "PS2RT_PreRender" .. math.random( 0, 1000000000 ) --not the cleanest but should work

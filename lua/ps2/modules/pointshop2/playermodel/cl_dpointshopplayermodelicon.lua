@@ -41,14 +41,7 @@ end
 function PANEL:OnDeselected( )
 	self.modelPanel:PlayIdleAnimation( )
 	
-	Pointshop2.previewPanel:SetModel( Pointshop2.GetPreviewModel() )
-	
-	for id, value in pairs( Pointshop2.previewPanel._oldBodygroups or {} ) do
-		Pointshop2.previewPanel.Entity:SetBodygroup( id, value )
-	end
-	if Pointshop2.previewPanel._oldSkin then
-		Pointshop2.previewPanel.Entity:SetSkin( Pointshop2.previewPanel._oldSkin )
-	end
+	Pointshop2.previewPanel:ApplyModelInfo( Pointshop2:GetPreviewModel( ) )
 end
 
 function PANEL:SetItemClass( itemClass )
