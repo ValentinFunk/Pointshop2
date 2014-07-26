@@ -49,6 +49,7 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	end )
 	:Then( function( )
 		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
+		hook.Run( "PS2_PurchasedItem", ply, itemClass )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
@@ -113,6 +114,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end )
 	:Then( function( )
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
+		hook.Run( "PS2_SoldItem", ply, itemClass )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
@@ -167,6 +169,8 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 	end )
 	:Then( function( updatedSlot )
 		item:OnHolster( ply )
+		hook.Run( "PS2_UnEquipItem", ply, item.id )
+		
 		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlot )
 		
@@ -209,11 +213,16 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	local slot
+	local slotsused = 1
 	for k, v in pairs( ply.PS2_Slots ) do
 		if v.slotName == slotName then
 			slot = v
 		end
+		if v.itemId then 
+			slotsused = slotsused + 1
+		end
 	end
+	
 	if not slot then
 		slot = Pointshop2.EquipmentSlot:new( )
 		slot.ownerId = ply.kPlayerId
@@ -255,7 +264,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		
+		hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
 		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
