@@ -211,16 +211,42 @@ function Pointshop2Controller:sendWallet( ply )
 	end )
 end
 
-function Pointshop2Controller:sendDynamicInfo( ply )
-	Pointshop2.LoadModuleItemsPromise:Done( function( )
-		WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ), 
-						 Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+function Pointshop2Controller:loadDynamicInfo( )
+	LibK.GLib.Resources.Resources["Pointshop2/dynamics"] = nil --Force resource reset
+	self.dynamicsResource = nil
+	return WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ),
+							Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+	}
+	:Then( function( itemMappings, categories )
+		local itemProperties = self.cachedPersistentItems
+		
+		local tblData = {
+			generateNetTable( itemMappings ), 
+			generateNetTable( categories ),
+			generateNetTable( itemProperties )
 		}
-		:Then( function( itemMappings, categories )
-			local itemProperties = self.cachedPersistentItems
-			self:startView( "Pointshop2View", "receiveDynamicProperties", ply, itemMappings, categories, itemProperties )
-		end )
+		
+		local data = LibK.von.serialize( { tblData } )
+		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "dynamics", data )
+		resource:GetCompressedData( ) --Force compression now
+		KLogf( 4, "[Pointshop2] Dynamics package loaded, version %s, %i item mappings, %i categories, %i items", resource:GetVersionHash(), table.Count( itemMappings ), table.Count( categories ), table.Count( itemProperties ) )
+		
+		self.dynamicsResource = resource
 	end )
+end
+Pointshop2.LoadModuleItemsPromise:Done( function( )
+	Pointshop2Controller:getInstance( ):loadDynamicInfo( )
+end )
+function Pointshop2Controller:sendDynamicInfo( ply )
+	if not self.dynamicsResource then
+		KLogf( 4, "[Pointshop2] Dynamics resource not loaded yet, trying again later" )
+		timer.Simple( 0.5, function( )
+			self:sendDynamicInfo( ply )
+		end )
+		return
+	end
+	
+	self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
 end
 
 --[[
@@ -361,9 +387,11 @@ function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable 
 		Pointshop2.DB.DisableForeignKeyChecks( false )
 		LibK.SetBlocking( false )
 		
-		for k, v in pairs( player.GetAll( ) ) do
-			self:sendDynamicInfo( v )
-		end
+		self:loadDynamicInfo( ):Done( function( )
+			for k, v in pairs( player.GetAll( ) ) do
+				self:sendDynamicInfo( v )
+			end
+		end )
 	end
 end	
 
@@ -442,6 +470,9 @@ function Pointshop2Controller:moduleItemsChanged( )
 	return self:loadModuleItems( )
 	:Then( function( )
 		return self:loadOutfits( )
+	end )
+	:Then( function( )
+		return self:loadDynamicInfo( )
 	end )
 	:Done( function( )
 		for k, v in pairs( player.GetAll( ) ) do

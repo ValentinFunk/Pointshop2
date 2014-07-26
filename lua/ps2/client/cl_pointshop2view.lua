@@ -160,6 +160,7 @@ function Pointshop2View:startSellItem( item )
 	end )
 end
 
+
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
 	self.itemMappings = itemMappings
@@ -231,6 +232,26 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	end )
 	
 	resolveIfWaiting( self.clPromises.DynamicsReceived )
+end
+
+function Pointshop2View:loadDynamics( versionHash )
+	GLib.Resources.Resources["Pointshop2/dynamics"] = nil --Force resource reset
+	GLib.Resources.Get( "Pointshop2", "dynamics", versionHash, function( success, data )
+		if not success then 
+			KLogf( 2, "[PS2][ERROR] Couldn't load dynamics resouce!" )
+			return
+		end
+		local dynamicsDecoded = LibK.von.deserialize( data )[1]
+		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s)", versionHash ) 
+		
+		--Back to classes
+		LibK.processNetTable( dynamicsDecoded[1] )
+		LibK.processNetTable( dynamicsDecoded[2] )
+		LibK.processNetTable( dynamicsDecoded[3] )
+		
+		--Pass to view
+		self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
+	end )
 end
 
 --This is a bit confusing, sorry
