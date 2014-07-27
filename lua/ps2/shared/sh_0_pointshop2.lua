@@ -23,6 +23,17 @@ function Pointshop2.GetItemClassByName( name )
 	return KInventory.Items[name]
 end
 
+function Pointshop2.GetItemClassByPrintName( name )
+	local itemClass
+	for _, class in pairs(KInventory.Items) do
+		if string.lower(class.PrintName) == string.lower(name) then
+			itemClass = class
+			break
+		end
+	end
+	return itemClass
+end
+
 /*
 	The hook specified in name is called for every item that is equipped by a player.
 	Arguments are passed unmodified and unfiltered.
