@@ -122,7 +122,7 @@ end
 function PANEL:AddPointNotification( text, points, small )
 	local panel = vgui.Create( "DLabel" )
 	
-	local message = string.upper( text ) .. points
+	local message = string.upper( text ) .. " " .. points
 	if points > 0 then
 		message = string.upper( text ) .. " +" .. points
 	end
