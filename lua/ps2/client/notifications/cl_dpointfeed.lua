@@ -121,7 +121,13 @@ end
 
 function PANEL:AddPointNotification( text, points, small )
 	local panel = vgui.Create( "DLabel" )
-	panel:SetText( string.upper( text ) .. " +" .. points )
+	
+	local message = string.upper( text ) .. points
+	if points > 0 then
+		message = string.upper( text ) .. " +" .. points
+	end
+	
+	panel:SetText( message )
 	panel:SetContentAlignment( 6 )
 	panel:SetSkin( Pointshop2.Config.DermaSkin )
 	if small then

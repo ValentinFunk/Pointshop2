@@ -4,7 +4,7 @@ local function createPointFeed( )
 	end
 	
 	Pointshop2.PointFeed = vgui.Create( "DPointFeed" )
-	Pointshop2.PointFeed:SetSize( ScrW( ) / 4, ScrH( ) / 5 )
+	Pointshop2.PointFeed:SetSize( ScrW( ) / 3, ScrH( ) / 5 )
 	Pointshop2.PointFeed:ParentToHUD( )
 	Pointshop2.PointFeed:SetPos( ScrW( ) / 2 - Pointshop2.PointFeed:GetWide( ) / 2, ScrH( ) - Pointshop2.PointFeed:GetTall( ) - 20 )
 	GAMEMODE.PS2_PF = Pointshop2.PointFeed
