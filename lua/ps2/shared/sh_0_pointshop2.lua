@@ -23,6 +23,9 @@ function Pointshop2.GetItemClassByName( name )
 	return KInventory.Items[name]
 end
 
+/*
+	Warning: convenience function to be used with care. Item names are NOT unique!
+*/
 function Pointshop2.GetItemClassByPrintName( name )
 	local itemClass
 	for _, class in pairs(KInventory.Items) do
