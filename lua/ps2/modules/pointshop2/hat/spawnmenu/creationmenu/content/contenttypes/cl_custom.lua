@@ -1,5 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
 local AddCustomizableNode = nil
 
 local function SetupCustomNode( node, pnlContent, needsapp )
@@ -48,7 +46,7 @@ local function SetupCustomNode( node, pnlContent, needsapp )
 	
 		if ( !self.PropPanel ) then
 
-			self.PropPanel = vgui.Create( "ContentContainer", pnlContent )
+			self.PropPanel = vgui.Create( "PS2_ContentContainer", pnlContent )
 			self.PropPanel:SetVisible( false )
 			self.PropPanel:SetTriggerSpawnlistChange( true )
 		
@@ -139,7 +137,7 @@ function AddPropsOfParent( pnlContent, node, parentid )
 		
 			if ( self.PropPanel ) then return end
 			
-			self.PropPanel = vgui.Create( "ContentContainer", pnlContent )
+			self.PropPanel = vgui.Create( "PS2_ContentContainer", pnlContent )
 			self.PropPanel:SetVisible( false )
 			
 			for i, object in SortedPairs( Info.contents ) do
@@ -159,7 +157,7 @@ function AddPropsOfParent( pnlContent, node, parentid )
 
 end
 
-hook.Add( "PopulateContent", "AddCustomContent", function( pnlContent, tree, node )
+hook.Add( "PS2_SpawnMenu_PopulateContent", "AddCustomContent", function( pnlContent, tree, node )
 
 	local node = AddCustomizableNode( pnlContent, "#spawnmenu.category.your_spawnlists", "", tree )
 	node:SetDraggableName( "CustomContent" );
@@ -170,13 +168,6 @@ hook.Add( "PopulateContent", "AddCustomContent", function( pnlContent, tree, nod
 		menu:AddOption( "New Category", function() AddCustomizableNode( pnlContent, "New Category", "", node ); node:SetExpanded( true ); hook.Run( "SpawnlistContentChanged" ) end )		
 		menu:Open()
 	
-	end
-	
-	--
-	-- Save the spawnlist when children drag and dropped
-	--
-	node.OnModified = function()
-		hook.Run( "SpawnlistContentChanged" )
 	end
 	
 	AddPropsOfParent( pnlContent, node, 0 )
@@ -191,13 +182,5 @@ hook.Add( "PopulateContent", "AddCustomContent", function( pnlContent, tree, nod
 	if ( IsValid( FirstNode ) ) then
 		FirstNode:InternalDoClick()
 	end
-
-end )
-
-hook.Add( "OnSaveSpawnlist", "DoSaveSpawnlist", function()
-
-	local Spawnlist = ConstructSpawnlist( CustomizableSpawnlistNode )
-	
-	spawnmenu.DoSaveToTextFiles( Spawnlist )
 
 end )

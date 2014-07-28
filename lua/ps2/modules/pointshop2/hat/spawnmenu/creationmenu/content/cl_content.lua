@@ -1,5 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
 local PANEL = {}
 
 AccessorFunc( PANEL, "m_pSelectedPanel", 		"SelectedPanel" )
@@ -57,19 +55,19 @@ function PANEL:SwitchPanel( panel )
 end
 
 
-vgui.Register( "SpawnmenuContentPanel", PANEL, "DPanel" )
+vgui.Register( "DPS2_SpawnmenuContentPanel", PANEL, "DPanel" )
 
 
 
 local function CreateContentPanel()
 
-	local ctrl = vgui.Create( "SpawnmenuContentPanel" )
+	local ctrl = vgui.Create( "DPS2_SpawnmenuContentPanel" )
 
 	ctrl.OldSpawnlists = ctrl.ContentNavBar.Tree:AddNode( "#spawnmenu.category.browse", "icon16/cog.png" )
 	
 	ctrl:EnableModify()
-	hook.Call( "PopulatePropMenu", GAMEMODE )
-	ctrl:CallPopulateHook( "PopulateContent" );
+	hook.Call( "PS2_PopulatePropMenu", GAMEMODE )
+	ctrl:CallPopulateHook( "PS2_SpawnMenu_PopulateContent" );
 
 		
 	ctrl.OldSpawnlists:MoveToFront()
@@ -79,4 +77,7 @@ local function CreateContentPanel()
 
 end
 
-spawnmenu.AddCreationTab( "#spawnmenu.content_tab", CreateContentPanel, "icon16/application_view_tile.png", -10 )
+local existing = spawnmenu.GetCreationTabs()
+if not existing["#spawnmenu.content_tab"] then
+	spawnmenu.AddCreationTab( "#spawnmenu.content_tab", CreateContentPanel, "icon16/application_view_tile.png", -10 )
+end

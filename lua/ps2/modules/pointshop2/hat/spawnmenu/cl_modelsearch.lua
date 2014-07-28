@@ -1,7 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then 
-	return
-end
-
 local function GetAllFiles( tab, folder, extension, path )
 
 	local files, folders = file.Find( folder .. "/*", path )

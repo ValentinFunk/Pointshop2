@@ -1,15 +1,10 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
-spawnmenu_border = CreateConVar( "spawnmenu_border",	"0.1", { FCVAR_ARCHIVE } )
-
-
 local PANEL = {}
 
 --[[---------------------------------------------------------
    Name: Paint
 -----------------------------------------------------------]]
 function PANEL:Init()
-	self.CreateMenu = vgui.Create( "CreationMenu", self )
+	self.CreateMenu = vgui.Create( "DPS2_CreationMenu", self )
 	self.CreateMenu:Dock( FILL );
 	self.CreateMenu:DockMargin( 3, 20, 3, 10 )
 	
@@ -103,8 +98,8 @@ function PANEL:PerformLayout()
 	self:SetSize( ScrW(), ScrH() )
 	self:SetPos( 0, 0 )
 
-	local MarginX = math.Clamp( (ScrW() - 1024) * spawnmenu_border:GetFloat(), 25, 256 )
-	local MarginY = math.Clamp( (ScrH() - 768) * spawnmenu_border:GetFloat(), 25, 256 )
+	local MarginX = math.Clamp( (ScrW() - 1024) * 5, 25, 256 )
+	local MarginY = math.Clamp( (ScrH() - 768) * 5, 25, 256 )
 
 	self:DockPadding( 0, 0, 0, 0 )
 
@@ -112,7 +107,7 @@ function PANEL:PerformLayout()
 
 end
 
-vgui.Register( "SpawnMenu", PANEL, "EditablePanel" )
+vgui.Register( "DPS2_SpawnMenu", PANEL, "EditablePanel" )
 
 
 --[[---------------------------------------------------------
@@ -128,21 +123,18 @@ local function CreateSpawnMenu()
 	
 	end
 	
-	-- Start Fresh
-	spawnmenu.ClearToolMenus()
-	
 	-- Add the tabs to the tool menu before trying
 	-- to populate them with tools.
-	hook.Run( "PopulateToolMenu" )
-	hook.Run("PopulateContent")
+	--hook.Run("PS2_SpawnMenu_PopulateContent")
 
-	Pointshop2.SpawnMenu = vgui.Create( "SpawnMenu" )
+	Pointshop2.SpawnMenu = vgui.Create( "DPS2_SpawnMenu" )
 	Pointshop2.SpawnMenu:SetVisible( false )
-	
-	g_SpawnMenu = Pointshop2.SpawnMenu
 end
 
 -- Hook to create the spawnmenu at the appropriate time (when all sents and sweps are loaded)
 CreateSpawnMenu()
 
-spawnmenu.PopulateFromEngineTextFiles()
+timer.Simple( 3, function( )
+	--PAC needs g_SpawnMenu so create it if the gamemode doesn't
+	g_SpawnMenu = g_SpawnMenu or Pointshop2.SpawnMenu
+end )

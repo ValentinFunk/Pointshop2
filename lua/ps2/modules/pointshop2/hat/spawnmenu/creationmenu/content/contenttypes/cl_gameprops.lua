@@ -1,5 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
 local function AddBrowseContent( ViewPanel, node, name, icon, path, pathid, pnlContent )
 
 	local models = node:AddFolder( name, path .. "models", pathid, false );
@@ -50,14 +48,14 @@ end
 --
 -- Called when setting up the sidebar on the spawnmenu - to populate the tree
 --
-hook.Add( "PopulateContent", "GameProps", function( pnlContent, tree, node )
+hook.Add( "PS2_SpawnMenu_PopulateContent", "GameProps", function( pnlContent, tree, node )
 
 	--
 	-- Create a node in the `other` category on the tree
 	--
 	local MyNode = node:AddNode( "#spawnmenu.category.games", "icon16/folder_database.png" );
 	
-		local ViewPanel = vgui.Create( "ContentContainer", pnlContent )
+		local ViewPanel = vgui.Create( "PS2_ContentContainer", pnlContent )
 		ViewPanel:SetVisible( false );
 
 		AddBrowseContent( ViewPanel, MyNode, "All", "games/16/all.png", "", "GAME", pnlContent );

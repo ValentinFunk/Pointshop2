@@ -1,5 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
 local function AddRecursive( pnl, folder, path, wildcard )
 
 	local files, folders = file.Find( folder .. "*", path )
@@ -24,9 +22,9 @@ local function AddRecursive( pnl, folder, path, wildcard )
 end
 
 
-hook.Add( "PopulateContent", "AddonProps", function( pnlContent, tree, node )
+hook.Add( "PS2_SpawnMenu_PopulateContent", "AddonProps", function( pnlContent, tree, node )
 
-	local ViewPanel = vgui.Create( "ContentContainer", pnlContent )
+	local ViewPanel = vgui.Create( "PS2_ContentContainer", pnlContent )
 	ViewPanel:SetVisible( false );
 
 	local MyNode = node:AddNode( "#spawnmenu.category.addons", "icon16/folder_database.png" );

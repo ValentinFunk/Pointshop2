@@ -1,5 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
 local PANEL = {}
 
 DEFINE_BASECLASS( "DScrollPanel" );
@@ -83,15 +81,6 @@ function PANEL:Clear()
 
 end
 
-function PANEL:OnModified()
-
-	if ( !self:GetTriggerSpawnlistChange() ) then return end
-
-	hook.Run( "SpawnlistContentChanged" )
-
-end
-
-
 function PANEL:ContentsToTable( contentpanel )
 
 	local tab = {}
@@ -110,7 +99,7 @@ end
 
 function PANEL:Copy()
 
-	local copy = vgui.Create( "ContentContainer", self:GetParent() )
+	local copy = vgui.Create( "PS2_ContentContainer", self:GetParent() )
 	copy:CopyBase( self )
 	
 	copy.IconList:CopyContents( self.IconList )
@@ -119,24 +108,4 @@ function PANEL:Copy()
 
 end
 
-vgui.Register( "ContentContainer", PANEL, "DScrollPanel" )
-
-
-hook.Add( "SpawnlistOpenGenericMenu", "SpawnlistOpenGenericMenu", function( canvas )
-
-	local selected = canvas:GetSelectedChildren()
-
-	local menu = DermaMenu()
-	menu:AddOption( "Delete", function() 
-							
-			for k, v in pairs( selected ) do
-				v:Remove();
-			end
-
-			hook.Run( "SpawnlistContentChanged" ) 
-
-		end )
-
-	menu:Open()
-
-end)
+vgui.Register( "PS2_ContentContainer", PANEL, "DScrollPanel" )

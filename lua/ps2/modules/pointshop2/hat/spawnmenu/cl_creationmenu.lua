@@ -1,5 +1,3 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
 local PANEL = {}
 
 --[[---------------------------------------------------------
@@ -49,4 +47,4 @@ function PANEL:Populate()
 
 end
 
-vgui.Register( "CreationMenu", PANEL, "DPropertySheet" )
+vgui.Register( "DPS2_CreationMenu", PANEL, "DPropertySheet" )

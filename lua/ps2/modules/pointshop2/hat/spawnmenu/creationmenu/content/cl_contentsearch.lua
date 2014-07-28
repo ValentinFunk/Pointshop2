@@ -66,7 +66,7 @@ function PANEL:Init()
 
 	end);
 
-	self.PropPanel = vgui.Create( "ContentContainer", self )
+	self.PropPanel = vgui.Create( "PS2_ContentContainer", self )
 	self.PropPanel:SetVisible( false )
 	self.PropPanel:SetTriggerSpawnlistChange( false )
 	
@@ -105,18 +105,18 @@ function PANEL:AddSearchResult( text, func, icon )
 end
 
 
-hook.Add( "PopulateContent", "AddSearchContent", function( pnlContent, tree, node )
+hook.Add( "PS2_SpawnMenu_PopulateContent", "AddSearchContent", function( pnlContent, tree, node )
 
 	-- Add a node to the tree
-	--local node = tree:AddNode( "Search", "icon16/magnifier.png" );
+	local node = tree:AddNode( "Search", "icon16/magnifier.png" );
 	
 	-- If we click on the node populate it and switch to it.
-	--node.DoClick = function( self )
+	node.DoClick = function( self )
 	
-	--	self:DoPopulate()		
-	--	pnlContent:SwitchPanel( self.PropPanel );
+		self:DoPopulate()		
+		pnlContent:SwitchPanel( self.PropPanel );
 	
-	--end
+	end
 
 	ContentPanel = pnlContent
 

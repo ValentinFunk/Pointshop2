@@ -1,7 +1,9 @@
 --Catches gm_spawn on gamemodes other than sandbox
 if engine.ActiveGamemode( ) == "sandbox" then return end
 
-hook.Add( "InitPostEntity", "SpawnMenuHk", function( )
+if SERVER then
+	util.AddNetworkString( "SpawnMenuItemSpawn" )
+	
 	local old = concommand.GetTable( )["gm_spawn"]
 
 	concommand.Add("gm_spawn", function( ply, cmd, args, mdl, flUnknown, iUnknown, ... )
@@ -9,8 +11,17 @@ hook.Add( "InitPostEntity", "SpawnMenuHk", function( )
 			return old( ply, cmd, args, mdl, flUnknown, iUnknown, ... )
 		end
 		
+		net.Start( "SpawnMenuItemSpawn" )
+			net.WriteString( args[1] )
+		net.Send( ply )
+	end)
+	
+else
+
+	net.Receive( "SpawnMenuItemSpawn", function( len )
 		Pointshop2.SpawnMenu = g_SpawnMenu or Pointshop2.SpawnMenu
-		local mdl = args[1]
+		
+		local mdl = net.ReadString( )
 		if pace.close_spawn_menu then
 			pace.Call("VariableChanged", pace.current_part, "Model", mdl)
 		
@@ -26,5 +37,6 @@ hook.Add( "InitPostEntity", "SpawnMenuHk", function( )
 		else
 			pace.Call("VariableChanged", pace.current_part, "Model", mdl)
 		end
-	end)
-end )
+	end )
+	
+end
