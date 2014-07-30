@@ -56,7 +56,7 @@ end )
 
 hook.Add( "TTTFoundDNA", "PS2_TTTFoundDNA", function( ply, dnaOwner, ent )
 	if S("Detective.DnaFound") then
-		v:PS2_AddStandardPoints( S("Detective.DnaFound"), "Retrieved DNA", true )
+		ply:PS2_AddStandardPoints( S("Detective.DnaFound"), "Retrieved DNA", true )
 	end
 	
 	ply.hasDnaOn = ply.hasDnaOn or {}
@@ -64,7 +64,8 @@ hook.Add( "TTTFoundDNA", "PS2_TTTFoundDNA", function( ply, dnaOwner, ent )
 end )
 
 hook.Add( "PlayerDeath", "PS2_PlayerDeath", function( victim, inflictor, attacker )
-	if ply == attacker then
+	victim.hasDnaOn = {}
+	if victim == attacker then
 		return
 	end
 	if (attacker.IsGhost and attacker:IsGhost()) then return end --SpecDM Support.
