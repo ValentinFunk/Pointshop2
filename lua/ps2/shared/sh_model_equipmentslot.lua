@@ -13,7 +13,8 @@ EquipmentSlot.static.model = {
 	belongsTo = {
 		Item = {
 			class = "KInventory.Item",
-			foreignKey = "itemId"
+			foreignKey = "itemId",
+			onDelete = "CASCADE"
 		},
 		/*Owner = {
 			class = "LibK.Player",

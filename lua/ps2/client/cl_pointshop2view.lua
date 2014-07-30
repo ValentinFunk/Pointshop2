@@ -358,6 +358,11 @@ function Pointshop2View:searchPlayers( subject, attribute )
 end
 
 function Pointshop2View:getUserDetails( kPlayerId )
+	if not kPlayerId or not type( kPlayerId ) == "number" then
+		error( "Invalid Call" )
+		debug.Trace( )
+		return
+	end
 	return self:controllerTransaction( "getUserDetails", kPlayerId )
 end
 

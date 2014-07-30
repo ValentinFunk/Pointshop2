@@ -48,9 +48,9 @@ function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 	WhenAllFinished{ LibK.Player.findById( kPlayerId ), 
 					 Pointshop2.Wallet.findByOwnerId( kPlayerId ), 
 					 KInventory.Inventory.findByOwnerId( kPlayerId )
-	}:Then( function( ply, wallet, inventory )
-		ply.wallet = wallet
-		ply.inventory = inventory
+	}:Then( function( dbPlayer, wallet, inventory )
+		dbPlayer.wallet = wallet
+		dbPlayer.inventory = inventory
 		if not wallet or not inventory then
 			local def = Deferred( )
 			def:Reject( 1, "Player is not a Pointshop2 User" )
@@ -58,7 +58,7 @@ function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 		end
 		return inventory:loadItems( )
 		:Then( function( )
-			return ply
+			return dbPlayer
 		end )
 	end )
 	:Done( function( plyInfo )
@@ -118,6 +118,12 @@ end
 function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, newValue )
 	return self:updatePlayerWallet( kPlayerId, currencyType, newValue )
 	:Done( function( wallet )
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
+		local walletOwner
+		for k, v in pairs( player.GetAll( ) ) do 
+			if v.kPlayerId == kPlayerId then
+				walletOwner = v
+			end
+		end
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( walletOwner ), wallet )
 	end )
 end
