@@ -68,7 +68,11 @@ local function recursiveSettingsInitialize( settings, storedSettings, cacheTable
 			if storedSettings[newPath] != nil then
 				cacheTable[newPath] = storedSettings[newPath]
 			else
-				cacheTable[newPath] = value.value
+				if istable( value ) then 
+					cacheTable[newPath] = value.value
+				else
+					cacheTable[newPath] = value
+				end
 			end
 		end
 	end
