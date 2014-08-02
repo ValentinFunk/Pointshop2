@@ -103,7 +103,7 @@ function Pointshop2View:receiveInventory( inventory )
 	InventoryView:getInstance( ):receiveInventory( inventory ) --Needed for KInventory to work properly
 	LocalPlayer().PS2_Inventory = inventory
 	KLogf( 5, "[PS2] Received Inventory, %i items", #inventory:getItems( ) )
-	
+	hook.Run( "PS2_InvUpdate" )
 	resolveIfWaiting( self.clPromises.InventoryReceived )
 end
 
@@ -134,6 +134,7 @@ function Pointshop2View:receiveSlots( slots )
 	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
 	for k, v in pairs( slots ) do
 		LocalPlayer().PS2_Slots[v.slotName] = v.Item
+		hook.Run( "PS2_SlotChanged", v )
 	end
 
 	KLogf( 5, "[PS2] Received slots, %i slots", #slots )

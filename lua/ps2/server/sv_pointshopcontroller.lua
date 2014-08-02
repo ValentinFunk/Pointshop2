@@ -609,7 +609,7 @@ function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 		return def:Promise( )
 	end
 		
-	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.name }
+	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.className }
 	:Then( function( )
 		return KInventory.Item.removeWhere{ itemclass = itemClass.name }
 	end )

@@ -70,6 +70,7 @@ function PANEL:Init( )
 				pnl.buyBtn:SetDisabled( true )
 				pnl.buyBtn:SetText( "Can't afford" )
 			else
+				pnl.buyBtn:SetDisabled( false )
 				pnl.label:SetColor( color_white )
 				pnl.buyBtn:SetText( "Buy Now" )
 			end
