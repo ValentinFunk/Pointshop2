@@ -25,12 +25,12 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		error( "Error starting transaction:", err )
 	end )
 	
-	if currencyType == "points" and price.points and ply.PS2_Wallet.points > price.points then
+	if currencyType == "points" and price.points and ply.PS2_Wallet.points >= price.points then
 		ply.PS2_Wallet.points = ply.PS2_Wallet.points - price.points
 	elseif currencyType == "premiumPoints" and price.premiumPoints and ply.PS2_Wallet.premiumPoints >= price.premiumPoints then
 		ply.PS2_Wallet.premiumPoints = ply.PS2_Wallet.premiumPoints - price.premiumPoints
 	else
-		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. currencyType )
+		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. currencyType .. ")" )
 		return
 	end
 	
