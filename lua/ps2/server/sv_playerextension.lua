@@ -1,4 +1,4 @@
-local PLAYER = FindMetaTable( "Player" )
+local Player = FindMetaTable( "Player" )
 
 function Player:PS2_AddStandardPoints( points, message, small )
 	if points == 0 then return end
