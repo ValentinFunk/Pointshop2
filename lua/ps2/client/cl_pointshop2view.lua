@@ -251,6 +251,9 @@ function Pointshop2View:loadDynamics( versionHash )
 		
 		--Pass to view
 		self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
+		
+		--Inform server
+		self:controllerAction( "dynamicsReceived" )
 	end )
 end
 
@@ -404,6 +407,10 @@ end
 
 function Pointshop2View:resetToDefaults( )
 	self:controllerAction( "resetToDefaults" )
+end
+
+function Pointshop2View:fixDatabase( )
+	self:controllerAction( "fixDatabase" )
 end
 
 function Pointshop2View:removeItem( itemClass, refund )
