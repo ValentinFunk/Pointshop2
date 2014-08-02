@@ -39,7 +39,13 @@ function Pointshop2.ResetDatabase( )
 	return WhenAllFinished( promises )
 end
 
+/*
+	This function tries to find and fix database errors.
+	Only use it in extreme cases and ALWAYS do a backup!
+	The function doesn't consider Lua defined items and detects them as DB errors, be very careful with that!
+*/
 function Pointshop2.FixDatabase( )
+	-- 1: Find all itemPersistences without a valid parent base persistence
 	local promises = {}
 	local persistences = Pointshop2Controller:getPersistenceModels( )
 	for _, persistenceModel in pairs( persistences ) do
@@ -48,6 +54,7 @@ function Pointshop2.FixDatabase( )
 			local promises = {}
 			for _, item in pairs( persistentItems ) do
 				if not item.ItemPersistence then
+					KLogf( 2, "[PS2-FIX] Found item persistence with invalid parent persistence, removing it, class %s, id %i", persistenceModel.name, item.id )
 					table.insert( promises, item:remove( ) )
 				end
 			end
@@ -55,7 +62,41 @@ function Pointshop2.FixDatabase( )
 		end )
 		table.insert( promises, promise )
 	end
+	
+	-- 2: Find all items that don't have a valid class (base persistence)
 	WhenAllFinished( promises ) 
+	:Then( function( )
+		return KInventory.Item.getAll( 0 ) --Don't resolve relationships
+	end )
+	:Then( function( items )
+		local promises = {}
+		for k, v in pairs( items ) do
+			if not getClass( v.itemclass ) then
+				KLogf( 2, "[PS2-FIX] Found invalid item reference in inventory, removing item %i, class %s", v.id, v.class )
+				table.insert( promises, v:remove( ) )
+			end
+		end
+		return WhenAllFinished( promises )
+	end )
+	
+	-- 3: Find all item mappings that don't have a valid class (base persistence)
+	:Then( function( )
+		return Pointshop2.ItemMapping.getAll( )
+	end )
+	:Then( function( itemMappings ) 
+		local promises = {}
+		for k, itemMapping in pairs( itemMappings ) do
+			local promise = Pointshop2.ItemPersistence.findById( itemMapping.itemClass )
+			:Then( function( persistence )
+				if not persistence then
+					KLogf( 2, "[PS2-FIX] Found invalid reference in mapping, class was %s", itemMapping.itemClass )
+					return itemMapping:remove( )
+				end
+			end )
+			table.insert( promises, promise )
+		end
+		return WhenAllFinished( promises )
+	end )
 	:Done( function( )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
 	end )
