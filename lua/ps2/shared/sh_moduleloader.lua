@@ -141,8 +141,10 @@ function Pointshop2.LoadModules( )
 							shouldLoad = false
 						end
 					end
+				end,
+				NotifyGamemodeModuleLoaded = function( )
 				end
-			}
+			},
 		}
 		setmetatable( env, { __index = _G } )
 		

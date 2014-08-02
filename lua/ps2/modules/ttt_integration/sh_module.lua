@@ -110,3 +110,4 @@ MODULE.Settings.Server = {
 }
 	
 Pointshop2.RegisterModule( MODULE )
+Pointshop2.NotifyGamemodeModuleLoaded( "terrortown", MODULE )
