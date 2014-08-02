@@ -16,8 +16,12 @@ function PANEL:Init( )
 end
 
 function PANEL:AddItems( )
-	for _, itemClass in pairs( self.category.items ) do
-		local itemClass = Pointshop2.GetItemClassByName( itemClass )
+	for _, itemClassName in pairs( self.category.items ) do
+		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+		if not itemClass then
+			KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
+			continue
+		end
 		local itemIcon = vgui.Create( itemClass:GetPointshopIconControl( ), self.layout )
 		itemIcon:SetItemClass( itemClass )
 	end

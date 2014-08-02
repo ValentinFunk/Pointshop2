@@ -119,8 +119,12 @@ function SetupCategoryNode( node, pnlContent )
 			self.PropPanel:SetTriggerSpawnlistChange( true )
 			
 			if not self.categoryInfo then return end 
-			for k, itemClass in pairs( self.categoryInfo.items ) do
-				itemClass = Pointshop2.GetItemClassByName( itemClass )
+			for k, itemClassName in pairs( self.categoryInfo.items ) do
+				itemClass = Pointshop2.GetItemClassByName( itemClassName )
+				if not itemClass then
+					KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
+					continue
+				end
 				local panel = vgui.Create( itemClass:GetPointshopIconControl( ) )
 				self.PropPanel:Add( panel )
 				panel:SetItemClass( itemClass )
