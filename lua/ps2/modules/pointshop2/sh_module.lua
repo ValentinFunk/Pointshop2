@@ -46,6 +46,18 @@ MODULE.SettingButtons = {
 			Pointshop2View:getInstance( ):installDefaults( )
 			Derma_Message( "We're installing the default items for you. Please give us about a minute, your shop will update automatically once the items are installed", "Information" )
 		end 
+	},
+	{
+		label = "Repair Database",
+		icon = "pointshop2/wizard.png",
+		onClick = function( )
+			Derma_Query( "This will attempt to repair a broken database, then switch the map. If you have strange errors you can try this. Backup your database as you could lose data or problems could get worse. Open a support ticket in this case.", "Warning",
+			"Ok, do it", function( )
+				Pointshop2View:getInstance( ):fixDatabase( )
+			end, 
+			"No", function( )
+			end )
+		end
 	}
 }
 

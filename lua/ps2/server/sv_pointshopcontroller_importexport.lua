@@ -269,3 +269,7 @@ function Pointshop2Controller:installDefaults( )
 		return self:moduleItemsChanged( )
 	end )
 end
+
+function Pointshop2Controller:fixDatabase( )
+	Pointshop2.FixDatabase( )
+end

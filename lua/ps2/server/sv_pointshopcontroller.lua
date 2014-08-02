@@ -69,7 +69,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action == "resetToDefaults" or action == "installDefaults" then
+	elseif action == "resetToDefaults" or action == "installDefaults" or action == "fixDatabase" then
 		if PermissionInterface.query( ply, "pointshop2 reset" ) then
 			def:Resolve( )
 		else
@@ -81,7 +81,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action == "outfitsReceived" then
+	elseif action == "outfitsReceived" or action == "dynamicsReceived" then
 		def:Resolve( )
 	elseif action == "searchPlayers" or
 		   action == "getUserDetails" or
@@ -167,17 +167,33 @@ function Pointshop2Controller:initializeSlots( ply )
 		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
 	
 		if shouldEquipItems then
-			ply.outfitsReceivedPromise:Done( function( )
-				for _, slot in pairs( ply.PS2_Slots ) do
-					if not slot.itemId then continue end
-					
-					local item = slot.Item
-					item:OnEquip( ply )
-					
-					self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
-				end
-			end )
+			for _, slot in pairs( ply.PS2_Slots ) do
+				if not slot.itemId then continue end
+				
+				local item = slot.Item
+				item:OnEquip( ply )
+				
+				self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
+			end
 		end
+	end )
+end
+
+function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
+	local args = {...}
+	local promise
+	if type( plyOrPlys ) == "table" then
+		local promises = {}
+		for k, ply in pairs( plyOrPlys ) do
+			local promise = WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
+			table.insert( promises, promise )
+		end
+		promise = WhenAllFinished( promises )
+	else
+		promise = ply.ps2ReadyPromise
+	end
+	promise:Done( function( )
+		self:startView( view, action, plyOrPlys, unpack( args ) )
 	end )
 end
 
@@ -238,6 +254,9 @@ Pointshop2.LoadModuleItemsPromise:Done( function( )
 	Pointshop2Controller:getInstance( ):loadDynamicInfo( )
 end )
 function Pointshop2Controller:sendDynamicInfo( ply )
+	if ply.dynamicsReceivedPromise._promise._state != "pending" then
+		ply.dynamicsReceivedPromise = Deferred( )
+	end
 	if not self.dynamicsResource then
 		KLogf( 4, "[Pointshop2] Dynamics resource not loaded yet, trying again later" )
 		timer.Simple( 0.5, function( )
@@ -247,6 +266,10 @@ function Pointshop2Controller:sendDynamicInfo( ply )
 	end
 	
 	self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
+end
+
+function Pointshop2Controller:dynamicsReceived( ply )
+	ply.dynamicsReceivedPromise:Resolve( )
 end
 
 --[[
@@ -280,6 +303,7 @@ local function initPlayer( ply )
 	local controller = Pointshop2Controller:getInstance( )
 	controller:sendWallet( ply )
 	
+	ply.dynamicsReceivedPromise = Deferred( )
 	ply.outfitsReceivedPromise = Deferred( )
 	Pointshop2.LoadModuleItemsPromise:Done( function( )
 		controller:sendDynamicInfo( ply )
@@ -296,6 +320,19 @@ local function initPlayer( ply )
 		end )
 	end )
 end
+
+local function reloadAllPlayers( )
+	for _, ply in pairs( player.GetAll( ) ) do
+		ply.outfitsReceivedPromise = Deferred( )
+		ply.dynamicsReceivedPromise = Deferred( )
+	end
+	timer.Simple( 1, function( )
+		for _, ply in pairs( player.GetAll( ) ) do
+			initPlayer( ply )
+		end
+	end )
+end
+
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	timer.Simple( 1, function( )
@@ -303,19 +340,10 @@ hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function
 	end )
 end )
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
-	for _, ply in pairs( player.GetAll( ) ) do
-		ply.outfitsReceivedPromise = Deferred( )
-		ply.settingsReceivedPromise = Deferred( )
-	end
-	timer.Simple( 1, function( )
-		for _, ply in pairs( player.GetAll( ) ) do
-			initPlayer( ply )
-		end
-	end )
+	reloadAllPlayers( )
 end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )
-	PrintTable( categoryItemsTable )
 	--Repopulate Categories Table
 	Pointshop2.Category.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate categories", errid, err ) end )
@@ -575,23 +603,27 @@ end
 
 function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
-	
-	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClassName }
+	if not itemClass then
+		local def = Deferred( )
+		def:Reject( "An item " .. iitemClassName .. " doesn't exist!" )
+		return def:Promise( )
+	end
+		
+	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.name }
 	:Then( function( )
-		return KInventory.Item.removeWhere{ itemclass = itemClassName }
+		return KInventory.Item.removeWhere{ itemclass = itemClass.name }
 	end )
 	:Then( function( )
-		if not itemClass then
-			local def = Deferred( )
-			def:Reject( "An item " .. itemClassName .. " doesn't exist!" )
-			return def:Promise( )
-		end
+		
 		if itemClass:getPersistence( ).customRemove then
 			return itemClass:getPersistence( ).customRemove( itemClass )
 		end
-		return Pointshop2.ItemPersistence.removeWhere{ id = itemClassName }
+		return Pointshop2.ItemPersistence.removeWhere{ id = itemClass.name }
 	end )
 	:Then( function( )
 		return self:moduleItemsChanged( )
+	end )
+	:Then( function( )
+		reloadAllPlayers( )
 	end )
 end
