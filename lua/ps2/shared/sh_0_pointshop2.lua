@@ -138,3 +138,12 @@ end
 function Pointshop2.GetCurrentServerId( )
 	return Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.ServerId" )
 end
+
+Pointshop2.GamemodeModules = {}
+function Pointshop2.NotifyGamemodeModuleLoaded( gamemodeName, mod )
+	Pointshop2.GamemodeModules[gamemodeName] = mod
+end
+
+function Pointshop2.IsCurrentGamemodePluginPresent( )
+	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )] != nil
+end

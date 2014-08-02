@@ -1,0 +1,37 @@
+function Pointshop2.UpdatePointsOverTime( )
+	local groupMultipliers = Pointshop2.GetSetting( "Pointshop 2", "PointsOverTime.GroupMultipliers" )
+	local points = Pointshop2.GetSetting( "Pointshop 2", "PointsOverTime.Points" )
+	for k, ply in pairs( player.GetAll( ) ) do
+		if groupMultipliers[ply:GetUserGroup( )] then
+			local bonus = groupMultipliers[ply:GetUserGroup( )] * points - points
+			
+			--Try to find a nice rank name
+			local titleLookup = {}
+			for k, v in pairs( PermissionInterface.getRanks( ) ) do
+				titleLookup[v.internalName] = v.title
+			end
+			local rank = titleLookup[ply:GetUserGroup()] or ply:GetUserGroup( )
+			
+			ply:PS2_AddStandardPoints( bonus, rank .. " Bonus", true )
+		end
+		ply:PS2_AddStandardPoints( points, "Playing on the Server" )
+	end
+end
+
+function Pointshop2.RegisterPOTtimer( )
+	--Points over time is disabled for gamemodes with integration plugins
+	if Pointshop2.IsCurrentGamemodePluginPresent( ) then
+		return
+	end
+	
+	local delayInSeconds = Pointshop2.GetSetting( "Pointshop 2", "PointsOverTime.Delay" ) * 60
+	timer.Create( "Pointshop2_POT", delayInSeconds, 0, function( )
+		Pointshop2.UpdatePointsOverTime( )
+	end )
+end
+hook.Add( "PS2_OnSettingsUpdate", "ChangeKeyHook", function( )
+	Pointshop2.RegisterPOTtimer( )
+end )
+Pointshop2.SettingsLoadedPromise:Done( function( )
+	Pointshop2.RegisterPOTtimer( )
+end )

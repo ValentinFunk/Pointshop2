@@ -35,7 +35,7 @@ function PANEL:OnMousePressed( )
 end
 
 function PANEL:SetSettingsInfo( settingsInfo, mod )	
-	self.icon:SetImage( settingsInfo.icon )
+	self.icon:SetMaterial( Material( settingsInfo.icon, "noclamp smooth" ) )
 	self.label:SetText( settingsInfo.label )
 	self.settingsInfo = settingsInfo
 	self.mod = mod

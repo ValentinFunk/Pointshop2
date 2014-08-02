@@ -49,7 +49,7 @@ MODULE.SettingButtons = {
 	},
 	{
 		label = "Repair Database",
-		icon = "pointshop2/wizard.png",
+		icon = "pointshop2/wizard_l.png",
 		onClick = function( )
 			Derma_Query( "This will attempt to repair a broken database, then switch the map. If you have strange errors you can try this. Backup your database as you could lose data or problems could get worse. Open a support ticket in this case.", "Warning",
 			"Ok, do it", function( )
@@ -58,6 +58,11 @@ MODULE.SettingButtons = {
 			"No", function( )
 			end )
 		end
+	},
+	{
+		label = "Points over Time",
+		icon = "pointshop2/person25.png",
+		control = "DPointsOverTimeConfigurator"
 	}
 }
 
@@ -135,7 +140,19 @@ MODULE.Settings.Server = {
 			label = "Shop Chat Command",
 			tooltip = "Chat command used to open the shop"
 		}
+	},
+	PointsOverTime = {
+		info = {
+			isManualSetting = true, --Ignored by AutoAddSettingsTable
+		},
+		Delay = 10,
+		Points = 100,
+		GroupMultipliers = { 
+			type = "table",
+			value = { }
+		}
 	}
 }
 
 Pointshop2.RegisterModule( MODULE )
+Pointshop2.NotifyGamemodeModuleLoaded( "terrortown", MODULE )

@@ -59,6 +59,10 @@ function PANEL:AutoAddSettingsTable( tbl, settingListener )
 	
 	self.settingsLookup = self.settingsLookup or {}
 	for catPath, settingsTable in pairs( tbl ) do
+		if settingsTable.info and settingsTable.info.isManualSetting then
+			continue
+		end
+		
 		self[catPath] = self:AddSection( settingsTable.info and settingsTable.info.label or catPath )
 		self[catPath]:SetSettingsListener( settingListener )
 		
