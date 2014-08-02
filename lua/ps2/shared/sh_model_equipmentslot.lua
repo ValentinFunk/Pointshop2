@@ -14,7 +14,7 @@ EquipmentSlot.static.model = {
 		Item = {
 			class = "KInventory.Item",
 			foreignKey = "itemId",
-			onDelete = "CASCADE"
+			onDelete = "SET NULL"
 		},
 		/*Owner = {
 			class = "LibK.Player",
