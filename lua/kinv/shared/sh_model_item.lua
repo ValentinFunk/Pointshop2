@@ -22,6 +22,12 @@ Item.static.model = {
 		itemclass = "classname",
 		inventory_id = "optKey", --optional foreign key, if this doesnt exist item is dropped
 		data = "table" --Table is a special field, saves all instance vars that weren't saved already
+	},
+	belongsTo = {
+		Inventory = {
+			class = "KInventory.Inventory",
+			foreignKey = "inventory_id"
+		}
 	}
 }
 Item:include( DatabaseModel )
