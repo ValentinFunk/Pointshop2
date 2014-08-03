@@ -152,13 +152,7 @@ end
 */
 function Pointshop2Controller:initializeSlots( ply )
 	return Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
-	:Then( function( slots )
-		--Don't double equip if the script gets reloaded
-		local shouldEquipItems = true
-		if ply.PS2_Slots then
-			shouldEquipItems = false
-		end
-		
+	:Then( function( slots )		
 		ply.PS2_Slots = {}
 		for _, slot in pairs( slots ) do
 			ply.PS2_Slots[slot.id] = slot
@@ -166,15 +160,18 @@ function Pointshop2Controller:initializeSlots( ply )
 		end
 		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
 	
-		if shouldEquipItems then
-			for _, slot in pairs( ply.PS2_Slots ) do
-				if not slot.itemId then continue end
-				
-				local item = slot.Item
-				item:OnEquip( ply )
-				
-				self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
+		for _, slot in pairs( ply.PS2_Slots ) do
+			if not slot.itemId then continue end
+			
+			local item = KInventory.ITEMS[slot.itemId]
+			if not item:GetOwner( ) or item:GetOwner( ) != ply then
+				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.name )
+				debug.Trace( )
+				continue
 			end
+			item:OnEquip( ply )
+			
+			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
 		end
 	end )
 end
@@ -293,7 +290,7 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.name )
 				continue
 			end
-			self:startView( "Pointshop2View", "playerEquipItem", plyToSendTo, ply, item )
+			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", plyToSendTo, ply, item )
 		end
 	end
 end
