@@ -327,19 +327,20 @@ local ITEMS = {}
 setmetatable( ITEMS, { __mode = 'v' } ) --weak reference holder
 
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
+	isRetry = isRetry or 0
 	local ply 
 	
 	for k, v in pairs( player.GetAll( ) ) do
-		if v:GetNWInt( "KPlayerId" ) == kPlayerId then
+		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
 			ply = v
 		end
 	end
 	if not IsValid( ply ) then
 		KLogf( 4, "[PS2] Couldn't get it on retry D:" )
-		if not isRetry then
+		if isRetry < 10 then
 			KLogf( 4, "[PS2] Player equip on player that is not valid, trying again in 1s" )
 			timer.Simple( 3, function( )
-				self:playerEquipItem( kPlayerId, item, true )
+				self:playerEquipItem( kPlayerId, item, isRetry + 1 )
 			end )
 		end
 		return
