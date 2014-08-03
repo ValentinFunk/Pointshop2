@@ -335,9 +335,10 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		end
 	end
 	if not IsValid( ply ) then
-		KLogf( 4, "[PS2] Player equip on player that is not valid, trying again in 1s" )
+		KLogf( 4, "[PS2] Couldn't get it on retry D:" )
 		if not isRetry then
-			timer.Simple( 1, function( )
+			KLogf( 4, "[PS2] Player equip on player that is not valid, trying again in 1s" )
+			timer.Simple( 3, function( )
 				self:playerEquipItem( kPlayerId, item, true )
 			end )
 		end
