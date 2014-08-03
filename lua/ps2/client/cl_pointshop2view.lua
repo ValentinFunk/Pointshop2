@@ -356,7 +356,9 @@ end
 function Pointshop2View:playerUnequipItem( ply, itemId )
 	if ITEMS[itemId] then
 		ITEMS[itemId]:OnHolster( ply )
-		ply.PS2_EquippedItems[itemId] = nil
+		if ply.PS2_EquippedItems then
+			ply.PS2_EquippedItems[itemId] = nil
+		end
 	end
 	hook.Run( "PS2_ItemUnequipped", ply, item )
 end
