@@ -187,7 +187,7 @@ function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
 		end
 		promise = WhenAllFinished( promises )
 	else
-		promise = ply.ps2ReadyPromise
+		promise = plyOrPlys.ps2ReadyPromise
 	end
 	promise:Done( function( )
 		self:startView( view, action, plyOrPlys, unpack( args ) )
