@@ -173,10 +173,11 @@ function Pointshop2Controller:initializeSlots( ply )
 				KLogf( 2, "[WARN-01] Unknown owner %s from player %s slot %s: %s", slot.itemId, ply:Nick( ), slot.slotName, tostring( item:GetOwner( ) ) )
 				debug.Trace( )
 				item.owner = ply --hmm
+				
 			end
 			item:OnEquip( ply )
 			
-			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
+			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		end
 	end )
 end
@@ -295,7 +296,7 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
 				continue
 			end
-			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", plyToSendTo, ply, item )
+			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", plyToSendTo, ply.kPlayerId, item )
 		end
 	end
 end

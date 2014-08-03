@@ -265,7 +265,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
 		hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
-		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply, item )
+		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 	end )
