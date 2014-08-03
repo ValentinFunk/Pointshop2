@@ -50,7 +50,6 @@ function EquipmentSlot:postLoad( )
 	local def = Deferred( )
 	
 	if self.Item then
-		self.Item:postLoad( )
 		self.Item.owner = self:getOwner( )
 	end
 	

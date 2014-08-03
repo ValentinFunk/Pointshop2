@@ -166,6 +166,7 @@ function Pointshop2Controller:initializeSlots( ply )
 			local item = KInventory.ITEMS[slot.itemId]
 			if not item then
 				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
+				continue
 			end
 			
 			if not item:GetOwner( ) or item:GetOwner( ) != ply then
