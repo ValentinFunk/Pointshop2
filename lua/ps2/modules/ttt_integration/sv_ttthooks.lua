@@ -27,10 +27,10 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 				continue
 			end
 		
-			if v:GetCleanRound( ) and (not v:IsSpec()) and S("RoundWin.CleanRound") then
+			if ( v:GetCleanRound( ) and not v:IsSpec() ) and S("RoundWin.CleanRound") then
 				v:PS2_AddStandardPoints( S("RoundWin.CleanRound"), "Clean round bonus", true )
 			end
-			if v:Alive( ) and not (v:IsSpec() or (v.IsGhost and v:IsGhost())) and S("RoundWin.InnocentAlive") then
+			if ( v:Alive( ) and not v:IsSpec( ) ) and not ( v.IsGhost and v:IsGhost() ) and S("RoundWin.InnocentAlive") then
 				v:PS2_AddStandardPoints( S("RoundWin.InnocentAlive"), "Alive bonus", true )
 			end
 			if S("RoundWin.Innocent") then
@@ -44,7 +44,7 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 				continue
 			end
 			
-			if v:Alive( ) and not (v:IsSpec() or (v.IsGhost and v:IsGhost())) and S("RoundWin.TraitorAlive") then
+			if ( v:Alive( ) and not v:IsSpec( ) ) and not ( v.IsGhost and v:IsGhost( ) ) and S("RoundWin.TraitorAlive") then
 				v:PS2_AddStandardPoints( S("RoundWin.TraitorAlive"), "Alive bonus", true )
 			end
 			if S("RoundWin.Traitor") then
