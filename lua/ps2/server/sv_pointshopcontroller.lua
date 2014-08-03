@@ -164,10 +164,14 @@ function Pointshop2Controller:initializeSlots( ply )
 			if not slot.itemId then continue end
 			
 			local item = KInventory.ITEMS[slot.itemId]
+			if not item then
+				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
+			end
+			
 			if not item:GetOwner( ) or item:GetOwner( ) != ply then
-				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.name )
+				KLogf( 2, "[WARN-01] Unknown owner %s from player %s slot %s: %s", slot.itemId, ply:Nick( ), slot.slotName, tostring( item:GetOwner( ) ) )
 				debug.Trace( )
-				continue
+				item.owner = ply --hmm
 			end
 			item:OnEquip( ply )
 			
@@ -178,18 +182,18 @@ end
 
 function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
 	local args = {...}
-	local promise
-	if type( plyOrPlys ) == "table" then
-		local promises = {}
-		for k, ply in pairs( plyOrPlys ) do
-			local promise = WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
-			table.insert( promises, promise )
-		end
-		promise = WhenAllFinished( promises )
-	else
-		promise = plyOrPlys.ps2ReadyPromise
+	
+	if type( plyOrPlys ) != "table" then
+		plyOrPlys = { plyOrPlys }
 	end
-	promise:Done( function( )
+	
+	local promises = {}
+	for k, ply in pairs( plyOrPlys ) do
+		local promise = WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
+		table.insert( promises, promise )
+	end
+	WhenAllFinished( promises )
+	:Done( function( )
 		self:startView( view, action, plyOrPlys, unpack( args ) )
 	end )
 end
@@ -287,7 +291,7 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 			
 			local item = KInventory.ITEMS[slot.itemId]
 			if not item then
-				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.name )
+				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
 				continue
 			end
 			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", plyToSendTo, ply, item )
