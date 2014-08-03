@@ -71,8 +71,9 @@ function Pointshop2.FixDatabase( )
 	:Then( function( items )
 		local promises = {}
 		for k, v in pairs( items ) do
-			if not getClass( v.itemclass ) then
-				KLogf( 2, "[PS2-FIX] Found invalid item reference in inventory, removing item %i, class %s", v.id, v.class )
+			if v._creationFailed then
+				PrintTable( v )
+				KLogf( 2, "[PS2-FIX] Found invalid item reference in inventory, removing item %i, class %s", v.id, v._className )
 				table.insert( promises, v:remove( ) )
 			end
 		end
