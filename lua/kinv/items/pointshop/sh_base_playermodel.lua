@@ -62,10 +62,16 @@ function ITEM:OnHolster( ply )
 end
 
 function ITEM:PlayerSetModel( ply )
+	KLogf( 5, "Playermodel of %s: PlayerSetModel %s", self:GetOwner():Nick(), ply:Nick( ) )
 	self:ApplyModel( )
+	timer.Simple( 1, function( )
+		self:ApplyModel( )
+		hook.Run( "PS2_DoUpdatePreviewModel" )
+	end )
 end
 Pointshop2.AddItemHook( "PlayerSetModel", ITEM )
 
+/*
 function ITEM:PlayerSpawn( ply )
 	print( "Player Spawn called", ply, self:GetOwner( ) )
 	if ply == self:GetOwner( ) then
@@ -73,6 +79,7 @@ function ITEM:PlayerSpawn( ply )
 	end
 end
 Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
+*/
 
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopPlayerModelIcon"
