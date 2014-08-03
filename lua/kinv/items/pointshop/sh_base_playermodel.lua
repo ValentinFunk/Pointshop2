@@ -18,7 +18,16 @@ function ITEM:getIcon( )
 end
 
 function ITEM:ApplyModel( )
+	if CLIENT then
+		return
+	end
+	
 	local ply = self:GetOwner( )
+	
+	if not IsValid( ply ) then
+		ErrorNoHalt( "[PS2] Invalid owner for item " .. self.id .. ": " .. tostring( ply ) )
+		return
+	end
 	
 	ply:SetModel( self.playerModel )
 	
@@ -34,32 +43,31 @@ function ITEM:ApplyModel( )
 end
 
 function ITEM:OnEquip( ply )
-	if not ply._oldModel then
-		ply._oldModel = ply:GetModel( )
-	end
-	
-	hook.Run( "PS2_DoUpdatePreviewModel" )
-	
+	self:ApplyModel( )
 	timer.Simple( 1, function( )
 		self:ApplyModel( )
+		hook.Run( "PS2_DoUpdatePreviewModel" )
 	end )
+	hook.Run( "PS2_DoUpdatePreviewModel" )
 end
 
 function ITEM:OnHolster( ply )
-	if ply._oldModel then
-		ply:SetModel(ply._oldModel)
-	end
 	timer.Simple( 0, function( )
 		hook.Run( "PS2_DoUpdatePreviewModel" )
+	end )
+	hook.Run( "PS2_ModelHolstered" )
+	timer.Simple( 1, function( )
+		hook.Run( "PlayerSetModel", ply )
 	end )
 end
 
 function ITEM:PlayerSetModel( ply )
-	self:ApplyModel( self )
+	self:ApplyModel( )
 end
 Pointshop2.AddItemHook( "PlayerSetModel", ITEM )
 
 function ITEM:PlayerSpawn( ply )
+	print( "Player Spawn called", ply, self:GetOwner( ) )
 	if ply == self:GetOwner( ) then
 		self:OnEquip( ply )
 	end
