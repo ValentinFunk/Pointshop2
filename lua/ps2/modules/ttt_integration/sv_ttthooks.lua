@@ -55,7 +55,7 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 end )
 
 hook.Add( "TTTFoundDNA", "PS2_TTTFoundDNA", function( ply, dnaOwner, ent )
-	if S("Detective.DnaFound") then
+	if S("Detective.DnaFound") and !ply.hasDnaOn[dnaOwner] then
 		ply:PS2_AddStandardPoints( S("Detective.DnaFound"), "Retrieved DNA", true )
 	end
 	
