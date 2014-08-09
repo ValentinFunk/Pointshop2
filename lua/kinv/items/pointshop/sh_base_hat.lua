@@ -9,56 +9,62 @@ ITEM.color = ""
 function ITEM:initialize( )
 end
 
-function ITEM:AttachOutfit( ply )
-	if SERVER then
-		return 
+if CLIENT then
+	function ITEM:AttachOutfit( )
+		local ply = self:GetOwner( )
+		if not ply.AttachPACPart then
+			pac.SetupENT( ply )
+			ply:SetShowPACPartsInEditor( false )
+		end
+		
+		local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
+		ply:AttachPACPart( outfit )
 	end
-	
-	if not ply.AttachPACPart then
-		pac.SetupENT( ply )
-		ply:SetShowPACPartsInEditor( false )
-	end
-	
-	local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
-	ply:AttachPACPart( outfit )
-end
 
-function ITEM:RemoveOutfit( ply )
-	if SERVER then
-		return 
+	function ITEM:RemoveOutfit( )
+		print( "ITEM:RemoveOutfit" )
+		local ply = self:GetOwner() 
+		if not ply.RemovePACPart then
+			return
+		end
+		
+		local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
+		ply:RemovePACPart( outfit )
 	end
-	
-	if not ply.AttachPACPart then
-		return
+else
+	function ITEM:PlayerSpawn( ply )
+		if ply == self:GetOwner( ) then
+			self:ClientRPC( "AttachOutfit" )
+		end
 	end
-	
-	local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
-	ply:RemovePACPart( outfit )
+	Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
+
+	function ITEM:PlayerDeath( victim, inflictor, attacker )
+		if victim == self:GetOwner( ) then
+			self:ClientRPC( "RemoveOutfit" )
+		end
+	end
+	Pointshop2.AddItemHook( "PlayerDeath", ITEM )
 end
 
 function ITEM:OnEquip( ply )
+	if SERVER then 
+		return
+	end
+	
 	if ply:Alive( ) and not (ply.IsSpec and ply:IsSpec()) then
-		self:PlayerSpawn( ply )
+		self:AttachOutfit( )
 	end
 end
 
 function ITEM:OnHolster( ply )
-	self:RemoveOutfit( ply )
+	if SERVER then 
+		return
+	end
+	
+	self:RemoveOutfit( )
 end
 
-function ITEM:PlayerSpawn( ply )
-	if ply == self:GetOwner( ) then
-		self:AttachOutfit( ply )
-	end
-end
-Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
-
-function ITEM:PlayerDeath( victim, inflictor, attacker )
-	if victim == self:GetOwner( ) then
-		self:RemoveOutfit( self:GetOwner( ) )
-	end
-end
-Pointshop2.AddItemHook( "PlayerDeath", ITEM )
 
 /*
 	Tech stuff
