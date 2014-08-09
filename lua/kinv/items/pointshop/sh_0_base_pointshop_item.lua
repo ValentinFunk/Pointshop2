@@ -51,6 +51,15 @@ function ITEM:OnHolster( ply )
 
 end
 
+if SERVER then
+	/*
+		Calls the item function on the client
+	*/
+	function ITEM:ClientRPC( funcName, ... )
+		Pointshop2.ItemClientRPC( self, funcName, ... )
+	end
+end
+
 --Get the player owner
 function ITEM:GetOwner( )
 	return self.owner

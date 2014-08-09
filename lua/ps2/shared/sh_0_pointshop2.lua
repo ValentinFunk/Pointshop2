@@ -147,3 +147,42 @@ end
 function Pointshop2.IsCurrentGamemodePluginPresent( )
 	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )] != nil
 end
+
+/*
+	Used to send RPCs on items to client:
+	Allows you to call client functions on items from the server with minimal effort.
+	Should only be called on items that are equipped!
+*/
+if SERVER then
+	util.AddNetworkString( "PS2_ItemClientRPC" )
+	function Pointshop2.ItemClientRPC( item, funcName, ... )
+		net.Start( "PS2_ItemClientRPC" )
+			net.WriteUInt( item.id, 32 )
+			net.WriteString( funcName )
+			net.WriteTable( { ... } )
+		net.Broadcast( )
+	end
+else
+	net.Receive( "PS2_ItemClientRPC", function( len )
+		local itemId = net.ReadUInt( 32 )
+		local funcName = net.ReadString()
+		local args = net.ReadTable( )
+		if LibK.Debug then
+			local argsStr = ""
+			for k, v in pairs( args ) do
+				argsStr = argsStr .. tostring( v )
+				if k < #args then
+					argsStr = argsStr .. ", "
+				end
+			end
+			KLogf( 4, "Pointshop2.ItemClientRPC(%i, %s, %s) len %i", itemId, funcName, argsStr, len )
+		end
+		
+		local item = Pointshop2.ITEMS[itemId]
+		if not item then 
+			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
+			return
+		end
+		item[funcName]( item, unpack( args ) )
+	end )
+end

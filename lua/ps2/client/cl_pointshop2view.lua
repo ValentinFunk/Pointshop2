@@ -323,8 +323,8 @@ function Pointshop2View:createPointshopItem( saveTable )
 	self:controllerAction( "saveModuleItem", saveTable )
 end
 
-local ITEMS = {}
-setmetatable( ITEMS, { __mode = 'v' } ) --weak reference holder
+Pointshop2.ITEMS = {}
+setmetatable( Pointshop2.ITEMS, { __mode = 'v' } ) --weak reference holder
 
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	isRetry = isRetry or 0
@@ -349,13 +349,14 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 	ply.PS2_EquippedItems[item.id] = item
 	item:OnEquip( ply )
-	ITEMS[item.id] = item
+	Pointshop2.ITEMS[item.id] = item
+	
 	hook.Run( "PS2_ItemEquipped", ply, item )
 end
 
 function Pointshop2View:playerUnequipItem( ply, itemId )
-	if ITEMS[itemId] then
-		ITEMS[itemId]:OnHolster( ply )
+	if Pointshop2.ITEMS[itemId] then
+		Pointshop2.ITEMS[itemId]:OnHolster( ply )
 		if ply.PS2_EquippedItems then
 			ply.PS2_EquippedItems[itemId] = nil
 		end
