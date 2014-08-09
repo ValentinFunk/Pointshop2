@@ -173,8 +173,8 @@ function Pointshop2Controller:initializeSlots( ply )
 				KLogf( 2, "[WARN-01] Unknown owner %s from player %s slot %s: %s", slot.itemId, ply:Nick( ), slot.slotName, tostring( item:GetOwner( ) ) )
 				debug.Trace( )
 				item.owner = ply --hmm
-				
 			end
+
 			item:OnEquip( ply )
 			
 			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
@@ -325,11 +325,11 @@ local function initPlayer( ply )
 end
 
 local function reloadAllPlayers( )
-	for _, ply in pairs( player.GetAll( ) ) do
+	/*for _, ply in pairs( player.GetAll( ) ) do
 		ply.outfitsReceivedPromise = Deferred( )
 		ply.dynamicsReceivedPromise = Deferred( )
-	end
-	timer.Simple( 1, function( )
+	end*/
+	timer.Simple( 0, function( )
 		for _, ply in pairs( player.GetAll( ) ) do
 			initPlayer( ply )
 		end
