@@ -60,9 +60,9 @@ function Pointshop2.AddItemHook( name, itemClass )
 	else
 		hook.Add( name, "PS2_Hook_" .. name .. itemClass.name, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
-				for k, item in pairs( ply.PS2_EquipedItems or {} ) do
-					if item.class.name == itemClass.name then
-						item[name]( item, ... )
+				for k, eqItem in pairs( ply.PS2_EquippedItems or {} ) do
+					if instanceOf( itemClass, eqItem ) then
+						eqItem[name]( eqItem, ... )
 					end
 				end
 			end 
