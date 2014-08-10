@@ -331,6 +331,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	local ply 
 	
 	for k, v in pairs( player.GetAll( ) ) do
+		print( "eq", kPlayerId, v, v:GetNWInt("KPlayerId") )
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
 			ply = v
 		end
