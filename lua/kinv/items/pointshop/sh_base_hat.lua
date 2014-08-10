@@ -12,6 +12,10 @@ end
 if CLIENT then
 	function ITEM:AttachOutfit( )
 		local ply = self:GetOwner( )
+		if not IsValid(ply) then
+			debug.Trace( )
+			PrintTable( self )
+		end
 		if not ply.AttachPACPart then
 			pac.SetupENT( ply )
 			ply:SetShowPACPartsInEditor( false )
