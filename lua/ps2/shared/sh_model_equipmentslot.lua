@@ -40,7 +40,8 @@ end
 
 function EquipmentSlot:getOwner( )
 	for k, v in pairs( player.GetAll( ) ) do
-		if tonumber( v:GetNWInt( "KPlayerId" ) ) == self.ownerId then
+		if tonumber( v:GetNWInt( "KPlayerId" ) ) == self.ownerId or 
+			tonumber( v.kPlayerId or -1 ) == self.ownerId then
 			return v
 		end
 	end

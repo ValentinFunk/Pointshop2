@@ -308,9 +308,11 @@ local function initPlayer( ply )
 	
 	ply.dynamicsReceivedPromise = Deferred( )
 	ply.outfitsReceivedPromise = Deferred( )
-	Pointshop2.LoadModuleItemsPromise:Done( function( )
+	Pointshop2.LoadModuleItemsPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
-		
+		return ply.dynamicsReceivedPromise
+	end )
+	:Done( function( )
 		--TODO: Make a proper promise/transaction for this
 		timer.Simple( 2, function( )
 			WhenAllFinished{ controller:initializeInventory( ply ),
