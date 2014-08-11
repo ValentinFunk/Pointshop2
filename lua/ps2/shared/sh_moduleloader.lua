@@ -129,6 +129,11 @@ local function includeFolder( folder )
 end
 
 function Pointshop2.LoadModules( )
+	if Pointshop2.LoadModulesPromise._promise._state != "pending" then
+		KLogf( 3, "[WARN] Module Promise already %s", Pointshop2.LoadModulesPromise._promise._state )
+		return
+	end
+	
 	local files, folders = file.Find( "ps2/modules/*", "LUA" )
 	for k, folder in pairs( folders ) do
 		local shouldLoad, detectedName = true, ""
