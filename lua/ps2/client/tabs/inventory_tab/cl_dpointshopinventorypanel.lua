@@ -77,7 +77,7 @@ function PANEL:Init( )
 			self.sendPointsBtn:SetTooltip( "The administrator of this server has diabled this functionality" )
 		end
 	end
-	hook.Add( "PS2_SettingsUpdated", self, function( self )
+	hook.Add( "PS2_OnSettingsUpdate", self, function( self )
 		sendButtonCheck( )
 	end )
 	sendButtonCheck( )

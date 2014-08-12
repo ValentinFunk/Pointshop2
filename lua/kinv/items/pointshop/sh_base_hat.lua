@@ -56,9 +56,19 @@ function ITEM:OnEquip( ply )
 		return
 	end
 	
-	if ply:Alive( ) and not (ply.IsSpec and ply:IsSpec()) then
-		self:AttachOutfit( )
+	if not ply:Alive( ) then
+		return
 	end
+	
+	if ply.IsSpec and ply:IsSpec() then
+		return
+	end
+	
+	if ply.IsGhost and ply:IsGhost() then
+		return
+	end
+	
+	self:AttachOutfit( )
 end
 
 function ITEM:OnHolster( ply )

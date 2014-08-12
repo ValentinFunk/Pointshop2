@@ -412,7 +412,7 @@ function Pointshop2View:loadSettings( versionHash )
 		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
 		
 		resolveIfWaiting( Pointshop2View:getInstance( ).clPromises.SettingsReceived )
-		hook.Run( "PS2_SettingsUpdated" )
+		hook.Run( "PS2_OnSettingsUpdate" )
 	end )
 end
 

@@ -7,7 +7,8 @@ PLUGIN.Privileges = { "pointshop2 manageitems",
 	"pointshop2 manageusers",
 	"pointshop2 managemodules",
 	"pointshop2 exportimport",
-	"pointshop2 reset"
+	"pointshop2 reset",
+	"pointshop2 usepac"
 }
 
 evolve:RegisterPlugin( PLUGIN )

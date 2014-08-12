@@ -108,6 +108,11 @@ MODULE.Settings.Server = {
 			label = "Starting donator points",
 			value = 1000
 		},
+		LimitPACAccess = {
+			value = true,
+			label = "Limit PAC access",
+			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
+		}
 	},
 	GUISettings = {
 		info = {
