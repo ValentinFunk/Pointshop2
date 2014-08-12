@@ -23,7 +23,7 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 	
 	if result == WIN_INNOCENT then
 		for k, v in pairs( player.GetAll( ) ) do
-			if v:IsActiveTraitor( ) then
+			if v:IsTraitor( ) then
 				continue
 			end
 		
@@ -40,7 +40,7 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 		end
 	elseif result == WIN_TRAITOR then
 		for k, v in pairs( player.GetAll( ) ) do
-			if not v:IsActiveTraitor( ) then
+			if not v:IsTraitor( ) then
 				continue
 			end
 			
