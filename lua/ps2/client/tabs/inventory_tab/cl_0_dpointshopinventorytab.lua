@@ -1,13 +1,5 @@
 Pointshop2.InventoryPanels = { }
 function Pointshop2:AddInventoryPanel( label, icon, controlName, shouldShow )
-	local panelExists = false
-	for k, v in pairs(Pointshop2.InventoryPanels) do	
-		if controlName == v.ControlName then
-			panelExists = true
-			break
-		end
-	end
-	if panelExists then return end
 	table.insert( Pointshop2.InventoryPanels, { label = label, icon = icon, controlName = controlName, shouldShow = shouldShow } )
 end
 
