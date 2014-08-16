@@ -36,7 +36,18 @@ if CLIENT then
 		ply:RemovePACPart( outfit )
 	end
 else
-	function ITEM:PlayerSpawn( ply )
+	function ITEM:PlayerSpawn( ply )		
+		if not ply:Alive( ) then
+			return
+		end
+	
+		if ply.IsSpec and ply:IsSpec() then
+			return
+		end
+	
+		if ply.IsGhost and ply:IsGhost() then
+			return
+		end
 		if ply == self:GetOwner( ) then
 			self:ClientRPC( "AttachOutfit" )
 		end
