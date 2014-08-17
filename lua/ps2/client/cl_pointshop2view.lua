@@ -349,6 +349,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 	ply.PS2_EquippedItems[item.id] = item
+	item.owner = ply
 	item:OnEquip( ply )
 	Pointshop2.ITEMS[item.id] = item
 	

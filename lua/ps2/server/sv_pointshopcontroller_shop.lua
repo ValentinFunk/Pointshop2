@@ -260,6 +260,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		return ply.PS2_Inventory:removeItem( item ) --unlink from inventory
 	end )
 	:Done( function( )
+		item.owner = ply
 		item:OnEquip( ply )
 		
 		slot.Item = item
