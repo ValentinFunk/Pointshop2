@@ -12,7 +12,8 @@ function PANEL:Init( )
 	
 	self.description = vgui.Create( "DMultilineLabel", self )
 	self.description:Dock( TOP )
-	self.description:SetVerticalScrollbarEnabled( false )
+	self.description:SetMaxHeight( 200 )
+	self.description:SetVerticalScrollbarEnabled( true )
 	timer.Simple( 1, function( )
 		if not IsValid( self.description ) then return end
 		self.description:SetFontInternal( self:GetSkin( ).TextFont )
