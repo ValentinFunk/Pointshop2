@@ -357,7 +357,12 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		debug.Trace( )
 		print( "Error in 0" )
 	end
-	item:OnEquip( )
+	
+	--Delay to next frame to clear stack
+	timer.Simple( 0, function( )
+		item:OnEquip( )
+	end )
+
 	Pointshop2.ITEMS[item.id] = item
 	
 	hook.Run( "PS2_ItemEquipped", ply, item )
