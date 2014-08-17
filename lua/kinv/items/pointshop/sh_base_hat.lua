@@ -62,10 +62,12 @@ else
 	Pointshop2.AddItemHook( "PlayerDeath", ITEM )
 end
 
-function ITEM:OnEquip( ply )
+function ITEM:OnEquip( )
 	if SERVER then 
 		return
 	end
+	
+	local ply = self:GetOwner()
 	
 	if not ply:Alive( ) then
 		return

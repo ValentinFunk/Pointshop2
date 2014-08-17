@@ -42,7 +42,7 @@ function ITEM:ApplyModel( )
 	end
 end
 
-function ITEM:OnEquip( ply )
+function ITEM:OnEquip( )
 	self:ApplyModel( )
 	timer.Simple( 1, function( )
 		self:ApplyModel( )

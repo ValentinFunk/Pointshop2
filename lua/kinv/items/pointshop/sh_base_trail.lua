@@ -21,7 +21,8 @@ function ITEM:RemoveTrail( )
 	end
 end
 
-function ITEM:OnEquip( ply )
+function ITEM:OnEquip( )
+	local ply = self:GetOwner()
 	if ply:Alive( ) and not (ply.IsSpec and ply:IsSpec()) then
 		self:PlayerSpawn( ply )
 	end
