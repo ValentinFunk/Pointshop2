@@ -331,7 +331,6 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	local ply 
 	
 	for k, v in pairs( player.GetAll( ) ) do
-		print( "eq", kPlayerId, v, v:GetNWInt("KPlayerId") )
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
 			ply = v
 		end
@@ -350,7 +349,11 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 	ply.PS2_EquippedItems[item.id] = item
 	item.owner = ply
-	item:OnEquip( ply )
+	if not IsValid( item:GetOwner() ) then
+		debug.Trace( )
+		print( "Error in 0" )
+	end
+	item:OnEquip( )
 	Pointshop2.ITEMS[item.id] = item
 	
 	hook.Run( "PS2_ItemEquipped", ply, item )

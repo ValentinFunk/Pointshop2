@@ -261,7 +261,11 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 	end )
 	:Done( function( )
 		item.owner = ply
-		item:OnEquip( ply )
+		if not IsValid( item:GetOwner() ) then
+			debug.Trace( )
+			print( "Error in 0" )
+		end
+		item:OnEquip( )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )

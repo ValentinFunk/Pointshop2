@@ -169,12 +169,11 @@ function Pointshop2Controller:initializeSlots( ply )
 				continue
 			end
 			
-			if not item:GetOwner( ) or item:GetOwner( ) != ply then
-				KLogf( 2, "[WARN-01] Unknown owner %s from player %s slot %s: %s", slot.itemId, ply:Nick( ), slot.slotName, tostring( item:GetOwner( ) ) )
+			item.owner = ply
+			if not IsValid( item:GetOwner() ) then
 				debug.Trace( )
-				item.owner = ply --hmm
+				print( "Error in 3" )
 			end
-
 			item:OnEquip( ply )
 			
 			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )

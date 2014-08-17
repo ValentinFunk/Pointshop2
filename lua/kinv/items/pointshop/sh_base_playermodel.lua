@@ -62,6 +62,14 @@ function ITEM:OnHolster( ply )
 end
 
 function ITEM:PlayerSetModel( ply )
+	if not IsValid( ply ) or not IsValid( self:GetOwner( ) ) then
+		return
+	end
+	
+	if not ply == self:GetOwner( ) then
+		return
+	end
+	
 	KLogf( 5, "Playermodel of %s: PlayerSetModel %s", self:GetOwner():Nick(), ply:Nick( ) )
 	self:ApplyModel( )
 	timer.Simple( 1, function( )
