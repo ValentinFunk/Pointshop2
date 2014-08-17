@@ -265,7 +265,11 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 			debug.Trace( )
 			print( "Error in 0" )
 		end
-		item:OnEquip( )
+		
+		--Delay to next frame to clear stack
+		timer.Simple( 0, function( )
+			item:OnEquip(  )
+		end )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )

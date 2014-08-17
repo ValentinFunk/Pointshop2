@@ -174,7 +174,11 @@ function Pointshop2Controller:initializeSlots( ply )
 				debug.Trace( )
 				print( "Error in 3" )
 			end
-			item:OnEquip( ply )
+			
+			--Delay to next frame to clear stack
+			timer.Simple( 0, function( )
+				item:OnEquip( )
+			end )
 			
 			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		end
