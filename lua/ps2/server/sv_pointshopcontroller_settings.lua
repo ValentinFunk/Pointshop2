@@ -13,13 +13,14 @@ function Pointshop2Controller:loadSettings( noTransmit )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "settings", data )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Settings package loaded, version " .. resource:GetVersionHash( ) )
-		
+
 		if not noTransmit then
 			self:startView( "Pointshop2View", "loadSettings", player.GetAll( ), resource:GetVersionHash( ) )
 		end
 	end )
 	:Done( function( )
 		Pointshop2.SettingsLoadedPromise:Resolve( )
+		hook.Run( "PS2_OnSettingsUpdate" )
 	end )
 	:Fail( function( )
 		Pointshop2.SettingsLoadedPromise:Reject( )

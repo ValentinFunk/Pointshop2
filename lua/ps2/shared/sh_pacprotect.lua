@@ -20,11 +20,6 @@ function Pointshop2.ApplyPacSettings( )
 	end )
 end
 
-hook.Add( "PS2_OnSettingsUpdate", "ChangeKeyHook", function( )
+hook.Add( "PS2_OnSettingsUpdate", "ProtectPAC", function( )
 	Pointshop2.ApplyPacSettings( )
 end )
-if SERVER then
-	Pointshop2.SettingsLoadedPromise:Done( function( )
-		Pointshop2.ApplyPacSettings( )
-	end )
-end
