@@ -63,10 +63,13 @@ end
 
 function ITEM:PlayerSetModel( ply )
 	if not IsValid( ply ) or not IsValid( self:GetOwner( ) ) then
+		KLogf( 5, "Invalid ply or owner: ply %s (%s) owner %s (%s)",
+			tostring(ply), type(ply),
+			tostring(self:GetOwner()), type(self:GetOwner()) )
 		return
 	end
 	
-	if not ply == self:GetOwner( ) then
+	if ply != self:GetOwner( ) then
 		return
 	end
 	
