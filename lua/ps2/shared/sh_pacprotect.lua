@@ -13,7 +13,7 @@ function Pointshop2.ApplyPacSettings( )
 	
 	hook.Add( "PrePACEditorOpen", "Pointshop2CheckPACAccess", function( ply )
 		if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.LimitPACAccess" ) then
-			if not PermissionInterface.query( owner, "pointshop2 usepac" ) then
+			if not PermissionInterface.query( ply, "pointshop2 usepac" ) then
 				return false
 			end
 		end
