@@ -48,7 +48,7 @@ MODULE.Settings.Server = {
 		DetectiveKillsTraitor = {
 			value = 200,
 			label = "Detective kills Traitor",
-			tooltip = "Points awarded to a traitor when he kills a detective",
+			tooltip = "Points awarded to a detective when he kills a traitor",
 		},
 		
 		DetectiveDnaBonus = { 
