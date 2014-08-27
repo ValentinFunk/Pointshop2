@@ -50,6 +50,7 @@ function PANEL:Init( )
 	self.pointsMoneyPanel = vgui.Create( "DPanel", self.currencyPanel )
 	self.pointsMoneyPanel:Dock( TOP )
 	self.pointsMoneyPanel:SetTall( 24 )
+	self.pointsMoneyPanel:SetTooltip( "Standard Points" )
 	function self.pointsMoneyPanel:Paint( w, h)
 	end
 	
@@ -71,6 +72,7 @@ function PANEL:Init( )
 	self.donationMoneyPanel:Dock( TOP )
 	self.donationMoneyPanel:DockMargin( 0, 0, 0, 5 )
 	self.donationMoneyPanel:SetTall( 24 )
+	self.donationMoneyPanel:SetTooltip( "Donator Points" )
 	function self.donationMoneyPanel:Paint( w, h)
 	end
 	
