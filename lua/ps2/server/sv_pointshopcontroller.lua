@@ -156,7 +156,7 @@ function Pointshop2Controller:initializeSlots( ply )
 		ply.PS2_Slots = {}
 		for _, slot in pairs( slots ) do
 			ply.PS2_Slots[slot.id] = slot
-			KLogf( 5, "[PS2] Loaded slots for player %s", ply:Nick( ) )
+			KLogf( 5, "[PS2] Loaded slot %i for player %s", _, ply:Nick( ) )
 		end
 		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
 	
@@ -178,6 +178,7 @@ function Pointshop2Controller:initializeSlots( ply )
 			--Delay to next frame to clear stack
 			timer.Simple( 0, function( )
 				item:OnEquip( )
+				print( "OnEquip for slot", _, ply )
 			end )
 			
 			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
