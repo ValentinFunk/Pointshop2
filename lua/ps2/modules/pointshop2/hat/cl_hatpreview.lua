@@ -29,7 +29,6 @@ local function validateOutfitList( previewPanel, ignorePreview )
 	--Add outfits that are not added yet
 	for id, outfit in pairs( previewPanel.outfits ) do
 		if not previewPanel.Entity.attachedOutfits[id] then
-			print( "attaching", id, outfit )
 			previewPanel.Entity:AttachPACPart( outfit )
 			timer.Simple(0, function( )
 				if not previewPanel.Entity.AttachPACPart then
