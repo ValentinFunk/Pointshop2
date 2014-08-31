@@ -304,13 +304,16 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 	end
 end
 
+hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( )
+	ply.dynamicsReceivedPromise = Deferred( )
+	ply.outfitsReceivedPromise = Deferred( )
+end )
+
 local function initPlayer( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	local controller = Pointshop2Controller:getInstance( )
 	controller:sendWallet( ply )
 	
-	ply.dynamicsReceivedPromise = Deferred( )
-	ply.outfitsReceivedPromise = Deferred( )
 	Pointshop2.LoadModuleItemsPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
 		return ply.dynamicsReceivedPromise
@@ -330,10 +333,10 @@ local function initPlayer( ply )
 end
 
 local function reloadAllPlayers( )
-	/*for _, ply in pairs( player.GetAll( ) ) do
+	for _, ply in pairs( player.GetAll( ) ) do
 		ply.outfitsReceivedPromise = Deferred( )
 		ply.dynamicsReceivedPromise = Deferred( )
-	end*/
+	end
 	timer.Simple( 0, function( )
 		for _, ply in pairs( player.GetAll( ) ) do
 			initPlayer( ply )
