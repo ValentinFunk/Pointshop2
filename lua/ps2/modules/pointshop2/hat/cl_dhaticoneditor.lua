@@ -140,21 +140,20 @@ function PANEL:Init( )
 	self.snapshotPreview:SetViewInfo( self.iconViewInfo )
 	
 	local materialChoice = self.choice:AddOption( "Use Material" )
-	materialInputBox = vgui.Create( "DTextEntry", materialChoice )
+	local materialInputBox = vgui.Create( "DTextEntry", materialChoice )
 	materialInputBox:Dock( LEFT )
 	materialInputBox:DockMargin( 100, 0, 0, 0 )
 	materialInputBox:SetWide( 250 )
 	materialInputBox:SetTall( 30 )
+	materialInputBox:SetDisabled( false )
+	materialChoice:SetChecked( false )
 	self.materialInputBox = materialInputBox
 	
 	self.choice:DockMargin( 5, 5, 5, 5 )
 	function self.choice.OnChange( )
-		if materialChoice:GetChecked( ) then
-			materialInputBox:SetDisabled( false )
-		else
-			materialInputBox:SetDisabled( true )
-		end
+		self.materialInputBox:SetDisabled( not materialChoice:GetChecked( ) )
 		self.useCustomMaterial = materialChoice:GetChecked( )
+		print("onChange", materialChoice:GetChecked( ), not materialChoice:GetChecked( ) )
 	end
 	self.choice:OnChange( )
 end
