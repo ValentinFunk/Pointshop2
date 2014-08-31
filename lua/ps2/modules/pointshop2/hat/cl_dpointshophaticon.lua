@@ -11,10 +11,19 @@ end
 function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
 	
-	local model = Pointshop2:GetPreviewModel()
-	self.image:ApplyModelInfo( model )
-	self.image:SetPacOutfit( itemClass.getOutfitForModel( model.model ) )
-	self.image:SetViewInfo( itemClass.iconInfo.shop.iconViewInfo )
+	if itemClass.iconInfo.inv.useMaterialIcon then
+		self.image:Remove()
+		self.image = vgui.Create( "DImage", self )
+		self.image:Dock( FILL )
+		self.image:SetSize( 64, 64 )
+		self.image:SetMouseInputEnabled( false )
+		self.image:SetImage( itemClass.iconInfo.inv.iconMaterial )
+	else
+		local model = Pointshop2:GetPreviewModel()
+		self.image:ApplyModelInfo( model )
+		self.image:SetPacOutfit( itemClass.getOutfitForModel( model.model ) )
+		self.image:SetViewInfo( itemClass.iconInfo.shop.iconViewInfo )
+	end
 end
 
 function PANEL:SetItem( item )

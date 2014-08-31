@@ -8,11 +8,20 @@ function PANEL:Init( )
 end
 
 function PANEL:SetItem( item )
-	local model = Pointshop2:GetPreviewModel()
-	self.image:ApplyModelInfo( model )
-	self.item = item 
-	self.image:SetPacOutfit( item.class.getOutfitForModel( model.model ) )
-	self.image:SetViewInfo( item.class.iconInfo.inv.iconViewInfo )
+	if item.class.iconInfo.inv.useMaterialIcon then
+		self.image:Remove()
+		self.image = vgui.Create( "DImage", self )
+		self.image:Dock( FILL )
+		self.image:SetSize( 64, 64 )
+		self.image:SetMouseInputEnabled( false )
+		self.image:SetImage( item.class.iconInfo.inv.iconMaterial )
+	else
+		local model = Pointshop2:GetPreviewModel()
+		self.image:ApplyModelInfo( model )
+		self.item = item 
+		self.image:SetPacOutfit( item.class.getOutfitForModel( model.model ) )
+		self.image:SetViewInfo( item.class.iconInfo.inv.iconViewInfo )
+	end
 end
 
 function PANEL:OnSelected( )
