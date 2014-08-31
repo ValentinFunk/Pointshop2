@@ -62,7 +62,8 @@ end )
 function Pointshop2Controller:canDoAction( ply, action )
 	local def = Deferred( )
 	if action == "saveCategoryOrganization" or
-	   action == "removeItem"
+	   action == "removeItem" or 
+	   action == "removeItems" 
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
 			def:Resolve( )
@@ -610,6 +611,19 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
 end
 
+local function removeSingleItem( itemClass, refund )
+	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.className }
+	:Then( function( )
+		return KInventory.Item.removeWhere{ itemclass = itemClass.name }
+	end )
+	:Then( function( )
+		if itemClass:getPersistence( ).customRemove then
+			return itemClass:getPersistence( ).customRemove( itemClass )
+		end
+		return Pointshop2.ItemPersistence.removeWhere{ id = itemClass.className }
+	end )
+end
+
 function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	if not itemClass then
@@ -618,21 +632,46 @@ function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 		return def:Promise( )
 	end
 		
-	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.className }
-	:Then( function( )
-		return KInventory.Item.removeWhere{ itemclass = itemClass.name }
-	end )
-	:Then( function( )
-		
-		if itemClass:getPersistence( ).customRemove then
-			return itemClass:getPersistence( ).customRemove( itemClass )
-		end
-		return Pointshop2.ItemPersistence.removeWhere{ id = itemClass.name }
-	end )
+	return removeSingleItem( itemClass )
 	:Then( function( )
 		return self:moduleItemsChanged( )
 	end )
 	:Then( function( )
 		reloadAllPlayers( )
+	end )
+end
+
+function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
+	local promises = {}
+	local removedClassNames = {}
+	
+	for k, itemClassName in pairs( itemClassNames ) do
+		local promise = Promise.Resolve()
+		:Then( function( )
+			local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+			if not itemClass then
+				return Promise.Reject( "An item " .. itemClassName .. " doesn't exist!" )
+			end
+			return itemClass
+		end )
+		:Then( function( itemClass )
+			return removeSingleItem( itemClass, refund )
+		end )
+		:Then( function( )
+			table.insert( removedClassNames, itemClassName )
+		end )
+		table.insert( promises, promise )
+	end
+	
+	return WhenAllFinished( promises )
+	:Then( function( )
+		return self:moduleItemsChanged( )
+	end )
+	:Then( function( )
+		reloadAllPlayers( )
+	end )
+	:Then( function( )
+		PrintTable( removedClassNames )
+		return removedClassNames
 	end )
 end

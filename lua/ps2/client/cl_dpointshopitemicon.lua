@@ -26,6 +26,10 @@ function PANEL:Init( )
 	end )
 end
 
+function PANEL:GetItemClass( )
+	return self.itemClass
+end
+
 function PANEL:SetItemClass( itemClass )
 	self.itemClass = itemClass
 	
@@ -42,6 +46,11 @@ function PANEL:SetItem( item )
 end
 
 function PANEL:DoRightClick()
+	local canvas = self:GetParent():GetSelectionCanvas( )
+	if IsValid( canvas ) and canvas:NumSelectedChildren( ) > 0 then
+		hook.Run( "PS2_MultiItemSelectOpenMenu", canvas:GetSelectedChildren() )
+		return 
+	end
 	self:OpenMenu( )
 end
 

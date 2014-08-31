@@ -68,6 +68,7 @@ function PANEL:SetItem( item )
 end
 
 function PANEL:SetSelected( b )
+	self.BaseClass.SetSelected( self, b )
 	self.Selected = b
 end
 

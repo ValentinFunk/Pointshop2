@@ -457,6 +457,21 @@ function Pointshop2View:removeItem( itemClass, refund )
 	end )
 end
 
+function Pointshop2View:removeItems( itemClasses, refund )
+	local classNames = {}
+	for k, v in pairs( itemClasses ) do
+		table.insert( classNames, v.className )
+	end
+	
+	self:controllerTransaction( "removeItems", classNames, refund )
+	:Done( function( removedNames )
+		PrintTable( removedNames )
+		for k, className in pairs( removedNames ) do
+			KInventory.Items[className] = nil
+		end
+	end )
+end
+
 function Pointshop2View:installDefaults( )
 	self:controllerAction( "installDefaults" )
 end
