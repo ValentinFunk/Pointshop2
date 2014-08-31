@@ -50,6 +50,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 				for _, slot in pairs( ply.PS2_Slots or {} ) do
 					if slot.itemId and KInventory.ITEMS[slot.itemId] then
 						local eqItem = KInventory.ITEMS[slot.itemId]
+						eqItem.owner = ply
 						if instanceOf( itemClass, eqItem ) then
 							eqItem[name]( eqItem, ... )
 						end
@@ -61,6 +62,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 		hook.Add( name, "PS2_Hook_" .. name .. itemClass.name, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
 				for k, eqItem in pairs( ply.PS2_EquippedItems or {} ) do
+					eqItem.owner = ply
 					if instanceOf( itemClass, eqItem ) then
 						eqItem[name]( eqItem, ... )
 					end
