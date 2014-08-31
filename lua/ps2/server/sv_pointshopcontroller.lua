@@ -192,15 +192,12 @@ function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
 		plyOrPlys = { plyOrPlys }
 	end
 	
-	local promises = {}
 	for k, ply in pairs( plyOrPlys ) do
-		local promise = WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
-		table.insert( promises, promise )
+		WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
+		:Done( function( )
+			self:startView( view, action, ply, unpack( args ) )
+		end )
 	end
-	WhenAllFinished( promises )
-	:Done( function( )
-		self:startView( view, action, plyOrPlys, unpack( args ) )
-	end )
 end
 
 --network wallets to owning players and all admins
