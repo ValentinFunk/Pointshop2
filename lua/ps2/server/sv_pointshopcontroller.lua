@@ -304,7 +304,7 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 	end
 end
 
-hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( )
+hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( ply )
 	ply.dynamicsReceivedPromise = Deferred( )
 	ply.outfitsReceivedPromise = Deferred( )
 end )
