@@ -97,9 +97,13 @@ function PANEL:Init( )
 		end
 	end
 	
-	function self.buttonsPanel:AddSellButton( price )
+	function self.buttonsPanel:AddSellButton( price, currencyType )
 		self.sellBtn = vgui.Create( "DButton", self )
-		self.sellBtn:SetText( "Sell Item (" .. price .. "pts)" )
+		if currencyType == "points" then
+			self.sellBtn:SetText( "Sell Item (" .. price .. " points)" )
+		elseif currencyType == "premiumPoints" then
+			self.sellBtn:SetText( "Sell Item (" .. price .. " premium points)")
+		end
 		self.sellBtn:Dock( TOP )
 		function self.sellBtn:DoClick( )
 			Pointshop2View:getInstance( ):startSellItem( itemDesc.item )
