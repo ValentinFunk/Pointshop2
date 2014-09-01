@@ -5,6 +5,10 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		return
 	end
 	local price = itemClass:GetBuyPrice( ply )
+	if not price then
+		KLogf( 3, "Player %s tried to buy item %s which cannot be bought! Hacking Attempt?", ply:Nick(), itemClass )
+		return	
+	end
 	
 	if #ply.PS2_Inventory:getItems( ) >= ply.PS2_Inventory.numSlots then
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, your inventory is full!" ) 
@@ -37,13 +41,18 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	ply.PS2_Wallet:save( )
 	:Then( function( )
 		local item = itemClass:new( )
+		item.purchaseData = {
+			time = os.time(),
+			amount = price[currencyType],
+			currency = currencyType
+		}
 		return item:save( )
 	end )
 	:Then( function( item )
 		KInventory.ITEMS[item.id] = item
 		return ply.PS2_Inventory:addItem( item )
 		:Then( function( )
-			item:OnPurchased( ply )
+			item:OnPurchased( )
 			self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
 		end )
 	end )
@@ -78,7 +87,12 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	local item = KInventory.ITEMS[itemId]
 	if not item then
 		KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), itemId )
-		return
+		return Promise.Reject( 0, "Invalid Data" )
+	end
+	
+	if not item:CanBeSold( ) then 
+		KLogf( 3, "[WARN] Player %s tried to sell not sellable item %i", ply:Nick( ), itemId )
+		return Promise.Reject( 0, "Invalid Data" )
 	end
 	
 	if not Pointshop2.PlayerOwnsItem( ply, item ) then
@@ -103,9 +117,10 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 	
 	def:Then( function( )
-		item:OnHolster( ply )
-		item:OnSold( ply )
-		ply.PS2_Wallet.points = ply.PS2_Wallet.points + item:GetSellPrice( ply )
+		item:OnHolster( )
+		item:OnSold( )
+		local amount, currencyType = item:GetSellPrice( )
+		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] + amount
 		return ply.PS2_Wallet:save( )
 	end )
 	:Then( function( ) 
