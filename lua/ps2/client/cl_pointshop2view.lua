@@ -465,7 +465,6 @@ function Pointshop2View:removeItems( itemClasses, refund )
 	
 	self:controllerTransaction( "removeItems", classNames, refund )
 	:Done( function( removedNames )
-		PrintTable( removedNames )
 		for k, className in pairs( removedNames ) do
 			KInventory.Items[className] = nil
 		end

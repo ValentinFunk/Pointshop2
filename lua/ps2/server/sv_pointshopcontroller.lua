@@ -671,7 +671,6 @@ function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
 		reloadAllPlayers( )
 	end )
 	:Then( function( )
-		PrintTable( removedClassNames )
 		return removedClassNames
 	end )
 end
