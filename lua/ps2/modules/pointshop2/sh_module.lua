@@ -77,6 +77,11 @@ MODULE.Settings.Shared = {
 			label = "Item sell repay ratio", 
 			value = 0.75
 		},
+		AllowPremptsSale = {
+			value = false,
+			tooltip = "Allow players to sell items that can be bought using premium points.\n Disabled by default to avoid conversion of the currencies",
+			label = "Allow selling of premium items",
+		},
 		ServerId = {
 			tooltip = "Generated from the ip and hostname, if you switch hosts/ips save this and change it back on the new host.",
 			label = "Server Id",
@@ -112,7 +117,7 @@ MODULE.Settings.Server = {
 			value = true,
 			label = "Limit PAC access",
 			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
-		}
+		},
 	},
 	GUISettings = {
 		info = {

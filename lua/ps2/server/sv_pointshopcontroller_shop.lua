@@ -78,7 +78,12 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	local item = KInventory.ITEMS[itemId]
 	if not item then
 		KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), itemId )
-		return
+		return Promise.Reject( 0, "Invalid Data" )
+	end
+	
+	if not item:CanBeSold( ) then 
+		KLogf( 3, "[WARN] Player %s tried to sell not sellable item %i", ply:Nick( ), itemId )
+		return Promise.Reject( 0, "Invalid Data" )
 	end
 	
 	if not Pointshop2.PlayerOwnsItem( ply, item ) then
