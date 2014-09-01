@@ -11,6 +11,13 @@ ITEM.static.Price = {
 	premiumPoints = 1
 }
 
+--CTOR
+function ITEM:initialize()
+	--Fields that are JSON saved for each item
+	self.saveFields = self.saveFields or {}
+	table.insert(self.saveFields, "purchaseData" )
+end
+
 function ITEM.static:GetBuyPrice( ply )
 	return { 
 		points = self.Price.points,
@@ -19,7 +26,17 @@ function ITEM.static:GetBuyPrice( ply )
 end
 
 function ITEM:GetSellPrice( ply )
-	return math.floor( self.class.Price.points * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) )
+	--New way
+	if self.purchaseData then
+		return self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ), self.purchaseData.currency		
+	end
+	
+	--Legacy way
+	if self.class.Price.points then
+		return math.floor( self.class.Price.points * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), "points"
+	elseif
+		return math.floor( self.class.Price.premiumPoints * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), "premiumPoints"
+	end
 end
 
 function ITEM:CanBeSold( )
@@ -34,8 +51,7 @@ function ITEM:CanBeSold( )
 	return false
 end
 
-function ITEM:OnPurchased( ply )
-
+function ITEM:OnPurchased( )
 end
 
 -- [TODO add to editor] -> Done for Hat 
@@ -43,7 +59,7 @@ function ITEM:CanBeEquipedInSlot( slotName )
 	return false
 end
 
-function ITEM:OnSold( ply )
+function ITEM:OnSold( )
 
 end
 
@@ -51,11 +67,11 @@ function ITEM:CanBeTraded( receivingPly )
 
 end
 
-function ITEM:OnEquip( ply )
+function ITEM:OnEquip( )
 
 end
 
-function ITEM:OnHolster( ply )
+function ITEM:OnHolster( )
 
 end
 

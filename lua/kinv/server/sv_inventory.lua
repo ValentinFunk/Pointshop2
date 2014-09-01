@@ -12,6 +12,7 @@ function Inventory:loadItems( )
 	Item.findAllByInventory_id( self.id )
 	:Then( function( items )
 		for k, item in pairs( items ) do
+			item.owner = self:getOwner()
 			table.insert( self.Items, item )
 		end
 	end )
