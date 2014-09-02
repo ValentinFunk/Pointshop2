@@ -40,21 +40,12 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	
 	ply.PS2_Wallet:save( )
 	:Then( function( )
-		local item = itemClass:new( )
-		item.purchaseData = {
+		return self:easyAddItem( itemClass, {
 			time = os.time(),
 			amount = price[currencyType],
-			currency = currencyType
-		}
-		return item:save( )
-	end )
-	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
-		return ply.PS2_Inventory:addItem( item )
-		:Then( function( )
-			item:OnPurchased( )
-			self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
-		end )
+			currency = currencyType, 
+			origin = "SHOP"
+		} )
 	end )
 	:Then( function( )
 		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
@@ -68,6 +59,31 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your purchase was not carried out." )
+	end )
+end
+
+function Pointshop2Controller:easyAddItem( ply, itemClass, purchaseData, suppressNotify )
+	return Promise.Resolve()
+	:Then( function( )
+		local item = itemClass:new( )
+		item.purchaseData = purchaseData or {
+			time = os.time(),
+			amount = price[currencyType],
+			currency = currencyType,
+			origin = "LUA"
+		}
+		return item:save( )
+	end )
+	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
+		return ply.PS2_Inventory:addItem( item )
+		:Then( function( )
+			item:OnPurchased( )
+			if not suppressNotify then
+				self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
+			end
+			return item
+		end )
 	end )
 end
 
