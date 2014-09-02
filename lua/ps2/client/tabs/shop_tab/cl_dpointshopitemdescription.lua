@@ -100,9 +100,9 @@ function PANEL:Init( )
 	function self.buttonsPanel:AddSellButton( price, currencyType )
 		self.sellBtn = vgui.Create( "DButton", self )
 		if currencyType == "points" then
-			self.sellBtn:SetText( "Sell Item (" .. price .. "pts)" )
+			self.sellBtn:SetText( "Sell Item (" .. price .. " points)" )
 		elseif currencyType == "premiumPoints" then
-			self.sellBtn:SetText( "Sell Item (" .. price .. "premium pts)")
+			self.sellBtn:SetText( "Sell Item (" .. price .. " premium points)")
 		end
 		self.sellBtn:Dock( TOP )
 		function self.sellBtn:DoClick( )

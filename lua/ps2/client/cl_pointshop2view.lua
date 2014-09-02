@@ -200,7 +200,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		else
 			local function findAndAddToParent( tree, parentId, subcategory )
 				if tree.self.id ==  parentId then
-					tree.subcategories[newCategory.self.id] = subcategory
+					table.insert(tree.subcategories, subcategory)
 					return true
 				end
 
@@ -218,13 +218,6 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		end
 	end
 	self.categoryItemsTable = categoryItemsTable
-	
-	local function sortCategories( cat )
-		table.sort( self.categoryItemsTable, function( a, b )
-			return a.self.id < b.self.id
-		end )
-	end
-	sortCategories( cat )
 	
 	--Hacky, dunno why this is needed
 	hook.Call( "PS2_DynamicItemsUpdated" )

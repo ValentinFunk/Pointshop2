@@ -311,10 +311,10 @@ end )
 local function initPlayer( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	local controller = Pointshop2Controller:getInstance( )
-	controller:sendWallet( ply )
 	
 	Pointshop2.LoadModuleItemsPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
+		controller:sendWallet( ply )
 		return ply.dynamicsReceivedPromise
 	end )
 	:Done( function( )

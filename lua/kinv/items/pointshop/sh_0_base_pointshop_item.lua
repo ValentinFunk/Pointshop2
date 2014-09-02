@@ -28,13 +28,13 @@ end
 function ITEM:GetSellPrice( ply )
 	--New way
 	if self.purchaseData then
-		return self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ), self.purchaseData.currency		
+		return math.floor( self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), self.purchaseData.currency		
 	end
 	
 	--Legacy way
 	if self.class.Price.points then
 		return math.floor( self.class.Price.points * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), "points"
-	elseif
+	elseif self.class.Price.premiumPoints then
 		return math.floor( self.class.Price.premiumPoints * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), "premiumPoints"
 	end
 end
