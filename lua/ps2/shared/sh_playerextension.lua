@@ -20,3 +20,13 @@ end
 function Player:PS2_GetWallet( )
 	return self.PS2_Wallet
 end
+
+function Player:PS2_HasInventorySpace( slots )
+	if not self.PS2_Inventory then
+		error( "Inventory of " .. tostring( self ) .. " not cached" )	
+	end
+	
+	local slotsUsed = table.Count( self.PS2_Inventory:getItems() )
+	local slotsTotal = self.PS2_Inventory:getNumSlots( )
+	return slotsTotal - slotsUsed - slots >= 0
+end
