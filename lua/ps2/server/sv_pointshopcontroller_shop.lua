@@ -1,5 +1,5 @@
-function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
-	local itemClass = Pointshop2.GetItemClassByName( itemClass )
+function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
+	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	if not itemClass then
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, item " .. itemClass .. " isn't valid" ) 
 		return
@@ -40,7 +40,7 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	
 	ply.PS2_Wallet:save( )
 	:Then( function( )
-		return self:easyAddItem( itemClass, {
+		return self:easyAddItem( ply, itemClassName, {
 			time = os.time(),
 			amount = price[currencyType],
 			currency = currencyType, 
@@ -62,7 +62,8 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	end )
 end
 
-function Pointshop2Controller:easyAddItem( ply, itemClass, purchaseData, suppressNotify )
+function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, suppressNotify )
+	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	return Promise.Resolve()
 	:Then( function( )
 		local item = itemClass:new( )
@@ -145,7 +146,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end )
 	:Then( function( )
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
-		hook.Run( "PS2_SoldItem", ply, itemClass )
+		hook.Run( "PS2_SoldItem", ply )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
