@@ -27,7 +27,10 @@ function Pointshop2Controller:loadSettings( noTransmit )
 	end )
 end
 Pointshop2.DatabaseConnectedPromise:Done( function( )
-	Pointshop2Controller:getInstance( ):loadSettings( )
+	Pointshop2Controller:initServer( )
+	:Done( function( )
+		Pointshop2Controller:getInstance( ):loadSettings( )
+	end )
 end )
 
 function Pointshop2Controller:SendInitialSettingsPackage( ply )

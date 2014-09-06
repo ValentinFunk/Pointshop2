@@ -82,15 +82,19 @@ MODULE.Settings.Shared = {
 			tooltip = "Allow players to sell items that can be bought using premium points.\n Disabled by default to avoid conversion of the currencies",
 			label = "Allow selling of premium items",
 		},
-		ServerId = {
-			tooltip = "Generated from the ip and hostname, if you switch hosts/ips save this and change it back on the new host.",
-			label = "Server Id",
-			value = util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) ),
-		},
 		SendPointsEnabled = {
 			label = "Allow players to send points",
 			tooltip = "This can be used to disable the possibility to send points to other players",
 			value = true
+		},
+	}, 
+	InternalSettings = {
+		info = {
+			isManualSetting = true,
+		},
+		-- Server's unique id, fetched from the database
+		ServerId = {
+			value = -1,
 		},
 	}
 }

@@ -137,8 +137,12 @@ function Pointshop2.GetItemInSlot( ply, slotName )
 	end
 end
 
+function Pointshop2.CalculateServerHash( )
+	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) )
+end
+
 function Pointshop2.GetCurrentServerId( )
-	return Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.ServerId" )
+	return Pointshop2.GetSetting( "Pointshop 2", "InternalSettings.ServerId" )
 end
 
 Pointshop2.GamemodeModules = {}
