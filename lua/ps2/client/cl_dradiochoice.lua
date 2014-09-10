@@ -73,3 +73,5 @@ function PANEL:Paint( )
 end
 
 derma.DefineControl( "DRadioChoice", "", PANEL, "DPanel" )
+
+-- Be careful of the clipboard. - Steeze 2014
