@@ -63,7 +63,10 @@ function Pointshop2Controller:canDoAction( ply, action )
 	local def = Deferred( )
 	if action == "saveCategoryOrganization" or
 	   action == "removeItem" or 
-	   action == "removeItems" 
+	   action == "removeItems" or 
+	   action == "adminGetServers" or
+	   action == "migrateServer" or
+	   action == "removeServer"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
 			def:Resolve( )

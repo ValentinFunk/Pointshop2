@@ -9,7 +9,7 @@ Server.static.model = {
 		serverHash = "string",
 		ip = "string",
 		port = "int",
-		name = "string"
+		name = "string",
 	}
 }
 
