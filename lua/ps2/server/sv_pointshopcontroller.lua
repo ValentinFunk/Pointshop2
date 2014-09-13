@@ -70,7 +70,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action == "resetToDefaults" or action == "installDefaults" or action == "fixDatabase" then
+	elseif action == "resetToDefaults" or action == "installDefaults" or action == "fixDatabase" or action == "installDlcPack" then
 		if PermissionInterface.query( ply, "pointshop2 reset" ) then
 			def:Resolve( )
 		else

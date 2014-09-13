@@ -468,3 +468,7 @@ end
 function Pointshop2View:installDefaults( )
 	self:controllerAction( "installDefaults" )
 end
+
+function Pointshop2View:installDlcPack( name )
+	self:controllerAction( "installDlcPack", name )
+end

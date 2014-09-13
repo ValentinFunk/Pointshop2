@@ -317,3 +317,28 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		LibK.SetBlocking( false )
 	end )
 end
+
+Pointshop2.DlcPacks = {}
+
+function Pointshop2.RegisterDlcPack( name, items, categories )
+	Pointshop2.DlcPacks[name] = { items = items, categories = categories }
+end
+
+function Pointshop2Controller:installDlcPack( ply, name )
+	local pack = Pointshop2.DlcPacks[name]
+	if not pack then
+		KLogf( 2, "Trying to install invalid DLC pack " .. name .. "!" )
+		return
+	end
+	
+	Promise.Resolve( )
+	:Then( function( )
+		return self:importItems( pack.items )
+	end )
+	:Then( function( )
+		return self:importCategoryOrganization( pack.categories )
+	end )
+	:Done( function( )
+		return self:moduleItemsChanged( )
+	end )
+end
