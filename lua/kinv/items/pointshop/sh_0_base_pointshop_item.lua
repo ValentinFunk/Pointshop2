@@ -110,9 +110,9 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 		points = persistenceItem.price,
 		premiumPoints = persistenceItem.pricePremium,
 	}
-	itemTable.Ranks = persistenceItem.ranks
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
+	itemTable.Servers = persistenceItem.servers or {}
 end
 
 /*

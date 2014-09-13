@@ -50,3 +50,34 @@ function Pointshop2Controller:migrateServer( ply, serverId )
 		return Pointshop2Controller:getInstance( ):reloadSettings( false )
 	end )
 end
+
+function Pointshop2Controller:updateServerRestrictions( ply, itemClassNames, serverIds )
+	local saveTbl = {}
+	for k, v in pairs( itemClassNames ) do
+		saveTbl[k]= tonumber(v)
+	end
+	local saveStr = table.concat( saveTbl, "," )
+	
+	return Pointshop2.ItemPersistence.getDbEntries( "WHERE id IN (" .. saveStr .. ")" )
+	:Then( function( itemPersistences ) 
+		local promises = {}
+		for k, itemClassName in pairs( itemClassNames ) do
+			local persistence
+			for _, v in pairs( itemPersistences ) do
+				if tonumber( v.id ) == tonumber( itemClassName ) then
+					persistence = v
+				end
+			end
+			if not persistence then
+				return Promise.Reject( "Invalid Item Class " .. itemClassName )
+			end
+			persistence.servers = serverIds
+			table.insert( promises, persistence:save( ) )
+		end
+		--Could optimize this to single query but cba
+		return WhenAllFinished( promises )
+	end )
+	:Then( function( )
+		self:moduleItemsChanged( )
+	end )
+end

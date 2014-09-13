@@ -66,7 +66,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 	   action == "removeItems" or 
 	   action == "adminGetServers" or
 	   action == "migrateServer" or
-	   action == "removeServer"
+	   action == "removeServer" or
+	   action == "updateServerRestrictions"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
 			def:Resolve( )
@@ -674,7 +675,6 @@ function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
 		reloadAllPlayers( )
 	end )
 	:Then( function( )
-		PrintTable( removedClassNames )
 		return removedClassNames
 	end )
 end

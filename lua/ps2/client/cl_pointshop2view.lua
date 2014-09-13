@@ -458,7 +458,6 @@ function Pointshop2View:removeItems( itemClasses, refund )
 	
 	self:controllerTransaction( "removeItems", classNames, refund )
 	:Done( function( removedNames )
-		PrintTable( removedNames )
 		for k, className in pairs( removedNames ) do
 			KInventory.Items[className] = nil
 		end
@@ -483,4 +482,8 @@ end
 
 function Pointshop2View:removeServer( server )
 	return self:controllerTransaction( "removeServer", server.id )
+end
+
+function Pointshop2View:updateServerRestrictions( itemClassNames, serverIds )
+	self:controllerAction( "updateServerRestrictions", itemClassNames, serverIds )
 end
