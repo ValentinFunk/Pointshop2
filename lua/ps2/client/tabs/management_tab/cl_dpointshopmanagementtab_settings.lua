@@ -11,7 +11,7 @@ function PANEL:Init( )
 	
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
-	self:DockPadding( 10, 0, 10, 10 )
+	self:DockPadding( 5, 0, 5, 5 )
 	
 	local label = vgui.Create( "DLabel", self )
 	label:SetText( "Select a section to configure" )
@@ -21,7 +21,7 @@ function PANEL:Init( )
 	label:Dock( TOP )
 	
 	self.panels = vgui.Create( "DPanel", self )
-	self.panels.Paint = function( ) end
+	self.panels.Paint = function( a, w, h )  end
 	self.panels:Dock( FILL )
 	
 	for k, mod in pairs( Pointshop2.Modules) do
@@ -32,7 +32,7 @@ function PANEL:Init( )
 		local categoryPanel = vgui.Create( "DPanel", self.panels )
 		Derma_Hook( categoryPanel, "Paint", "Paint", "InnerPanel" )
 		categoryPanel:DockMargin( 0, 5, 0, 5 )
-		categoryPanel:DockPadding( 8, 8, 8, 8 )
+		categoryPanel:DockPadding( 11, 8, 0, 8 )
 		categoryPanel:Dock( TOP )
 		function categoryPanel:PerformLayout( )
 			self.items:SizeToChildren( false, true )
