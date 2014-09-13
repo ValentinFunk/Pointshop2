@@ -174,10 +174,23 @@ function Pointshop2.LoadModules( )
 	end
 end
 Pointshop2.ModulesLoaded = false
-hook.Add( "InitPostEntity", "Load", function()
-	Pointshop2.LoadModules( )
-end )
 
+
+if SERVER then
+	WhenAllFinished{ LibK.WhenAddonsLoaded{ "Pointshop2" }, LibK.InitPostEntityPromise }
+	:Done( function()
+		Pointshop2.LoadModules( )
+	end )
+else
+	if GAMEMODE then 
+		Pointshop2.LoadModules( )
+	else
+		hook.Add( "InitPostEntity", "LoadModules", function( )
+			Pointshop2.LoadModules( )
+		end )
+	end
+end
+	
 hook.Add( "OnReloaded", "Do", function( )
 --For reloads.
 if GAMEMODE then
