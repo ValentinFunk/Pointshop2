@@ -52,6 +52,9 @@ function Pointshop2.AddItemHook( name, itemClass )
 						local eqItem = KInventory.ITEMS[slot.itemId]
 						eqItem.owner = ply
 						if instanceOf( itemClass, eqItem ) then
+							if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+								break
+							end
 							eqItem[name]( eqItem, ... )
 						end
 					end
@@ -64,6 +67,9 @@ function Pointshop2.AddItemHook( name, itemClass )
 				for k, eqItem in pairs( ply.PS2_EquippedItems or {} ) do
 					eqItem.owner = ply
 					if instanceOf( itemClass, eqItem ) then
+						if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+							break
+						end
 						eqItem[name]( eqItem, ... )
 					end
 				end

@@ -300,13 +300,15 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		--Delay to next frame to clear stack
 		timer.Simple( 0, function( )
-			item:OnEquip(  )
+			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+				item:OnEquip(  )
+				hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
+				self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
+			end
 		end )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
-		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 	end )
