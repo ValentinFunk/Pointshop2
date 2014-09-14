@@ -66,6 +66,24 @@ MODULE.SettingButtons = {
 	}
 }
 
+--Resolve Servers that Pointshop 2 runs on to shared. Only transmit id and name
+--to avoid exposing the com secret
+MODULE.Resolve = function( )
+	return Pointshop2.Server.getAll( )
+	:Then( function( servers )
+		MODULE.Settings.Shared.InternalSettings.Servers = {
+			type = "table",
+			value = {}
+		}
+		for k, server in pairs( servers ) do
+			table.insert( MODULE.Settings.Shared.InternalSettings.Servers.value, {
+				id = server.id,
+				name = server.name
+			} )
+		end
+	end )
+end
+
 MODULE.Settings = {}
 MODULE.Settings.Shared = {
 	BasicSettings = {
