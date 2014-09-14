@@ -101,6 +101,14 @@ function ITEM.static:GetPointshopIconDimensions( )
 	return Pointshop2.GenerateIconSize( 2, 2 )
 end
 
+function ITEM.static:IsValidForServer( id )
+	if #self.Servers == 0 then
+		return true
+	end
+	
+	return table.HasValue( self.Servers, id )
+end
+
 /*
 	This function is called to populate the itemTable (a new class which inherits the BaseClass from persistanceItem).
 	Should be overwritten and called by any other item bases.

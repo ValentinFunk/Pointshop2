@@ -111,6 +111,50 @@ function PANEL:Init( )
 	end
 end
 
+function PANEL:UpdateServerRestrictions( servers )
+	if IsValid( self.restrictionsPanel ) then
+		self.restrictionsPanel:Remove( )
+	end
+	
+	if #servers == 0 then
+		return
+	end
+	
+	self.restrictionsPanel = vgui.Create( "DPanel", self )
+	self.restrictionsPanel:Dock( TOP )
+	self.restrictionsPanel:DockMargin( 0, 8, 0, 0 )
+	Derma_Hook( self.restrictionsPanel, "Paint", "Paint", "InnerPanelBright" )
+	self.restrictionsPanel:SetTall( 100 )
+	self.restrictionsPanel:DockPadding( 5, 5, 5, 5 )
+	function self.restrictionsPanel:PerformLayout( )
+		self:SizeToChildren( false, true )
+	end
+	
+	local label = vgui.Create( "DLabel", self.restrictionsPanel )
+	label:SetText( "This item is restricted to these servers:" )
+	label:Dock( TOP )
+	label:SizeToContents( )
+	
+	for k, v in pairs( servers ) do
+		local label = vgui.Create( "DLabel", self.restrictionsPanel )
+		label:SetText( "- " .. Pointshop2.GetServerById( v ).name )
+		label:Dock( TOP )
+		label:SizeToContents( )
+		label:DockMargin( 5, 0, 0, 0 )
+	end
+	
+	local label = vgui.Create( "DLabel", self.restrictionsPanel )
+	label:Dock( TOP )
+	label:SizeToContents( )
+	if not table.HasValue( servers, Pointshop2.GetCurrentServerId( ) ) then
+		label:SetText( "The item cannot be used on this server!" )
+		label:SetColor( Color( 255, 0, 0 ) )
+	else
+		label:SetText( "The item can be used on this server!" )
+		label:SetColor( Color( 0, 255, 0 ) )
+	end
+end
+
 function PANEL:SelectionReset( )
 	self.titleLabel:SetText( "No Item selected" )
 	self.titleLabel:SizeToContents( )
@@ -130,6 +174,8 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 	if not noBuyPanel then
 		self.buttonsPanel:AddBuyButtons( itemClass:GetBuyPrice( LocalPlayer( ) ) )
 	end
+	
+	self:UpdateServerRestrictions( itemClass.Servers )
 end
 
 function PANEL:SetItem( item, noButtons )
