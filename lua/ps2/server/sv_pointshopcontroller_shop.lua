@@ -300,13 +300,15 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		--Delay to next frame to clear stack
 		timer.Simple( 0, function( )
-			item:OnEquip(  )
+			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+				item:OnEquip(  )
+				hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
+				self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
+			end
 		end )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
-		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 	end )
@@ -315,5 +317,30 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		LibK.SetBlocking( false )
+	end )
+end
+
+Pointshop2.DlcPacks = {}
+
+function Pointshop2.RegisterDlcPack( name, items, categories )
+	Pointshop2.DlcPacks[name] = { items = items, categories = categories }
+end
+
+function Pointshop2Controller:installDlcPack( ply, name )
+	local pack = Pointshop2.DlcPacks[name]
+	if not pack then
+		KLogf( 2, "Trying to install invalid DLC pack " .. name .. "!" )
+		return
+	end
+	
+	Promise.Resolve( )
+	:Then( function( )
+		return self:importItems( pack.items )
+	end )
+	:Then( function( )
+		return self:importCategoryOrganization( pack.categories )
+	end )
+	:Done( function( )
+		return self:moduleItemsChanged( )
 	end )
 end

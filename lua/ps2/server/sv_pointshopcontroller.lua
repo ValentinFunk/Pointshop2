@@ -63,14 +63,18 @@ function Pointshop2Controller:canDoAction( ply, action )
 	local def = Deferred( )
 	if action == "saveCategoryOrganization" or
 	   action == "removeItem" or 
-	   action == "removeItems" 
+	   action == "removeItems" or 
+	   action == "adminGetServers" or
+	   action == "migrateServer" or
+	   action == "removeServer" or
+	   action == "updateServerRestrictions"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
 			def:Resolve( )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action == "resetToDefaults" or action == "installDefaults" or action == "fixDatabase" then
+	elseif action == "resetToDefaults" or action == "installDefaults" or action == "fixDatabase" or action == "installDlcPack" then
 		if PermissionInterface.query( ply, "pointshop2 reset" ) then
 			def:Resolve( )
 		else
@@ -178,11 +182,11 @@ function Pointshop2Controller:initializeSlots( ply )
 			
 			--Delay to next frame to clear stack
 			timer.Simple( 0, function( )
-				item:OnEquip( )
-				print( "OnEquip for slot", _, ply )
+				if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+					self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
+					item:OnEquip( )
+				end
 			end )
-			
-			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		end
 	end )
 end

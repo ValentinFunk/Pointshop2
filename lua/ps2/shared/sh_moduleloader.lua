@@ -86,8 +86,10 @@ function Pointshop2.InitializeModuleSettings( modTable )
 		return def:Promise( )
 	end
 	
-	return Pointshop2.StoredSetting.findAllByPlugin( modTable.Name )
-	:Done( function( storedSettings )
+	--Give the module a chance to resolve settings via promise
+	local resolve = modTable.Resolve and modTable.Resolve( ) or Promise.Resolve( )
+	return WhenAllFinished{ Pointshop2.StoredSetting.findAllByPlugin( modTable.Name ), resolve }
+	:Then( function( storedSettings )
 		local storedMap = {}
 		for k, v in pairs( storedSettings ) do
 			storedMap[v.path] = v.value
@@ -129,10 +131,10 @@ local function includeFolder( folder )
 end
 
 function Pointshop2.LoadModules( )
-	--if Pointshop2.LoadModulesPromise._promise._state != "pending" then
-	--	KLogf( 3, "[WARN] Module Promise already %s", Pointshop2.LoadModulesPromise._promise._state )
-	--	return
-	--end
+	if SERVER and Pointshop2.LoadModulesPromise._promise._state != "pending" then
+		KLogf( 3, "[WARN] Module Promise already %s", Pointshop2.LoadModulesPromise._promise._state )
+		return
+	end
 	
 	local files, folders = file.Find( "ps2/modules/*", "LUA" )
 	for k, folder in pairs( folders ) do
@@ -174,10 +176,23 @@ function Pointshop2.LoadModules( )
 	end
 end
 Pointshop2.ModulesLoaded = false
-hook.Add( "InitPostEntity", "Load", function()
-	Pointshop2.LoadModules( )
-end )
 
+
+if SERVER then
+	WhenAllFinished{ LibK.WhenAddonsLoaded{ "Pointshop2" }, LibK.InitPostEntityPromise }
+	:Done( function()
+		Pointshop2.LoadModules( )
+	end )
+else
+	if GAMEMODE then 
+		Pointshop2.LoadModules( )
+	else
+		hook.Add( "InitPostEntity", "LoadModules", function( )
+			Pointshop2.LoadModules( )
+		end )
+	end
+end
+	
 hook.Add( "OnReloaded", "Do", function( )
 --For reloads.
 if GAMEMODE then

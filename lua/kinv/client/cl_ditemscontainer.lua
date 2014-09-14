@@ -85,7 +85,7 @@ function PANEL:OnModified( )
 end
 
 function PANEL:savePositions( )
-	self.fname = "itempositions_" .. Pointshop2.GetCurrentServerId( ) .. self.categoryName .. ".txt"
+	self.fname = "itempositions_" .. Pointshop2.CalculateServerHash( ) .. self.categoryName .. ".txt"
 	
 	self.itemPositions = {}
 	for pos, slot in ipairs( self:GetChildren( ) ) do
@@ -103,7 +103,7 @@ end
 	saved text file
 */
 function PANEL:loadItems( dontSave )
-	self.fname = "itempositions_" .. Pointshop2.GetCurrentServerId( ) .. self.categoryName .. ".txt"
+	self.fname = "itempositions_" .. Pointshop2.CalculateServerHash( ) .. self.categoryName .. ".txt"
 	
 	self.itemPositions = {}
 	if file.Exists( self.fname, "DATA" ) then

@@ -24,6 +24,10 @@ function PANEL:DoRightClick()
 end
 
 function PANEL:PaintOver( w, h )
+	if not self.item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+		surface.SetDrawColor( Color( 150, 100, 100, 150 ) )
+		surface.DrawRect( 0, 0, w, h )
+	end
 	if self.Selected then
 		surface.SetDrawColor( self:GetSkin( ).Highlight )
 		surface.DrawOutlinedRect( 0, 0, w, h )

@@ -52,6 +52,9 @@ function Pointshop2.AddItemHook( name, itemClass )
 						local eqItem = KInventory.ITEMS[slot.itemId]
 						eqItem.owner = ply
 						if instanceOf( itemClass, eqItem ) then
+							if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+								break
+							end
 							eqItem[name]( eqItem, ... )
 						end
 					end
@@ -64,6 +67,9 @@ function Pointshop2.AddItemHook( name, itemClass )
 				for k, eqItem in pairs( ply.PS2_EquippedItems or {} ) do
 					eqItem.owner = ply
 					if instanceOf( itemClass, eqItem ) then
+						if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+							break
+						end
 						eqItem[name]( eqItem, ... )
 					end
 				end
@@ -137,8 +143,25 @@ function Pointshop2.GetItemInSlot( ply, slotName )
 	end
 end
 
+function Pointshop2.GetServerById( id )
+	local servers = Pointshop2.GetSetting("Pointshop 2", "InternalSettings.Servers" )
+	for k, v in pairs( servers ) do
+		if v.id == id then
+			return v
+		end 
+	end
+end
+
+function Pointshop2.CalculateServerHash( )
+	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) )
+end
+
+local serverId
 function Pointshop2.GetCurrentServerId( )
-	return Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.ServerId" )
+	if not serverId then
+		serverId = Pointshop2.GetSetting( "Pointshop 2", "InternalSettings.ServerId" )
+	end
+	return serverId
 end
 
 Pointshop2.GamemodeModules = {}

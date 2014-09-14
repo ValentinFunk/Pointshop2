@@ -467,3 +467,23 @@ end
 function Pointshop2View:installDefaults( )
 	self:controllerAction( "installDefaults" )
 end
+
+function Pointshop2View:installDlcPack( name )
+	self:controllerAction( "installDlcPack", name )
+end
+
+function Pointshop2View:getServers( )
+	return self:controllerTransaction( "adminGetServers" )
+end
+
+function Pointshop2View:migrateServer( server )
+	return self:controllerTransaction( "migrateServer", server.id )
+end
+
+function Pointshop2View:removeServer( server )
+	return self:controllerTransaction( "removeServer", server.id )
+end
+
+function Pointshop2View:updateServerRestrictions( itemClassNames, serverIds )
+	self:controllerAction( "updateServerRestrictions", itemClassNames, serverIds )
+end
