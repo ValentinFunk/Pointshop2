@@ -86,8 +86,10 @@ function Pointshop2.InitializeModuleSettings( modTable )
 		return def:Promise( )
 	end
 	
-	return Pointshop2.StoredSetting.findAllByPlugin( modTable.Name )
-	:Done( function( storedSettings )
+	--Give the module a chance to resolve settings via promise
+	local resolve = modTable.Resolve and modTable.Resolve( ) or Promise.Resolve( )
+	return WhenAllFinished{ Pointshop2.StoredSetting.findAllByPlugin( modTable.Name ), resolve }
+	:Then( function( storedSettings )
 		local storedMap = {}
 		for k, v in pairs( storedSettings ) do
 			storedMap[v.path] = v.value
