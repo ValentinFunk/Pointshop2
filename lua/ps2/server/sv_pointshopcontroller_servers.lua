@@ -27,7 +27,32 @@ function Pointshop2Controller:removeServer( ply, serverId )
 	if serverId == Pointshop2.GetSetting( "Pointshop 2", "InternalSettings.ServerId" ) then
 		return Promise.Reject( "You cannot remove the server you're playing on!" )
 	end
-	return Pointshop2.Server.removeWhere{ id = serverId }
+	return WhenAllFinished{ 
+		Pointshop2.ItemPersistence.getAll( ),
+		Pointshop2.StoredSetting.removeWhere{ serverId = serverId },
+		Pointshop2.Server.removeWhere{ id = serverId },
+	}
+	:Then( function( itemPersistences )
+		--Make sure that there are no removed servers in the restriction lists
+		local promises = {}
+		for k, persistence in pairs( itemPersistences ) do
+			local changed = false
+			for k, v in pairs( persistence.servers or {} ) do
+				if v == serverId then
+					persistence.servers[k] = nil
+					changed = true
+					break
+				end
+			end
+			if changed then
+				table.insert( promises, persistence:save( ) )
+			end
+		end
+		return WhenAllFinished( promises )
+	end )
+	:Then( function( )
+		return self:moduleItemsChanged( )
+	end )
 end
 
 function Pointshop2Controller:migrateServer( ply, serverId )
@@ -78,6 +103,6 @@ function Pointshop2Controller:updateServerRestrictions( ply, itemClassNames, ser
 		return WhenAllFinished( promises )
 	end )
 	:Then( function( )
-		self:moduleItemsChanged( )
+		return self:moduleItemsChanged( )
 	end )
 end
