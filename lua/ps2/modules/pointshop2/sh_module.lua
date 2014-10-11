@@ -140,6 +140,11 @@ MODULE.Settings.Server = {
 			label = "Limit PAC access",
 			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
 		},
+		ShouldBlock = {
+			value = true,
+			label = "Blocking Transactions", 
+			tooltip = "When turned on trades some performance for safety against data loss on gmod or sql server crashes"
+		}
 	},
 	GUISettings = {
 		info = {
