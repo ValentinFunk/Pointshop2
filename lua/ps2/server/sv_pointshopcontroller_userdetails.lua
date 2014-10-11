@@ -80,6 +80,7 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 	
 	local walletPromise = Deferred( ) 
 	local walletFound = false
+	local shouldBlock = Pointshop2.GetSetting( "Pointshop2", "BasicSettings.ShouldBlock" )
 	for k, v in pairs( player.GetAll( ) ) do
 		if v.kPlayerId == kPlayerId then
 			if v.PS2_Wallet then 
@@ -99,7 +100,7 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 		end )
 	end
 	
-	if walletFound then --no need to block if player is offline
+	if walletFound and shouldBlock then --no need to block if player is offline
 		Pointshop2.DB:SetBlocking( true ) --don't want player to sell/buy stuff during our update
 	end
 	
@@ -109,7 +110,7 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 		return wallet:save( )
 	end )
 	:Always( function( )
-		if walletFound then
+		if walletFound and shouldBlock then
 			Pointshop2.DB:SetBlocking( false )
 		end
 	end )
