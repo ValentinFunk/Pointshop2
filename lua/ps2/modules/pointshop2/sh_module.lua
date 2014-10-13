@@ -105,6 +105,11 @@ MODULE.Settings.Shared = {
 			tooltip = "This can be used to disable the possibility to send points to other players",
 			value = true
 		},
+		LimitPACAccess = {
+			value = true,
+			label = "Limit PAC access",
+			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
+		},
 	}, 
 	InternalSettings = {
 		info = {
@@ -134,11 +139,6 @@ MODULE.Settings.Server = {
 		["DefaultWallet.PremiumPoints"] = {
 			label = "Starting donator points",
 			value = 1000
-		},
-		LimitPACAccess = {
-			value = true,
-			label = "Limit PAC access",
-			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
 		},
 		ShouldBlock = {
 			value = true,
