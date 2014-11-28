@@ -11,6 +11,10 @@ ITEM.static.Price = {
 	premiumPoints = 1
 }
 
+ITEM.static.Servers = {
+
+}
+
 --CTOR
 function ITEM:initialize()
 	--Fields that are JSON saved for each item
@@ -81,6 +85,10 @@ if SERVER then
 	*/
 	function ITEM:ClientRPC( funcName, ... )
 		Pointshop2.ItemClientRPC( self, funcName, ... )
+	end
+else
+	function ITEM:ServerRPC( funcName, ... )
+		Pointshop2.ItemServerRPC( self, funcName, ... )
 	end
 end
 
