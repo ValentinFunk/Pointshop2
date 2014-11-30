@@ -42,10 +42,19 @@ function PANEL:Init( )
 			return 
 		end
 		self.invPanel:itemAdded( item )
+		
+		timer.Simple( 0, function( )
+			if IsValid( item.icon ) then
+				item.icon:Select( )
+			end
+		end )
 	end )
 	hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId )
 		if inventory.id != LocalPlayer( ).PS2_Inventory.id then
 			return 
+		end
+		if self.descPanel.item.id == itemId then
+			self.descPanel:SelectionReset( )
 		end
 		self.invPanel:itemRemoved( itemId )
 	end )
@@ -138,14 +147,6 @@ function PANEL:Init( )
 			self.descPanel:Dock( TOP )
 		end
 		self.descPanel:SetItem( item, false )
-	end )
-	hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId )
-		if inventory.id != LocalPlayer( ).PS2_Inventory.id then
-			return 
-		end
-		if self.descPanel.item.id == itemId then
-			self.descPanel:SelectionReset( )
-		end
 	end )
 	hook.Add( "PS2_SlotChanged", self, function( self, slot )
 		if not slot.Item then
