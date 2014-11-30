@@ -17,6 +17,18 @@ function Player:PS2_HasItemEquipped( item )
 	end
 end
 
+function Player:PS2_GetItemInSlot( name )
+	if CLIENT then
+		return self.PS2_Slots and self.PS2_Slots[name]
+	else
+		for k, slot in pairs( self.PS2_Slots ) do
+			if slot.slotName == name then
+				return slot.Item
+			end
+		end
+	end
+end
+
 function Player:PS2_GetWallet( )
 	return self.PS2_Wallet
 end
