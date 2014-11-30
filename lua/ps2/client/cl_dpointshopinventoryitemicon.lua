@@ -42,12 +42,16 @@ function PANEL:OnDeselected( )
 
 end
 
-function PANEL:OnMousePressed( mcode )
-	self:GetParent( ):OnMousePressed( mcode )
-	DPanel.OnMousePressed( self, mcode )
+function PANEL:Select( )
 	self.Selected = true
 	hook.Run( "PS2_InvItemIconSelected", self, self.item )
 	self:OnSelected( )
+end
+
+function PANEL:OnMousePressed( mcode )
+	self:GetParent( ):OnMousePressed( mcode )
+	DPanel.OnMousePressed( self, mcode )
+	self:Select( )
 end
 
 Derma_Hook( PANEL, "Paint", "Paint", "PointshopInvItemIcon" )

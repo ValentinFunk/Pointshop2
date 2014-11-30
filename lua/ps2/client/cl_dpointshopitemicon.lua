@@ -69,6 +69,13 @@ function PANEL:OnDeselected( )
 
 end
 
+function PANEL:Select( )
+	self.Selected = true
+	self.item =  self.item and KInventory.ITEMS[self.item.id] 
+	hook.Run( "PS2_ItemIconSelected", self, self.item or self.itemClass )
+	self:OnSelected( )
+end
+
 function PANEL:OnMousePressed( mcode )
 	DPanel.OnMousePressed( self, mcode )
 	
@@ -76,9 +83,7 @@ function PANEL:OnMousePressed( mcode )
 		self:DoRightClick( )
 	end
 	
-	self.Selected = true
-	hook.Run( "PS2_ItemIconSelected", self, self.item or self.itemClass )
-	self:OnSelected( )
+	self:Select( )
 	return true
 end
 
