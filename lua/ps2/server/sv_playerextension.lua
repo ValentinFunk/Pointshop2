@@ -1,9 +1,11 @@
 local Player = FindMetaTable( "Player" )
 
-function Player:PS2_AddStandardPoints( points, message, small )
+function Player:PS2_AddStandardPoints( points, message, small, suppressEvent )
 	if points == 0 then return end
 	
-	hook.Run( "PS2_PointsAwarded", self, points )
+	if not suppressEvent then
+		hook.Run( "PS2_PointsAwarded", self, points, "points" )
+	end
 	
 	Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "points", points )
 	if message then
@@ -14,7 +16,7 @@ end
 function Player:PS2_AddPremiumPoints( points)
 	if points == 0 then return end		
 	
-	hook.Run( "PS2_PointsAwarded", self, points )
+	hook.Run( "PS2_PointsAwarded", self, points, "premiumPoints" )
 	
 	Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "premiumPoints", points )
 end
