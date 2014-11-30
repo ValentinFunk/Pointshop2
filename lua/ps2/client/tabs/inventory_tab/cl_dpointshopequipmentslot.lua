@@ -92,7 +92,6 @@ function PANEL:Init( )
 				self.actualSlot:addItem( item )
 				
 				timer.Simple( 0.01, function( )
-					print( self.actualSlot.itemStack )
 					self.actualSlot.itemStack:Think( )
 					self.actualSlot.itemStack.icon:Select( )
 				end )
