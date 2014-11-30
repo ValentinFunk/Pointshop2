@@ -1,7 +1,7 @@
 Pointshop2 = {}
 
 --[[
-	Pointshop2 Main file, last modifed on 06.07.2014, {{ user_id }}
+	Pointshop2 Main file, last modifed on 06.07.2014, Revision {{ user_id|133713371337 }}
 --]]
 
 --Find all registered items that use the pointshop base
@@ -180,6 +180,8 @@ end
 */
 if SERVER then
 	util.AddNetworkString( "PS2_ItemClientRPC" )
+	util.AddNetworkString( "PS2_ItemServerRPC" )
+
 	function Pointshop2.ItemClientRPC( item, funcName, ... )
 		net.Start( "PS2_ItemClientRPC" )
 			net.WriteUInt( item.id, 32 )
@@ -187,6 +189,33 @@ if SERVER then
 			net.WriteTable( { ... } )
 		net.Broadcast( )
 	end
+	
+	net.Receive( "PS2_ItemServerRPC", function( len, ply )
+		local itemId = net.ReadUInt( 32 )
+		local funcName = net.ReadString()
+		local args = net.ReadTable( )
+		if LibK.Debug then
+			local argsStr = ""
+			for k, v in pairs( args ) do
+				argsStr = argsStr .. tostring( v )
+				if k < #args then
+					argsStr = argsStr .. ", "
+				end
+			end
+			KLogf( 4, "Pointshop2.ItemServerRPC(%i, %s, %s) len %i", itemId, funcName, argsStr, len )
+		end
+		
+		local item = Pointshop2.ITEMS[itemId]
+		if not item then 
+			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
+			return
+		end
+		if item:GetOwner( ) != ply then
+			KLogf( 3, "[WARN] Player %s tried to RPC for other player's item %i", ply:Nick( ), itemId )
+			return
+		end
+		item[funcName]( item, unpack( args ) )
+	end )
 else
 	net.Receive( "PS2_ItemClientRPC", function( len )
 		local itemId = net.ReadUInt( 32 )
@@ -210,4 +239,12 @@ else
 		end
 		item[funcName]( item, unpack( args ) )
 	end )
+	
+	function Pointshop2.ItemServerRPC( item, funcName, ... )
+		net.Start( "PS2_ItemServerRPC" )
+			net.WriteUInt( item.id, 32 )
+			net.WriteString( funcName )
+			net.WriteTable( { ... } )
+		net.SendToServer( )
+	end
 end
