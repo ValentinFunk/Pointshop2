@@ -44,7 +44,7 @@ function PANEL:Init( )
 		self.invPanel:itemAdded( item )
 		
 		timer.Simple( 0, function( )
-			if IsValid( item.icon ) then
+			if item.icon and IsValid( item.icon ) then
 				item.icon:Select( )
 			end
 		end )
@@ -116,7 +116,7 @@ function PANEL:Init( )
 	
 	self.slotsLayout = vgui.Create( "DIconLayout", self.slotsScroll )
 	self.slotsLayout:Dock( FILL )
-	self.slotsLayout:DockMargin( 5, 5, 5, 5 )
+	self.slotsLayout:DockMargin( 7, 7, 7, 5 )
 	self.slotsLayout:SetSpaceX( 5 )
 	self.slotsLayout:SetSpaceY( 5 )
 	hook.Run( "PS2_PopulateSlots", self.slotsLayout )

@@ -81,7 +81,6 @@ local function includeFolder( folder )
 		local fullpath = folder .. "/" .. filename
 		if SERVER and ( realmPrefix == "sh" or realmPrefix == "cl" ) then
 			AddCSLuaFile( fullpath )
-			print( "AddCSLua", fullpath )
 		end
 		loadItem( fullpath, filename )
 	end

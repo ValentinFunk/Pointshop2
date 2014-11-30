@@ -46,7 +46,7 @@ function PANEL:CreateNumberSetting( settingsPath, settingInfo )
 	end
 	
 	function panel.SetValue( panel, val )
-		panel.numberWang:SetMax( 1000 )
+		panel.numberWang:SetMax( val < 1000 and 1000 or val * 10 )
 		panel.numberWang:SetValue( val )
 		self.listener:OnValueChanged( settingsPath, val )
 	end

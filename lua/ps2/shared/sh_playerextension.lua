@@ -21,7 +21,7 @@ function Player:PS2_GetItemInSlot( name )
 	if CLIENT then
 		return self.PS2_Slots and self.PS2_Slots[name]
 	else
-		for k, slot in pairs( self.PS2_Slots ) do
+		for k, slot in pairs( self.PS2_Slots or {} ) do
 			if slot.slotName == name then
 				return slot.Item
 			end

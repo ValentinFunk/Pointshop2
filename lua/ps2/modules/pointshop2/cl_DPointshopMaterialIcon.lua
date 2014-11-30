@@ -30,8 +30,8 @@ function PANEL:PerformLayout( )
 	local min = math.min( mulW, mulH )
 	if min < 1 then
 		self.image:SetSize( self.image:GetWide( ) * min, self.image:GetTall( ) * min )
-		self.image:Center( )
 	end
+	self.image:Center( )
 end
 
 derma.DefineControl( "DPointshopMaterialIcon", "", PANEL, "DPointshopItemIcon" )
