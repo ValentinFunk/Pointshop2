@@ -163,6 +163,33 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	return transactionDef:Promise( )
 end
 
+--Remove Item, clear inventory references etc.
+function Pointshop2Controller:removeItemFromPlayer( ply, item )
+	local slot
+	for k, v in pairs( ply.PS2_Slots ) do
+		if v.itemId == item.id then
+			slot = v
+		end
+	end
+	
+	return Promise.Resolve( )
+	:Then( function( )
+		if ply.PS2_Inventory:containsItem( item ) then
+			return ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
+		elseif slot then
+			return slot:removeItem( item ):Then( function( )
+				self:startView( "Pointshop2View", "slotChanged", ply, slot )
+			end )
+		end
+	end )
+	:Then( function( )
+		item:OnHolster( )
+		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
+		KInventory.ITEMS[item.id] = nil
+		return item:remove( ) --remove the actual db entry
+	end )
+end
+
 function Pointshop2Controller:unequipItem( ply, slotName )
 	local slot
 	for k, v in pairs( ply.PS2_Slots ) do
