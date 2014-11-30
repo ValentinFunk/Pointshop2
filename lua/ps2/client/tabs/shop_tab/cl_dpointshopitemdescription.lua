@@ -97,12 +97,15 @@ function PANEL:Init( )
 		end
 	end
 	
-	function self.buttonsPanel:AddSellButton( price, currencyType )
+	function self.buttonsPanel:AddSellButton( item )
 		self.sellBtn = vgui.Create( "DButton", self )
-		if currencyType == "points" then
-			self.sellBtn:SetText( "Sell Item (" .. price .. " points)" )
-		elseif currencyType == "premiumPoints" then
-			self.sellBtn:SetText( "Sell Item (" .. price .. " premium points)")
+		function self.sellBtn:Think( )
+			local price, currencyType = item:GetSellPrice( )
+			if currencyType == "points" then
+				self:SetText( "Sell Item (" .. price .. " points)" )
+			elseif currencyType == "premiumPoints" then
+				self:SetText( "Sell Item (" .. price .. " premium points)")
+			end
 		end
 		self.sellBtn:Dock( TOP )
 		function self.sellBtn:DoClick( )
@@ -160,6 +163,10 @@ function PANEL:SelectionReset( )
 	self.titleLabel:SizeToContents( )
 	self.description:SetText( "Please Select an Item" )
 	self.buttonsPanel:Reset( )
+	
+	if self.restrictionsPanel then
+		self.restrictionsPanel:Remove( )
+	end
 end
 
 function PANEL:SetItemClass( itemClass, noBuyPanel )
@@ -184,7 +191,7 @@ function PANEL:SetItem( item, noButtons )
 	
 	self.buttonsPanel:Reset( )
 	if item:CanBeSold( ) and not noButtons then --todo
-		self.buttonsPanel:AddSellButton( item:GetSellPrice( ) )
+		self.buttonsPanel:AddSellButton( item )
 	end
 end
 
