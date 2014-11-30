@@ -80,7 +80,7 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 	
 	local walletPromise = Deferred( ) 
 	local walletFound = false
-	local shouldBlock = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.ShouldBlock" )
+	local shouldBlock = Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.ShouldBlock" )
 	for k, v in pairs( player.GetAll( ) ) do
 		if v.kPlayerId == kPlayerId then
 			if v.PS2_Wallet then 

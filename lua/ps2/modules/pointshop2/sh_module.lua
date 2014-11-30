@@ -140,10 +140,20 @@ MODULE.Settings.Server = {
 			label = "Starting donator points",
 			value = 1000
 		},
+	},
+	AdvancedSettings = {
+		info = {
+			label = "Technical Settings"
+		},
 		ShouldBlock = {
 			value = true,
 			label = "Blocking Transactions", 
 			tooltip = "When turned on trades some performance for safety against data loss on gmod or sql server crashes"
+		},
+		BroadcastWallets = {
+			value = false,
+			label = "Broadcast Wallets",
+			tooltip = "Causes pointshop 2 to network all wallets across the server. This makes it possible to show points on the scoreboard"
 		}
 	},
 	GUISettings = {
