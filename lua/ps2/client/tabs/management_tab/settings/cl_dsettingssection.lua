@@ -41,6 +41,7 @@ function PANEL:CreateNumberSetting( settingsPath, settingInfo )
 	panel.numberWang = vgui.Create( "DNumberWang", panel )
 	panel.numberWang:Dock( RIGHT )
 	function panel.numberWang.OnValueChanged( wang, val )
+		val = tonumber( val )
 		self.listener:OnValueChanged( settingsPath, val )
 	end
 	
@@ -131,6 +132,9 @@ function PANEL:AddSettingByType( settingsPath, settingInfo )
 	
 	local settingPanel = self[creatorFn]( self, settingsPath, settingInfo )
 	self:AddSettingPanel( settingPanel )
+	if settingInfo.value then
+		settingPanel:SetValue( settingInfo.value )
+	end
 	return settingPanel
 end
 
