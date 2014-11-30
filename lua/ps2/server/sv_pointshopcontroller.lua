@@ -67,7 +67,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 	   action == "adminGetServers" or
 	   action == "migrateServer" or
 	   action == "removeServer" or
-	   action == "updateServerRestrictions"
+	   action == "updateServerRestrictions" or
+	   action == "requestMaterials"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
 			def:Resolve( )
@@ -208,15 +209,34 @@ end
 
 --network wallets to owning players and all admins
 function Pointshop2Controller:getWalletChangeSubscribers( ply )
-	local receivers = { ply }
-	for k, v in pairs( player.GetAll( ) ) do
-		if PermissionInterface.query( v, "pointshop2 manageusers" ) then
-			if v == ply then continue end
-			table.insert( receivers, v )
+	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
+		return player.GetAll() 
+	else
+		local receivers = { ply }
+		for k, v in pairs( player.GetAll( ) ) do
+			if PermissionInterface.query( v, "pointshop2 manageusers" ) then
+				if v == ply then continue end
+				table.insert( receivers, v )
+			end
 		end
+		return receivers
 	end
-	return receivers
 end
+hook.Add( "PS2_OnSettingsUpdate", "AddOrRemoveWalletBroadcast", function( )
+	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
+		hook.Add( "LibK_PlayerInitialSpawn", "PS2_SendWallets", function( ply )
+			timer.Simple( 2, function( )
+				for k, v in pairs( player.GetAll( ) ) do
+					if v.PS2_Wallet then
+						Pointshop2Controller:getInstance( ):startView(  "Pointshop2View", "walletChanged", ply, v.PS2_Wallet )
+					end
+				end
+			end )
+		end )
+	else
+		hook.Remove( "LibK_PlayerInitialSpawn", "PS2_SendWallets" )
+	end
+end )
 
 function Pointshop2Controller:sendWallet( ply )
 	Pointshop2.Wallet.findByOwnerId( ply.kPlayerId )
@@ -677,4 +697,9 @@ function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
 	:Then( function( )
 		return removedClassNames
 	end )
+end
+
+function Pointshop2Controller:requestMaterials( ply, dir )
+	local files, folders = file.Find( "materials/" .. dir .. "/*", "GAME" )
+	return Promise.Resolve( files )
 end
