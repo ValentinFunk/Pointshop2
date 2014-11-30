@@ -86,8 +86,16 @@ function PANEL:Init( )
 	hook.Add( "PS2_SlotChanged", self, function( self, slot )
 		if slot.slotName == self.slotName then
 			self.actualSlot:removeItem( )
+			
 			if slot.Item then
-				self.actualSlot:addItem( slot.Item )
+				local item = KInventory.ITEMS[slot.Item.id]
+				self.actualSlot:addItem( item )
+				
+				timer.Simple( 0.01, function( )
+					print( self.actualSlot.itemStack )
+					self.actualSlot.itemStack:Think( )
+					self.actualSlot.itemStack.icon:Select( )
+				end )
 			end
 		end
 	end )
