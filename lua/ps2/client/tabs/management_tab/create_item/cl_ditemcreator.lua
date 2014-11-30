@@ -181,6 +181,7 @@ function PANEL:PerformLayout( )
 	local maxY = 0
 	for k, v in pairs( self:GetChildren( ) ) do
 		local x, y = v:GetPos( )
+		v:InvalidateLayout( true )
 		local endPos = y + v:GetTall( )
 		if endPos > maxY and v != self.buttonBar then
 			maxY = endPos
