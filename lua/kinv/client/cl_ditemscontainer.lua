@@ -159,7 +159,6 @@ function PANEL:itemRemoved( itemId )
 end
 
 function PANEL:itemAdded( item ) 
-	print( "itemAdded", self )
 	if not table.HasValue( self.itemsTbl, item ) then
 		table.insert( self.itemsTbl, item )
 	end
