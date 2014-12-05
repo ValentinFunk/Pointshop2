@@ -67,7 +67,7 @@ end
 	Inventory icon
 */
 function ITEM:getIcon( )
-	self.icon = vgui.Create( "DPointshopTrailInvIcon" )
+	self.icon = vgui.Create( "DPointshopMaterialInvIcon" )
 	self.icon:SetItem( self )
 	self.icon:SetSize( 64, 64 )
 	return self.icon

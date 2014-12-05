@@ -7,7 +7,7 @@ function PANEL:Init( )
 	self.leftPanel:Dock( LEFT )
 	Derma_Hook( self.leftPanel, "Paint", "Paint", "InventoryBackground" )
 	
-	local slotsPerRow = 5
+	local slotsPerRow = 4
 	local containerWidth = 64 * slotsPerRow + ( slotsPerRow - 1 ) * 5 + 2 * 8
 	self.leftPanel:SetWide( containerWidth  )
 	self.leftPanel:DockPadding( 8, 8, 8, 8 )
@@ -42,10 +42,19 @@ function PANEL:Init( )
 			return 
 		end
 		self.invPanel:itemAdded( item )
+		
+		timer.Simple( 0, function( )
+			if item.icon and IsValid( item.icon ) then
+				item.icon:Select( )
+			end
+		end )
 	end )
 	hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId )
 		if inventory.id != LocalPlayer( ).PS2_Inventory.id then
 			return 
+		end
+		if self.descPanel.item.id == itemId then
+			self.descPanel:SelectionReset( )
 		end
 		self.invPanel:itemRemoved( itemId )
 	end )
@@ -98,7 +107,7 @@ function PANEL:Init( )
 	self.topContainer.Paint = function( ) end
 	
 	self.slotsScroll = vgui.Create( "DScrollPanel", self.topContainer )
-	self.slotsScroll.wantedWidth = 2 * 64 + 2 * 8
+	self.slotsScroll.wantedWidth = 3 * 64 + 3 * 8
 	self.slotsScroll:SetWide( self.slotsScroll.wantedWidth )
 	self.slotsScroll:DockMargin( 8, 0, 8, 0 )
 	self.slotsScroll:Dock( LEFT )
@@ -107,7 +116,7 @@ function PANEL:Init( )
 	
 	self.slotsLayout = vgui.Create( "DIconLayout", self.slotsScroll )
 	self.slotsLayout:Dock( FILL )
-	self.slotsLayout:DockMargin( 5, 5, 5, 5 )
+	self.slotsLayout:DockMargin( 7, 7, 7, 5 )
 	self.slotsLayout:SetSpaceX( 5 )
 	self.slotsLayout:SetSpaceY( 5 )
 	hook.Run( "PS2_PopulateSlots", self.slotsLayout )
@@ -138,6 +147,11 @@ function PANEL:Init( )
 			self.descPanel:Dock( TOP )
 		end
 		self.descPanel:SetItem( item, false )
+	end )
+	hook.Add( "PS2_SlotChanged", self, function( self, slot )
+		if not slot.Item then
+			self.descPanel:SelectionReset( )
+		end
 	end )
 end
 

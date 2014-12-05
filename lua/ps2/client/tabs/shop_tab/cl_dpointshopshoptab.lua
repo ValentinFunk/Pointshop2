@@ -40,14 +40,31 @@ function PANEL:OnTabChanged( newTab )
 	hook.Call( "PS2_ItemIconSelected" ) --Reset selection
 end
 
+local function anyItemValidForServer( category )
+	for k, v in pairs( category.items ) do
+		local itemClass = Pointshop2.GetItemClassByName( v )
+		if itemClass:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+			return true
+		end
+	end
+	
+	for k, subcat in pairs( category.subcategories ) do
+		if anyItemValidForServer( subcat ) then
+			return true
+		end
+	end
+end
+
 function PANEL:DoPopulate( )
 	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
-	for k, category in pairs( dataNode ) do 
-		local sp = vgui.Create("DScrollPanel")
-		local panel = vgui.Create( "DPointshopCategoryPanel", sp )
-		panel:Dock(FILL)
-		panel:SetCategory( category )
-		self:addMenuEntry( category.self.label, category.self.icon, sp )
+	for k, category in pairs( dataNode ) do
+		if anyItemValidForServer( category ) then
+			local sp = vgui.Create("DScrollPanel")
+			local panel = vgui.Create( "DPointshopCategoryPanel", sp )
+			panel:Dock(FILL)
+			panel:SetCategory( category )
+			self:addMenuEntry( category.self.label, category.self.icon, sp )
+		end
 	end
 end
 

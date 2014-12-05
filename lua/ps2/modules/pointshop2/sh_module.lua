@@ -66,6 +66,24 @@ MODULE.SettingButtons = {
 	}
 }
 
+--Resolve Servers that Pointshop 2 runs on to shared. Only transmit id and name
+--to avoid exposing the com secret
+MODULE.Resolve = function( )
+	return Pointshop2.Server.getAll( )
+	:Then( function( servers )
+		MODULE.Settings.Shared.InternalSettings.Servers = {
+			type = "table",
+			value = {}
+		}
+		for k, server in pairs( servers ) do
+			table.insert( MODULE.Settings.Shared.InternalSettings.Servers.value, {
+				id = server.id,
+				name = server.name
+			} )
+		end
+	end )
+end
+
 MODULE.Settings = {}
 MODULE.Settings.Shared = {
 	BasicSettings = {
@@ -77,15 +95,29 @@ MODULE.Settings.Shared = {
 			label = "Item sell repay ratio", 
 			value = 0.75
 		},
-		ServerId = {
-			tooltip = "Generated from the ip and hostname, if you switch hosts/ips save this and change it back on the new host.",
-			label = "Server Id",
-			value = util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) ),
+		AllowPremptsSale = {
+			value = false,
+			tooltip = "Allow players to sell items that can be bought using premium points.\n Disabled by default to avoid conversion of the currencies",
+			label = "Allow selling of premium items",
 		},
 		SendPointsEnabled = {
 			label = "Allow players to send points",
 			tooltip = "This can be used to disable the possibility to send points to other players",
 			value = true
+		},
+		LimitPACAccess = {
+			value = true,
+			label = "Limit PAC access",
+			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
+		},
+	}, 
+	InternalSettings = {
+		info = {
+			isManualSetting = true,
+		},
+		-- Server's unique id, fetched from the database
+		ServerId = {
+			value = -1,
 		},
 	}
 }
@@ -108,10 +140,20 @@ MODULE.Settings.Server = {
 			label = "Starting donator points",
 			value = 1000
 		},
-		LimitPACAccess = {
+	},
+	AdvancedSettings = {
+		info = {
+			label = "Technical Settings"
+		},
+		ShouldBlock = {
 			value = true,
-			label = "Limit PAC access",
-			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
+			label = "Blocking Transactions", 
+			tooltip = "When turned on trades some performance for safety against data loss on gmod or sql server crashes"
+		},
+		BroadcastWallets = {
+			value = false,
+			label = "Broadcast Wallets",
+			tooltip = "Causes pointshop 2 to network all wallets across the server. This makes it possible to show points on the scoreboard"
 		}
 	},
 	GUISettings = {

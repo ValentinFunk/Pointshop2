@@ -133,7 +133,10 @@ end
 function Pointshop2View:receiveSlots( slots )
 	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
 	for k, v in pairs( slots ) do
-		LocalPlayer().PS2_Slots[v.slotName] = v.Item
+		if v.Item then
+			LocalPlayer().PS2_Slots[v.slotName] = v.Item
+			KInventory.Items[v.Item.id] = v.Item
+		end
 		hook.Run( "PS2_SlotChanged", v )
 	end
 
@@ -141,7 +144,18 @@ function Pointshop2View:receiveSlots( slots )
 end
 
 function Pointshop2View:slotChanged( slot )
-	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item
+	if not slot.Item and LocalPlayer().PS2_Slots[slot.slotName] then
+		--hack: keep reference around for a bit
+		local item = LocalPlayer().PS2_Slots[slot.slotName]
+		timer.Simple( 10, function( )
+			local x = "the item " .. item.id .. "was removed"
+			hook.Call( ".......nothing.", {}, x )
+		end )
+		--end hacky solution
+
+	end
+	
+	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item and KInventory.ITEMS[slot.Item.id]
 	hook.Run( "PS2_SlotChanged", slot )
 end
 
@@ -200,7 +214,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		else
 			local function findAndAddToParent( tree, parentId, subcategory )
 				if tree.self.id ==  parentId then
-					tree.subcategories[newCategory.self.id] = subcategory
+					table.insert(tree.subcategories, subcategory)
 					return true
 				end
 
@@ -218,13 +232,6 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		end
 	end
 	self.categoryItemsTable = categoryItemsTable
-	
-	local function sortCategories( cat )
-		table.sort( self.categoryItemsTable, function( a, b )
-			return a.self.id < b.self.id
-		end )
-	end
-	sortCategories( cat )
 	
 	--Hacky, dunno why this is needed
 	hook.Call( "PS2_DynamicItemsUpdated" )
@@ -327,11 +334,16 @@ Pointshop2.ITEMS = {}
 setmetatable( Pointshop2.ITEMS, { __mode = 'v' } ) --weak reference holder
 
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
+	if item:GetOwner( ) == LocalPlayer( ) then
+		if KInventory.ITEMS[item.id] then
+			item = KInventory.ITEMS[item.id]
+		end
+	end
+
 	isRetry = isRetry or 0
 	
 	local ply 
 	for k, v in pairs( player.GetAll( ) ) do
-		print( "eq", v:GetNWInt( "KPlayerId" ), tonumber( kPlayerId ), tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) )
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
 			ply = v
 		end
@@ -473,4 +485,28 @@ end
 
 function Pointshop2View:installDefaults( )
 	self:controllerAction( "installDefaults" )
+end
+
+function Pointshop2View:installDlcPack( name )
+	self:controllerAction( "installDlcPack", name )
+end
+
+function Pointshop2View:getServers( )
+	return self:controllerTransaction( "adminGetServers" )
+end
+
+function Pointshop2View:migrateServer( server )
+	return self:controllerTransaction( "migrateServer", server.id )
+end
+
+function Pointshop2View:removeServer( server )
+	return self:controllerTransaction( "removeServer", server.id )
+end
+
+function Pointshop2View:updateServerRestrictions( itemClassNames, serverIds )
+	self:controllerAction( "updateServerRestrictions", itemClassNames, serverIds )
+end
+
+function Pointshop2View:requestMaterials( directory )
+	return self:controllerTransaction( "requestMaterials", directory )
 end

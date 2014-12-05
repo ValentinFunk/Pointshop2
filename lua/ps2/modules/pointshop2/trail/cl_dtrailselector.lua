@@ -15,7 +15,8 @@ function PANEL:Init( )
 	self.layout:DockMargin( 0, 2, 0, 5 )
 	self.layout:SetWide( 25 + 64*8+63*4 )
 	
-	Pointshop2.RequestServerTrails( function( files )
+	Pointshop2View:getInstance( ):requestMaterials( "trails" )
+	:Then( function( files )
 		self:SetTrails( files )
 	end )
 end
@@ -68,4 +69,4 @@ function PANEL:OnChange( )
 	--for overwriting
 end
 
-vgui.Register( "DMaterialSelector", PANEL, "DFrame" )
+vgui.Register( "DTrailSelector", PANEL, "DFrame" )

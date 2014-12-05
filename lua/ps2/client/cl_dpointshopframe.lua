@@ -2,7 +2,7 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	self:SetSize( 1024, 768 )
+	self:SetSize( math.min( ScrW() - 10, 1024 ), math.min( ScrH( ) - 10, 768 ) )
 	
 	self.topBar = vgui.Create( "DPanel", self )
 	self.topBar:Dock( TOP )

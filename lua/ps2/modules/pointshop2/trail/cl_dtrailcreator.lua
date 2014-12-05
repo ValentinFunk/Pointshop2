@@ -17,7 +17,7 @@ function PANEL:Init( )
 	local frame = self
 	function self.materialPanel:OnMousePressed( )
 		--Open model selector
-		local window = vgui.Create( "DMaterialSelector" )
+		local window = vgui.Create( "DTrailSelector" )
 		window:Center( )
 		window:MakePopup( )
 		function window:OnChange( )

@@ -1,10 +1,14 @@
-function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
-	local itemClass = Pointshop2.GetItemClassByName( itemClass )
+function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
+	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	if not itemClass then
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, item " .. itemClass .. " isn't valid" ) 
 		return
 	end
 	local price = itemClass:GetBuyPrice( ply )
+	if not price then
+		KLogf( 3, "Player %s tried to buy item %s which cannot be bought! Hacking Attempt?", ply:Nick(), itemClass )
+		return	
+	end
 	
 	if #ply.PS2_Inventory:getItems( ) >= ply.PS2_Inventory.numSlots then
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, your inventory is full!" ) 
@@ -36,16 +40,12 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 	
 	ply.PS2_Wallet:save( )
 	:Then( function( )
-		local item = itemClass:new( )
-		return item:save( )
-	end )
-	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
-		return ply.PS2_Inventory:addItem( item )
-		:Then( function( )
-			item:OnPurchased( ply )
-			self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
-		end )
+		return self:easyAddItem( ply, itemClassName, {
+			time = os.time(),
+			amount = price[currencyType],
+			currency = currencyType, 
+			origin = "SHOP"
+		} )
 	end )
 	:Then( function( )
 		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
@@ -59,6 +59,32 @@ function Pointshop2Controller:buyItem( ply, itemClass, currencyType )
 		LibK.SetBlocking( false )
 		
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your purchase was not carried out." )
+	end )
+end
+
+function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, suppressNotify )
+	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+	return Promise.Resolve()
+	:Then( function( )
+		local item = itemClass:new( )
+		item.purchaseData = purchaseData or {
+			time = os.time(),
+			amount = price[currencyType],
+			currency = currencyType,
+			origin = "LUA"
+		}
+		return item:save( )
+	end )
+	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
+		return ply.PS2_Inventory:addItem( item )
+		:Then( function( )
+			item:OnPurchased( )
+			if not suppressNotify then
+				self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
+			end
+			return item
+		end )
 	end )
 end
 
@@ -78,7 +104,12 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	local item = KInventory.ITEMS[itemId]
 	if not item then
 		KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), itemId )
-		return
+		return Promise.Reject( 0, "Invalid Data" )
+	end
+	
+	if not item:CanBeSold( ) then 
+		KLogf( 3, "[WARN] Player %s tried to sell not sellable item %i", ply:Nick( ), itemId )
+		return Promise.Reject( 0, "Invalid Data" )
 	end
 	
 	if not Pointshop2.PlayerOwnsItem( ply, item ) then
@@ -103,9 +134,10 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 	
 	def:Then( function( )
-		item:OnHolster( ply )
-		item:OnSold( ply )
-		ply.PS2_Wallet.points = ply.PS2_Wallet.points + item:GetSellPrice( ply )
+		item:OnHolster( )
+		item:OnSold( )
+		local amount, currencyType = item:GetSellPrice( )
+		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] + amount
 		return ply.PS2_Wallet:save( )
 	end )
 	:Then( function( ) 
@@ -114,7 +146,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end )
 	:Then( function( )
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
-		hook.Run( "PS2_SoldItem", ply, itemClass )
+		hook.Run( "PS2_SoldItem", ply )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
@@ -129,6 +161,33 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end )
 	
 	return transactionDef:Promise( )
+end
+
+--Remove Item, clear inventory references etc.
+function Pointshop2Controller:removeItemFromPlayer( ply, item )
+	local slot
+	for k, v in pairs( ply.PS2_Slots ) do
+		if v.itemId == item.id then
+			slot = v
+		end
+	end
+	
+	return Promise.Resolve( )
+	:Then( function( )
+		if ply.PS2_Inventory:containsItem( item ) then
+			return ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
+		elseif slot then
+			return slot:removeItem( item ):Then( function( )
+				self:startView( "Pointshop2View", "slotChanged", ply, slot )
+			end )
+		end
+	end )
+	:Then( function( )
+		item:OnHolster( )
+		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
+		KInventory.ITEMS[item.id] = nil
+		return item:remove( ) --remove the actual db entry
+	end )
 end
 
 function Pointshop2Controller:unequipItem( ply, slotName )
@@ -268,13 +327,15 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		--Delay to next frame to clear stack
 		timer.Simple( 0, function( )
-			item:OnEquip(  )
+			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+				item:OnEquip(  )
+				hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
+				self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
+			end
 		end )
 		
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
-		self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 	end )
@@ -283,5 +344,30 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		LibK.SetBlocking( false )
+	end )
+end
+
+Pointshop2.DlcPacks = {}
+
+function Pointshop2.RegisterDlcPack( name, items, categories )
+	Pointshop2.DlcPacks[name] = { items = items, categories = categories }
+end
+
+function Pointshop2Controller:installDlcPack( ply, name )
+	local pack = Pointshop2.DlcPacks[name]
+	if not pack then
+		KLogf( 2, "Trying to install invalid DLC pack " .. name .. "!" )
+		return
+	end
+	
+	Promise.Resolve( )
+	:Then( function( )
+		return self:importItems( pack.items )
+	end )
+	:Then( function( )
+		return self:importCategoryOrganization( pack.categories )
+	end )
+	:Done( function( )
+		return self:moduleItemsChanged( )
 	end )
 end

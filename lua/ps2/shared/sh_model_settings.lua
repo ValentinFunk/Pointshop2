@@ -8,7 +8,8 @@ StoredSetting.static.model = {
 	fields = {
 		plugin = "string",
 		path = "string",
-		value = "json"
+		value = "json",
+		serverId = "optKey"
 	}
 }
 

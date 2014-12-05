@@ -30,7 +30,6 @@ Inventory:include( DatabaseModel )
 function Inventory:postLoad( )
 	local def = Deferred( )
 	
-	print( "Inventory", self.id, "postLoad" )
 	KInventory.INVENTORIES[self.id] = self
 	
 	def:Resolve( )

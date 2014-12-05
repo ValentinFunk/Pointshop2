@@ -85,6 +85,8 @@ function PANEL:OnModified( )
 end
 
 function PANEL:savePositions( )
+	self.fname = "itempositions_" .. Pointshop2.CalculateServerHash( ) .. self.categoryName .. ".txt"
+	
 	self.itemPositions = {}
 	for pos, slot in ipairs( self:GetChildren( ) ) do
 		if slot.itemStack and slot.itemStack.items then
@@ -93,7 +95,7 @@ function PANEL:savePositions( )
 			end
 		end
 	end
-	file.Write( "itempositions_" .. Pointshop2.GetCurrentServerId( ) .. self.categoryName .. ".txt", util.TableToJSON( self.itemPositions ) )
+	file.Write( self.fname, util.TableToJSON( self.itemPositions ) )
 end
 
 /*
@@ -101,9 +103,11 @@ end
 	saved text file
 */
 function PANEL:loadItems( dontSave )
+	self.fname = "itempositions_" .. Pointshop2.CalculateServerHash( ) .. self.categoryName .. ".txt"
+	
 	self.itemPositions = {}
-	if file.Exists( "itempositions_" .. self.categoryName .. ".txt", "DATA" ) then
-		self.itemPositions = util.JSONToTable( file.Read( "itempositions_" .. self.categoryName .. ".txt", "DATA" ) or "[]" )
+	if file.Exists( self.fname, "DATA" ) then
+		self.itemPositions = util.JSONToTable( file.Read( self.fname, "DATA" ) or "[]" )
 	end
 	
 	--Step 1: Add items with saved positions
@@ -155,7 +159,6 @@ function PANEL:itemRemoved( itemId )
 end
 
 function PANEL:itemAdded( item ) 
-	print( "itemAdded", self )
 	if not table.HasValue( self.itemsTbl, item ) then
 		table.insert( self.itemsTbl, item )
 	end

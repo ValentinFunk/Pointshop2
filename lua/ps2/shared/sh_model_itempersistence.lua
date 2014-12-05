@@ -14,6 +14,7 @@ ItemPersistence.static.model = {
 		description = "text",
 		createdAt = "createdTime",
 		updatedAt = "updatedTime",
+		servers = "luadata"
 	}
 }
 

@@ -30,6 +30,30 @@ local function genericDelete( panels )
 	btn:SetImage( "pointshop2/cross66.png" )
 	btn.m_Image:SetSize( 16, 16 )
 	
+	local btn = menu:AddOption( "Restrict Server", function( )
+		local frame = vgui.Create( "DSelectServers" )
+		frame:MakePopup( )
+		frame:Center( )
+		function frame.OnSave( )
+			local itemClassNames = {}
+			for k, v in pairs( panels ) do
+				local itemClass = v:GetItemClass( )
+				
+				local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
+				if persistence == "STATIC" then
+					Derma_Message( "The Item " .. itemClass.PrintName .. " is Lua defined and cannot be modified ingame. To modify it edit " .. itemClass.originFilePath, "Info" )
+					continue
+				end
+
+				table.insert( itemClassNames, itemClass.className )
+			end
+			local validServers = frame:GetSelectedIds( )
+			Pointshop2View:getInstance( ):updateServerRestrictions( itemClassNames, validServers )
+		end
+	end )
+	btn:SetImage( "pointshop2/rack1.png" )
+	btn.m_Image:SetSize( 16, 16 )
+	
 	menu:Open( )
 end
 hook.Add( "PS2_MultiItemSelectOpenMenu", "AddDeleteMenu", function( panels )
@@ -78,6 +102,19 @@ local function addEditMenu( panel, itemClass )
 			)
 		end )
 		btn:SetImage( "pointshop2/cross66.png" )
+		btn.m_Image:SetSize( 16, 16 )
+		
+		local btn = menu:AddOption( "Restrict Server", function( )
+			local frame = vgui.Create( "DSelectServers" )
+			frame:MakePopup( )
+			frame:Center( )
+			frame:SetSelectedServers( itemClass.Servers or {} )
+			function frame.OnSave( )
+				local validServers = frame:GetSelectedIds( )
+				Pointshop2View:getInstance( ):updateServerRestrictions( { itemClass.className }, validServers )
+			end
+		end )
+		btn:SetImage( "pointshop2/rack1.png" )
 		btn.m_Image:SetSize( 16, 16 )
 		
 		menu:Open( )
@@ -305,7 +342,6 @@ hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
 		table.insert( tbl, nodeInTable )
 	end
 	for k, v in ipairs( categoriesNode.ChildNodes:GetChildren( ) ) do
-		print( v:GetText( ) )
 		recursiveAddCategory( v, categoriesWithItems )
 	end
 	
