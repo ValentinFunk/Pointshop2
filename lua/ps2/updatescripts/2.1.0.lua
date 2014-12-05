@@ -42,8 +42,9 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 			end )
 		end
 	end )
-	:Then( function( doUpdate )
-		if doUpdate then
+	:Then( function( skipUpdate )
+		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", skipUpdate and "do not need" or "need" )
+		if not skipUpdate then
 			return WhenAllFinished{ addSettingsField(), addServersField() }
 			:Fail( function( errid, err )
 				KLogf( 3, "[WARN] Error during update: %i, %s. Ignore this if you run multiple servers on a single database.", errid, err )
@@ -57,7 +58,7 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 		def:Resolve( )
 	end )
 	:Fail( function( errid, err )
-		KLogf( 3, "[WARN] Error during update: %i, %s. Ignore this if you run multiple servers on a single database.", errid, err )
+		KLogf( 2, "[ERROR] Error during update: %i, %s.", errid, err )
 		def:Reject( errid, err )
 	end )
 end )
