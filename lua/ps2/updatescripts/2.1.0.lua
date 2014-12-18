@@ -32,19 +32,19 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 		if DB.CONNECTED_TO_MYSQL then
 			return DB.DoQuery( "SHOW TABLES LIKE 'ps2_itempersistence'" )
 			:Then( function( exists )
-				return not exists
+				return exists
 			end )
 		else
 			return DB.DoQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ps2_itempersistence'" )
 			:Then( function( result )
 				local exists = result and result[1] and result[1].name
-				return not exists
+				return exists
 			end )
 		end
 	end )
-	:Then( function( skipUpdate )
-		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", skipUpdate and "do not need" or "need" )
-		if not skipUpdate then
+	:Then( function( shouldUpdate )
+		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", shouldUpdate and "need" or "not need" )
+		if shouldUpdate then
 			return WhenAllFinished{ addSettingsField(), addServersField() }
 			:Fail( function( errid, err )
 				KLogf( 3, "[WARN] Error during update: %i, %s. Ignore this if you run multiple servers on a single database.", errid, err )
