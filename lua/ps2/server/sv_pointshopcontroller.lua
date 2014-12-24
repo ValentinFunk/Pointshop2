@@ -75,7 +75,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 			def:Reject( 1, "Permission Denied" )
 		end
 	elseif action =="adminGetServers" then
-		if PermissionInterface.query( "pointshop2 manageservers" ) then
+		if PermissionInterface.query( ply, "pointshop2 manageservers" ) then
 			def:Resolve( )
 		else
 			def:Reject( 1, "Permission Denied" )
