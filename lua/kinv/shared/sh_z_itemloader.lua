@@ -90,11 +90,16 @@ local function includeFolder( folder )
 	end
 end
 
-hook.Add( "Initialize", "LoadItems", function( )
+local function loadItems( )
 	includeFolder( "kinv/items" )
 	hook.Run( "KInv_ItemsLoaded" )
+end
+
+WhenAllFinished{ LibK.WhenAddonsLoaded{ "Pointshop2" }, LibK.InitPostEntityPromise }
+:Done( function()
+	loadItems( )
 end )
+
 hook.Add( "OnReloaded", "LoadItems", function( )
-	includeFolder( "kinv/items" )
-	hook.Run( "KInv_ItemsLoaded" )
+	loadItems( )
 end )
