@@ -1,7 +1,7 @@
 Pointshop2 = KInventory --mean hack to share databases, Pointshop2 = {}
 
 --[[
-	Pointshop2 Main file, last modifed on 06.07.2014, Revision {{ user_id|133713371337 }}
+	Pointshop2 Main file, last modifed on 06.07.2014, Revision {{ user_id }}
 --]]
 
 --Find all registered items that use the pointshop base
