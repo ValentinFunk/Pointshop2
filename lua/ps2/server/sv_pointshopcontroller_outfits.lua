@@ -35,6 +35,13 @@ hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestOutfits", function( ply )
 		Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
 	end )
 end )
+hook.Add( "OnReloaded", "InitialRequestOutfitsR", function( )
+	for k, ply in pairs( player.GetAll( ) ) do
+		timer.Simple( 1, function( )
+			Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
+		end )
+	end
+end )
 
 --Player notifies us that he has loaded and decoded all PAC outfits
 function Pointshop2Controller:outfitsReceived( ply )

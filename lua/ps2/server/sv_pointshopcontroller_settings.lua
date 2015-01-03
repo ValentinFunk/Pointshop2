@@ -47,6 +47,13 @@ hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestSettings", function( ply )
 		Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )
 	end )
 end )
+hook.Add( "OnReloaded", "InitialRequestSettingsR", function( )
+	for k, ply in pairs( player.GetAll( ) ) do
+		timer.Simple( 1, function( )
+			Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )
+		end )
+	end
+end )
 
 GLib.Transfers.RegisterHandler( "Pointshop2.Settings", GLib.NullCallback )
 GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, data )

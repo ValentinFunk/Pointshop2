@@ -101,5 +101,11 @@ WhenAllFinished{ LibK.WhenAddonsLoaded{ "Pointshop2" }, LibK.InitPostEntityPromi
 end )
 
 hook.Add( "OnReloaded", "LoadItems", function( )
-	loadItems( )
+	if SERVER then
+		if Pointshop2.ItemsLoadedPromise._promise._state == "pending" then
+			loadItems( )
+		end
+	else
+		loadItems( )
+	end
 end )
