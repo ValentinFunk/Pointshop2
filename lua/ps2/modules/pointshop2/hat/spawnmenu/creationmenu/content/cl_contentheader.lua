@@ -1,6 +1,4 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
-
-surface.CreateFont( "ContentHeader",
+surface.CreateFont( "PS2ContentHeader",
 {
 	font		= "Helvetica",
 	size		= 50,
@@ -16,7 +14,7 @@ local PANEL = {}
 
 function PANEL:Init()
 
-	self:SetFont( "ContentHeader" )
+	self:SetFont( "PS2ContentHeader" )
 	self:SetBright( true )
 	self:SetExpensiveShadow( 2, Color( 0, 0, 0, 130 ) )
 	
@@ -46,7 +44,7 @@ end
 
 function PANEL:Copy()
 
-	local copy = vgui.Create( "ContentHeader", self:GetParent() )
+	local copy = vgui.Create( "PS2ContentHeader", self:GetParent() )
 	copy:SetText( self:GetText() )
 	copy:CopyBounds( self )
 	
@@ -75,14 +73,14 @@ function PANEL:OpenMenu()
 	menu:Open()
 end
 
-vgui.Register( "ContentHeader", PANEL, "DLabelEditable" )
+vgui.Register( "PS2ContentHeader", PANEL, "DLabelEditable" )
 
 
 spawnmenu.AddContentType( "header", function( container, obj )
 
 	if ( !obj.text || type(obj.text) != "string" ) then return end
 
-	local label = vgui.Create( "ContentHeader", container )
+	local label = vgui.Create( "PS2ContentHeader", container )
 	label:SetText( obj.text )
 	
 	container:Add( label )

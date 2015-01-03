@@ -1,11 +1,11 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
+if gmod.GetGamemode( ).IsSandboxDerived then return end
 
 AddCSLuaFile()
 
 local PANEL = {}
 
-local matOverlay_Normal = Material( "gui/ContentIcon-normal.png" )
-local matOverlay_Hovered = Material( "gui/ContentIcon-hovered.png" )
+local matOverlay_Normal = Material( "gui/PS2ContentIcon-normal.png" )
+local matOverlay_Hovered = Material( "gui/PS2ContentIcon-hovered.png" )
 local matOverlay_AdminOnly = Material( "icon16/shield.png" )
 
 AccessorFunc( PANEL, "m_Color", 			"Color" )
@@ -161,7 +161,7 @@ end
 
 function PANEL:Copy()
 
-	local copy = vgui.Create( "ContentIcon", self:GetParent() )
+	local copy = vgui.Create( "PS2ContentIcon", self:GetParent() )
 
 	copy:SetContentType( self:GetContentType() )
 	copy:SetSpawnName( self:GetSpawnName() )
@@ -177,7 +177,7 @@ function PANEL:Copy()
 
 end
 
-vgui.Register( "ContentIcon", PANEL, "DButton" )
+vgui.Register( "PS2ContentIcon", PANEL, "DButton" )
 
 
 spawnmenu.AddContentType( "entity", function( container, obj )
@@ -186,7 +186,7 @@ spawnmenu.AddContentType( "entity", function( container, obj )
 	if ( !obj.nicename ) then return end
 	if ( !obj.spawnname ) then return end
 	
-	local icon = vgui.Create( "ContentIcon", container )
+	local icon = vgui.Create( "PS2ContentIcon", container )
 		icon:SetContentType( "entity" )
 		icon:SetSpawnName( obj.spawnname )
 		icon:SetName( obj.nicename )
@@ -222,7 +222,7 @@ spawnmenu.AddContentType( "vehicle", function( container, obj )
 	if ( !obj.nicename ) then return end
 	if ( !obj.spawnname ) then return end
 	
-	local icon = vgui.Create( "ContentIcon", container )
+	local icon = vgui.Create( "PS2ContentIcon", container )
 		icon:SetContentType( "vehicle" )
 		icon:SetSpawnName( obj.spawnname )
 		icon:SetName( obj.nicename )
@@ -262,7 +262,7 @@ spawnmenu.AddContentType( "npc", function( container, obj )
 
 	if ( !obj.weapon ) then obj.weapon = { "" } end
 	
-	local icon = vgui.Create( "ContentIcon", container )
+	local icon = vgui.Create( "PS2ContentIcon", container )
 		icon:SetContentType( "npc" )
 		icon:SetSpawnName( obj.spawnname )
 		icon:SetName( obj.nicename )
@@ -311,7 +311,7 @@ spawnmenu.AddContentType( "weapon", function( container, obj )
 	if ( !obj.nicename ) then return end
 	if ( !obj.spawnname ) then return end
 	
-	local icon = vgui.Create( "ContentIcon", container )
+	local icon = vgui.Create( "PS2ContentIcon", container )
 		icon:SetContentType( "weapon" )
 		icon:SetSpawnName( obj.spawnname )
 		icon:SetName( obj.nicename )

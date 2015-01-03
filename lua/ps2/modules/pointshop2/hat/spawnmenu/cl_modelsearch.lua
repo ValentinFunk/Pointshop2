@@ -49,7 +49,7 @@ search.AddProvider( function( str )
 			{
 				text = v:GetFileFromFilename(),
 				func = function() RunConsoleCommand( "gm_spawn", v ) end,
-				icon = spawnmenu.CreateContentIcon( "model", Pointshop2.SpawnMenu.SearchPropPanel, { model = v } ),
+				icon = spawnmenu.CreatePS2ContentIcon( "model", Pointshop2.SpawnMenu.SearchPropPanel, { model = v } ),
 				words = { v }
 			}
 			
