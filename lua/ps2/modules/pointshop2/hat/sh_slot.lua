@@ -1,6 +1,6 @@
 Pointshop2.ValidHatSlots = { }
 
-local function addHatSlot( name )
+function Pointshop2.AddHatSlot( name )
 	Pointshop2.AddEquipmentSlot( name, function( item )
 		local isHat = instanceOf( Pointshop2.GetItemClassByName( "base_hat" ), item )
 		
@@ -28,6 +28,6 @@ local function addHatSlot( name )
 	table.insert( Pointshop2.ValidHatSlots, name )
 end
 
-addHatSlot( "Hat" )
-addHatSlot( "Accessory" )
-addHatSlot( "Accessory 2" )
+Pointshop2.AddHatSlot( "Hat" )
+Pointshop2.AddHatSlot( "Accessory" )
+Pointshop2.AddHatSlot( "Accessory 2" )
