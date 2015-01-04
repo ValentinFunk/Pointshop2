@@ -3,7 +3,7 @@ LibK.InitializeAddon{
     author = "Kamshak",                   --Name of the author
     luaroot = "ps2",                      --Folder that contains the client/shared/server structure relative to the lua folder,
 	loadAfterGamemode = false,
-	version = "2.1.2",
+	version = "2.1.3",
 	requires = { "KInventory" }	
 }
 
