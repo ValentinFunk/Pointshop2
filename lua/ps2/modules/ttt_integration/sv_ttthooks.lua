@@ -18,19 +18,44 @@ local function applyDelayedRewards( )
 	delayedRewards = {}
 end
 
+local playersInRound = {}
+hook.Add( "TTTBeginRound", "PS2_TTTBeginRound", function( )
+	for k, v in pairs( player.GetAll( ) ) do
+		if not v:IsSpec( ) then
+			playersInRound[k] = v
+		end
+	end
+end )
+
 hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 	applyDelayedRewards( )
 	
+	local prevRoles = {
+		[ROLE_INNOCENT] = {},
+		[ROLE_TRAITOR] = {},
+		[ROLE_DETECTIVE] = {}
+	};
+
+	if not GAMEMODE.LastRole then GAMEMODE.LastRole = {} end
+	
 	if result == WIN_INNOCENT then
 		for k, v in pairs( player.GetAll( ) ) do
+			if not table.HasValue( playersInRound, v ) then
+				continue
+			end
+			
 			if v:IsTraitor( ) then
 				continue
 			end
+			
+			if v:IsSpec( ) then
+				continue
+			end
 		
-			if ( v:GetCleanRound( ) and not v:IsSpec() ) and S("RoundWin.CleanRound") then
+			if v:GetCleanRound( ) and S("RoundWin.CleanRound") then
 				v:PS2_AddStandardPoints( S("RoundWin.CleanRound"), "Clean round bonus", true )
 			end
-			if ( v:Alive( ) and not v:IsSpec( ) ) and not ( v.IsGhost and v:IsGhost() ) and S("RoundWin.InnocentAlive") then
+			if v:Alive( ) and not ( v.IsGhost and v:IsGhost() ) and S("RoundWin.InnocentAlive") then
 				v:PS2_AddStandardPoints( S("RoundWin.InnocentAlive"), "Alive bonus", true )
 			end
 			if S("RoundWin.Innocent") then
@@ -52,16 +77,14 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 			end
 		end
 	end
+	playersInRound = {}
 end )
 
 hook.Add( "TTTFoundDNA", "PS2_TTTFoundDNA", function( ply, dnaOwner, ent )
-	local trackBodies = {}
-	
-	if S("Detective.DnaFound") and !trackBodies[dnaOwner] then
+	ply.hasDnaOn = ply.hasDnaOn or {}	
+	if S("Detective.DnaFound") and not ply.hasDnaOn[dnaOwner] then
 		ply:PS2_AddStandardPoints( S("Detective.DnaFound"), "Retrieved DNA", true )
 	end
-	ply.hasDnaOn = ply.hasDnaOn or {}	
-	trackBodies[dnaOwner] = true 
 	ply.hasDnaOn[dnaOwner] = true
 end )
 
