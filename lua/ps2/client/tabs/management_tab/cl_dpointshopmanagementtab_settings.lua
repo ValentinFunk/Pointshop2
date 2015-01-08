@@ -9,21 +9,28 @@ function PANEL:Init( )
 	self.loadingNotifier = vgui.Create( "DLoadingNotifier", self )
 	self.loadingNotifier:Dock( TOP )
 	
+	local scroll = vgui.Create( "DScrollPanel", self )
+	scroll:Dock( FILL )
+	
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
 	self:DockPadding( 5, 0, 5, 5 )
 	
-	local label = vgui.Create( "DLabel", self )
+	local label = vgui.Create( "DLabel", scroll )
 	label:SetText( "Select a section to configure" )
 	label:SetColor( color_white )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
 	
-	self.panels = vgui.Create( "DPanel", self )
-	self.panels.Paint = function( a, w, h )  end
-	self.panels:Dock( FILL )
-	
+	self.panels = vgui.Create( "DPanel", scroll )
+	self.panels.Paint = function( a, w, h ) 
+	end
+	function self.panels:PerformLayout( )
+		self:SizeToChildren( false, true )
+	end
+	self.panels:Dock( TOP )
+
 	for k, mod in pairs( Pointshop2.Modules) do
 		if not mod.SettingButtons or #mod.SettingButtons == 0 then
 			continue
@@ -72,6 +79,10 @@ function PANEL:Init( )
 end
 
 function PANEL:Paint( )
+end
+
+function PANEL:PerformLayout( )
+	
 end
 
 derma.DefineControl( "DPointshopManagementTab_Settings", "", PANEL, "DPanel" )
