@@ -1,4 +1,4 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
+if gmod.GetGamemode( ).IsSandboxDerived then return end
 
 local pnlSearch = vgui.RegisterFile( "cl_contentsearch.lua" )
 
@@ -9,7 +9,7 @@ function PANEL:Init()
 	
 	self.Tree = vgui.Create( "DTree", self );
 	self.Tree:SetClickOnDragHover( true );
-	self.Tree.OnNodeSelected = function( Tree, Node ) hook.Call( "ContentSidebarSelection", GAMEMODE, self:GetParent(), Node ) end
+	self.Tree.OnNodeSelected = function( Tree, Node ) hook.Call( "PS2ContentSidebarSelection", GAMEMODE, self:GetParent(), Node ) end
 	self.Tree:Dock( FILL )
 	self.Tree:SetBackgroundColor( Color( 240, 240, 240, 255 ) )
 	
@@ -22,7 +22,7 @@ function PANEL:EnableModify()
 	self.Search = vgui.CreateFromTable( pnlSearch, self )
 	self:CreateSaveNotification()
 
-	self.Toolbox = vgui.Create( "ContentSidebarToolbox", self )
+	self.Toolbox = vgui.Create( "PS2PS2ContentSidebarToolbox", self )
 
 	hook.Add( "OpenToolbox", "OpenToolbox", function()
 		
@@ -62,4 +62,4 @@ function PANEL:CreateSaveNotification()
 
 end
 
-vgui.Register( "ContentSidebar", PANEL, "DPanel" )
+vgui.Register( "PS2ContentSidebar", PANEL, "DPanel" )

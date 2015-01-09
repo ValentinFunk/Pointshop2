@@ -1,4 +1,4 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
+if gmod.GetGamemode( ).IsSandboxDerived then return end
 
 local PANEL = PANEL or {}
 
@@ -82,7 +82,7 @@ function PANEL:RefreshResults()
 
 	local results = search.GetResults( self.Search:GetText() )
 
-	local Header = self:Add( "ContentHeader" )
+	local Header = self:Add( "PS2ContentHeader" )
 		Header:SetText( #results .. " Results for \""..self.Search:GetText().."\"" )
 		self.PropPanel:Add( Header )
 

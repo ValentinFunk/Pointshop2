@@ -11,7 +11,7 @@ function PANEL:Init()
 	
 	self.CategoryTable = {}	
 	
-	self.ContentNavBar = vgui.Create( "ContentSidebar", self );
+	self.ContentNavBar = vgui.Create( "PS2ContentSidebar", self );
 	self.ContentNavBar:Dock( LEFT );
 	self.ContentNavBar:SetSize( 190, 10 );
 	self.ContentNavBar:DockMargin( 0, 0, 4, 0 )

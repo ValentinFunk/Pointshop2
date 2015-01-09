@@ -16,6 +16,9 @@ function Pointshop2.InitPromises( )
 	Pointshop2.ItemsLoadedPromise:Done( function( )
 		KLogf( 4, "[Pointshop2] All Items were loaded by KInv" )
 	end )
+	Pointshop2.ItemsLoadedPromise:Fail( function( )
+		debug.Trace( )
+	end )
 	hook.Add( "KInv_ItemsLoaded", "ResolveDeferred", function( )
 		Pointshop2.ItemsLoadedPromise:Resolve( ) --Trigger ready for all listeners
 	end )
@@ -563,7 +566,7 @@ function Pointshop2Controller:addToPlayerWallet( ply, currencyType, addition )
 		return def:Promise( )
 	end
 	
-	self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
+	return self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
 	:Done( function( wallet )
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
 	end )

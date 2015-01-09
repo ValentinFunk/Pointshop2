@@ -1,4 +1,4 @@
-if engine.ActiveGamemode( ) == "sandbox" then return end
+if gmod.GetGamemode( ).IsSandboxDerived then return end
 
 local PANEL = {}
 
@@ -24,7 +24,7 @@ function PANEL:Init()
 
 	Button.OnDrop =	function( self, target )
 
-						local label = vgui.Create( "ContentHeader", target )
+						local label = vgui.Create( "PS2ContentHeader", target )
 						return label
 		
 					end
@@ -42,7 +42,7 @@ function PANEL:Init()
 	--
 	-- If we select a node from the sidebar, update the text/icon/actions in the toolbox (at the bottom)
 	--
-	hook.Add( "ContentSidebarSelection", "SidebarToolboxSelection", function( pnlContent, node )
+	hook.Add( "PS2ContentSidebarSelection", "SidebarToolboxSelection", function( pnlContent, node )
 		
 		label:SetText( node:GetText() )
 		icons:SelectIcon( node:GetIcon() )
@@ -64,4 +64,4 @@ end
 
 
 
-vgui.Register( "ContentSidebarToolbox", PANEL, "DDrawer" )
+vgui.Register( "PS2PS2ContentSidebarToolbox", PANEL, "DDrawer" )

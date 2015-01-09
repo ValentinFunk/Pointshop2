@@ -3,21 +3,33 @@ local PANEL = {}
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
-	self:DockPadding( 10, 0, 10, 10 )
+	local scroll = vgui.Create( "DScrollPanel", self )
+	scroll:Dock( FILL )
+	scroll:GetCanvas( ):DockPadding( 0, 0, 5, 5 )
 	
-	local label = vgui.Create( "DLabel", self )
+	self:DockPadding( 5, 5, 5, 5 )
+	
+	local label = vgui.Create( "DLabel", scroll:GetCanvas( ) )
 	label:SetText( "Select an item type" )
 	label:SetColor( color_white )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
 	
+	self.panels = vgui.Create( "DPanel", scroll:GetCanvas( ) )
+	self.panels.Paint = function( a, w, h ) 
+	end
+	function self.panels:PerformLayout( )
+		self:SizeToChildren( false, true )
+	end
+	self.panels:Dock( TOP )
+
 	for k, mod in pairs( Pointshop2.Modules ) do
 		if not mod.Blueprints or #mod.Blueprints == 0 then
 			continue
 		end
 	
-		local modPanel = vgui.Create( "DPanel", self )
+		local modPanel = vgui.Create( "DPanel", self.panels )
 		Derma_Hook( modPanel, "Paint", "Paint", "InnerPanel" )
 		modPanel:DockMargin( 0, 5, 0, 5 )
 		modPanel:DockPadding( 8, 8, 8, 8 )
@@ -45,7 +57,6 @@ function PANEL:Init( )
 			iconButton:SetItemInfo( itemInfo )
 		end
 	end
-	
 	derma.SkinHook( "Layout", "DPointshopManagementTab_CreateItem", self )
 end
 

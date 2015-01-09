@@ -185,7 +185,9 @@ if SERVER then
 	end )
 else
 	if GAMEMODE then 
-		Pointshop2.LoadModules( )
+		LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( function( )
+			Pointshop2.LoadModules( )
+		end )
 	else
 		hook.Add( "InitPostEntity", "LoadModules", function( )
 			Pointshop2.LoadModules( )
@@ -193,9 +195,8 @@ else
 	end
 end
 	
-hook.Add( "OnReloaded", "Do", function( )
---For reloads.
-if GAMEMODE then
-	Pointshop2.LoadModules( )
-end
+hook.Remove( "OnReloaded", "Do", function( )
+	LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( function( )
+		Pointshop2.LoadModules( )
+	end )
 end )

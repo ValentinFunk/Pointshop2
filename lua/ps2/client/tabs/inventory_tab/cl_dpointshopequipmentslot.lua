@@ -93,7 +93,9 @@ function PANEL:Init( )
 				
 				timer.Simple( 0.01, function( )
 					self.actualSlot.itemStack:Think( )
-					self.actualSlot.itemStack.icon:Select( )
+					if IsValid( self.actualSlot.itemStack.icon ) then
+						self.actualSlot.itemStack.icon:Select( )
+					end
 				end )
 			end
 		end
