@@ -9,6 +9,13 @@ Wallet.static.model = {
 		ownerId = "int",
 		points = "int",
 		premiumPoints = "int"
+	},
+	belongsTo = {
+		Owner = {
+			class = "KPlayer",
+			foreignKey = "ownerId",
+			onDelete = "CASCADE"
+		}
 	}
 }
 
