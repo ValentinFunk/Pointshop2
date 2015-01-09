@@ -128,3 +128,48 @@ function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, n
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( walletOwner ), wallet )
 	end )
 end
+
+function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount )
+	-- Player is online do standard stuff
+	for k, v in pairs( player.GetAll( ) ) do
+		if v:SteamID( ) == steamId then
+			return self:addToPlayerWallet( v, currencyType, amount )
+		end
+	end
+	
+	return LibK.Player.findByPlayer( steamId )
+	:Then( function( ply )
+		-- Player may or may not be in DB, create if not
+		if not ply then
+			ply = LibK.Player:new( )
+			ply.name = "Unknown"
+			ply.player = steamId
+			ply.steam64 = util.SteamIDTo64( steamId )
+			ply.uid = util.CRC( "gm_" .. steamId .. "_gm" )
+			return ply:save( )
+		end
+		return ply
+	end )
+	:Then( function( ply )
+		return WhenAllFinished{ Pointshop2.Wallet.findByOwnerId( ply.id ), Promise.Resolve( ply ) }
+	end )
+	:Then( function( wallet, kPlayer  ) 
+		-- Player might not have a PS2 Wallet yet, create it if he does not
+		if not wallet then
+			local wallet = Pointshop2.Wallet:new( )
+			wallet.points = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.Points" )
+			wallet.premiumPoints = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.PremiumPoints" )
+			wallet.ownerId = kPlayer.id
+			return wallet:save( )
+		end
+		return wallet
+	end )
+	:Then( function( wallet )
+		if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
+			return Promise.Reject( 1, "Invalid Currency " .. tostring( currencyType ) )
+		end
+		
+		wallet[currencyType] = wallet[currencyType] + amount
+		return wallet:save( )
+	end )
+end
