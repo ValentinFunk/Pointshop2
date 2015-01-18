@@ -41,8 +41,12 @@ function PANEL:OnTabChanged( newTab )
 end
 
 local function anyItemValidForServer( category )
-	for k, v in pairs( category.items ) do
-		local itemClass = Pointshop2.GetItemClassByName( v )
+	for k, itemClassName in pairs( category.items ) do
+		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+		if not itemClass then
+			KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
+			continue
+		end
 		if itemClass:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
 			return true
 		end
