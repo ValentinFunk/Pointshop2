@@ -153,7 +153,7 @@ function Pointshop2.GetServerById( id )
 end
 
 function Pointshop2.CalculateServerHash( )
-	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) )
+	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "hostport" ) )
 end
 
 local serverId
