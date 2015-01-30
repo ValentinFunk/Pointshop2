@@ -9,8 +9,12 @@ ITEM.color = ""
 function ITEM:initialize( )
 end
 
-function ITEM:AttachTrail( ply )
+function ITEM:AttachTrail( )
 	if SERVER then
+		local ply = self:GetOwner()
+		if (ply.IsSpec and ply:IsSpec()) then
+			return
+		end
 		self.trailEnt = util.SpriteTrail( ply, 0, self.color, false, 15, 1, 4, 0.125, self.material .. ".vmt" )
 	end
 end
@@ -22,15 +26,12 @@ function ITEM:RemoveTrail( )
 end
 
 function ITEM:OnEquip( )
-	local ply = self:GetOwner()
-	if ply:Alive( ) and not (ply.IsSpec and ply:IsSpec()) then
-		self:PlayerSpawn( ply )
-	end
+	self:AttachTrail( )
 end
 
 function ITEM:PlayerSpawn( ply )
 	if ply == self:GetOwner( ) then
-		self:AttachTrail( ply )
+		self:AttachTrail( )
 	end
 end
 Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
