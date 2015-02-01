@@ -22,9 +22,9 @@ function PANEL:EnableModify()
 	self.ContentNavBar:EnableModify()
 end
 
-function PANEL:CallPopulateHook( HookName )
+function PANEL:CallPopulateHook( HookName, noEdit, rightClickNodeFunction, rightClickItemFunction )
 
-	hook.Call( HookName, GAMEMODE, self, self.ContentNavBar.Tree, self.OldSpawnlists )
+	hook.Call( HookName, GAMEMODE, self, self.ContentNavBar.Tree, self.OldSpawnlists, noEdit, rightClickNodeFunction, rightClickItemFunction )
 
 end
 

@@ -121,66 +121,24 @@ local function addEditMenu( panel, itemClass )
 	end
 end
 
-local function AddCategoryNode( pnlContent, name, icon, parent )
+local function AddCategoryNode( pnlContent, name, icon, parent, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	local node = parent:AddNode( name, icon )
-	SetupCategoryNode( node, pnlContent )
+	SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	return node
 end
 
-function SetupCategoryNode( node, pnlContent )
+function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	node.OnModified = function( )
 		hook.Run( "PS2_SpawnlistContentChanged" )
 	end
 	
 	node.SetupCopy = function( self, copy ) 
-		SetupCategoryNode( copy, pnlContent )
+		SetupCategoryNode( copy, pnlContent, noEdit, rightClickNodeFunction, rightClickItemFunction )
 		self:DoPopulate()
 		copy.PropPanel = self.PropPanel:Copy()
 		copy.PropPanel:SetVisible( false )
 		copy.PropPanel:SetTriggerSpawnlistChange( true )
 		copy.DoPopulate = function() end
-	end
-	
-	node.DoRightClick = function( self )
-		local menu = DermaMenu()
-		menu:SetSkin( self:GetSkin( ).Name )
-		local btn =menu:AddOption( "Edit", function()
-			self:InternalDoClick(); 
-			hook.Run( "PS2_OpenToolbox" )  
-			hook.Run( "PS2_ToolboxFocus" )  
-		end )
-		btn:SetImage( "pointshop2/edit21.png" )
-		btn.m_Image:SetSize( 16, 16 )
-		
-		btn = menu:AddOption( "New Category", function()
-			local node = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", self );
-			self:SetExpanded( true )
-			self:InstallDraggable(node)
-			timer.Simple( 0.1, function( )
-				node:DoClick( )
-				node:InternalDoClick()
-				hook.Run( "PS2_ToolboxFocus" )  
-			end )
-			hook.Run( "PS2_SpawnlistContentChanged" )
-			hook.Run( "PS2_OpenToolbox" )  
-		end )
-		btn:SetImage( "pointshop2/category2.png" )
-		btn.m_Image:SetSize( 16, 16 )
-		
-		btn = menu:AddOption( "Delete", function() 			
-			print( self.PropPanel:GetCount( ), self.ChildNodes and #self.ChildNodes:GetChildren( ) )
-			if self.PropPanel:GetCount( ) > 0 or self.ChildNodes and #self.ChildNodes:GetChildren( ) > 0 then
-				return Derma_Message( "Please clear the category of all items and subcategories before deleting it", "Error" )
-			end
-			node:GetParentNode( ):DoClick( )
-			node:Remove( )
-			hook.Run( "PS2_SpawnlistContentChanged" ) 
-		end )
-		btn:SetImage( "pointshop2/category1.png" )
-		btn.m_Image:SetSize( 16, 16 )
-		btn.m_Image:SetSize( 16, 16 )
-		
-		menu:Open()
 	end
 	
 	node.DoPopulate = function( self )
@@ -202,7 +160,14 @@ function SetupCategoryNode( node, pnlContent )
 				self.PropPanel:Add( panel )
 				panel:SetItemClass( itemClass )
 				
-				addEditMenu( panel, itemClass )
+				if noEdit then
+					panel.noEditMode = true
+				else
+					addEditMenu( panel, itemClass )
+				end
+				if rightClickItemFunction then
+					panel.OpenMenu = rightClickItemFunction
+				end
 			end
 		end
 	end
@@ -210,15 +175,62 @@ function SetupCategoryNode( node, pnlContent )
 	node.DoClick = function( self )
 		self:DoPopulate( )		
 		pnlContent:SwitchPanel( self.PropPanel )
+		hook.Run( "PS2_CategorySelected", self, self.categoryInfo )
 	end
 	
+	if not noEdit then
+		node.DoRightClick = function( self )
+			local menu = DermaMenu()
+			menu:SetSkin( self:GetSkin( ).Name )
+			local btn =menu:AddOption( "Edit", function()
+				self:InternalDoClick(); 
+				hook.Run( "PS2_OpenToolbox" )  
+				hook.Run( "PS2_ToolboxFocus" )  
+			end )
+			btn:SetImage( "pointshop2/edit21.png" )
+			btn.m_Image:SetSize( 16, 16 )
+			
+			btn = menu:AddOption( "New Category", function()
+				local node = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", self, noEdit, rightClickNodeFunction, rightClickItemFunction );
+				self:SetExpanded( true )
+				self:InstallDraggable(node)
+				timer.Simple( 0.1, function( )
+					node:DoClick( )
+					node:InternalDoClick()
+					hook.Run( "PS2_ToolboxFocus" )  
+				end )
+				hook.Run( "PS2_SpawnlistContentChanged" )
+				hook.Run( "PS2_OpenToolbox" )  
+			end )
+			btn:SetImage( "pointshop2/category2.png" )
+			btn.m_Image:SetSize( 16, 16 )
+			
+			btn = menu:AddOption( "Delete", function() 			
+				print( self.PropPanel:GetCount( ), self.ChildNodes and #self.ChildNodes:GetChildren( ) )
+				if self.PropPanel:GetCount( ) > 0 or self.ChildNodes and #self.ChildNodes:GetChildren( ) > 0 then
+					return Derma_Message( "Please clear the category of all items and subcategories before deleting it", "Error" )
+				end
+				node:GetParentNode( ):DoClick( )
+				node:Remove( )
+				hook.Run( "PS2_SpawnlistContentChanged" ) 
+			end )
+			btn:SetImage( "pointshop2/category1.png" )
+			btn.m_Image:SetSize( 16, 16 )
+			btn.m_Image:SetSize( 16, 16 )
+			
+			menu:Open()
+		end
+	end
+	if rightClickNodeFunction then
+		node.DoRightClick = rightClickNodeFunction
+	end
 end
 
 
-local function PopulateWithExistingCategories( pnlContent, node, dataNode )
+local function PopulateWithExistingCategories( pnlContent, node, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	for id, subcategory in pairs( dataNode.subcategories ) do
-		local newNode = AddCategoryNode( pnlContent, subcategory.self.label, subcategory.self.icon, node )
-		PopulateWithExistingCategories( pnlContent, newNode, subcategory )
+		local newNode = AddCategoryNode( pnlContent, subcategory.self.label, subcategory.self.icon, node, noEdit, rightClickNodeFunction, rightClickItemFunction )
+		PopulateWithExistingCategories( pnlContent, newNode, subcategory, noEdit, rightClickNodeFunction, rightClickItemFunction )
 		newNode:SetExpanded( true )
 		newNode.categoryInfo = subcategory
 		newNode:DoPopulate( )
@@ -226,9 +238,10 @@ local function PopulateWithExistingCategories( pnlContent, node, dataNode )
 end
 
 local categoriesNode
-hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tree, node )
+hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tree, node, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	local node = AddCategoryNode( pnlContent, "Categories", "pointshop2/folder62.png", tree )
 	node:SetDraggableName( "CustomContent" )
+	node.specialNode = true
 	function node:DoRightClick( )
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
@@ -286,11 +299,12 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 	
 	--Populate with existing stuff
 	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
-	PopulateWithExistingCategories( pnlContent, node, { subcategories = dataNode } )
+	PopulateWithExistingCategories( pnlContent, node, { subcategories = dataNode }, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	node:SetExpanded( true )
 	
-	local node = AddCategoryNode( pnlContent, "Uncategorized Items", "pointshop2/folder62.png", tree )
+	local node = AddCategoryNode( pnlContent, "Uncategorized Items", "pointshop2/folder62.png", tree, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	node:SetDraggableName( "CustomContent" )
+	node.specialNode = true
 	function node:DoRightClick( )
 	end
 	node.immuneToChanges = true
