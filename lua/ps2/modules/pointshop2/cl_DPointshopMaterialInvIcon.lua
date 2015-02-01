@@ -13,7 +13,7 @@ end
 
 function PANEL:SetItem( item )
 	self.item = item 
-	self.image:SetMaterial( item.class.material )
+	self.image:SetMaterial( item.material or item.class.material )
 end
 
 function PANEL:PerformLayout( )
