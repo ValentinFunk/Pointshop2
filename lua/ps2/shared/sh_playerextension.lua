@@ -42,3 +42,11 @@ function Player:PS2_HasInventorySpace( slots )
 	local slotsTotal = self.PS2_Inventory:getNumSlots( )
 	return slotsTotal - slotsUsed - slots >= 0
 end
+
+function Player:PS2_GetFirstItemOfClass( class )
+	for k, item in pairs( self.PS2_Inventory:getItems( ) ) do
+		if instanceOf( class, item ) then
+			return item
+		end
+	end
+end
