@@ -273,6 +273,8 @@ function Pointshop2Controller:loadDynamicInfo( )
 	:Then( function( itemMappings, categories )
 		local itemProperties = self.cachedPersistentItems
 		
+		self.itemCategories = categories
+		self.itemMappings = itemMappings
 		local tblData = {
 			generateNetTable( itemMappings ), 
 			generateNetTable( categories ),

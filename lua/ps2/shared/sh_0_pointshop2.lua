@@ -173,6 +173,36 @@ function Pointshop2.IsCurrentGamemodePluginPresent( )
 	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )] != nil
 end
 
+function Pointshop2.GetCategoryByName( name )
+	local categories, mappings
+	if CLIENT then
+		categories, mappings = Pointshop2View:getInstance( ).itemCategories, Pointshop2View:getInstance( ).itemMappings
+	else
+		categories, mappings = Pointshop2Controller:getInstance( ).itemCategories, Pointshop2Controller:getInstance( ).itemMappings
+	end
+	
+	local category
+	for k, v in pairs( categories ) do
+		if v.label == name then
+			category = table.Copy( v )
+			break
+		end
+	end
+	if not category then 
+		return false 
+	end
+	
+	category.items = {}
+	--Populate with item mappings
+	for k, v in pairs( mappings ) do
+		if v.categoryId == category.id then
+			table.insert( category.items, Pointshop2.GetItemClassByName( v.itemClass ) )
+		end
+	end
+	
+	return category
+end
+
 /*
 	Used to send RPCs on items to client:
 	Allows you to call client functions on items from the server with minimal effort.
