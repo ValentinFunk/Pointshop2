@@ -29,7 +29,7 @@ function Pointshop2.RegisterPOTtimer( )
 		Pointshop2.UpdatePointsOverTime( )
 	end )
 end
-hook.Add( "PS2_OnSettingsUpdate", "ChangeKeyHook", function( )
+hook.Add( "PS2_OnSettingsUpdate", "POTTimerUpdate", function( )
 	Pointshop2.RegisterPOTtimer( )
 end )
 Pointshop2.SettingsLoadedPromise:Done( function( )
