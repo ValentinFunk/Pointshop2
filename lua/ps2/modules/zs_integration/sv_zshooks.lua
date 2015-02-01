@@ -18,6 +18,7 @@ hook.Add( "EndRound", "PS2_ZSEndRound", function( result )
 			end			
 		end
 	end
+	hook.Call( "Pointshop2GmIntegration_RoundEnded" )
 end )
 
 hook.Add("LastHuman","PS2_LastHuman", function( ply )	//This hook is called every second, adjust your points accordingly
