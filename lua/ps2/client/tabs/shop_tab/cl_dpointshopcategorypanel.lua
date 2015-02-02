@@ -55,7 +55,7 @@ function PANEL:SetCategory( category, depth )
 				subcategory.subcategories[k] = nil
 			end
 			for k, v in pairs( subcategory.items ) do
-				table.insert( subcategory.items, v )
+				table.insert( tbl, v )
 			end
 			subcategory.items = tbl
 		end

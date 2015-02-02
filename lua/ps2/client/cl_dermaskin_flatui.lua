@@ -112,9 +112,10 @@ function SKIN:PaintCategoryPanelLevel1( panel, w, h )
 end
 
 function SKIN:LayoutCategoryPanelLevel2( panel )
-	panel.title:SetFont( self.SmallTitleFont )
+	panel.title:SetFont( self.TabFont )
+	panel.title:SetColor( color_white )
 	panel.title:SizeToContents( )
-	panel.title:DockMargin( 8, 5, 0, -5 )
+	panel.title:DockMargin( 8, 5, 0, 0 )
 	panel.layout:DockMargin( 10, 8, 0, 8 )
 end
 function SKIN:PaintCategoryPanelLevel2( panel, w, h )
@@ -124,7 +125,9 @@ end
 
 function SKIN:LayoutCategoryPanelLevel3( panel )
 	panel.title:SetFont( self.fontName )
-	panel.title:SetColor( self.Highlight )
+	panel.title:SizeToContents( )
+	panel.title:SetColor( color_white )
+	panel.title:DockMargin( 5, 5, 0, 10 )
 end
 function SKIN:PaintCategoryPanelLevel3( panel, w, h )
 end
