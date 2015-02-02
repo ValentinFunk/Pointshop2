@@ -9,7 +9,7 @@ function PANEL:Init( )
 	
 	self.layout = vgui.Create( "DTileLayout", self )
 	self.layout:Dock( FILL )
-	self.layout:DockMargin( 8, 8, 8, 8 )
+	
 	self.layout:SetBaseSize( 16 )
 	self.layout:SetSpaceY( 5 )
 	self.layout:SetSpaceX( 5 )
@@ -22,16 +22,22 @@ function PANEL:AddItems( )
 			KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
 			continue
 		end
-		local itemIcon = vgui.Create( itemClass:GetPointshopIconControl( ), self.layout )
-		itemIcon:SetItemClass( itemClass )
+		--timer.Simple( _ / 10, function( ) 
+			if IsValid( self ) and IsValid( self.layout ) then
+				local itemIcon = vgui.Create( itemClass:GetPointshopIconControl( ), self.layout )
+				itemIcon:SetItemClass( itemClass )
+			end
+		--end )
 	end
 end
 
 function PANEL:AddSubcategories( )
 	for _, subcategory in pairs( self.category.subcategories ) do
-		local subcategoryPanel = vgui.Create( "DPointshopCategoryPanel", self.layout )
-		subcategoryPanel.OwnLine = true
-		subcategoryPanel:SetCategory( subcategory, self.depth + 1 )
+		--timer.Simple( _ / 10, function( )
+			local subcategoryPanel = vgui.Create( "DPointshopCategoryPanel", self.layout )
+			subcategoryPanel.OwnLine = true
+			subcategoryPanel:SetCategory( subcategory, self.depth + 1 )
+		--end )
 	end
 end
 
@@ -42,7 +48,6 @@ function PANEL:SetCategory( category, depth )
 		--Max depth reached
 		KLogf( 3, "[Pointshop2][WARN] Reached max category depth for category %s, flattening all subcategories", category.self.label )
 		
-		--TODO: Test
 		local function flatten( subcategory, tbl )
 			tbl = tbl or {}
 			for k, v in pairs( subcategory.subcategories ) do
