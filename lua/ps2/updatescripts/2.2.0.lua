@@ -14,6 +14,7 @@ local function convertCategoryOrganization( )
 	:Then( function( categories )
 		if #categories == 1 and categories[1].label == "Root" then
 			-- Already updated
+			print( "Already updated to new format: Root node exists" )
 			return
 		end
 		
@@ -36,6 +37,8 @@ local function convertCategoryOrganization( )
 			return WhenAllFinished{ notForSale:save( ), shopCategories:save( ) }
 		end )
 		:Then( function( notForSale, shopCategories )
+			print( "NotForSale: ", notForSale.id )
+			print( "Shop:", shopCategories.id )
 			local promises = {}
 			for k, v in pairs( categories ) do
 				v.parent = shopCategories.id
