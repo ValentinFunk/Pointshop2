@@ -1,7 +1,7 @@
 local PANEL = {}
 
 function PANEL:Init( )
-	self.rightBar = vgui.Create( "DPanel", self )
+	self.rightBar = vgui.Create( "DScrollPanel", self )
 	self.rightBar:Dock( RIGHT )
 	self.rightBar:SetWide( self.leftBar:GetWide( ) - 23 )
 	Derma_Hook( self.rightBar, "Paint", "Paint", "InnerPanel" )
@@ -60,8 +60,8 @@ local function anyItemValidForServer( category )
 end
 
 function PANEL:DoPopulate( )
-	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
-	for k, category in pairs( dataNode ) do
+	local dataNode = Pointshop2View:getInstance( ):getShopCategory( )
+	for k, category in pairs( dataNode.subcategories ) do
 		if anyItemValidForServer( category ) then
 			local sp = vgui.Create("DScrollPanel")
 			local panel = vgui.Create( "DPointshopCategoryPanel", sp )
