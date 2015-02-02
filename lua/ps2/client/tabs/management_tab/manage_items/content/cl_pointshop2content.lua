@@ -237,9 +237,9 @@ local function PopulateWithExistingCategories( pnlContent, node, dataNode, noEdi
 	end
 end
 
-local categoriesNode
+local categoriesNode, notForSaleNode
 hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tree, node, noEdit, rightClickNodeFunction, rightClickItemFunction )
-	local node = AddCategoryNode( pnlContent, "Categories", "pointshop2/folder62.png", tree )
+	local node = AddCategoryNode( pnlContent, "Shop Categories", "pointshop2/folder62.png", tree )
 	node:SetDraggableName( "CustomContent" )
 	node.specialNode = true
 	function node:DoRightClick( )
@@ -269,37 +269,82 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 		self.PropPanel:SetVisible( false )
 		function self.PropPanel:Paint( )
 		end
+		function self.PropPanel:GetItems( )
+			return {}
+		end
 		
-		local lbl = vgui.Create( "DLabel", self.PropPanel )
-		lbl:SetText( "Drag and Drop items into any of the subcategories to move them." )
-		lbl:Dock( TOP )
-		lbl:SetContentAlignment( 5 )
-		lbl:SetFont( self:GetSkin( ).fontName )
-		lbl:SizeToContents( )
-		lbl:DockMargin( 0, 5, 0, 5 )
+		local info = vgui.Create( "DInfoPanel", self.PropPanel )
+		info:Dock( TOP )
+		info:SetInfo( "Categories", 
+[[Drag and Drop items into any of the subcategories to move them.
+To create a new subcategory, right-click on the category's folder.
+To take an item out of sale drop it into the "Not for sale Items" Category.
+]] )
+		info:DockMargin( 5, 5, 5, 5 )
 		
-		local lbl = vgui.Create( "DLabel", self.PropPanel )
-		lbl:SetText( "To create a new subcategory, right-click on the category's folder." )
-		lbl:Dock( TOP )
-		lbl:SetContentAlignment( 5 )
-		lbl:SetFont( self:GetSkin( ).fontName )
-		lbl:SizeToContents( )
-		lbl:DockMargin( 0, 5, 0, 5 )
-		
-		local lbl = vgui.Create( "DLabel", self.PropPanel )
-		lbl:SetText( "To take an item out of sale drop it into the Uncategorized Items category." )
-		lbl:Dock( TOP )
-		lbl:SetContentAlignment( 5 )
-		lbl:SetFont( self:GetSkin( ).fontName )
-		lbl:SizeToContents( )
-		lbl:DockMargin( 0, 5, 0, 5 )
+		local info = vgui.Create( "DInfoPanel", self.PropPanel )
+		info:Dock( TOP )
+		info:SetInfo( "Moving Items", 
+[[
+When moving items first hover over the entry in the tree on the left, then drop them into place in the grey area on the right.
+]] )
+		info:DockMargin( 5, 5, 5, 5 )
 	end
 	categoriesNode = node
 	node:InternalDoClick()
 	
 	--Populate with existing stuff
-	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
-	PopulateWithExistingCategories( pnlContent, node, { subcategories = dataNode }, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	local dataNode = Pointshop2View:getInstance( ):getShopCategory( )
+	PopulateWithExistingCategories( pnlContent, node, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	node:SetExpanded( true )
+	
+	local node = AddCategoryNode( pnlContent, "Not for sale Items", "pointshop2/circle14.png", tree, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	node.immuneToChanges = true
+	node.specialNode = true
+	node:SetDraggableName( "CustomContent" )
+	notForSaleNode = node
+	function node:DoRightClick( )
+		local menu = DermaMenu( )
+		menu:SetSkin( self:GetSkin( ).Name )
+		local btn = menu:AddOption( "New Category", function( )
+			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", node )
+			node:SetExpanded( true )
+			node:InstallDraggable(n2)
+			timer.Simple( 0.1, function( )
+				n2:DoClick( )
+				n2:InternalDoClick()
+				hook.Run( "PS2_ToolboxFocus" )  
+			end )
+			hook.Run( "PS2_SpawnlistContentChanged" )
+			hook.Run( "PS2_OpenToolbox" )
+		end )
+		btn:SetImage( "pointshop2/category2.png" )
+		btn.m_Image:SetSize( 16, 16 )
+		menu:Open( )
+	end
+	local old = node.DoPopulate
+	function node:DoPopulate( )
+		self.PropPanel = vgui.Create( "DPanel", pnlContent )
+		self.PropPanel:Dock( FILL )
+		self.PropPanel:DockMargin( 5, 5, 5, 5 )
+		self.PropPanel:SetVisible( false )
+		function self.PropPanel:Paint( )
+		end
+		function self.PropPanel:GetItems( )
+			return {}
+		end
+		
+		local info = vgui.Create( "DInfoPanel", self.PropPanel )
+		info:Dock( TOP )
+		info:SetInfo( "Not for Sale items", 
+[[You can use this to organize items that are currently out of sale (events, special promotions, crate/drop items).
+
+Categories and organization of items are saved, but the categories will not appear in the shop.
+]] )
+		info:DockMargin( 5, 5, 5, 5 )
+	end
+	local dataNode = Pointshop2View:getInstance( ):getNoSaleCategory( )
+	PopulateWithExistingCategories( pnlContent, node, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	node:SetExpanded( true )
 	
 	local node = AddCategoryNode( pnlContent, "Uncategorized Items", "pointshop2/folder62.png", tree, noEdit, rightClickNodeFunction, rightClickItemFunction )
@@ -329,8 +374,6 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 end )
 
 hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
-	local categoriesWithItems = {}
-	
 	local function recursiveAddCategory( node, tbl )
 		local nodeInTable = {
 			self = {
@@ -355,8 +398,17 @@ hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
 		
 		table.insert( tbl, nodeInTable )
 	end
-	for k, v in ipairs( categoriesNode.ChildNodes:GetChildren( ) ) do
-		recursiveAddCategory( v, categoriesWithItems )
+	
+	local categoriesWithItems = {
+		self = {
+			label = "Root", 
+			icon = "Root",
+		},
+		items = {},
+		subcategories = {},
+	}
+	for k, v in ipairs( {categoriesNode, notForSaleNode} ) do
+		recursiveAddCategory( v, categoriesWithItems.subcategories )
 	end
 	
 	Pointshop2View:getInstance( ):saveCategoryOrganization( categoriesWithItems )

@@ -406,9 +406,7 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 		end )
 		:Fail( function( errid, err ) error( "Error saving subcategory", errid, err ) end )
 	end
-	for k, category in pairs( categoryItemsTable ) do
-		recursiveAddCategory( category )
-	end
+	recursiveAddCategory( categoryItemsTable )
 	
 	--Repopulate Item Mappings Table
 	Pointshop2.ItemMapping.removeDbEntries( "WHERE 1=1" )
@@ -427,9 +425,7 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 			recursiveAddItems( subcategory )
 		end
 	end
-	for k, category in pairs( categoryItemsTable ) do
-		recursiveAddItems( category )
-	end
+	recursiveAddItems( categoryItemsTable )
 end
 
 function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable )

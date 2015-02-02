@@ -210,7 +210,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		--Put it in the right place into the tree
 		if not dbCategory.parent then
 			--Create Category in root
-			table.insert( categoryItemsTable, newCategory )
+			categoryItemsTable = newCategory
 		else
 			local function findAndAddToParent( tree, parentId, subcategory )
 				if tree.self.id ==  parentId then
@@ -224,11 +224,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 					end
 				end
 			end
-			for id, rootCategory in pairs( categoryItemsTable ) do
-				if findAndAddToParent( rootCategory, dbCategory.parent, newCategory ) then
-					break
-				end
-			end
+			findAndAddToParent( categoryItemsTable, dbCategory.parent, newCategory )
 		end
 	end
 	self.categoryItemsTable = categoryItemsTable
@@ -308,6 +304,30 @@ function Pointshop2View:getCategoryOrganization( )
 	end
 	
 	return self.categoryItemsTable
+end
+
+function Pointshop2View:getShopCategory( )
+	if not self.categoryItemsTable then
+		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
+	end
+	
+	for k, v in pairs( self.categoryItemsTable.subcategories ) do
+		if v.self.label == "Shop Categories" then
+			return v
+		end
+	end
+end
+
+function Pointshop2View:getNoSaleCategory( )
+	if not self.categoryItemsTable then
+		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
+	end
+	
+	for k, v in pairs( self.categoryItemsTable.subcategories ) do
+		if v.self.label == "Not for sale Items" then
+			return v
+		end
+	end
 end
 
 function Pointshop2View:getUncategorizedItems( )
