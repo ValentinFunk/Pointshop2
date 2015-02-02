@@ -84,6 +84,11 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	end
 	
 	local baseClass = Pointshop2.GetItemClassByName( persistentItem.ItemPersistence.baseClass )
+	if not baseClass then
+		KLogf( 2, "[WARN] Invalid base class %s", persistentItem.ItemPersistence.baseClass )
+		debug.Trace( )
+		return
+	end
 	
 	local className = tostring( persistentItem.ItemPersistence.id )
 	local internalName = "KInventory.Items." .. className
