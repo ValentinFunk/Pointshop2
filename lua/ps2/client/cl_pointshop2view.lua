@@ -225,7 +225,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	local tree
 	while ( #stack > 0 ) do
 		n = n +1
-		if n > 5000 then
+		if n > 1000000 then
 			error( "Overflow" )
 			break
 		end
@@ -242,7 +242,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		end
 	end
 	
-	self.categoryItemsTable = tree
+	self.categoryItemsTable = tree or {}
 	
 	--Hacky, dunno why this is needed
 	hook.Call( "PS2_DynamicItemsUpdated" )

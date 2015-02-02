@@ -265,11 +265,41 @@ function Pointshop2Controller:sendWallet( ply )
 	end )
 end
 
+local function loadOrCreateCategoryTree( )
+	return Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+	:Then( function( categories ) 
+		if #categories == 0 then
+			local rootNode = Pointshop2.Category:new( )
+			rootNode.label = "Root"
+			rootNode.icon = "Root"
+			
+			return rootNode:save( )
+			:Then( function( rootNode )
+				local notForSale = Pointshop2.Category:new( )
+				notForSale.label = "Not for sale Items"
+				notForSale.icon = "pointshop2/circle14.png"
+				notForSale.parent = rootNode.id
+				
+				local shopCategories = Pointshop2.Category:new( )
+				shopCategories.label = "Shop Categories"
+				shopCategories.icon = "pointshop2/folder62.png"
+				shopCategories.parent = rootNode.id
+				
+				return WhenAllFinished{ notForSale:save( ), shopCategories:save( ) }
+			end )
+			:Then( function( )
+				return Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+			end )
+		end
+		return categories
+	end )
+end
+
 function Pointshop2Controller:loadDynamicInfo( )
 	LibK.GLib.Resources.Resources["Pointshop2/dynamics"] = nil --Force resource reset
 	self.dynamicsResource = nil
 	return WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ),
-							Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
+							loadOrCreateCategoryTree( )
 	}
 	:Then( function( itemMappings, categories )
 		local itemProperties = self.cachedPersistentItems

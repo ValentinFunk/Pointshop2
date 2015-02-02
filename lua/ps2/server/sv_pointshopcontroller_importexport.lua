@@ -71,53 +71,69 @@ function Pointshop2Controller:exportCategoryOrganization( )
 			persistencesLookup[v.id] = v
 		end
 	
-		--Create Tree from the information
-		local categoryItemsTable = {}
-		for k, dbCategory in pairs( categories ) do
-			local newCategory = { 
+		local stack = {}
+		for k, v in pairs( self.itemCategories ) do
+			table.insert( stack, { 
 				self = {
-					id = tonumber( dbCategory.id ),
-					label = dbCategory.label,
-					icon = dbCategory.icon
+					id = tonumber( v.id ),
+					label = v.label,
+					icon = v.icon
 				},
-				subcategories = { },
-				items = {}
-			}
+				subcategories = {},
+				items = {},
+				parentId = v.parent
+			} )
 			
-			--Fill With items
-			for k, dbItemMapping in pairs( itemMappings ) do
-				if dbItemMapping.categoryId == newCategory.self.id then
-					local persistence = persistencesLookup[tonumber(dbItemMapping.itemClass)]
-					local hash = util.CRC( persistence.baseClass .. persistence.name .. persistence.description )
-					table.insert( newCategory.items, hash )
-				end
-			end
-			
-			--Put it in the right place into the tree
-			if not dbCategory.parent then
-				--Create Category in root
-				categoryItemsTable[newCategory.self.id] = newCategory
-			else
-				local function findAndAddToParent( tree, parentId, subcategory )
-					if tree.self.id ==  parentId then
-						tree.subcategories[newCategory.self.id] = subcategory
-						return true
-					end
-
-					for id, category in pairs( tree.subcategories ) do
-						if findAndAddToParent( category, parentId, subcategory ) then
-							return true
-						end
-					end
-				end
-				for id, rootCategory in pairs( categoryItemsTable ) do
-					if findAndAddToParent( rootCategory, dbCategory.parent, newCategory ) then
-						break
-					end
+			local item = stack[#stack]
+			for k, dbItemMapping in pairs( self.itemMappings ) do
+				if dbItemMapping.categoryId == item.self.id then
+					table.insert( item.items, dbItemMapping.itemClass )
 				end
 			end
 		end
-		return categoryItemsTable
+		
+		local function findAndAddToParent( startNode, parentId, subcategory )
+			if startNode.self.id ==  parentId then
+				table.insert(startNode.subcategories, subcategory)
+				return true
+			end
+
+			for id, category in pairs( startNode.subcategories ) do
+				if findAndAddToParent( category, parentId, subcategory ) then
+					return true
+				end
+			end
+		end
+		
+		local n = 1
+		local tree
+		while ( #stack > 0 ) do
+			n = n +1
+			if n > 1000000 then
+				error( "Overflow" )
+				break
+			end
+			
+			local item = table.remove( stack )
+			if not item.parentId then
+				tree = item
+				continue
+			end
+			
+			if not tree or not findAndAddToParent( tree, item.parentId, item ) then
+				table.insert( stack, 1, item )
+				continue
+			end
+		end
+		
+		local shopCategories = {}
+		for k, v in pairs( tree.subcategories ) do
+			if v.self.label == "Shop Categories" then
+				shopCategories = v.subcategories
+			end
+		end
+		
+		return shopCategories
 	end )
 	:Done( function( exportTable )
 		local filename = "ps2_export_categories_".. os.date( "%Y-%m-%d_%H-%M" ) .. ".txt"
@@ -159,8 +175,10 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 		end )
 		:Fail( function( errid, err ) error( "Error saving subcategory", errid, err ) end )
 	end
+	
+	local shopCategoryId = Pointshop2.GetCategoryByName( "Shop Categories" ).id
 	for k, category in pairs( importTable ) do
-		local promise = recursiveAddCategory( category )
+		local promise = recursiveAddCategory( category, shopCategoryId )
 		table.insert( addCatPromises, promise )
 	end
 
