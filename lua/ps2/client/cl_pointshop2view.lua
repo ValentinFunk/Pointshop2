@@ -311,11 +311,16 @@ function Pointshop2View:getShopCategory( )
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
 	
-	for k, v in pairs( self.categoryItemsTable.subcategories ) do
+	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
 		if v.self.label == "Shop Categories" then
 			return v
 		end
 	end
+	
+	return {
+		items = {},
+		subcategories = {}
+	}
 end
 
 function Pointshop2View:getNoSaleCategory( )
@@ -323,11 +328,16 @@ function Pointshop2View:getNoSaleCategory( )
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
 	
-	for k, v in pairs( self.categoryItemsTable.subcategories ) do
+	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
 		if v.self.label == "Not for sale Items" then
 			return v
 		end
 	end
+	
+	return {
+		items = {},
+		subcategories = {}
+	}
 end
 
 function Pointshop2View:getUncategorizedItems( )
