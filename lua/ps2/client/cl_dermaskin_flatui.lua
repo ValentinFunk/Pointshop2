@@ -99,12 +99,14 @@ SKIN.TextFont = "PS2_Text"
 
 function SKIN:LayoutCategoryPanelLevel0( panel )
 	panel.title:SetVisible( false )
+	panel.layout:DockMargin( 8, 8, 8, 8 )
 end
 
 function SKIN:LayoutCategoryPanelLevel1( panel )
-	panel.title:SetFont( self.TabFont )
+	panel.title:SetFont( self.BigTitleFont )
 	panel.title:SizeToContents( )
 	panel.title:SetColor( color_white )
+	panel.title:DockMargin( 0, 0, 0, 5 )
 end
 function SKIN:PaintCategoryPanelLevel1( panel, w, h )
 end
@@ -113,6 +115,7 @@ function SKIN:LayoutCategoryPanelLevel2( panel )
 	panel.title:SetFont( self.SmallTitleFont )
 	panel.title:SizeToContents( )
 	panel.title:DockMargin( 8, 5, 0, -5 )
+	panel.layout:DockMargin( 10, 8, 0, 8 )
 end
 function SKIN:PaintCategoryPanelLevel2( panel, w, h )
 	surface.SetDrawColor( self.ButtonColor )
@@ -405,6 +408,8 @@ end
 
 
 derma.DefineSkin( SKIN.Name, "Poinsthop2 Default", SKIN )
+
+KLogf( 4, "Loaded " .. SKIN.Name )
 
 end --function loadSkin
 
