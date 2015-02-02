@@ -530,3 +530,7 @@ end
 function Pointshop2View:requestMaterials( directory )
 	return self:controllerTransaction( "requestMaterials", directory )
 end
+
+function Pointshop2View:adminGiveItem( kPlayerId, itemClass )
+	return self:controllerTransaction( "adminGiveItem", kPlayerId, itemClass )
+end

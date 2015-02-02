@@ -173,3 +173,54 @@ function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount 
 		return wallet:save( )
 	end )
 end
+
+function Pointshop2Controller:adminGiveItem( ply, kPlayerId, itemClassName )
+	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+	
+	if not itemClass then 
+		return Promise.Reject( "Invalid item class " .. itemClassName )
+	end
+	
+	local ply
+	for k, v in pairs( player.GetAll( ) ) do
+		if v.kPlayerId == kPlayerId then
+			ply = v
+		end
+	end
+	
+	return Promise.Resolve()
+	:Then( function( )
+		local item = itemClass:new( )
+		item.purchaseData = purchaseData or {
+			time = os.time(),
+			amount = 0,
+			currency = "points",
+			origin = "admin"
+		}
+		return item:save( )
+	end )
+	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
+		
+		if IsValid( ply ) then
+			return WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
+			:Then( function( )
+				return ply.PS2_Inventory, item
+			end )
+		else
+			return KInventory.Inventory.findByOwnerId( kPlayerId ), item
+		end
+	end )
+	:Then( function( inventory, item )
+		if not inventory then
+			return Promise.Reject( "The player has not used pointshop 2 yet. Could not give item." )
+		end
+		return inventory:addItem( item ), item
+	end )
+	:Then( function( inventory, item )
+		if IsValid( ply ) then
+			self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
+		end
+		KLogf( 4, "Admin %s gave %s %s", ply:Nick( ), ply and ply:Nick( ) or kPlayerId, item:GetPrintName( ) )
+	end )
+end
