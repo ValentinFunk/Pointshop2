@@ -118,7 +118,7 @@ function PANEL:loadItems( dontSave )
 			local panelPos = self.itemPositions[item.id]
 			if panelPos then
 				local slots = self:GetChildren( )
-				if slots[panelPos]:addItem( item ) then
+				if slots[panelPos] and slots[panelPos]:addItem( item ) then
 					table.insert( addedItems, item )
 				end
 			end
