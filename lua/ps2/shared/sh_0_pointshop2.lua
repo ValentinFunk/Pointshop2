@@ -84,6 +84,11 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	end
 	
 	local baseClass = Pointshop2.GetItemClassByName( persistentItem.ItemPersistence.baseClass )
+	if not baseClass then
+		KLogf( 2, "[WARN] Invalid base class %s", persistentItem.ItemPersistence.baseClass )
+		debug.Trace( )
+		return
+	end
 	
 	local className = tostring( persistentItem.ItemPersistence.id )
 	local internalName = "KInventory.Items." .. className
@@ -153,7 +158,7 @@ function Pointshop2.GetServerById( id )
 end
 
 function Pointshop2.CalculateServerHash( )
-	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "port" ) )
+	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "hostport" ) )
 end
 
 local serverId
@@ -171,6 +176,36 @@ end
 
 function Pointshop2.IsCurrentGamemodePluginPresent( )
 	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )] != nil
+end
+
+function Pointshop2.GetCategoryByName( name )
+	local categories, mappings
+	if CLIENT then
+		categories, mappings = Pointshop2View:getInstance( ).itemCategories, Pointshop2View:getInstance( ).itemMappings
+	else
+		categories, mappings = Pointshop2Controller:getInstance( ).itemCategories, Pointshop2Controller:getInstance( ).itemMappings
+	end
+	
+	local category
+	for k, v in pairs( categories ) do
+		if v.label == name then
+			category = table.Copy( v )
+			break
+		end
+	end
+	if not category then 
+		return false 
+	end
+	
+	category.items = {}
+	--Populate with item mappings
+	for k, v in pairs( mappings ) do
+		if v.categoryId == category.id then
+			table.insert( category.items, Pointshop2.GetItemClassByName( v.itemClass ) )
+		end
+	end
+	
+	return category
 end
 
 /*

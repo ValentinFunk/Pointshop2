@@ -187,51 +187,62 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		Pointshop2.LoadPersistentItem( v )
 	end
 	
-	--Create Tree from the information
-	local categoryItemsTable = {}
-	for k, dbCategory in pairs( self.itemCategories ) do
-		local newCategory = { 
+	local stack = {}
+	for k, v in pairs( self.itemCategories ) do
+		table.insert( stack, { 
 			self = {
-				id = tonumber( dbCategory.id ),
-				label = dbCategory.label,
-				icon = dbCategory.icon
+				id = tonumber( v.id ),
+				label = v.label,
+				icon = v.icon
 			},
-			subcategories = { },
-			items = {}
-		}
+			subcategories = {},
+			items = {},
+			parentId = v.parent
+		} )
 		
-		--Fill With items
+		local item = stack[#stack]
 		for k, dbItemMapping in pairs( self.itemMappings ) do
-			if dbItemMapping.categoryId == newCategory.self.id then
-				table.insert( newCategory.items, dbItemMapping.itemClass )
-			end
-		end
-		
-		--Put it in the right place into the tree
-		if not dbCategory.parent then
-			--Create Category in root
-			table.insert( categoryItemsTable, newCategory )
-		else
-			local function findAndAddToParent( tree, parentId, subcategory )
-				if tree.self.id ==  parentId then
-					table.insert(tree.subcategories, subcategory)
-					return true
-				end
-
-				for id, category in pairs( tree.subcategories ) do
-					if findAndAddToParent( category, parentId, subcategory ) then
-						return true
-					end
-				end
-			end
-			for id, rootCategory in pairs( categoryItemsTable ) do
-				if findAndAddToParent( rootCategory, dbCategory.parent, newCategory ) then
-					break
-				end
+			if dbItemMapping.categoryId == item.self.id then
+				table.insert( item.items, dbItemMapping.itemClass )
 			end
 		end
 	end
-	self.categoryItemsTable = categoryItemsTable
+	
+	local function findAndAddToParent( startNode, parentId, subcategory )
+		if startNode.self.id ==  parentId then
+			table.insert(startNode.subcategories, subcategory)
+			return true
+		end
+
+		for id, category in pairs( startNode.subcategories ) do
+			if findAndAddToParent( category, parentId, subcategory ) then
+				return true
+			end
+		end
+	end
+	
+	local n = 1
+	local tree
+	while ( #stack > 0 ) do
+		n = n +1
+		if n > 1000000 then
+			error( "Overflow" )
+			break
+		end
+		
+		local item = table.remove( stack )
+		if not item.parentId then
+			tree = item
+			continue
+		end
+		
+		if not tree or not findAndAddToParent( tree, item.parentId, item ) then
+			table.insert( stack, 1, item )
+			continue
+		end
+	end
+	
+	self.categoryItemsTable = tree or {}
 	
 	--Hacky, dunno why this is needed
 	hook.Call( "PS2_DynamicItemsUpdated" )
@@ -308,6 +319,40 @@ function Pointshop2View:getCategoryOrganization( )
 	end
 	
 	return self.categoryItemsTable
+end
+
+function Pointshop2View:getShopCategory( )
+	if not self.categoryItemsTable then
+		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
+	end
+	
+	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
+		if v.self.label == "Shop Categories" then
+			return v
+		end
+	end
+	
+	return {
+		items = {},
+		subcategories = {}
+	}
+end
+
+function Pointshop2View:getNoSaleCategory( )
+	if not self.categoryItemsTable then
+		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
+	end
+	
+	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
+		if v.self.label == "Not for sale Items" then
+			return v
+		end
+	end
+	
+	return {
+		items = {},
+		subcategories = {}
+	}
 end
 
 function Pointshop2View:getUncategorizedItems( )
@@ -509,4 +554,8 @@ end
 
 function Pointshop2View:requestMaterials( directory )
 	return self:controllerTransaction( "requestMaterials", directory )
+end
+
+function Pointshop2View:adminGiveItem( kPlayerId, itemClass )
+	return self:controllerTransaction( "adminGiveItem", kPlayerId, itemClass )
 end

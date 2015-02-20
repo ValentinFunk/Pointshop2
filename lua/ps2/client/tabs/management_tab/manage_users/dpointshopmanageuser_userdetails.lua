@@ -242,7 +242,10 @@ function PANEL:PlayerWalletChanged( wallet, ply )
 end
 
 function PANEL:OpenGiveItemDialog( )
-	
+	local frame = vgui.Create( "DPointshopManageUser_GiveItemDialog" )
+	frame:MakePopup( )
+	frame:SetKPlayer( self.playerData )
+	frame:Center( )
 end
 
 function PANEL:RefreshInventory( )

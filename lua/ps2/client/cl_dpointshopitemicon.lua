@@ -46,6 +46,10 @@ function PANEL:SetItem( item )
 end
 
 function PANEL:DoRightClick()
+	if self.noEditMode then
+		return
+	end
+	
 	local canvas = self:GetParent():GetSelectionCanvas( )
 	if IsValid( canvas ) and canvas:NumSelectedChildren( ) > 0 then
 		hook.Run( "PS2_MultiItemSelectOpenMenu", canvas:GetSelectedChildren() )

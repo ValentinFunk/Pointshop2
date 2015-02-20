@@ -1,7 +1,7 @@
 local PANEL = {}
 
 function PANEL:Init( )
-	self.rightBar = vgui.Create( "DPanel", self )
+	self.rightBar = vgui.Create( "DScrollPanel", self )
 	self.rightBar:Dock( RIGHT )
 	self.rightBar:SetWide( self.leftBar:GetWide( ) - 23 )
 	Derma_Hook( self.rightBar, "Paint", "Paint", "InnerPanel" )
@@ -41,8 +41,12 @@ function PANEL:OnTabChanged( newTab )
 end
 
 local function anyItemValidForServer( category )
-	for k, v in pairs( category.items ) do
-		local itemClass = Pointshop2.GetItemClassByName( v )
+	for k, itemClassName in pairs( category.items ) do
+		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+		if not itemClass then
+			KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
+			continue
+		end
 		if itemClass:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
 			return true
 		end
@@ -56,8 +60,8 @@ local function anyItemValidForServer( category )
 end
 
 function PANEL:DoPopulate( )
-	local dataNode = Pointshop2View:getInstance( ):getCategoryOrganization( )
-	for k, category in pairs( dataNode ) do
+	local dataNode = Pointshop2View:getInstance( ):getShopCategory( )
+	for k, category in pairs( dataNode.subcategories ) do
 		if anyItemValidForServer( category ) then
 			local sp = vgui.Create("DScrollPanel")
 			local panel = vgui.Create( "DPointshopCategoryPanel", sp )

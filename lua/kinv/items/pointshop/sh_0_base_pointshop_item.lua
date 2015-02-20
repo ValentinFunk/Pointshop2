@@ -15,6 +15,14 @@ ITEM.static.Servers = {
 
 }
 
+function ITEM:GetPrintName( )
+	return self.PrintName
+end
+
+function ITEM:GetDescription( )
+	return self.Description
+end
+
 --CTOR
 function ITEM:initialize()
 	--Fields that are JSON saved for each item

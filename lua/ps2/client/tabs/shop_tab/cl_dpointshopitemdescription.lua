@@ -189,6 +189,11 @@ function PANEL:SetItem( item, noButtons )
 	self.item = item
 	self:SetItemClass( item.class, true )
 	
+	self.titleLabel:SetText( item:GetPrintName( ) )
+	self.titleLabel:SizeToContents( )
+	
+	self.description:SetText( item:GetDescription( ) )
+	
 	self.buttonsPanel:Reset( )
 	if item:CanBeSold( ) and not noButtons then --todo
 		self.buttonsPanel:AddSellButton( item )

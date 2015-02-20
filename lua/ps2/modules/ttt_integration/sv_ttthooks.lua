@@ -78,6 +78,8 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 		end
 	end
 	playersInRound = {}
+	
+	hook.Call( "Pointshop2GmIntegration_RoundEnded" )
 end )
 
 hook.Add( "TTTFoundDNA", "PS2_TTTFoundDNA", function( ply, dnaOwner, ent )

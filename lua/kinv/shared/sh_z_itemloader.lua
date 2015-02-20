@@ -37,7 +37,7 @@ local function loadItem( filepath, filename )
 	if baseClassName then
 		baseItem = KInventory.Items[baseClassName]
 		if not baseItem then
-			KLogf( 2, "     -> [ERROR] Invalid base %s for item %s (%s)", baseClassName, className )
+			KLogf( 2, "     -> [ERROR] Invalid base %s for item %s", baseClassName, className )
 			return
 		end
 	end

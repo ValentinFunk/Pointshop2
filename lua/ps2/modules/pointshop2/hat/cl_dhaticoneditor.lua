@@ -153,7 +153,6 @@ function PANEL:Init( )
 	function self.choice.OnChange( )
 		self.materialInputBox:SetDisabled( not materialChoice:GetChecked( ) )
 		self.useCustomMaterial = materialChoice:GetChecked( )
-		print("onChange", materialChoice:GetChecked( ), not materialChoice:GetChecked( ) )
 	end
 	self.choice:OnChange( )
 end

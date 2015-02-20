@@ -11,9 +11,8 @@ function PANEL:Init( )
 	self.image:Dock( FILL )
 end
 
-function PANEL:SetItem( item )
-	self.item = item 
-	self.image:SetMaterial( item.material or item.class.material )
+function PANEL:SetImage( name )
+	self.image:SetMaterial( Material( name, "noclamp smooth" ) ) 
 end
 
 function PANEL:PerformLayout( )
@@ -27,4 +26,7 @@ function PANEL:PerformLayout( )
 	end
 end
 
-vgui.Register( "DPointshopMaterialInvIcon", PANEL, "DPointshopInventoryItemIcon" )
+function PANEL:Paint( w, h )
+end
+
+vgui.Register( "DCenteredImage", PANEL, "DPanel" )

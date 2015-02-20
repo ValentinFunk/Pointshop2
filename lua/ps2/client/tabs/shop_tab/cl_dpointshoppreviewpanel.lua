@@ -61,6 +61,7 @@ function PANEL:Paint( w, h )
 		return
 	end
 	
+	
 	derma.SkinHook( "Paint", "InnerPanel", self, w, h )
 	
 	if ( !IsValid( self.Entity ) ) then return end
@@ -93,9 +94,27 @@ function PANEL:Paint( w, h )
 		end
 	end
 	
+	local curparent = self
+	local rightx = self:GetWide()
+	local leftx = 0
+	local topy = 0
+	local bottomy = self:GetTall()
+	local previous = curparent
+	while( curparent:GetParent() != nil ) do
+		curparent = curparent:GetParent()
+		local x, y = previous:GetPos()
+		topy = math.Max( y, topy + y )
+		leftx = math.Max( x, leftx + x )
+		bottomy = math.Min( y + previous:GetTall(), bottomy + y )
+		rightx = math.Min( x + previous:GetWide(), rightx + x )
+		previous = curparent
+	end
+	render.SetScissorRect( leftx, topy, rightx, bottomy, true )
+	
 	hook.Call( "PS2_PreviewPanelPaint_PreDrawModel", GAMEMODE, self )
 	self.Entity:DrawModel()
 	hook.Call( "PS2_PreviewPanelPaint_PostDrawModel", GAMEMODE, self )
+	render.SetScissorRect( 0, 0, 0, 0, false )
 	
 	render.SuppressEngineLighting( false )
 	cam.IgnoreZ( false )

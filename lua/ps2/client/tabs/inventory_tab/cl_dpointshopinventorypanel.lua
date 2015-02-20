@@ -129,12 +129,12 @@ function PANEL:Init( )
 	Pointshop2.InventoryPreviewPanel = self.preview
 	
 	--	Bottom desc panel
-	self.itemDescPanel = vgui.Create( "DPanel", self.rightPanel )
+	self.itemDescPanel = vgui.Create( "DScrollPanel", self.rightPanel )
 	self.itemDescPanel:Dock( FILL )
 	self.itemDescPanel:DockMargin( 0, 8, 0, 0 )
 	self.itemDescPanel.Paint = function( ) end
 	
-	self.descPanel = vgui.Create( "DPointshopItemDescription", self.rightPanel )
+	self.descPanel = vgui.Create( "DPointshopItemDescription", self.itemDescPanel )
 	self.descPanel:Dock( TOP )
 	hook.Add( "PS2_InvItemIconSelected", self, function( self, panel, item )
 		if not IsValid( panel ) or not item then
@@ -143,7 +143,7 @@ function PANEL:Init( )
 		end
 		if self.descPanel.ClassName != item.class:GetPointshopDescriptionControl( ) then
 			self.descPanel:Remove( )
-			self.descPanel = vgui.Create( item.class:GetPointshopDescriptionControl( ), self.rightPanel )
+			self.descPanel = vgui.Create( item.class:GetPointshopDescriptionControl( ), self.itemDescPanel )
 			self.descPanel:Dock( TOP )
 		end
 		self.descPanel:SetItem( item, false )

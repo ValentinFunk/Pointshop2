@@ -98,6 +98,15 @@ function Pointshop2.FixDatabase( )
 		end
 		return WhenAllFinished( promises )
 	end )
+	
+	-- 4: Remove settings wrongfully in the DB
+	:Then( function( )
+		return WhenAllFinished{
+			Pointshop2.StoredSetting.removeWhere{ plugin = "Pointshop 2", path = "InternalSettings.Servers" },
+			Pointshop2.StoredSetting.removeWhere{ plugin = "Pointshop 2", path = "InternalSettings.ServerId" }
+		}
+	end )
+	
 	:Done( function( )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
 	end )

@@ -12,7 +12,7 @@ function PANEL:OnMousePressed( )
 end
 
 function PANEL:SetItemInfo( itemInfo )
-	self.icon:SetImage( itemInfo.icon )
+	self.icon:SetMaterial( Material( itemInfo.icon, "noclamp smooth" ) )
 	self.label:SetText( itemInfo.label )
 	self.itemInfo = itemInfo
 end
