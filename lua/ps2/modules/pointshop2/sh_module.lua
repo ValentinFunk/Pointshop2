@@ -114,6 +114,7 @@ MODULE.Settings.Shared = {
 	InternalSettings = {
 		info = {
 			isManualSetting = true,
+			noDbSetting = true --Never save these to DB
 		},
 		-- Server's unique id, fetched from the database
 		ServerId = {

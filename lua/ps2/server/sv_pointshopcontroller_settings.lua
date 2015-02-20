@@ -135,6 +135,14 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 				continue --Setting already exists in the database
 			end
 			
+			--Check if we need to skip this because it should not be saved to DB
+			local pathRoot = string.Explode( ".", settingsPath )[1]
+			local mod = Pointshop2.GetModule( modName )
+			local settingsMeta = mod.Settings.Shared[pathRoot] or mod.Settings.Server[pathRoot]
+			if settingsMeta.noDbSetting then
+				continue
+			end
+			
 			--Doesn't exist, create new:
 			local storedSetting = Pointshop2.StoredSetting:new( )
 			storedSetting.plugin = modName
