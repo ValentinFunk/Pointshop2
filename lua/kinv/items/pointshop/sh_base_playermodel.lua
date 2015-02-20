@@ -51,7 +51,8 @@ function ITEM:OnEquip( )
 	hook.Run( "PS2_DoUpdatePreviewModel" )
 end
 
-function ITEM:OnHolster( ply )
+function ITEM:OnHolster( )
+	local ply = self:GetOwner( )
 	timer.Simple( 0, function( )
 		hook.Run( "PS2_DoUpdatePreviewModel" )
 	end )
