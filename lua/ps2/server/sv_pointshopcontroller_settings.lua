@@ -136,7 +136,8 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 			end
 			
 			--Check if we need to skip this because it should not be saved to DB
-			local pathRoot = string.Explode( ".", settingsPath )[1]
+			print(settingPath)
+			local pathRoot = string.Explode( ".", settingPath )[1]
 			local mod = Pointshop2.GetModule( modName )
 			local settingsMeta = mod.Settings.Shared[pathRoot] or mod.Settings.Server[pathRoot]
 			if settingsMeta.noDbSetting then

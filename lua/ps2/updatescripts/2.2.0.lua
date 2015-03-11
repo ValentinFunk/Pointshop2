@@ -61,8 +61,24 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 	
 	Promise.Resolve( )
 	:Then( function( )
-		KLogf( 2, "[INFO] We are on %s", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite" )
-		return convertCategoryOrganization( )
+		if DB.CONNECTED_TO_MYSQL then
+			return DB.DoQuery( "SHOW TABLES LIKE 'ps2_itempersistence'" )
+			:Then( function( exists )
+				return exists
+			end )
+		else
+			return DB.DoQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ps2_itempersistence'" )
+			:Then( function( result )
+				local exists = result and result[1] and result[1].name
+				return exists
+			end )
+		end
+	end )
+	:Then( function( shouldUpdate )
+		KLogf( 2, "[INFO] We are on %s, %s", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", tostring(shouldUpdate) )
+		if shouldUpdate then
+			return convertCategoryOrganization( )
+		end
 	end )
 	:Then( function( )
 		def:Resolve( )
