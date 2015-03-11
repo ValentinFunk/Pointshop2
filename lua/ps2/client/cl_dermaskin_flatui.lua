@@ -309,7 +309,7 @@ function SKIN:LayoutInlineSheetSheet( panel, sheet )
 		
 		DLabel.ApplySchemeSettings( self )
 	end
-	self:SetFont( SKIN.fontName )
+	sheet.Tab:SetFont( SKIN.fontName )
 	sheet.Panel:Dock( FILL )
 end
 
