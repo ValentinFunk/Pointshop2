@@ -121,3 +121,13 @@ concommand.Add( "pointshop2_reload", function( )
 		end )
 	end )
 end )
+/*
+hook.Add( "InitPostEntity", "asdf", function( ) 
+	local lblTbl = vgui.GetControlTable( "DLabel" )
+	PrintTable( lblTbl )
+	function lblTbl:SetFont( strFont )
+		self.m_FontName = strFont
+		self:SetFontInternal( self.m_FontName )
+		-- self:ApplySchemeSettings() FIX
+	end
+end )*/

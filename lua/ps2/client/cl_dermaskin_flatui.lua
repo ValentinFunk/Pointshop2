@@ -287,11 +287,12 @@ function SKIN:LayoutPropertySheetSheet( panel, sheet )
 		self:SetTextInset( 10, -0 )
 		self:SetSize( w + 10, self:GetParent( ):GetTall( ) )
 		
-		self:SetFont( SKIN.TabFont )
+		
 		self:SetContentAlignment( 5 )
 		
 		DLabel.ApplySchemeSettings( self )
 	end
+	sheet.Tab:SetFont( SKIN.TabFont )
 	sheet.Tab:SetTooltip( false )
 	sheet.Panel:Dock( FILL )
 end

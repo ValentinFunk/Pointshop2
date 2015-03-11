@@ -2,14 +2,18 @@
 local PANEL = { }
 
 function PANEL:Init( )
+	self:SetSkin( Pointshop2.Config.DermaSkin )
 	self:SetContentAlignment( 4 )
-	self:SetFont( self:GetSkin( ).ButtonFont or "DermaDefault" )
+	
 	
 	derma.SkinHook( "Layout", "PointshopMenuButton", self )
 end
 
 function PANEL:PerformLayout( )
-	self:ApplySchemeSettings( )
+	if self:GetSkin( ) then
+		self:SetFont( self:GetSkin( ).ButtonFont or "DermaDefault" )
+	end
+	
 	self:SetWide( self:GetParent( ):GetWide( ) )
 	
 	if not self.Image then return end
@@ -27,7 +31,6 @@ function PANEL:PerformLayout( )
 end
 
 function PANEL:ApplySchemeSettings( )
-	local active = self:GetPropertySheet( ):GetActiveTab( ) == self
 	self:SetContentAlignment( 4 )
 	
 	local ExtraInset = 20
@@ -35,8 +38,6 @@ function PANEL:ApplySchemeSettings( )
 	if ( self.Image ) then
 		ExtraInset = ExtraInset + self.Image:GetWide()
 	end
-
-	local Active = self:GetPropertySheet():GetActiveTab() == self
 
 	self:SetTextInset( ExtraInset, 0 )
 	
