@@ -304,11 +304,12 @@ function SKIN:LayoutInlineSheetSheet( panel, sheet )
 		self:SetTextInset( 10, -0 )
 		self:SetSize( w + 10, self:GetParent( ):GetTall( ) )
 		
-		self:SetFont( SKIN.fontName )
+		
 		self:SetContentAlignment( 5 )
 		
 		DLabel.ApplySchemeSettings( self )
 	end
+	self:SetFont( SKIN.fontName )
 	sheet.Panel:Dock( FILL )
 end
 
