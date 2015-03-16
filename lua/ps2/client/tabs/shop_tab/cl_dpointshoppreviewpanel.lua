@@ -41,7 +41,7 @@ end
 function PANEL:Think( )
 	self.Angles = self.Angles or Angle( 0, 0, 0 )
 	if not self.Pressed then
-		self.Angles = self.Angles + Angle( 0, RealTime( ) / 50000, 0 ) * FrameTime() * 25
+		self.Angles = self.Angles + Angle( 0, FrameTime( ) * 20, 0 )
 	end
 end
 
