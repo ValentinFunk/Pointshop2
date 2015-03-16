@@ -221,13 +221,14 @@ function SKIN:PaintButton( panel, w, h )
 		panel.m_Image:SetImageColor( color_white )
 	end
 	
+	
 	if panel.Hovered or panel.Highlight or panel.Selected then
 		surface.SetDrawColor( self.Highlight )
 		surface.DrawRect( 0, 0, w, h )
 		if IsValid( panel.m_Image ) then
 			panel.m_Image:SetImageColor( self.Colours.Label.Dark )
 		end
-		panel:SetTextColor( self.Colours.Label.Dark )
+		panel:SetTextStyleColor( self.Colours.Label.Dark )
 	end
 	
 	if panel:GetDisabled( ) then
@@ -240,6 +241,7 @@ function SKIN:PaintButton( panel, w, h )
 		end
 		panel:SetTextColor( self.Colours.Label.Dark )
 	end
+	panel:ApplySchemeSettings( )
 end
 
 function SKIN:PaintBigButton( panel, w, h )
