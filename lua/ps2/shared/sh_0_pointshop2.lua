@@ -249,6 +249,10 @@ if SERVER then
 			KLogf( 3, "[WARN] Player %s tried to RPC for other player's item %i", ply:Nick( ), itemId )
 			return
 		end
+		if not item[funcName] then
+			KLogf( 3, "[WARN] Invalid RPC Method %s for itemId %s, name %s, class %s", funcName, itemId, item:GetPrintName( ), item.className )
+			return
+		end
 		item[funcName]( item, unpack( args ) )
 	end )
 else
