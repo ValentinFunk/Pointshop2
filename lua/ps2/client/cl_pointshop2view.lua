@@ -175,6 +175,38 @@ function Pointshop2View:startSellItem( item )
 	end )
 end
 
+local function buildTree( flatStructure, itemMappings )
+	local root
+	local lookup = {}
+	for k, v in pairs( flatStructure ) do
+		local node = { 
+			self = {
+				id = tonumber( v.id ),
+				label = v.label,
+				icon = v.icon
+			},
+			subcategories = {},
+			items = {},
+			parentId = v.parent
+		}
+		lookup[v.id] = node
+		for k, dbItemMapping in pairs( itemMappings ) do
+			if dbItemMapping.categoryId == node.self.id then
+				table.insert( node.items, dbItemMapping.itemClass )
+			end
+		end
+	end
+	for k, v in pairs( lookup ) do
+		if lookup[v.parentId] then
+			lookup[v.parentId].subcategories = lookup[v.parentId].subcategories or {}
+			table.insert( lookup[v.parentId].subcategories, v )
+		else
+			root = v
+		end
+	end
+	return root
+end
+
 
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
@@ -187,61 +219,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		Pointshop2.LoadPersistentItem( v )
 	end
 	
-	local stack = {}
-	for k, v in pairs( self.itemCategories ) do
-		table.insert( stack, { 
-			self = {
-				id = tonumber( v.id ),
-				label = v.label,
-				icon = v.icon
-			},
-			subcategories = {},
-			items = {},
-			parentId = v.parent
-		} )
-		
-		local item = stack[#stack]
-		for k, dbItemMapping in pairs( self.itemMappings ) do
-			if dbItemMapping.categoryId == item.self.id then
-				table.insert( item.items, dbItemMapping.itemClass )
-			end
-		end
-	end
-	
-	local function findAndAddToParent( startNode, parentId, subcategory )
-		if startNode.self.id ==  parentId then
-			table.insert(startNode.subcategories, subcategory)
-			return true
-		end
-
-		for id, category in pairs( startNode.subcategories ) do
-			if findAndAddToParent( category, parentId, subcategory ) then
-				return true
-			end
-		end
-	end
-	
-	local n = 1
-	local tree
-	while ( #stack > 0 ) do
-		n = n +1
-		if n > 1000000 then
-			error( "Overflow" )
-			break
-		end
-		
-		local item = table.remove( stack )
-		if not item.parentId then
-			tree = item
-			continue
-		end
-		
-		if not tree or not findAndAddToParent( tree, item.parentId, item ) then
-			table.insert( stack, 1, item )
-			continue
-		end
-	end
-	
+	local tree = buildTree( self.itemCategories, self.itemMappings )
 	self.categoryItemsTable = tree or {}
 	
 	--Hacky, dunno why this is needed
