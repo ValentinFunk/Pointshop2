@@ -155,6 +155,12 @@ function PANEL:Init( )
 	end )
 end
 
+function PANEL:PerformLayout( )
+	if self.slotsScroll.VBar.Enabled then
+		self.slotsScroll:SetWide( self.slotsScroll.wantedWidth + self.slotsScroll.VBar:GetWide( ) )
+	end
+end
+
 Derma_Hook( PANEL, "Paint", "Paint", "PointshopInventoryPanel" )
 derma.DefineControl( "DPointshopInventoryPanel", "", PANEL, "DPanel" )
 

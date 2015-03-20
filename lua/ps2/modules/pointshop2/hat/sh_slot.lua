@@ -24,7 +24,7 @@ function Pointshop2.AddHatSlot( name )
 		end
 		
 		return true
-	end )
+	end, 2 )
 	table.insert( Pointshop2.ValidHatSlots, name )
 end
 

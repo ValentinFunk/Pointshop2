@@ -87,7 +87,7 @@ function Pointshop2View:toggleMenu( )
 	end
 end
 
-function Pointshop2View:walletChanged( newWallet )
+function Pointshop2View:walletChanged( newWallet, tries )
 	local ply
 	for k, v in pairs( player.GetAll( ) ) do
 		if v:GetNWInt( "KPlayerId" ) == newWallet.ownerId then
@@ -95,6 +95,11 @@ function Pointshop2View:walletChanged( newWallet )
 			KLogf( 5, "[PS2] Received Wallet of %s: %i pts, %i premPts", v:Nick( ), newWallet.points, newWallet.premiumPoints )
 			ply = v
 		end
+	end
+	if not ply and tries < 10 then
+		timer.Simple( 0.5, function( )
+			self:walletChanged( newWallet, ( tries or 0 ) + 1 )
+		end )
 	end
 	hook.Run( "PS2_WalletChanged", newWallet, ply ) 
 end 

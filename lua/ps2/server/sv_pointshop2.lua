@@ -1,5 +1,7 @@
-LibK.addContentFolder( "materials/pointshop2" )
-LibK.addContentFolder( "materials/trails" )
+-- UNCOMMENT TO USE FastDL
+--LibK.addContentFolder( "materials/pointshop2" )
+--LibK.addContentFolder( "materials/trails" )
+resource.AddWorkshop( "369842321" )
 
 function Pointshop2.ResetDatabase( )
 	local models = {}
