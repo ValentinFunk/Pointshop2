@@ -1,0 +1,2 @@
+--Many of this stuff is a slightly modified copy of the Sandbox Spawn menu.
+--Because the addon needs to be usable outside of sandbox simple inheritance didn't do the job.
