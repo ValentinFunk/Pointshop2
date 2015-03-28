@@ -1,3 +1,0 @@
-identified Body +25
-
-Scale rewards by karma
