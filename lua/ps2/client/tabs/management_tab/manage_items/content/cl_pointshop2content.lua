@@ -62,17 +62,19 @@ end )
 
 local function addEditMenu( panel, itemClass )
 	function panel:OpenMenu( )
+		local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
+		if persistence == "STATIC" then
+			Derma_Message( "The Item " .. itemClass.PrintName .. " is Lua defined and cannot be modified ingame. To modify it edit " .. itemClass.originFilePath, "Info" )
+			local menu = DermaMenu( )
+			menu:Open( )
+			return
+		end
+				
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
 		
 		local btn = menu:AddOption( "Edit", function( )
 			local creatorControl = Pointshop2.GetCreatorControlForClass( itemClass )
-			
-			local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
-			assert( persistence )
-			if not creatorControl or persistence == "STATIC" then
-				return Derma_Message( "This item is Lua defined and cannot be edited ingame. To configure it edit " .. itemClass.originFilePath, "Error" )
-			end
 			
 			local creator = vgui.Create( creatorControl )
 			creator:Center( )
@@ -90,11 +92,6 @@ local function addEditMenu( panel, itemClass )
 					Pointshop2View:getInstance( ):removeItem( itemClass, true )
 				end,*/
 				"Yes", function( )
-					local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
-					if persistence == "STATIC" then
-						return Derma_Message( "This item is Lua defined and cannot be deleted ingame. To delete it remove " .. itemClass.originFilePath, "Error" )
-					end
-			
 					Pointshop2View:getInstance( ):removeItem( itemClass )
 				end, 
 				"No", function( )
