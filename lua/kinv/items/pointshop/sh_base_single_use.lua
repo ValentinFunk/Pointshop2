@@ -11,6 +11,10 @@ function ITEM:UseButtonClicked( )
 end
 
 function ITEM:CanBeUsed( )
+	local servers = self.class.Servers
+	if not table.HasValue( servers, Pointshop2.GetCurrentServerId( ) ) then
+		return false, "This item cannot be used on this server"
+	end
 	return true
 end
 
