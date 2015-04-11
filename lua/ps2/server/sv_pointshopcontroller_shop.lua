@@ -67,6 +67,7 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 	return Promise.Resolve()
 	:Then( function( )
 		local item = itemClass:new( )
+		local price = itemClass.Price
 		item.purchaseData = purchaseData or {
 			time = os.time(),
 			amount = price[currencyType],
