@@ -181,6 +181,15 @@ function Pointshop2View:startSellItem( item )
 	end )
 end
 
+local function recursiveSort( tree )
+	for k, v in pairs( tree.subcategories ) do
+		recursiveSort( v )
+	end
+	table.sort( tree.subcategories, function( a, b )
+		return a.self.id < b.self.id
+	end )
+end
+
 local function buildTree( flatStructure, itemMappings )
 	local root
 	local lookup = {}
@@ -210,6 +219,7 @@ local function buildTree( flatStructure, itemMappings )
 			root = v
 		end
 	end
+	recursiveSort( root )
 	return root
 end
 
