@@ -12,9 +12,10 @@ local function delayReward( ply, points, message, small )
 end
 
 local function applyDelayedRewards( )
-	for k, v in ipairs( delayedRewards )  do
+	for k, v in ipairs( delayedRewards ) do
 		v.ply:PS2_AddStandardPoints( v.points, v.message, v.small )
 	end
+	
 	delayedRewards = {}
 end
 
@@ -28,6 +29,8 @@ hook.Add( "TTTBeginRound", "PS2_TTTBeginRound", function( )
 end )
 
 hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
+	Pointshop2.StandardPointsBatch:begin( )
+	
 	applyDelayedRewards( )
 	
 	local prevRoles = {
@@ -78,6 +81,8 @@ hook.Add( "TTTEndRound", "PS2_TTTEndRound", function( result )
 		end
 	end
 	playersInRound = {}
+	
+	Pointshop2.StandardPointsBatch:finish( )
 	
 	hook.Call( "Pointshop2GmIntegration_RoundEnded" )
 end )
