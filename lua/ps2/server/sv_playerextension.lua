@@ -7,7 +7,12 @@ function Player:PS2_AddStandardPoints( points, message, small, suppressEvent )
 		hook.Run( "PS2_PointsAwarded", self, points, "points" )
 	end
 	
-	Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "points", points )
+	if Pointshop2.StandardPointsBatch:isInProgress( ) then
+		Pointshop2.StandardPointsBatch:addPoints( self, points )
+	else
+		Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "points", points )
+	end
+	
 	if message then
 		Pointshop2Controller:getInstance( ):addToPointFeed( self, message, points, small )
 	end
@@ -18,7 +23,11 @@ function Player:PS2_AddPremiumPoints( points)
 	
 	hook.Run( "PS2_PointsAwarded", self, points, "premiumPoints" )
 	
-	Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "premiumPoints", points )
+	if Pointshop2.PremiumPointsBatch:isInProgress( ) then
+		Pointshop2.PremiumPointsBatch:addPoints( self, points )
+	else
+		Pointshop2Controller:getInstance( ):addToPlayerWallet( self, "premiumPoints", points )
+	end
 end
 
 function Player:PS2_EasyAddItem( itemClassName, purchaseData, supressNotify )
