@@ -50,7 +50,7 @@ function Pointshop2.GetSetting( modName, path )
 	return setting
 end
 
-local function recursiveSettingsInitialize( settings, storedSettings, cacheTable, path )
+function Pointshop2.recursiveSettingsInitialize( settings, storedSettings, cacheTable, path )
 	for name, value in pairs( settings ) do
 		if name == "info" then
 			continue
@@ -63,7 +63,7 @@ local function recursiveSettingsInitialize( settings, storedSettings, cacheTable
 			newPath = name
 		end
 		if istable( value ) and value.value == nil then
-			recursiveSettingsInitialize( value, storedSettings, cacheTable, newPath )
+			Pointshop2.recursiveSettingsInitialize( value, storedSettings, cacheTable, newPath )
 		else
 			if storedSettings[newPath] != nil then
 				cacheTable[newPath] = storedSettings[newPath]
@@ -101,7 +101,7 @@ function Pointshop2.InitializeModuleSettings( modTable )
 			end
 			
 			Pointshop2.Settings[realm][modTable.Name] = {}
-			recursiveSettingsInitialize( modTable.Settings[realm], storedMap, Pointshop2.Settings[realm][modTable.Name] )
+			Pointshop2.recursiveSettingsInitialize( modTable.Settings[realm], storedMap, Pointshop2.Settings[realm][modTable.Name] )
 		end
 	end )
 end

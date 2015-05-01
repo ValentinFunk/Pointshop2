@@ -1,5 +1,7 @@
 local SetupCategoryNode
 
+local nodeToSelect, nodeToSelectText
+
 local function genericDelete( panels )
 	local menu = DermaMenu( )
 	menu:SetSkin( Pointshop2.Config.DermaSkin )
@@ -129,14 +131,14 @@ function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, ri
 		hook.Run( "PS2_SpawnlistContentChanged" )
 	end
 	
-	node.SetupCopy = function( self, copy ) 
+	/*node.SetupCopy = function( self, copy ) 
 		SetupCategoryNode( copy, pnlContent, noEdit, rightClickNodeFunction, rightClickItemFunction )
 		self:DoPopulate()
 		copy.PropPanel = self.PropPanel:Copy()
 		copy.PropPanel:SetVisible( false )
 		copy.PropPanel:SetTriggerSpawnlistChange( true )
 		copy.DoPopulate = function() end
-	end
+	end*/
 	
 	node.DoPopulate = function( self )
 		if not self.PropPanel then
@@ -153,7 +155,7 @@ function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, ri
 					KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
 					continue
 				end
-				local panel = vgui.Create( itemClass:GetPointshopIconControl( ) )
+				local panel = vgui.Create( itemClass:GetConfiguredIconControl( ) )
 				self.PropPanel:Add( panel )
 				panel:SetItemClass( itemClass )
 				
@@ -236,6 +238,12 @@ end
 
 local categoriesNode, notForSaleNode
 hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tree, node, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	local old = tree.OnNodeSelected
+	function tree:OnNodeSelected( node )
+		old( self, node )
+		nodeToSelect = node
+	end
+	
 	local node = AddCategoryNode( pnlContent, "Shop Categories", "pointshop2/folder62.png", tree )
 	node:SetDraggableName( "CustomContent" )
 	node.specialNode = true
@@ -288,7 +296,7 @@ When moving items first hover over the entry in the tree on the left, then drop 
 		info:DockMargin( 5, 5, 5, 5 )
 	end
 	categoriesNode = node
-	node:InternalDoClick()
+	--node:InternalDoClick()
 	
 	--Populate with existing stuff
 	local dataNode = Pointshop2View:getInstance( ):getShopCategory( )
@@ -362,16 +370,49 @@ Categories and organization of items are saved, but the categories will not appe
 		self.PropPanel:SetTriggerSpawnlistChange( true )
 		
 		for _, itemClass in pairs(  Pointshop2View:getInstance( ):getUncategorizedItems( ) ) do
-			local panel = vgui.Create( itemClass:GetPointshopIconControl( ) )
+			local panel = vgui.Create( itemClass:GetConfiguredIconControl( ) )
 			self.PropPanel:Add( panel )
 			panel:SetItemClass( itemClass )
 			addEditMenu( panel, itemClass )
 		end
 	end
+	
+	tree.RootNode.ChildNodes:GetChildren( )[1]:InternalDoClick( )
+	
+	local function selectNode( node )
+		for _, node in pairs( node.ChildNodes:GetChildren( ) ) do
+			if node:HasChildren() then
+				selectNode( node )
+			end
+			if node:GetText( ) == nodeToSelectText then
+				timer.Simple( 0, function( )
+					node:InternalDoClick( )
+				end )
+			end
+		end
+	end
+
+	if nodeToSelectText then
+		selectNode( tree.RootNode )
+	end
+end )
+
+hook.Add( "PS2_PreReload", "RememberActiveCategory", function( )
+	if IsValid( nodeToSelect ) then
+		nodeToSelectText = nodeToSelect:GetText( )
+	end
 end )
 
 hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
+	if IsValid( nodeToSelect ) then
+		nodeToSelectText = nodeToSelect:GetText( )
+	end
+	
 	local function recursiveAddCategory( node, tbl )
+		if not IsValid( node ) then
+			return
+		end
+		
 		local nodeInTable = {
 			self = {
 				label = node:GetText( ),

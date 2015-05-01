@@ -313,7 +313,7 @@ end
 function PANEL:Think( )
 
 	if not IsValid( self.icon ) and self.items[1] then
-		self.icon = self.items[1]:getIcon( )
+		self.icon = self.items[1]:getCrashsafeIcon( )
 		self.icon:SetParent( self )
 		self.icon.stackPanel = self
 		self.icon:SetDragParent( self )

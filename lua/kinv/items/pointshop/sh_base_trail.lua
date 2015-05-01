@@ -16,6 +16,17 @@ function ITEM:AttachTrail( )
 			return
 		end
 		self.trailEnt = util.SpriteTrail( ply, 0, self.color, false, 15, 1, 4, 0.125, self.material .. ".vmt" )
+		timer.Simple( 1, function( )
+			self:ClientRPC( "TrailAdded", self.trailEnt )
+		end )
+	end
+end
+
+function ITEM:TrailAdded( trailEnt )
+	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then 
+		if IsValid( trailEnt ) then
+			trailEnt:SetVisible( false )
+		end
 	end
 end
 

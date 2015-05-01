@@ -3,6 +3,12 @@ local PANEL = {}
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
+	local loading = vgui.Create( "DLoadingNotifier", self )
+	loading:Dock( TOP )
+	hook.Add( "PS2_PreReload", "Loading", function( )
+		loading:Expand( )
+	end )
+	
 	self.contentPanel = vgui.Create( "DPointshopContentPanel", self )
 	self.contentPanel:Dock( FILL )
 	self.contentPanel:EnableModify( )
@@ -12,6 +18,7 @@ function PANEL:Init( )
 	hook.Add( "PS2_DynamicItemsUpdated", self, function( )
 		self.contentPanel:Remove( )
 		self:Init( )
+		loading:Collapse( )
 	end )
 	
 	derma.SkinHook( "Layout", "PointshopManagementTab_Items", self )

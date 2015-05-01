@@ -230,18 +230,26 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.itemCategories = itemCategories
 	self.itemProperties = itemProperties
 	
-	--Load persistent items
+	
+	--Load persistent items	
+	local startTime = SysTime( )
 	for k, v in pairs( self.itemProperties ) do
 		Pointshop2.LoadPersistentItem( v )
 	end
+	KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	
+	local startTime = SysTime( )
 	local tree = buildTree( self.itemCategories, self.itemMappings )
+	KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+	
 	self.categoryItemsTable = tree or {}
 	
 	--Hacky, dunno why this is needed
-	hook.Call( "PS2_DynamicItemsUpdated" )
+	--hook.Call( "PS2_DynamicItemsUpdated" )
 	timer.Simple( 0.1, function( )
+		local startTime = SysTime( )
 		hook.Call( "PS2_DynamicItemsUpdated" )
+		KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	end )
 	
 	resolveIfWaiting( self.clPromises.DynamicsReceived )
@@ -254,9 +262,11 @@ function Pointshop2View:loadDynamics( versionHash )
 			KLogf( 2, "[PS2][ERROR] Couldn't load dynamics resouce!" )
 			return
 		end
-		local dynamicsDecoded = LibK.von.deserialize( data )[1]
-		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s)", versionHash ) 
 		
+		local startTime = SysTime( )
+		local dynamicsDecoded = LibK.von.deserialize( data )[1]
+		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) ) 
+
 		--Back to classes
 		LibK.processNetTable( dynamicsDecoded[1] )
 		LibK.processNetTable( dynamicsDecoded[2] )
@@ -366,6 +376,7 @@ function Pointshop2View:getUncategorizedItems( )
 end
 
 function Pointshop2View:createPointshopItem( saveTable )
+	hook.Run( "PS2_PreReload" )
 	self:controllerAction( "saveModuleItem", saveTable )
 end
 
@@ -502,6 +513,8 @@ function Pointshop2View:fixDatabase( )
 end
 
 function Pointshop2View:removeItem( itemClass, refund )
+	hook.Run( "PS2_PreReload" )
+	
 	self:controllerTransaction( "removeItem", itemClass.className, refund )
 	:Done( function( )
 		KInventory.Items[itemClass.className] = nil
@@ -509,6 +522,8 @@ function Pointshop2View:removeItem( itemClass, refund )
 end
 
 function Pointshop2View:removeItems( itemClasses, refund )
+	hook.Run( "PS2_PreReload" )
+	
 	local classNames = {}
 	for k, v in pairs( itemClasses ) do
 		table.insert( classNames, v.className )

@@ -14,7 +14,7 @@ function PANEL:Init( )
 	
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
-	self:DockPadding( 5, 0, 5, 5 )
+	self:DockPadding( 10, 0, 10, 10 )
 	
 	local label = vgui.Create( "DLabel", scroll )
 	label:SetText( "Select a section to configure" )

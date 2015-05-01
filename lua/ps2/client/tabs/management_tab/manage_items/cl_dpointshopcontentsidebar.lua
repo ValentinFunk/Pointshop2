@@ -47,7 +47,14 @@ function PANEL:CreateSaveNotification()
 	SavePanel.DoClick = function()
 		SavePanel:SlideUp( 0.2 )
 		hook.Run( "PS2_OnSaveSpawnlist" );
+		hook.Run( "PS2_PreReload" )
 	end
+	hook.Add( "PS2_PreReload", SavePanel, function( SavePanel )
+		if SavePanel:IsVisible( ) then
+			SavePanel:SetVisible( false )
+			SavePanel.DoClick( )
+		end
+	end )
 		
 	hook.Add( "PS2_SpawnlistContentChanged", self, function()
 		if SavePanel:IsVisible( ) then
