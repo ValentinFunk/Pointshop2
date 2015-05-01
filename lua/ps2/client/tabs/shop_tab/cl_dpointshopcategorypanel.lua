@@ -32,12 +32,21 @@ function PANEL:AddItems( )
 	end
 end
 
+function PANEL:Populate( )
+	self:AddItems( )
+	self:AddSubcategories( )
+	for k, v in pairs( self.category.subcategories ) do
+		v.panel:Populate( )
+	end
+end
+
 function PANEL:AddSubcategories( )
 	for _, subcategory in pairs( self.category.subcategories ) do
 		--timer.Simple( _ / 10, function( )
 			local subcategoryPanel = vgui.Create( "DPointshopCategoryPanel", self.layout )
 			subcategoryPanel.OwnLine = true
 			subcategoryPanel:SetCategory( subcategory, self.depth + 1 )
+			subcategory.panel = subcategoryPanel
 		--end )
 	end
 end
@@ -67,7 +76,6 @@ function PANEL:SetCategory( category, depth )
 	self.category = category
 	
 	self.title:SetText( category.self.label )
-	self:AddSubcategories( )
 	
 	derma.SkinHook( "Layout", "CategoryPanelLevel" .. self.depth, self )
 	Derma_Hook( self, "Paint", "Paint", "CategoryPanelLevel" .. self.depth )
