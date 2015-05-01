@@ -59,7 +59,7 @@ function PANEL:Init( )
 	self.tabScroller:Remove( ) --dont need it
 	self.tabScroller = nil
 
-	self.leftBar = vgui.Create( "DPanel", self )
+	self.leftBar = vgui.Create( "DScrollPanel", self )
 	self.leftBar:Dock( LEFT )
 	self.leftBar:SetWide( 245 )
 	Derma_Hook( self.leftBar, "Paint", "Paint", "InnerPanel" )
