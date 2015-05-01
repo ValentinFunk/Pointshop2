@@ -45,7 +45,7 @@ function PANEL:OnTabChanged( newTab )
 	
 	local categoryPanel = newTab:GetPanel( ).categoryPanel
 	if not categoryPanel.itemsAdded then
-		categoryPanel:AddItems( )
+		categoryPanel:Populate( )
 	end
 end
 
