@@ -22,10 +22,6 @@ function ITEM:ApplyModel( )
 		return
 	end
 	
-	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then
-		return
-	end
-	
 	local ply = self:GetOwner( )
 	
 	if not IsValid( ply ) then
