@@ -46,6 +46,8 @@ Pointshop2.ClientSettings.LoadSettings( )
 
 hook.Add( "PS2_ClientSettingsUpdated", "UpdatePACConvars", function( )
 	RunConsoleCommand( "pac_draw_distance", Pointshop2.ClientSettings.GetSetting( "BasicSettings.DrawDistance" ) )
-	Pointshop2.Menu:Remove( )
+	if IsValid( Pointshop2.Menu ) then
+		Pointshop2.Menu:Remove( )
+	end
 	Pointshop2.OpenMenu( )
 end )
