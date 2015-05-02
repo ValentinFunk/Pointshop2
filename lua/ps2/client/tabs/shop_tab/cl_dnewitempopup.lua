@@ -26,7 +26,7 @@ function PANEL:SetItem( item )
 	self.infoPnl.desc:SetItem( item, true )
 	self.infoPnl.desc:Dock( FILL )
 	
-	self.infoPnl.icon = vgui.Create( item.class.GetConfiguredIconControl( ), self.infoPnl )
+	self.infoPnl.icon = vgui.Create( item.class:GetConfiguredIconControl( ), self.infoPnl )
 	self.infoPnl.icon:SetPos( 5, 5 )
 	self.infoPnl.icon:SetItem( item )
 	self.infoPnl.icon:SetMouseInputEnabled( false )

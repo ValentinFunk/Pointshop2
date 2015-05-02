@@ -304,7 +304,7 @@ function PANEL:removeItem( itemId )
 	else
 		removed = table.remove( self.items )
 	end
-	if removed and table.Count( self.items ) == 0 then
+	if removed and table.Count( self.items ) == 0 and IsValid( self.icon ) then
 		self.icon:Remove( )
 	end
 	return removed
