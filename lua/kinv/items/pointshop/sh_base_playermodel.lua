@@ -100,6 +100,11 @@ function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopPlayerModelIcon"
 end
 
+
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimplePlayerModelIcon"
+end
+
 function ITEM.static.getPersistence( )
 	return Pointshop2.PlayermodelPersistence
 end

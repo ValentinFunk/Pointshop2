@@ -107,7 +107,7 @@ end
 
 function ITEM.static:GetConfiguredIconControl( )
 	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.LowendMode" ) then
-		return "DPointshopSimpleItemIcon"
+		return self:GetPointshopLowendIconControl( )
 	else
 		return self:GetPointshopIconControl( )
 	end
@@ -115,6 +115,10 @@ end
 
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopItemIcon"
+end
+
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimpleItemIcon"
 end
 
 function ITEM.static.GetPointshopDescriptionControl( )
@@ -160,11 +164,15 @@ function ITEM:getIcon( )
 	return self.icon
 end
 
+function ITEM:getLowendInventoryIcon( )
+	self.icon = vgui.Create( "DPointshopSimpleInventoryIcon" )
+	self.icon:SetItem( self )
+	return self.icon
+end
+
 function ITEM:getCrashsafeIcon( )
 	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.LowendMode" ) then
-		self.icon = vgui.Create( "DPointshopSimpleInventoryIcon" )
-		self.icon:SetItem( self )
-		return self.icon
+		return self:getLowendInventoryIcon( )
 	else
 		return self:getIcon( )
 	end

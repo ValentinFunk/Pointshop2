@@ -62,6 +62,10 @@ function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopTrailIcon"
 end
 
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimpleTrailIcon" 
+end
+
 function ITEM.static.getPersistence( )
 	return Pointshop2.TrailPersistence
 end

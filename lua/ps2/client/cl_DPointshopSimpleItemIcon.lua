@@ -2,12 +2,15 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
+	self:InitText( )
+end
+
+function PANEL:InitText( )
 	self.lbl = vgui.Create( "DLabel", self )
 	self.lbl:Dock( FILL )
 	self.lbl:SetColor( color_white )
 	self.lbl:SetTextColor( color_white )
-	self.lbl:SetText( "C" )
+	self.lbl:SetText( "" )
 	self.lbl:SetFont( self:GetSkin( ).BigTitleFont )
 	self.lbl:SetContentAlignment( 5 )
 end

@@ -138,6 +138,10 @@ function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopHatIcon"
 end
 
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimpleHatIcon"
+end
+
 function ITEM.static.getPersistence( )
 	return Pointshop2.HatPersistence
 end
