@@ -62,13 +62,20 @@ function PANEL:Init( )
 	self.leftBar = vgui.Create( "DScrollPanel", self )
 	self.leftBar:Dock( LEFT )
 	self.leftBar:SetWide( 245 )
+	self.leftBar:SetPadding( 10 )
 	Derma_Hook( self.leftBar, "Paint", "Paint", "InnerPanel" )
 	
-	self.buttons = vgui.Create( "DIconLayout", self.leftBar )
-	self.buttons:Dock( FILL )
+	local container = vgui.Create( "DSizeToContents", self.leftBar )
+	container:Dock( TOP )
+	function container:PerformLayout()
+		self:SizeToChildren( false, true )
+		self:SetTall( self:GetTall( ) + 10 )
+	end
 	
+	self.buttons = vgui.Create( "DIconLayout", container )
 	self.buttons:DockMargin( 10, 10, 10, 10 )
 	self.buttons:SetSpaceY( 10 )
+	self.buttons:Dock( TOP )
 end
 
 function PANEL:OnTabChanged( )
