@@ -15,6 +15,7 @@ if CLIENT then
 		if not IsValid(ply) then
 			debug.Trace( )
 			PrintTable( self )
+			return
 		end
 		
 		if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then
