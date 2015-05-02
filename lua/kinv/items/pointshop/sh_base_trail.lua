@@ -25,7 +25,7 @@ end
 function ITEM:TrailAdded( trailEnt )
 	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then 
 		if IsValid( trailEnt ) then
-			trailEnt:SetVisible( false )
+			trailEnt:SetNoDraw( true )
 		end
 	end
 end
