@@ -1,0 +1,75 @@
+--network wallets to owning players and all admins
+function Pointshop2Controller:getWalletChangeSubscribers( ply )
+	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
+		return player.GetAll() 
+	else
+		local receivers = { ply }
+		for k, v in pairs( player.GetAll( ) ) do
+			if PermissionInterface.query( v, "pointshop2 manageusers" ) then
+				if v == ply then continue end
+				table.insert( receivers, v )
+			end
+		end
+		return receivers
+	end
+end
+hook.Add( "PS2_OnSettingsUpdate", "AddOrRemoveWalletBroadcast", function( )
+	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
+		hook.Add( "LibK_PlayerInitialSpawn", "PS2_SendWallets", function( ply )
+			timer.Simple( 2, function( )
+				for k, v in pairs( player.GetAll( ) ) do
+					if v.PS2_Wallet then
+						Pointshop2Controller:getInstance( ):startView(  "Pointshop2View", "walletChanged", ply, v.PS2_Wallet )
+					end
+				end
+			end )
+		end )
+	else
+		hook.Remove( "LibK_PlayerInitialSpawn", "PS2_SendWallets" )
+	end
+end )
+
+function Pointshop2Controller:broadcastWalletChanges( wallet )
+	self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( wallet:GetOwner( ) ), wallet )
+end
+
+function Pointshop2Controller:sendWallet( ply )
+	Pointshop2.Wallet.findByOwnerId( ply.kPlayerId )
+	:Then( function( wallet )
+		if not wallet then
+			local wallet = Pointshop2.Wallet:new( )
+			wallet.points = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.Points" )
+			wallet.premiumPoints = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.PremiumPoints" )
+			wallet.ownerId = ply.kPlayerId
+			return wallet:save( )
+		end
+		return wallet
+	end )
+	:Then( function( wallet )
+		ply.PS2_Wallet = wallet
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
+	end )
+end
+
+function Pointshop2Controller:addToPlayerWallet( ply, currencyType, addition )
+	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
+		local def = Deferred( )
+		def:Reject( -2, "Invalid currency type " .. currencyType )
+		return def:Promise( )
+	end
+	
+	if not ply.PS2_Wallet then
+		local def = Deferred( )
+		def:Reject( -3, "Player wallet not loaded" )
+		return def:Promise( )
+	end
+	
+	return self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
+	:Done( function( wallet )
+		self:broadcastWalletChanges( wallet )
+	end )
+end
+
+function Pointshop2Controller:addToPointFeed( ply, message, points, small )
+	self:startView( "Pointshop2View", "addToPointFeed", ply, message, points, small )
+end

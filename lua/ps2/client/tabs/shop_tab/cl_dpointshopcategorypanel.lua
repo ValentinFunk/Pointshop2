@@ -16,6 +16,7 @@ function PANEL:Init( )
 end
 
 function PANEL:AddItems( )
+	self.itemsAdded = true
 	for _, itemClassName in pairs( self.category.items ) do
 		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 		if not itemClass then
@@ -24,10 +25,18 @@ function PANEL:AddItems( )
 		end
 		--timer.Simple( _ / 10, function( ) 
 			if IsValid( self ) and IsValid( self.layout ) then
-				local itemIcon = vgui.Create( itemClass:GetPointshopIconControl( ), self.layout )
+				local itemIcon = vgui.Create( itemClass:GetConfiguredIconControl( ), self.layout )
 				itemIcon:SetItemClass( itemClass )
 			end
 		--end )
+	end
+end
+
+function PANEL:Populate( )
+	self:AddItems( )
+	self:AddSubcategories( )
+	for k, v in pairs( self.category.subcategories ) do
+		v.panel:Populate( )
 	end
 end
 
@@ -37,6 +46,7 @@ function PANEL:AddSubcategories( )
 			local subcategoryPanel = vgui.Create( "DPointshopCategoryPanel", self.layout )
 			subcategoryPanel.OwnLine = true
 			subcategoryPanel:SetCategory( subcategory, self.depth + 1 )
+			subcategory.panel = subcategoryPanel
 		--end )
 	end
 end
@@ -66,8 +76,6 @@ function PANEL:SetCategory( category, depth )
 	self.category = category
 	
 	self.title:SetText( category.self.label )
-	self:AddItems( )
-	self:AddSubcategories( )
 	
 	derma.SkinHook( "Layout", "CategoryPanelLevel" .. self.depth, self )
 	Derma_Hook( self, "Paint", "Paint", "CategoryPanelLevel" .. self.depth )

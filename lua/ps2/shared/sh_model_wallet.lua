@@ -20,3 +20,17 @@ Wallet.static.model = {
 }
 
 Wallet:include( DatabaseModel )
+
+function Wallet:GetOwner( )
+	local walletOwner
+	for k, v in pairs( player.GetAll( ) ) do 
+		if v.kPlayerId == self.ownerId then
+			walletOwner = v
+		end
+	end
+	return walletOwner
+end
+
+function Wallet:broacastChanges( )
+	return Pointshop2Controller:getInstance( ):broadcastWalletChanges( self )
+end

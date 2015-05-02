@@ -276,6 +276,10 @@ else
 			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
 			return
 		end
+		if not item[funcName] then
+			KLogf( 3, "[WARN] Received invalid RPC method %s for item %s", funcName, item.class:GetPrintName( ) )
+			return
+		end
 		item[funcName]( item, unpack( args ) )
 	end )
 	

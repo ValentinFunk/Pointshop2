@@ -1,5 +1,6 @@
 Pointshop2.Menu = nil
 Pointshop2.RegisteredTabs = {}
+Pointshop2.LowEndMode = true
 
 function Pointshop2:OpenMenu( )
 	if not IsValid( Pointshop2.Menu ) then

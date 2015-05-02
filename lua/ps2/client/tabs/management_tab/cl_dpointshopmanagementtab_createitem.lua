@@ -7,7 +7,7 @@ function PANEL:Init( )
 	scroll:Dock( FILL )
 	scroll:GetCanvas( ):DockPadding( 0, 0, 5, 5 )
 	
-	self:DockPadding( 5, 5, 5, 5 )
+	self:DockPadding( 10, 0, 10, 10 )
 	
 	local label = vgui.Create( "DLabel", scroll:GetCanvas( ) )
 	label:SetText( "Select an item type" )

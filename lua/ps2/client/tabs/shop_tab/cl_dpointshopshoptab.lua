@@ -38,6 +38,15 @@ end
 
 function PANEL:OnTabChanged( newTab )
 	hook.Call( "PS2_ItemIconSelected" ) --Reset selection
+	
+	if not newTab then
+		return
+	end
+	
+	local categoryPanel = newTab:GetPanel( ).categoryPanel
+	if not categoryPanel.itemsAdded then
+		categoryPanel:Populate( )
+	end
 end
 
 local function anyItemValidForServer( category )
@@ -67,7 +76,8 @@ function PANEL:DoPopulate( )
 			local panel = vgui.Create( "DPointshopCategoryPanel", sp )
 			panel:Dock(FILL)
 			panel:SetCategory( category )
-			self:addMenuEntry( category.self.label, category.self.icon, sp )
+			sp.categoryPanel = panel
+			local sheet = self:addMenuEntry( category.self.label, category.self.icon, sp )
 		end
 	end
 end

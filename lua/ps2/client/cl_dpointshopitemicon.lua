@@ -1,6 +1,8 @@
 local PANEL = {}
 
 function PANEL:Init( )
+	if IsValid( self.Label ) then return end
+	
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
 	self:DockPadding( 3, 3, 3, 3 )

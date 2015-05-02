@@ -216,55 +216,6 @@ function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
 	end
 end
 
---network wallets to owning players and all admins
-function Pointshop2Controller:getWalletChangeSubscribers( ply )
-	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
-		return player.GetAll() 
-	else
-		local receivers = { ply }
-		for k, v in pairs( player.GetAll( ) ) do
-			if PermissionInterface.query( v, "pointshop2 manageusers" ) then
-				if v == ply then continue end
-				table.insert( receivers, v )
-			end
-		end
-		return receivers
-	end
-end
-hook.Add( "PS2_OnSettingsUpdate", "AddOrRemoveWalletBroadcast", function( )
-	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
-		hook.Add( "LibK_PlayerInitialSpawn", "PS2_SendWallets", function( ply )
-			timer.Simple( 2, function( )
-				for k, v in pairs( player.GetAll( ) ) do
-					if v.PS2_Wallet then
-						Pointshop2Controller:getInstance( ):startView(  "Pointshop2View", "walletChanged", ply, v.PS2_Wallet )
-					end
-				end
-			end )
-		end )
-	else
-		hook.Remove( "LibK_PlayerInitialSpawn", "PS2_SendWallets" )
-	end
-end )
-
-function Pointshop2Controller:sendWallet( ply )
-	Pointshop2.Wallet.findByOwnerId( ply.kPlayerId )
-	:Then( function( wallet )
-		if not wallet then
-			local wallet = Pointshop2.Wallet:new( )
-			wallet.points = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.Points" )
-			wallet.premiumPoints = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultWallet.PremiumPoints" )
-			wallet.ownerId = ply.kPlayerId
-			return wallet:save( )
-		end
-		return wallet
-	end )
-	:Then( function( wallet )
-		ply.PS2_Wallet = wallet
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
-	end )
-end
-
 local function loadOrCreateCategoryTree( )
 	return Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
 	:Then( function( categories ) 
@@ -443,20 +394,53 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	Pointshop2.ItemMapping.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
 	
-	local function recursiveAddItems( category )
-		for _, itemClassName in pairs( category.items ) do
-			local itemMapping = Pointshop2.ItemMapping:new( )
-			itemMapping.itemClass = itemClassName
-			itemMapping.categoryId = category.id
-			itemMapping:save( )
-			:Fail( function( errid, err ) error( "Error saving item mapping", errid, err ) end )
+	if Pointshop2.DB.CONNECTED_TO_MYSQL then
+		local query = "INSERT INTO ps2_itemmapping (itemClass, categoryId) VALUES "
+		local mappings = {}
+		local function recursiveAddItems( category )
+			for _, itemClassName in pairs( category.items ) do
+				table.insert( mappings, string.format( "(%s, %s)", Pointshop2.DB.SQLStr( itemClassName ), Pointshop2.DB.SQLStr( category.id ) ) )
+			end
+			
+			for _, subcategory in pairs( category.subcategories ) do
+				recursiveAddItems( subcategory )
+			end
+		end
+		recursiveAddItems( categoryItemsTable )
+		query = query .. table.concat( mappings, ", " )
+		Pointshop2.DB.DoQuery( query )
+	else
+		
+		local mappings = {}
+		local function recursiveAddItems( category )
+			for _, itemClassName in pairs( category.items ) do
+				table.insert( mappings, { itemClassName = itemClassName, categoryId = category.id } )
+			end
+			
+			for _, subcategory in pairs( category.subcategories ) do
+				recursiveAddItems( subcategory )
+			end
+		end
+		recursiveAddItems( categoryItemsTable )
+		
+		local query = Format( 
+			"INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
+			Pointshop2.DB.SQLStr( mappings[1].itemClassName ),
+			tonumber( mappings[1].categoryId )
+		)
+		local mappings2 = {}
+		for i = 2, #mappings do
+			table.insert( mappings2, 
+				Format( "UNION SELECT %s, %i, NULL",
+					Pointshop2.DB.SQLStr( mappings[i].itemClassName ),
+					tonumber( mappings[i].categoryId )
+				)
+			)
 		end
 		
-		for _, subcategory in pairs( category.subcategories ) do
-			recursiveAddItems( subcategory )
-		end
+		query = query .. table.concat( mappings2, "\n " )
+		Pointshop2.DB.DoQuery( query )
 	end
-	recursiveAddItems( categoryItemsTable )
 end
 
 function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable )
@@ -580,29 +564,6 @@ function Pointshop2Controller:moduleItemsChanged( )
 			end )
 		end
 	end )
-end
-
-function Pointshop2Controller:addToPlayerWallet( ply, currencyType, addition )
-	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
-		local def = Deferred( )
-		def:Reject( -2, "Invalid currency type " .. currencyType )
-		return def:Promise( )
-	end
-	
-	if not ply.PS2_Wallet then
-		local def = Deferred( )
-		def:Reject( -3, "Player wallet not loaded" )
-		return def:Promise( )
-	end
-	
-	return self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
-	:Done( function( wallet )
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
-	end )
-end
-
-function Pointshop2Controller:addToPointFeed( ply, message, points, small )
-	self:startView( "Pointshop2View", "addToPointFeed", ply, message, points, small )
 end
 
 --Lookup table taken from adamburton/pointshop
@@ -740,3 +701,55 @@ function Pointshop2Controller:requestMaterials( ply, dir )
 	local files, folders = file.Find( "materials/" .. dir .. "/*", "GAME" )
 	return Promise.Resolve( files )
 end
+
+local function recurseFlatten( path, pathId, tab )
+	print( pathId )
+	tab = tab or {}
+	local _, folders = file.Find( path .. "/*", pathId )
+	local files = file.Find( path .. "/*.mdl", pathId )
+
+	for k, v in pairs( files ) do
+		table.insert( tab, path .. "/" .. v )
+	end
+	
+	for k, v in pairs( folders ) do
+		recurseFlatten( path .. "/" .. v, pathId, tab )
+	end
+	return tab
+end
+
+function Pointshop2Controller:generateModelCache( )
+	KLogf( 5, "[Pointshop 2] Generating model cache..." )
+	local startTime = SysTime( )
+	
+	self.gameModels = {}
+	self.addonModels = {}
+	
+	local games = engine.GetGames()
+	/*table.insert( games, {
+		mounted = true,
+		title = "Garry's Mod",
+		folder = "garrysmod"
+	} )*/
+	for _, game in SortedPairsByMemberValue( games, "title" ) do
+		if ( !game.mounted ) then continue end
+		
+		self.gameModels[game.title] = recurseFlatten( "models", game.folder )
+	end
+	
+	for _, addon in SortedPairsByMemberValue( engine.GetAddons(), "title" ) do
+	
+		if ( !addon.downloaded || !addon.mounted ) then continue end
+		if ( addon.models <= 0 ) then continue end
+	
+		self.addonModels[addon.title] = recurseFlatten( "models", addon.title )
+	end
+	local data = util.TableToJSON( { games = self.gameModels,	addons = self.addonModels, addonTbl = engine.GetAddons() } )
+	KLogf( 5, "[Pointshop 2] Model cache created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+	
+	local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "modelCache", data )
+	resource:GetCompressedData( ) --Force compression now
+	
+	PrintTable( self.gameModels )
+end
+Pointshop2Controller:getInstance( ):generateModelCache( )

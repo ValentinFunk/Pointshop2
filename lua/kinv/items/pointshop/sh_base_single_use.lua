@@ -56,6 +56,10 @@ function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopMaterialIcon"
 end
 
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopMaterialIcon" 
+end
+
 function ITEM:getIcon( )
 	self.icon = vgui.Create( "DPointshopMaterialInvIcon" )
 	self.icon:SetItem( self )

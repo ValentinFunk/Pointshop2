@@ -119,13 +119,7 @@ end
 function Pointshop2Controller:adminChangeWallet( ply, kPlayerId, currencyType, newValue )
 	return self:updatePlayerWallet( kPlayerId, currencyType, newValue )
 	:Done( function( wallet )
-		local walletOwner
-		for k, v in pairs( player.GetAll( ) ) do 
-			if v.kPlayerId == kPlayerId then
-				walletOwner = v
-			end
-		end
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( walletOwner ), wallet )
+		self:broadcastWalletChanges( wallet )
 	end )
 end
 

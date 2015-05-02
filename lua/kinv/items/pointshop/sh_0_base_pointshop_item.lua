@@ -105,8 +105,20 @@ function ITEM:GetOwner( )
 	return self.owner
 end
 
+function ITEM.static:GetConfiguredIconControl( )
+	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.LowendMode" ) then
+		return self:GetPointshopLowendIconControl( )
+	else
+		return self:GetPointshopIconControl( )
+	end
+end
+
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopItemIcon"
+end
+
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimpleItemIcon"
 end
 
 function ITEM.static.GetPointshopDescriptionControl( )
@@ -150,4 +162,18 @@ function ITEM:getIcon( )
 		surface.DrawRect( 0, 0, w, h )
 	end
 	return self.icon
+end
+
+function ITEM:getLowendInventoryIcon( )
+	self.icon = vgui.Create( "DPointshopSimpleInventoryIcon" )
+	self.icon:SetItem( self )
+	return self.icon
+end
+
+function ITEM:getCrashsafeIcon( )
+	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.LowendMode" ) then
+		return self:getLowendInventoryIcon( )
+	else
+		return self:getIcon( )
+	end
 end

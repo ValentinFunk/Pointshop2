@@ -16,6 +16,11 @@ if CLIENT then
 			debug.Trace( )
 			PrintTable( self )
 		end
+		
+		if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then
+			return
+		end
+		
 		if not ply.AttachPACPart then
 			pac.SetupENT( ply )
 			ply:SetShowPACPartsInEditor( false )
@@ -26,7 +31,6 @@ if CLIENT then
 	end
 
 	function ITEM:RemoveOutfit( )
-		print( "ITEM:RemoveOutfit" )
 		local ply = self:GetOwner() 
 		if not ply.RemovePACPart then
 			return
@@ -92,6 +96,29 @@ function ITEM:OnHolster( ply )
 	self:RemoveOutfit( )
 end
 
+function Pointshop2.AllContentInstalled( self )
+	local outfit = self.getBaseOutfit( )
+	
+	local missingModels = {}
+	local function checkModel( part )
+		for k, v in pairs( part.children or {} ) do
+			checkModel( v )
+		end
+		
+		if part.self and part.self.Model then
+			local model = part.self.Model
+			if not file.Exists( model, "GAME" ) then
+				table.insert( missingModels, model )
+			end
+		end
+	end
+	
+	for k, part in pairs( outfit ) do 
+		checkModel( part )
+	end
+	
+	return missingModels
+end
 
 /*
 	Tech stuff
@@ -109,6 +136,10 @@ end
 
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopHatIcon"
+end
+
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimpleHatIcon"
 end
 
 function ITEM.static.getPersistence( )

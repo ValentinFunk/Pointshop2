@@ -22,6 +22,10 @@ function ITEM:ApplyModel( )
 		return
 	end
 	
+	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then
+		return
+	end
+	
 	local ply = self:GetOwner( )
 	
 	if not IsValid( ply ) then
@@ -94,6 +98,11 @@ Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
 
 function ITEM.static:GetPointshopIconControl( )
 	return "DPointshopPlayerModelIcon"
+end
+
+
+function ITEM.static:GetPointshopLowendIconControl( )
+	return "DPointshopSimplePlayerModelIcon"
 end
 
 function ITEM.static.getPersistence( )
