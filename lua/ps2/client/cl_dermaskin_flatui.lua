@@ -97,6 +97,12 @@ SKIN.TabFont = "PS2_MediumLarge"
 SKIN.ButtonFont = "PS2_MediumLarge"
 SKIN.TextFont = "PS2_Text"
 
+local old = SKIN.PaintComboBox
+function SKIN:PaintComboBox( panel, w, h )
+	derma.GetDefaultSkin( ).PaintComboBox( self, panel, w, h )
+	panel:SetColor( self.Colours.Label.Dark )
+end
+
 function SKIN:LayoutCategoryPanelLevel0( panel )
 	panel.title:SetVisible( false )
 	panel.layout:DockMargin( 8, 8, 8, 8 )
