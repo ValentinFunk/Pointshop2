@@ -19,7 +19,9 @@ end
 
 function PANEL:AddPlayer( ply )
 	local panel = vgui.Create( "DButton", self.playersContainer )
-	panel:SetText( ply:Nick( ) )
+	function panel:Think( )
+		panel:SetText( ply:Nick( ) )
+	end
 	panel.avatarImage = vgui.Create( "AvatarImage", panel )
 	panel.avatarImage:SetPlayer( ply, 32 )
 	panel.avatarImage:SetSize( 32, 32 )
