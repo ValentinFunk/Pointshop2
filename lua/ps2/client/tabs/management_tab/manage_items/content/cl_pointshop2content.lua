@@ -379,14 +379,14 @@ Categories and organization of items are saved, but the categories will not appe
 		end
 	end
 	
-	tree.RootNode.ChildNodes:GetChildren( )[1]:InternalDoClick( )
-	
+	local gotNode
 	local function selectNode( node )
 		for _, node in pairs( node.ChildNodes:GetChildren( ) ) do
 			if node:HasChildren() then
 				selectNode( node )
 			end
 			if node:GetText( ) == nodeToSelectText then
+				gotNode = true
 				timer.Simple( 0, function( )
 					node:InternalDoClick( )
 				end )
@@ -396,6 +396,10 @@ Categories and organization of items are saved, but the categories will not appe
 
 	if nodeToSelectText then
 		selectNode( tree.RootNode )
+	end
+	
+	if not gotNode then
+		tree.RootNode.ChildNodes:GetChildren( )[1]:InternalDoClick( )
 	end
 end )
 
