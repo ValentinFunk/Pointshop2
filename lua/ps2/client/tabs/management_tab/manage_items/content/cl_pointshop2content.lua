@@ -118,6 +118,9 @@ local function addEditMenu( panel, itemClass )
 		btn:SetImage( "pointshop2/rack1.png" )
 		btn.m_Image:SetSize( 16, 16 )
 		
+		hook.Run( "PS2_ItemEditOptions", menu, itemClass )
+		print( "hook called" )
+		
 		menu:Open( )
 	end
 end
