@@ -16,6 +16,7 @@ SKIN.tex.RadioButtonD = GWEN.CreateTextureNormal( 464, 80, 15, 15 )
 SKIN.HeaderBG   = Color( 23, 23, 23 )
 SKIN.MainBG     = Color( 102, 102, 102 )
 SKIN.InnerPanel = Color( 49, 49, 49 )
+SKIN.Footer = Color( 59, 59, 59 )
 SKIN.ButtonColor = Color( 65, 65, 65 )
 SKIN.BrightPanel = Color( 102, 102, 102 )
 SKIN.Highlight	= Color( 255, 198, 0 )
@@ -192,6 +193,11 @@ end
 
 function SKIN:PaintInnerPanel( panel, w, h )
 	surface.SetDrawColor( self.InnerPanel )
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintFooter( panel, w, h )
+	surface.SetDrawColor( self.Footer )
 	surface.DrawRect( 0, 0, w, h )
 end
 

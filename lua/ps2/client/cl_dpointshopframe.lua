@@ -116,6 +116,30 @@ function PANEL:Init( )
 	
 	CloseDermaMenus( )
 	
+	self.footer = vgui.Create( "DPanel", self )
+	self.footer:Dock( BOTTOM )
+	self.footer:SetTall( 25 )
+	
+	local lbl = vgui.Create( "DLabel", self.footer )
+	lbl:SetText( "Pointshop 2 Build " .. ( PS2_BUILD or "unknown" ) .. "    |    Icons designed by Freepik     |    " )
+	lbl:Dock( LEFT )
+	lbl:SizeToContents( )
+	lbl:DockMargin( 5, 4, 5, 5 )
+	
+	local lbl = vgui.Create( "DButton", self.footer )
+	lbl:Dock( LEFT )
+	lbl:SizeToContents( )
+	lbl:DockMargin( 5, 4, 5, 5 )
+	lbl:SetWide( 70 )
+	lbl:SetText( "Credits" )
+	lbl:SetColor( Color( 255, 255, 0 ) )
+	function lbl:DoClick( )
+		local creditWindow = vgui.Create( "DCreditWindow" )
+		creditWindow:MakePopup( )
+	end
+	
+	Derma_Hook( self.footer, "Paint", "Paint", "Footer" )
+	
 	derma.SkinHook( "Layout", "PointshopFrame", self )
 end
 
