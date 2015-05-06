@@ -58,3 +58,23 @@ end
 Derma_Hook( PANEL, "Paint", "Paint", "InnerPanel" )
 
 vgui.Register( "DInfoPanel", PANEL, "DPanel" )
+
+local PANEL = {}
+
+function PANEL:Init( )
+	self.content:Remove( )
+	self.content = vgui.Create( "DHTML", self )
+	self.content:DockMargin( 5, 0, 5, 0 )
+	self.content:Dock( TOP )
+	self.content:SetTall( 200 )
+end
+function PANEL:SetInfo( title, description, icon )
+	icon = icon or "pointshop2/info20.png"
+	
+	self.header.icon:SetMaterial( Material( icon, "noclamp smooth" ) )
+	self.header.title:SetText( title )
+	self.content:SetHTML( '<pre style="color:white; white-space: pre-wrap; word-wrap: break-word;">' ..  description )
+	self.content:SizeToContents( )
+end
+
+vgui.Register( "DInfoPanelHTML", PANEL, "DInfoPanel" )

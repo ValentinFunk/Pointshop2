@@ -2,17 +2,17 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	if not itemClass then
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, item " .. itemClass .. " isn't valid" ) 
-		return
+		return Promise.Reject()
 	end
 	local price = itemClass:GetBuyPrice( ply )
 	if not price then
 		KLogf( 3, "Player %s tried to buy item %s which cannot be bought! Hacking Attempt?", ply:Nick(), itemClass )
-		return	
+		return Promise.Reject()	
 	end
 	
 	if #ply.PS2_Inventory:getItems( ) >= ply.PS2_Inventory.numSlots then
 		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, your inventory is full!" ) 
-		return
+		return Promise.Reject()
 	end
 	
 	--[[
@@ -35,10 +35,10 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
 		ply.PS2_Wallet.premiumPoints = ply.PS2_Wallet.premiumPoints - price.premiumPoints
 	else
 		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. currencyType .. ")" )
-		return
+		return Promise.Reject()
 	end
 	
-	ply.PS2_Wallet:save( )
+	return ply.PS2_Wallet:save( )
 	:Then( function( )
 		return self:easyAddItem( ply, itemClassName, {
 			time = os.time(),
@@ -47,12 +47,13 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
 			origin = "SHOP"
 		} )
 	end )
-	:Then( function( )
+	:Then( function( item )
 		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
 		hook.Run( "PS2_PurchasedItem", ply, itemClass )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
+		return item
 	end, function( errid, err )
 		KLogf( 2, "Error saving item purchase: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )

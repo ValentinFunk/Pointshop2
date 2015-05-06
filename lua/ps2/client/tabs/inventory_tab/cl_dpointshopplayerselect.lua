@@ -19,7 +19,11 @@ end
 
 function PANEL:AddPlayer( ply )
 	local panel = vgui.Create( "DButton", self.playersContainer )
-	panel:SetText( ply:Nick( ) )
+	function panel:Think( )
+		if IsValid( ply ) then
+			panel:SetText( ply:Nick( ) )
+		end
+	end
 	panel.avatarImage = vgui.Create( "AvatarImage", panel )
 	panel.avatarImage:SetPlayer( ply, 32 )
 	panel.avatarImage:SetSize( 32, 32 )
@@ -92,8 +96,6 @@ function PANEL:InvalidatePlayerTable( )
 end
 
 function PANEL:ShowAllConncectedPlayers( exceptLocal )
-	self.playerMonitor = LibK.GLib.PlayerMonitor( "Pointshop2" )
-	
 	local function playersChanged( )
 		local players = player.GetAll( )
 		if exceptLocal then
@@ -105,21 +107,15 @@ function PANEL:ShowAllConncectedPlayers( exceptLocal )
 		self:SetPlayers( players )
 	end
 	
-	self.playerMonitor:AddEventListener( "PlayerConnected", function( _, ply, userid )
+	hook.Add( "PlayerConnect", self, function( _, ply )
 		playersChanged( )
 	end )
 	
-	self.playerMonitor:AddEventListener( "PlayerDisconnected", function( _, ply, userid )
+	hook.Add( "PlayerDisconnected", self, function( _, ply )
 		self:RemovePanelFor( ply )
 	end )
 	
 	playersChanged( )
-end
-
-function PANEL:OnRemove( )
-	if self.playerMonitor then
-		self.playerMonitor:dtor( )
-	end
 end
 
 function PANEL:OnChange( ply )

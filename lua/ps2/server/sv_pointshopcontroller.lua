@@ -534,8 +534,8 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 		KLogf( 3, "[Pointshop2] Couldn't save item %s: invalid baseclass", saveTable.name, saveTable.baseClass )
 		return self:reportError( "Pointshop2View", ply, "Error saving item", 1, "Invalid Baseclass " .. saveTable.baseClass )
 	end
+	
 	--If persistenceId != nil update existing
-	print( saveTable.persistenceId != nil, saveTable.persistenceId )
 	class.getPersistence( ).createOrUpdateFromSaveTable( saveTable, saveTable.persistenceId != nil )
 	:Then( function( saved )
 		KLogf( 4, "[Pointshop2] Saved item %s", saveTable.name )
@@ -703,7 +703,6 @@ function Pointshop2Controller:requestMaterials( ply, dir )
 end
 
 local function recurseFlatten( path, pathId, tab )
-	print( pathId )
 	tab = tab or {}
 	local _, folders = file.Find( path .. "/*", pathId )
 	local files = file.Find( path .. "/*.mdl", pathId )
@@ -749,7 +748,5 @@ function Pointshop2Controller:generateModelCache( )
 	
 	local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "modelCache", data )
 	resource:GetCompressedData( ) --Force compression now
-	
-	PrintTable( self.gameModels )
 end
 Pointshop2Controller:getInstance( ):generateModelCache( )

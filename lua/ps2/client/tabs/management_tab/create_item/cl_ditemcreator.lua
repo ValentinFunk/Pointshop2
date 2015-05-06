@@ -76,7 +76,7 @@ function PANEL:Init( )
 		end
 		
 		function panel:IsEnabled( )
-			return self.checkbox:GetValue( )
+			return self.checkBox:GetValue( )
 		end
 		
 		return panel

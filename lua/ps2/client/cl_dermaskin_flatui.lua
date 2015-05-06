@@ -16,6 +16,7 @@ SKIN.tex.RadioButtonD = GWEN.CreateTextureNormal( 464, 80, 15, 15 )
 SKIN.HeaderBG   = Color( 23, 23, 23 )
 SKIN.MainBG     = Color( 102, 102, 102 )
 SKIN.InnerPanel = Color( 49, 49, 49 )
+SKIN.Footer = Color( 59, 59, 59 )
 SKIN.ButtonColor = Color( 65, 65, 65 )
 SKIN.BrightPanel = Color( 102, 102, 102 )
 SKIN.Highlight	= Color( 255, 198, 0 )
@@ -96,6 +97,12 @@ SKIN.SmallTitleFont = "PS2_SmallHeading"
 SKIN.TabFont = "PS2_MediumLarge"
 SKIN.ButtonFont = "PS2_MediumLarge"
 SKIN.TextFont = "PS2_Text"
+
+local old = SKIN.PaintComboBox
+function SKIN:PaintComboBox( panel, w, h )
+	derma.GetDefaultSkin( ).PaintComboBox( self, panel, w, h )
+	panel:SetColor( self.Colours.Label.Dark )
+end
 
 function SKIN:LayoutCategoryPanelLevel0( panel )
 	panel.title:SetVisible( false )
@@ -186,6 +193,11 @@ end
 
 function SKIN:PaintInnerPanel( panel, w, h )
 	surface.SetDrawColor( self.InnerPanel )
+	surface.DrawRect( 0, 0, w, h )
+end
+
+function SKIN:PaintFooter( panel, w, h )
+	surface.SetDrawColor( self.Footer )
 	surface.DrawRect( 0, 0, w, h )
 end
 
