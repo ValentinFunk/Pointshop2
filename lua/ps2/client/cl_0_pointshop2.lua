@@ -126,15 +126,28 @@ end )
 
 -- Hide PAC Parts on First Person spectated player
 function Pointshop2.HidePacOnSpectate( )
-	local ply = LocalPlayer( )
-	if ply:GetObserverMode() == OBS_MODE_IN_EYE then
-		ply.lastSpecTarget = ply:GetObserverTarget( )
-		pac.HideEntityParts( ply.lastSpecTarget )
-	else
-		if IsValid( ply.lastSpecTarget ) then
-			pac.ShowEntityParts( ply.lastSpecTarget )
-			ply.lastSpecTarget = nil
+	if IsValid( LocalPlayer( ).lastSpecTarget ) 
+		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE 
+	then
+		pac.ShowEntityParts( LocalPlayer( ).lastSpecTarget )
+		for k, v in pairs( LocalPlayer( ).lastSpecTarget.partsHidden or {} ) do
+			pac.HookEntityRender( LocalPlayer( ).lastSpecTarget, v )
 		end
+		LocalPlayer( ).lastSpecTarget = nil
 	end
 end
 hook.Add( "Think", "PS2_HidePacOnSpectate", Pointshop2.HidePacOnSpectate )
+
+hook.Add( "PostDrawOpaqueRenderables", "UnhookPac", function( )
+	if LocalPlayer( ):GetObserverMode() == OBS_MODE_IN_EYE then
+		local ply = LocalPlayer( ):GetObserverTarget( )
+		LocalPlayer( ).lastSpecTarget = ply
+		if IsValid( ply ) then
+			ply.partsHidden = ply.partsHidden or {}
+			for k, v in pairs( ply.pac_parts or {} ) do
+				table.insert( ply.partsHidden, k )
+				pac.UnhookEntityRender( ply, k )
+			end
+		end
+	end
+end )
