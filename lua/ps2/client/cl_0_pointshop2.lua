@@ -6,6 +6,7 @@ function Pointshop2:OpenMenu( )
 	if not IsValid( Pointshop2.Menu ) then
 		Pointshop2.Menu = vgui.Create( "DPointshopFrame" )
 		Pointshop2.Menu:Center( )
+		Pointshop2.Menu.LowendModeEnabled = Pointshop2.ClientSettings.GetSetting( "BasicSettings.LowendMode" )
 	end
 	Pointshop2.Menu:SetVisible( true )
 	CloseDermaMenus( )
@@ -122,13 +123,18 @@ concommand.Add( "pointshop2_reload", function( )
 		end )
 	end )
 end )
-/*
-hook.Add( "InitPostEntity", "asdf", function( ) 
-	local lblTbl = vgui.GetControlTable( "DLabel" )
-	PrintTable( lblTbl )
-	function lblTbl:SetFont( strFont )
-		self.m_FontName = strFont
-		self:SetFontInternal( self.m_FontName )
-		-- self:ApplySchemeSettings() FIX
+
+-- Hide PAC Parts on First Person spectated player
+function Pointshop2.HidePacOnSpectate( )
+	local ply = LocalPlayer( )
+	if ply:GetObserverMode() == OBS_MODE_IN_EYE then
+		ply.lastSpecTarget = ply:GetObserverTarget( )
+		pac.HideEntityParts( ply.lastSpecTarget )
+	else
+		if IsValid( ply.lastSpecTarget ) then
+			pac.ShowEntityParts( ply.lastSpecTarget )
+			ply.lastSpecTarget = nil
+		end
 	end
-end )*/
+end
+hook.Add( "Think", "PS2_HidePacOnSpectate", Pointshop2.HidePacOnSpectate )
