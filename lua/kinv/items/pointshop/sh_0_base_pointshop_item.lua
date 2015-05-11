@@ -37,6 +37,10 @@ function ITEM.static:GetBuyPrice( ply )
 	}
 end
 
+function ITEM:isPremiumItem( )
+	return not self.Price.points and self.Price.premiumPoints
+end
+
 function ITEM:GetSellPrice( ply )
 	--New way
 	if self.purchaseData then
@@ -149,6 +153,8 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
 	itemTable.Servers = persistenceItem.servers or {}
+	
+	hook.Run( "PS2_BaseItem_LoadPersistence", itemTable, persistenceItem )
 end
 
 /*
