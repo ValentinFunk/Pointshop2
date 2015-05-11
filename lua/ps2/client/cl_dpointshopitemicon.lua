@@ -18,6 +18,10 @@ function PANEL:Init( )
 	self.Label:DockMargin( 0, 4, 0, 4 )
 	self.Label:SetTextColor( Color( 255, 255, 255, 255 ) )
 	self.Label:SetExpensiveShadow( 1, Color( 0, 0, 0, 200 ) )
+	
+	self.iconContainer = vgui.Create( "DIconLayout", self.Label )
+	self.iconContainer:SetSpaceX( 5 )
+	self.iconContainer:SetPos( 5, 0 )
 	--self.Label:SetFont( self:GetSkin( ).fontName )
 	
 	hook.Add( "PS2_ItemIconSelected", self, function( self, itemIcon )
@@ -26,6 +30,10 @@ function PANEL:Init( )
 			self:OnDeselected( )
 		end
 	end )
+end
+
+function PANEL:PerformLayout( )
+	self.iconContainer:SetSize( self:GetWide( ) - 10, 16 )
 end
 
 function PANEL:GetItemClass( )
@@ -39,6 +47,14 @@ function PANEL:SetItemClass( itemClass )
 	self.Label:SetText( itemClass.PrintName )
 	self.Label:SetFont( self:GetSkin( ).TextFont )
 	self.Label:SizeToContents( )
+	
+	/*if itemClass:isPremiumItem( ) then
+		local icon = self.iconContainer:Add( "DImage" )
+		icon:SetMaterial( Material( "pointshop2/donation.png", "noclamp smooth" ) )
+		icon:SetSize( 12, 12 )
+	end*/
+	
+	hook.Run( "PS2_ItemIconSetClass", self, itemClass )
 	
 	self:SetSize( w, h )
 end
