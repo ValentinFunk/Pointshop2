@@ -56,15 +56,7 @@ function ITEM:GetSellPrice( ply )
 end
 
 function ITEM:CanBeSold( )
-	if self.class.Price.points then
-		return true	
-	end
-	if self.class.Price.premiumPoints then
-		if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.AllowPremptsSale" ) then
-			return true	
-		end
-	end
-	return false
+	return true
 end
 
 function ITEM:OnPurchased( )
