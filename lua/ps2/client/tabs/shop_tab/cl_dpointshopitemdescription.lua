@@ -171,9 +171,12 @@ function PANEL:SelectionReset( )
 	if self.restrictionsPanel then
 		self.restrictionsPanel:Remove( )
 	end
+	
+	hook.Run( "PS2_ItemDescription_SelectionReset", self )
 end
 
 function PANEL:SetItemClass( itemClass, noBuyPanel )
+	self.item = nil
 	self.itemClass = itemClass
 
 	self.titleLabel:SetText( itemClass.PrintName )
@@ -192,8 +195,8 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 end
 
 function PANEL:SetItem( item, noButtons )
-	self.item = item
 	self:SetItemClass( item.class, true )
+	self.item = item
 	
 	self.titleLabel:SetText( item:GetPrintName( ) )
 	self.titleLabel:SizeToContents( )

@@ -12,7 +12,7 @@ function PANEL:Init( )
 end
 
 function PANEL:SetItem( item )
-	self.item = item 
+	self.BaseClass.SetItem( self, item )
 	self.image:SetMaterial( item.material or item.class.material )
 end
 

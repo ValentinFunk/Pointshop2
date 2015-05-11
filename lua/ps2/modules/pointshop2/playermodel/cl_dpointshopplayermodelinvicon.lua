@@ -8,7 +8,7 @@ function PANEL:Init( )
 end
 
 function PANEL:SetItem( item )
-	self.item = item 
+	self.BaseClass.SetItem( self, item )
 	
 	self.modelPanel:SetModel( item.playerModel )
 	self.modelPanel.Entity:SetPos( Vector( -100, 0, -61 ) )
