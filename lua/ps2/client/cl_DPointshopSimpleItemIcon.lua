@@ -72,7 +72,7 @@ function PANEL:Paint( w, h )
 end
 
 function PANEL:SetItem( item )
-	self.item = item
+	self.BaseClass.SetItem( self, item )
 	self.itemClass = item.class
 end
 
