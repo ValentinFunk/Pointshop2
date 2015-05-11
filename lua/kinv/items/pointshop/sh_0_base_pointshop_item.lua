@@ -153,8 +153,6 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
 	itemTable.Servers = persistenceItem.servers or {}
-	
-	hook.Run( "PS2_BaseItem_LoadPersistence", itemTable, persistenceItem )
 end
 
 /*
