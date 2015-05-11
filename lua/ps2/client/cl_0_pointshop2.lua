@@ -151,3 +151,23 @@ hook.Add( "PostDrawOpaqueRenderables", "UnhookPac", function( )
 		end
 	end
 end )
+
+local function InitNotificationsPanel( )
+	if IsValid( LocalPlayer( ).notificationPanel ) then
+		LocalPlayer( ).notificationPanel:Remove( )
+	end
+
+	local notificationPanel = vgui.Create( "KNotificationManagerPanel" )
+	notificationPanel:SetPos( 5, 5 )
+	notificationPanel:ParentToHUD( )
+	notificationPanel:SetSize( 250, 0 )
+	LocalPlayer( ).notificationPanel = notificationPanel
+end
+
+hook.Add( "InitPostEntity", "InitNotifications", function( )
+	InitNotificationsPanel( )
+end )
+
+hook.Add( "OnReloaded", "InitNotifications", function( )
+	InitNotificationsPanel( )
+end )

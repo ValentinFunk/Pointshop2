@@ -574,3 +574,21 @@ end
 function Pointshop2View:adminGiveItem( kPlayerId, itemClass )
 	return self:controllerTransaction( "adminGiveItem", kPlayerId, itemClass )
 end
+
+function Pointshop2View:displayInformation( infoStr )
+	local notification = vgui.Create( "KNotificationPanel" )
+	notification:setText( infoStr )
+	notification:setIcon( "icon16/information.png" )
+	notification:SetSkin( "KReport" )
+	notification.sound = "kreport/retro_deny.wav"
+	LocalPlayer( ).notificationPanel:addNotification( notification )
+end
+
+function Pointshop2View:displayError( infoStr )
+	local notification = vgui.Create( "KNotificationPanel" )
+	notification:setText( infoStr )
+	notification:setIcon( "icon16/exclamation.png" )
+	notification.sound = "kreport/electric_deny2.wav" 
+	notification:SetSkin( "KReport" )
+	LocalPlayer( ).notificationPanel:addNotification( notification )
+end
