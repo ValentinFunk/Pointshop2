@@ -66,7 +66,7 @@ local function addEditMenu( panel, itemClass )
 	function panel:OpenMenu( )
 		local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
 		if persistence == "STATIC" then
-			timer.Simple( 0.1, function( )
+			timer.Simple( 0.5, function( )
 				local m = Derma_Message( "The Item " .. itemClass.PrintName .. " is Lua defined and cannot be modified ingame. To modify it edit " .. itemClass.originFilePath, "Info" )
 				m:MakePopup( )
 				--m:DoModal( )
