@@ -124,8 +124,11 @@ function Pointshop2View:itemChanged( item )
 				hook.Run( "PS2_ItemRemoved", item )
 			else
 				--Item was updated
-				LocalPlayer().PS2_Inventory.Items[k] = item
-				hook.Run( "PS2_ItemUpdated", item )
+				for _, v in pairs( item ) do
+					LocalPlayer().PS2_Inventory.Items[k][_] = v
+				end
+				hook.Run( "PS2_ItemUpdated", LocalPlayer().PS2_Inventory.Items[k] )
+				print( "Updated ", k )
 			end
 		end
 	end
@@ -166,7 +169,10 @@ function Pointshop2View:slotChanged( slot )
 end
 
 function Pointshop2View:startBuyItem( itemClass, currencyType )
-	self:controllerAction( "buyItem", itemClass.className, currencyType )
+	self:controllerTransaction( "buyItem", itemClass.className, currencyType )
+	:Fail( function( err )
+		self:displayError( "Error selling the item: " .. err, "Error" )
+	end )
 end
 
 function Pointshop2View:startSellItem( item )
@@ -245,7 +251,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.categoryItemsTable = tree or {}
 	
 	--Hacky, dunno why this is needed
-	--hook.Call( "PS2_DynamicItemsUpdated" )
+	hook.Call( "PS2_DynamicItemsUpdated" )
 	timer.Simple( 0.1, function( )
 		local startTime = SysTime( )
 		hook.Call( "PS2_DynamicItemsUpdated" )
