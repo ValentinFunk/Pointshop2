@@ -32,8 +32,8 @@ function PANEL:Init( )
 	end
 	
 	local itemDesc = self
-	local function AddBuyOption( icon, price, type )
-		local pnl = vgui.Create( "DPanel", self.buttonsPanel )
+	function self.buttonsPanel:AddBuyOption( icon, price, type )
+		local pnl = vgui.Create( "DPanel", itemDesc.buttonsPanel )
 		pnl:DockMargin( 0, 0, 0, 5 )
 		function pnl:Paint( ) end
 		pnl:Dock( TOP )
@@ -52,7 +52,7 @@ function PANEL:Init( )
 		pnl.icon:SetSize( 16, 16 )
 		
 		pnl.label = vgui.Create( "DLabel", pnl )
-		pnl.label:SetFont( self:GetSkin( ).fontName )
+		pnl.label:SetFont( itemDesc:GetSkin( ).fontName )
 		pnl.label:SetText( price )
 		pnl.label:SetColor( color_white )
 		pnl.label:SizeToContents( )
@@ -78,6 +78,8 @@ function PANEL:Init( )
 		end
 		updatePrices( )
 		hook.Add( "PS2_WalletChanged", pnl, updatePrices )
+		
+		return pnl
 	end
 	
 	function self.buttonsPanel:Reset( )
@@ -89,11 +91,11 @@ function PANEL:Init( )
 	
 	function self.buttonsPanel:AddBuyButtons( priceInfo )
 		if priceInfo.points then
-			AddBuyOption( "pointshop2/dollar103.png", priceInfo.points, "points" )
+			self:AddBuyOption( "pointshop2/dollar103.png", priceInfo.points, "points" )
 		end
 		
 		if priceInfo.premiumPoints then
-			AddBuyOption( "pointshop2/donation.png", priceInfo.premiumPoints, "premiumPoints" )
+			self:AddBuyOption( "pointshop2/donation.png", priceInfo.premiumPoints, "premiumPoints" )
 		end
 	end
 	
@@ -112,6 +114,8 @@ function PANEL:Init( )
 			Pointshop2View:getInstance( ):startSellItem( itemDesc.item )
 		end
 	end
+	
+	hook.Run( "PS2_ItemDescription_Init", self )
 end
 
 function PANEL:UpdateServerRestrictions( servers )
@@ -183,6 +187,8 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 	end
 	
 	self:UpdateServerRestrictions( itemClass.Servers )
+
+	hook.Run( "PS2_ItemDescription_SetItemClass", self, itemClass )
 end
 
 function PANEL:SetItem( item, noButtons )
@@ -198,6 +204,8 @@ function PANEL:SetItem( item, noButtons )
 	if item:CanBeSold( ) and not noButtons then --todo
 		self.buttonsPanel:AddSellButton( item )
 	end
+	
+	hook.Run( "PS2_ItemDescription_SetItem", self, item )
 end
 
 function PANEL:PerformLayout( )
