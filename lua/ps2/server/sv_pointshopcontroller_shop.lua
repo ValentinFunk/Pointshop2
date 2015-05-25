@@ -77,6 +77,10 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	return Promise.Resolve()
 	:Then( function( )
+		if not itemClass then
+			return Promise.Reject( "Item class " .. tostring( itemClassName ) .. " is not valid!" )	
+		end
+		
 		local item = itemClass:new( )
 		local price = itemClass.Price
 		item.purchaseData = purchaseData or {
