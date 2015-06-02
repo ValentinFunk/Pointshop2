@@ -55,6 +55,10 @@ function PointsBatch:finish( )
 	local ownerIds = {}
 	local parts = {}
 	for ply, points in pairs( self.pointsChanges ) do
+		if not IsValid( ply ) or not ply.kPlayerId then 
+			continue
+		end
+		
 		if not table.HasValue( ownerIds, ply.kPlayerId ) then
 			table.insert( ownerIds, tonumber( ply.kPlayerId ) )
 		end
@@ -62,6 +66,11 @@ function PointsBatch:finish( )
 	end
 	query = query .. table.concat( parts, " " )
 	query = query .. ' ELSE points END WHERE ownerId IN (' .. table.concat( ownerIds, ', ' ) .. ')'
+	
+	if #ownerIds == 0 then
+		self.pointsChanges = nil
+		return
+	end
 	
 	Pointshop2.DB.DoQuery( query )
 	:Done( function( )
