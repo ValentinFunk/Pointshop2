@@ -28,8 +28,9 @@ end
 */
 function Pointshop2.GetItemClassByPrintName( name )
 	local itemClass
-	for _, class in pairs(KInventory.Items) do
-		if string.lower(class.PrintName) == string.lower(name) then
+	for _, class in pairs( KInventory.Items ) do
+		print(class)
+		if string.lower( class:GetPrintName( ) ) == string.lower( name ) then
 			itemClass = class
 			break
 		end

@@ -87,6 +87,10 @@ function PANEL:LoadServers( )
 	self.loadingNotifier:Expand( )
 	Pointshop2View.getInstance( ):getServers( )
 	:Done( function( servers )
+		if not IsValid( self ) or not IsValid( self.serversTbl ) then
+			return
+		end
+		
 		self.serversTbl:Clear( )
 		for k, v in pairs( servers ) do
 			self.serversTbl:AddLine( v.id, v.name, v.ip, v.port ).server = v
