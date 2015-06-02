@@ -79,9 +79,20 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 	:Then( function( )
 		local item = itemClass:new( )
 		local price = itemClass.Price
+		local currencyType, amount
+		if price.points then
+			currencyType = "points"
+			amount = price.points
+		elseif price.premiumPoints then
+			currencyType = "premiumPoints"
+			amount = price.premiumPoints
+		else
+			currencyType = "points"
+			amount = 0
+		end
 		item.purchaseData = purchaseData or {
 			time = os.time(),
-			amount = price[currencyType],
+			amount = amount,
 			currency = currencyType,
 			origin = "LUA"
 		}

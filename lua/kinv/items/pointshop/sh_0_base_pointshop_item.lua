@@ -44,6 +44,8 @@ end
 function ITEM:GetSellPrice( ply )
 	--New way
 	if self.purchaseData then
+		self.purchaseData.amount = self.purchaseData.amount or 0
+		self.purchaseData.currency = self.purchaseData.currency or "points"
 		return math.floor( self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), self.purchaseData.currency		
 	end
 	
