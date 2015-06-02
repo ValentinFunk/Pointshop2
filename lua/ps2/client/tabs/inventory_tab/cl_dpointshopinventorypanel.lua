@@ -53,7 +53,7 @@ function PANEL:Init( )
 		if inventory.id != LocalPlayer( ).PS2_Inventory.id then
 			return 
 		end
-		if self.descPanel.item.id == itemId then
+		if self.descPanel.item and self.descPanel.item.id == itemId then
 			self.descPanel:SelectionReset( )
 		end
 		self.invPanel:itemRemoved( itemId )

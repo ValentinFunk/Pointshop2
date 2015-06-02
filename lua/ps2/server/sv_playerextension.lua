@@ -30,9 +30,9 @@ function Player:PS2_AddPremiumPoints( points)
 	end
 end
 
-function Player:PS2_EasyAddItem( itemClassName, purchaseData, supressNotify )
+function Player:PS2_EasyAddItem( itemClassName, purchaseData, suppressNotify )
 	if not self:PS2_HasInventorySpace( 1 ) then
 		return Promise.Reject( 1, "No space in Inventory" )
 	end
-	return Pointshop2Controller:getInstance():easyAddItem( self, itemClassName, purchaseData, supressNotify )
+	return Pointshop2Controller:getInstance():easyAddItem( self, itemClassName, purchaseData, suppressNotify )
 end

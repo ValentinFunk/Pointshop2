@@ -91,12 +91,17 @@ function PANEL:Init( )
 				local item = KInventory.ITEMS[slot.Item.id]
 				self.actualSlot:addItem( item )
 				
-				timer.Simple( 0.01, function( )
-					self.actualSlot.itemStack:Think( )
+				local function remove( )
+					if IsValid( self.actualSlot.itemStack ) then
+						self.actualSlot.itemStack:Think( )
+					end
 					if IsValid( self.actualSlot.itemStack.icon ) then
 						self.actualSlot.itemStack.icon:Select( )
 					end
-				end )
+				end
+				
+				timer.Simple( 0.01, remove )
+				remove( )
 			end
 		end
 	end )

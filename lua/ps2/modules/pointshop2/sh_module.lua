@@ -95,11 +95,6 @@ MODULE.Settings.Shared = {
 			label = "Item sell repay ratio", 
 			value = 0.75
 		},
-		AllowPremptsSale = {
-			value = false,
-			tooltip = "Allow players to sell items that can be bought using premium points.\n Disabled by default to avoid conversion of the currencies",
-			label = "Allow selling of premium items",
-		},
 		SendPointsEnabled = {
 			label = "Allow players to send points",
 			tooltip = "This can be used to disable the possibility to send points to other players",

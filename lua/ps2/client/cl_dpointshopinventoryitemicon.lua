@@ -17,6 +17,8 @@ end
 
 function PANEL:SetItem( item )
 	self.item = item
+	hook.Run( "PS2_InvItemIconSetItem", self, item )
+	print( "Run " , "PS2_InvItemIconSetItem" )
 end
 
 function PANEL:DoRightClick()

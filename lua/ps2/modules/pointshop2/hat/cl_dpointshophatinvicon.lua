@@ -8,6 +8,8 @@ function PANEL:Init( )
 end
 
 function PANEL:SetItem( item )
+	self.BaseClass.SetItem( self, item )
+	
 	if item.class.iconInfo.inv.useMaterialIcon then
 		self.image:Remove()
 		self.image = vgui.Create( "DImage", self )

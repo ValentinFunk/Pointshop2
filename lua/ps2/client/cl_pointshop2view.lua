@@ -124,8 +124,11 @@ function Pointshop2View:itemChanged( item )
 				hook.Run( "PS2_ItemRemoved", item )
 			else
 				--Item was updated
-				LocalPlayer().PS2_Inventory.Items[k] = item
-				hook.Run( "PS2_ItemUpdated", item )
+				for _, v in pairs( item ) do
+					LocalPlayer().PS2_Inventory.Items[k][_] = v
+				end
+				hook.Run( "PS2_ItemUpdated", LocalPlayer().PS2_Inventory.Items[k] )
+				print( "Updated ", k )
 			end
 		end
 	end
@@ -166,7 +169,10 @@ function Pointshop2View:slotChanged( slot )
 end
 
 function Pointshop2View:startBuyItem( itemClass, currencyType )
-	self:controllerAction( "buyItem", itemClass.className, currencyType )
+	self:controllerTransaction( "buyItem", itemClass.className, currencyType )
+	:Fail( function( err )
+		self:displayError( "Error selling the item: " .. err, "Error" )
+	end )
 end
 
 function Pointshop2View:startSellItem( item )
@@ -567,4 +573,22 @@ end
 
 function Pointshop2View:adminGiveItem( kPlayerId, itemClass )
 	return self:controllerTransaction( "adminGiveItem", kPlayerId, itemClass )
+end
+
+function Pointshop2View:displayInformation( infoStr )
+	local notification = vgui.Create( "KNotificationPanel" )
+	notification:setText( infoStr )
+	notification:setIcon( "icon16/information.png" )
+	notification:SetSkin( "KReport" )
+	notification.sound = "kreport/retro_deny.wav"
+	LocalPlayer( ).notificationPanel:addNotification( notification )
+end
+
+function Pointshop2View:displayError( infoStr )
+	local notification = vgui.Create( "KNotificationPanel" )
+	notification:setText( infoStr )
+	notification:setIcon( "icon16/exclamation.png" )
+	notification.sound = "kreport/electric_deny2.wav" 
+	notification:SetSkin( "KReport" )
+	LocalPlayer( ).notificationPanel:addNotification( notification )
 end

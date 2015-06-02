@@ -1,10 +1,9 @@
 local PANEL = {}
 
 function PANEL:Init( )
-	self.image = vgui.Create( "DImage", self )
-	self.image:Dock( TOP )
-	self.image:SetSize( 64, 64 )
-	self.image:DockMargin( 5, 0, 5, 5 )
+	self.image = vgui.Create( "DCenteredImage", self )
+	self.image:Dock( FILL )
+	self.image:SetMouseInputEnabled( false )
 end
 
 function PANEL:SetItemClass( itemClass )
@@ -40,19 +39,14 @@ function PANEL:Think( )
 	end
 end
 
-function PANEL:PerformLayout( )
-	self.image:SetTall( self.image:GetWide( ) )
-	local border = ( ( self:GetTall( ) - self.Label:GetTall( ) ) - self.image:GetTall( ) ) / 2
-	self.image:DockMargin( 5, border, 5, border )
-end
-
 derma.DefineControl( "DPointshopTrailIcon", "", PANEL, "DPointshopItemIcon" )
 
+local PANEL = {}
+
 function PANEL:Init( )
-	self.image = vgui.Create( "DImage", self )
-	self.image:Dock( TOP )
-	self.image:SetSize( 64, 64 )
-	self.image:DockMargin( 5, 0, 5, 5 )
+	self.image = vgui.Create( "DCenteredImage", self )
+	self.image:Dock( FILL )
+	self.image:SetMouseInputEnabled( false )
 end
 
 function PANEL:SetItemClass( itemClass )
@@ -64,12 +58,5 @@ end
 function PANEL:SetItem( item )
 	self:SetItemClass( item.class )
 end
-
-function PANEL:PerformLayout( )
-	self.image:SetTall( self.image:GetWide( ) )
-	local border = ( ( self:GetTall( ) - self.Label:GetTall( ) ) - self.image:GetTall( ) ) / 2
-	self.image:DockMargin( 5, border, 5, border )
-end
-
 
 derma.DefineControl( "DPointshopSimpleTrailIcon", "", PANEL, "DPointshopItemIcon" )

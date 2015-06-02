@@ -1,20 +1,17 @@
-function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
+function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	if not itemClass then
-		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, item " .. itemClass .. " isn't valid" ) 
-		return Promise.Reject()
-	end
-	local price = itemClass:GetBuyPrice( ply )
-	if not price then
-		KLogf( 3, "Player %s tried to buy item %s which cannot be bought! Hacking Attempt?", ply:Nick(), itemClass )
-		return Promise.Reject()	
+		return Promise.Reject( "Couldn't buy item, item " .. itemClassName .. " isn't valid" )
 	end
 	
-	if #ply.PS2_Inventory:getItems( ) >= ply.PS2_Inventory.numSlots then
-		self:startView( "Pointshop2View", "displayError", ply, "Couldn't buy item, your inventory is full!" ) 
-		return Promise.Reject()
+	if not ply:PS2_HasInventorySpace( 1 ) then
+		return Promise.Reject( "Inventory full" )
 	end
 	
+	return Promise.Resolve( )
+end
+
+function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, price, suppressNotify )
 	--[[
 		Wrap everything into a blocking transaction to make sure we don't get duplicate stuff
 		if mysql takes a little longer to respond and prevent any lua from queueing querys in 
@@ -22,44 +19,57 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
 		TODO: look into alternative methods of locking the database as this is a bit performance heavy because it blocks the game thread, 
 	]]--
 	LibK.SetBlocking( true )
-	Pointshop2.DB.DoQuery( "BEGIN" )
-	:Fail( function( errid, err ) 
-		KLogf( 2, "Error starting transaction: %s", err )
-		self:startView( "Pointshop2View", "displayError", ply, "A Technical error occured, your purchase was not carried out." )
-		error( "Error starting transaction:", err )
-	end )
 	
-	if currencyType == "points" and price.points and ply.PS2_Wallet.points >= price.points then
-		ply.PS2_Wallet.points = ply.PS2_Wallet.points - price.points
-	elseif currencyType == "premiumPoints" and price.premiumPoints and ply.PS2_Wallet.premiumPoints >= price.premiumPoints then
-		ply.PS2_Wallet.premiumPoints = ply.PS2_Wallet.premiumPoints - price.premiumPoints
-	else
-		self:startView( "Pointshop2View", "displayError", ply, "You cannot purchase this item (insufficient " .. currencyType .. ")" )
-		return Promise.Reject()
-	end
-	
-	return ply.PS2_Wallet:save( )
+	return Pointshop2.DB.DoQuery( "BEGIN" )
 	:Then( function( )
-		return self:easyAddItem( ply, itemClassName, {
+		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] - price
+		return ply.PS2_Wallet:save( )
+	end )
+	:Then( function( )
+		return self:easyAddItem( ply, itemClass.className, {
 			time = os.time(),
-			amount = price[currencyType],
+			amount = price,
 			currency = currencyType, 
 			origin = "SHOP"
-		} )
+		}, suppressNotify )
 	end )
 	:Then( function( item )
-		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClass )
-		hook.Run( "PS2_PurchasedItem", ply, itemClass )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
+		
 		self:sendWallet( ply )
 		return item
 	end, function( errid, err )
-		KLogf( 2, "Error saving item purchase: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		LibK.SetBlocking( false )
+	end )
+end
+
+function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
+	return self:isValidPurchase( ply, itemClassName )
+	:Then( function( )
+		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+		local price = itemClass:GetBuyPrice( ply )
+		if not price then
+			KLogf( 3, "Player %s tried to buy item %s which cannot be bought! Hacking Attempt?", ply:Nick(), itemClass )
+			return Promise.Reject( "Item %s cannot be bought!" )
+		end
 		
-		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured (2), your purchase was not carried out." )
+		if currencyType == "points" and price.points and ply.PS2_Wallet.points < price.points  or
+		   currencyType == "premiumPoints" and price.premiumPoints and ply.PS2_Wallet.premiumPoints < price.premiumPoints
+		then
+			return Promise.Reject( "You cannot purchase this item (insufficient " .. currencyType .. ")" )
+		end
+		
+		return self:internalBuyItem( ply, itemClass, currencyType, price[currencyType] )
+	end )
+	:Then( function( item )
+		KLogf( 4, "Player %s purchased item %s", ply:Nick( ), itemClassName )
+		hook.Run( "PS2_PurchasedItem", ply, itemClassName )
+		return item
+	end, function( errid, err )
+		KLogf( 2, "Error saving item purchase: %s", err or errid )
+		return Promise.Reject( "A technical error occured (2), your purchase was not carried out. " .. ( err or errid or "" ) )
 	end )
 end
 
@@ -69,9 +79,20 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 	:Then( function( )
 		local item = itemClass:new( )
 		local price = itemClass.Price
+		local currencyType, amount
+		if price.points then
+			currencyType = "points"
+			amount = price.points
+		elseif price.premiumPoints then
+			currencyType = "premiumPoints"
+			amount = price.premiumPoints
+		else
+			currencyType = "points"
+			amount = 0
+		end
 		item.purchaseData = purchaseData or {
 			time = os.time(),
-			amount = price[currencyType],
+			amount = amount,
 			currency = currencyType,
 			origin = "LUA"
 		}

@@ -37,9 +37,15 @@ function ITEM.static:GetBuyPrice( ply )
 	}
 end
 
+function ITEM:isPremiumItem( )
+	return not self.Price.points and self.Price.premiumPoints
+end
+
 function ITEM:GetSellPrice( ply )
 	--New way
 	if self.purchaseData then
+		self.purchaseData.amount = self.purchaseData.amount or 0
+		self.purchaseData.currency = self.purchaseData.currency or "points"
 		return math.floor( self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), self.purchaseData.currency		
 	end
 	
@@ -52,15 +58,7 @@ function ITEM:GetSellPrice( ply )
 end
 
 function ITEM:CanBeSold( )
-	if self.class.Price.points then
-		return true	
-	end
-	if self.class.Price.premiumPoints then
-		if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.AllowPremptsSale" ) then
-			return true	
-		end
-	end
-	return false
+	return true
 end
 
 function ITEM:OnPurchased( )

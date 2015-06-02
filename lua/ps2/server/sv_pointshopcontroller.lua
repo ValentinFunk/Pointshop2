@@ -545,13 +545,16 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 	end )
 end
 
-function Pointshop2Controller:moduleItemsChanged( )
+function Pointshop2Controller:moduleItemsChanged( outfitsChanged )
 	for k, v in pairs( player.GetAll( ) ) do
 		v.outfitsReceivedPromise = Deferred( )
 	end
 	
 	return self:loadModuleItems( )
 	:Then( function( )
+		if outfitsChanged == false then
+			return Promise.Resolve( )
+		end
 		return self:loadOutfits( )
 	end )
 	:Then( function( )
@@ -559,7 +562,14 @@ function Pointshop2Controller:moduleItemsChanged( )
 	end )
 	:Done( function( )
 		for k, v in pairs( player.GetAll( ) ) do
-			v.outfitsReceivedPromise:Done( function( )
+			Promise.Resolve( )
+			:Then( function( )
+				if outfitsChanged == false then
+					return Promise.Resolve( )
+				end
+				return v.outfitsReceivedPromise
+			end )
+			:Done( function( )
 				self:sendDynamicInfo( v )
 			end )
 		end
