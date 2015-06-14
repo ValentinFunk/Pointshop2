@@ -6,7 +6,7 @@ function PANEL:OnSelected( )
 	
 	for k = 0, Pointshop2.previewPanel.Entity:GetNumBodyGroups( ) - 1 do
 		if ( Pointshop2.previewPanel.Entity:GetBodygroupCount( k ) <= 1 ) then continue end
-		Pointshop2.previewPanel.Entity:SetBodygroup( k, self.bodyGroups[ k + 1 ] or 0 )
+		Pointshop2.previewPanel.Entity:SetBodygroup( k, self.bodyGroups[ k + 1 ] or 0 ) 
 	end
 	
 	if Pointshop2.previewPanel.Entity:SkinCount( ) - 1 > 0 then
