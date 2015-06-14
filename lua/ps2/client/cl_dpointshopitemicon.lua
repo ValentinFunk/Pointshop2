@@ -53,7 +53,7 @@ function PANEL:SetItemClass( itemClass )
 	
 	if itemClass:isPremiumItem( ) then
 		local icon = self.iconContainer:Add( "DImage" )
-		icon:SetMaterial( Material( "pointshop2/donation.png", "noclamp smooth" ) )
+		icon:SetMaterial( Material( "pointshop2/donation_small.png", "noclamp smooth" ) )
 		icon:SetSize( 12, 12 )
 	end
 	

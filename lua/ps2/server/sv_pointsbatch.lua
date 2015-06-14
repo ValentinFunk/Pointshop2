@@ -75,6 +75,10 @@ function PointsBatch:finish( )
 	Pointshop2.DB.DoQuery( query )
 	:Done( function( )
 		for ply, points in pairs( self.pointsChanges ) do
+			if not ply.PS2_Wallet then
+				continue
+			end
+			
 			ply.PS2_Wallet[self.currencyType] = ply.PS2_Wallet[self.currencyType] + points
 			Pointshop2Controller:getInstance( ):broadcastWalletChanges( ply.PS2_Wallet )
 		end

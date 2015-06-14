@@ -73,6 +73,14 @@ function ITEM:OnEquip( )
 	end
 	
 	local ply = self:GetOwner()
+	if not self:GetOwner() then
+		timer.Simple( 1, function() 
+			if IsValid( self:GetOwner( ) ) then
+				self:OnEquip( )
+			end
+		end )
+		return
+	end
 	
 	if not ply:Alive( ) then
 		return

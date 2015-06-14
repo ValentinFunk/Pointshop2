@@ -55,7 +55,7 @@ function PANEL:Init( )
 	end
 	
 	self.pointsMoneyPanel.icon = vgui.Create( "DImage", self.pointsMoneyPanel )
-	self.pointsMoneyPanel.icon:SetMaterial( Material( "pointshop2/dollar103.png", "noclamp smooth" ) )
+	self.pointsMoneyPanel.icon:SetMaterial( Material( "pointshop2/dollar103_small.png", "noclamp smooth" ) )
 	self.pointsMoneyPanel.icon:Dock( LEFT )
 	self.pointsMoneyPanel.icon:DockMargin( 0, 2, 5, 2 )
 	self.pointsMoneyPanel.icon:SetSize( 20, 20 )
@@ -77,7 +77,7 @@ function PANEL:Init( )
 	end
 	
 	self.donationMoneyPanel.icon = vgui.Create( "DImage", self.donationMoneyPanel )
-	self.donationMoneyPanel.icon:SetMaterial( Material( "pointshop2/donation.png", "noclamp smooth" ) )
+	self.donationMoneyPanel.icon:SetMaterial( Material( "pointshop2/donation_small.png", "noclamp smooth" ) )
 	self.donationMoneyPanel.icon:SetSize( 22, 22 )
 	self.donationMoneyPanel.icon:Dock( LEFT )
 	self.donationMoneyPanel.icon:DockMargin( 0, 2, 5, 2 )
