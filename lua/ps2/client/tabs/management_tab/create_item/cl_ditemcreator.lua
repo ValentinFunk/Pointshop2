@@ -1,76 +1,10 @@
 local PANEL = {}
 
 function PANEL:Init( )
-	self:SetTitle( "Create a Pointshop Item" )
-	self:SetSize( 410, 320 )
-
-	self.scroll = vgui.Create( "DScrollPanel", self )
-	self.scroll:Dock( FILL )
-	
-	self.actual = vgui.Create( "DItemCreator_Actual", self.scroll )
-	self.actual:Dock( TOP )
-	
-	timer.Simple( 0.01, function( )
-		self:Center( )
-	end )
-	
-	function self:OnChildAdded( child )
-		child:SetParent( self.actual )
-	end
-end
-
-function PANEL:SetItemBase( itembase )
-	self.actual:SetItemBase( itembase )
-end
-
-function PANEL:NotifyLoading( bIsLoading )
-	self.actual:NotifyLoading( bIsLoading )
-end
-
-function PANEL:startStage( title )
-	self.actual:startStage( title )
-end
-
-function PANEL:addSectionTitle( text )
-	self.actual:addSectionTitle( text )
-end
-
-function PANEL:Validate( saveTable )	
-	return self.actual:Validate( saveTable )
-end
-
-function PANEL:SaveItem( )
-	return self.actual:SaveItem( )
-end
-
-function PANEL:EditItem( persistence, itemClass )
-	return self.actual:EditItem( persistence, itemClass )
-end
-
-function PANEL:PerformLayout( )
-	DFrame.PerformLayout( self )
-	
-	self:SetTall( math.Clamp( self.actual:GetTall( ) + 35, 320, ScrH( ) ) )
-end
-
-function PANEL:addFormButton( btn )
-	return self.actual:addFormButton( btn )
-end
-
-function PANEL:addFormItem( desc, panel )
-	return self.actual:addFormItem( desc, panel )
-end
-
-vgui.Register( "DItemCreator", PANEL, "DFrame" )
-
-
-local PANEL = {}
-
-function PANEL:Paint( )
-end
-
-function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
+	
+	self:SetTitle( "Create a Pointshop Item" )
+	self:SetSize( 410, 308 )
 	
 	self.loadingNotifier = vgui.Create( "DLoadingNotifier", self )
 	self.loadingNotifier:Dock( TOP )
@@ -234,6 +168,8 @@ function PANEL:addSectionTitle( text )
 end
 
 function PANEL:PerformLayout( )
+	DFrame.PerformLayout( self )
+	
 	local maxW = 0
 	for k, v in pairs( self.items ) do
 		if v:GetLabelWidth( ) > maxW then
@@ -317,4 +253,4 @@ function PANEL:EditItem( persistence, itemClass )
 	self.pricePremium:SetPrice( persistence.pricePremium )
 end
 
-vgui.Register( "DItemCreator_Actual", PANEL, "DPanel" )
+vgui.Register( "DItemCreator", PANEL, "DFrame" )
