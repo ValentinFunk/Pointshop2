@@ -10,7 +10,7 @@ function Pointshop2Controller:loadOutfits( )
 		
 		local data = LibK.von.serialize( { outfitsAssoc } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "outfits", data )
-		resource:SetVersionHash( versionHash )
+		resource:SetVersionHash( tostring( versionHash ) )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Outfit package loaded, version " .. versionHash .. " " .. #outfitsAssoc .. " outfits." )
 		
