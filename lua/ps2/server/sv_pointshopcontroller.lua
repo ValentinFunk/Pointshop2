@@ -362,6 +362,9 @@ end
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	timer.Simple( 1, function( )
+		if not IsValid( ply ) then
+			KLogf( 4, "[PS2] Loading a player failed, possible disconnect" )
+		end
 		initPlayer( ply )
 	end )
 end )

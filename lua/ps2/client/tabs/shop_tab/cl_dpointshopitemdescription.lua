@@ -91,11 +91,11 @@ function PANEL:Init( )
 	
 	function self.buttonsPanel:AddBuyButtons( priceInfo )
 		if priceInfo.points then
-			self:AddBuyOption( "pointshop2/dollar103.png", priceInfo.points, "points" )
+			self:AddBuyOption( "pointshop2/dollar103_small.png", priceInfo.points, "points" )
 		end
 		
 		if priceInfo.premiumPoints then
-			self:AddBuyOption( "pointshop2/donation.png", priceInfo.premiumPoints, "premiumPoints" )
+			self:AddBuyOption( "pointshop2/donation_small.png", priceInfo.premiumPoints, "premiumPoints" )
 		end
 	end
 	

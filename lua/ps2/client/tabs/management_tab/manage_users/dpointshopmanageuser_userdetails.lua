@@ -109,8 +109,8 @@ function PANEL:Init( )
 		
 		return pnl
 	end
-	self.pointsPanel = self.walletInfo:AddCurrencyPanel( "points", "Points", 0, "pointshop2/dollar103.png" )
-	self.premiumPointsPanel = self.walletInfo:AddCurrencyPanel( "premiumPoints", "Premium Points", 0, "pointshop2/donation.png" )
+	self.pointsPanel = self.walletInfo:AddCurrencyPanel( "points", "Points", 0, "pointshop2/dollar103_small.png" )
+	self.premiumPointsPanel = self.walletInfo:AddCurrencyPanel( "premiumPoints", "Premium Points", 0, "pointshop2/donation_small.png" )
 	hook.Add( "PS2_WalletChanged", self, self.PlayerWalletChanged )
 
 	self.invCategory, self.invCategoryPnl = self:AddCategory( "Player Inventory" )

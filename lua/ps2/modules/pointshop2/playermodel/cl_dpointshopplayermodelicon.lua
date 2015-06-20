@@ -1,16 +1,16 @@
 local PANEL = {}
 
 function PANEL:OnSelected( )
-	Pointshop2.previewPanel:SetModel( self.itemClass.playerModel )
+	local itemClass = self.itemClass
+	Pointshop2.previewPanel:SetModel( itemClass.playerModel )
 	
-	for i = 0, Pointshop2.previewPanel.Entity:GetNumBodyGroups( ) - 1 do
-		if Pointshop2.previewPanel.Entity:GetBodygroupCount( i ) <= 1 then 
-			continue 
-		end
-		Pointshop2.previewPanel.Entity:SetBodygroup( i, self.bodyGroups[i] )
+	for k = 0, Pointshop2.previewPanel.Entity:GetNumBodyGroups( ) - 1 do
+		if ( Pointshop2.previewPanel.Entity:GetBodygroupCount( k ) <= 1 ) then continue end
+		Pointshop2.previewPanel.Entity:SetBodygroup( k, self.bodyGroups[ k + 1 ] or 0 )
 	end
+	
 	if Pointshop2.previewPanel.Entity:SkinCount( ) - 1 > 0 then
-		Pointshop2.previewPanel.Entity:SetSkin( self.itemClass.skin )
+		Pointshop2.previewPanel.Entity:SetSkin( itemClass.skin )
 	end
 end
 
