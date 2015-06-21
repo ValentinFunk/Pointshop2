@@ -52,7 +52,7 @@ function PANEL:CreateSaveNotification()
 	hook.Add( "PS2_PreReload", SavePanel, function( SavePanel )
 		if SavePanel:IsVisible( ) then
 			SavePanel:SetVisible( false )
-			SavePanel.DoClick( )
+			-- SavePanel.DoClick( )
 		end
 	end )
 		
