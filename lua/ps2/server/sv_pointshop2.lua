@@ -47,26 +47,46 @@ end
 	The function doesn't consider Lua defined items and detects them as DB errors, be very careful with that!
 */
 function Pointshop2.FixDatabase( )
+	Promise.Resolve( )
 	-- 1: Find all itemPersistences without a valid parent base persistence
-	local promises = {}
-	local persistences = Pointshop2Controller:getPersistenceModels( )
-	for _, persistenceModel in pairs( persistences ) do
-		local promise = persistenceModel.getDbEntries( "WHERE 1" )
-		:Then( function( persistentItems ) 
-			local promises = {}
-			for _, item in pairs( persistentItems ) do
-				if not item.ItemPersistence then
-					KLogf( 2, "[PS2-FIX] Found item persistence with invalid parent persistence, removing it, class %s, id %i", persistenceModel.name, item.id )
-					table.insert( promises, item:remove( ) )
+	:Then( function()
+		return Pointshop2Controller:getPersistenceModels( )
+	end )
+	:Then( function( persistences )
+		local promises = {}
+		for _, persistenceModel in pairs( persistences ) do
+			local promise = persistenceModel.getDbEntries( "WHERE 1" )
+			:Then( function( persistentItems ) 
+				local promises = {}
+				for _, item in pairs( persistentItems ) do
+					if not item.ItemPersistence then
+						KLogf( 2, "[PS2-FIX] Found item persistence with invalid parent persistence, removing it, class %s, id %i", persistenceModel.name, item.id )
+						table.insert( promises, item:remove( ) )
+					end
 				end
-			end
-			return WhenAllFinished( promises )
-		end )
-		table.insert( promises, promise )
-	end
+				return WhenAllFinished( promises )
+			end )
+			table.insert( promises, promise )
+		end
+		return WhenAllFinished( promises )
+	end )
 	
+	-- 1.1: Find all hats with broken settings
+	:Then( function( )
+		return Pointshop2.HatPersistence.getAll( )
+	end )
+	:Then( function( persistentItems )
+		local promises = {}
+		for k, item in pairs( persistentItems ) do
+			if not item.iconInfo.inv or not item.iconInfo.shop then
+				KLogf( 2, "[PS2-FIX] Found hat persistence with invalid icon properties, id %i", item.id )
+				table.insert( promises, Pointshop2.ItemPersistence.removeWhere{ id = item.ItemPersistence.id } )
+			end
+		end
+		return WhenAllFinished( promises )
+	end )
+
 	-- 2: Find all items that don't have a valid class (base persistence)
-	WhenAllFinished( promises ) 
 	:Then( function( )
 		return KInventory.Item.getAll( 0 ) --Don't resolve relationships
 	end )
