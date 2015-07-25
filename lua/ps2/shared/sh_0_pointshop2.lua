@@ -137,6 +137,10 @@ function Pointshop2.GetPersistenceClassForItemClass( itemClass )
 end
 
 function Pointshop2.GetItemInSlot( ply, slotName )
+	if not ply.PS2_Slots then
+		return nil
+	end
+	
 	if CLIENT then
 		return ply.PS2_Slots[slotName]
 	end
@@ -175,7 +179,11 @@ function Pointshop2.NotifyGamemodeModuleLoaded( gamemodeName, mod )
 end
 
 function Pointshop2.IsCurrentGamemodePluginPresent( )
-	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )] != nil
+	return Pointshop2.GetCurrentGamemodePlugin( ) != nil
+end
+
+function Pointshop2.GetCurrentGamemodePlugin( )
+	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )]
 end
 
 function Pointshop2.GetCategoryByName( name )
