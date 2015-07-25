@@ -398,7 +398,6 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
 	
 	if Pointshop2.DB.CONNECTED_TO_MYSQL then
-		local query = "INSERT INTO ps2_itemmapping (itemClass, categoryId) VALUES "
 		local mappings = {}
 		local function recursiveAddItems( category )
 			for _, itemClassName in pairs( category.items ) do
@@ -410,8 +409,18 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 			end
 		end
 		recursiveAddItems( categoryItemsTable )
-		query = query .. table.concat( mappings, ", " )
-		Pointshop2.DB.DoQuery( query )
+		
+		-- Prevent error if no mappings are present
+		if #mappings == 0 then
+			return
+		end
+		
+		local splitted = LibK.splitTable( mappings, 50 )
+		for k, mappingsChunk in pairs(splitted) do
+			local query = "INSERT INTO ps2_itemmapping (itemClass, categoryId) VALUES "
+			query = query .. table.concat( mappingsChunk, ", " )
+			Pointshop2.DB.DoQuery( query )
+		end
 	else
 		
 		local mappings = {}
@@ -426,23 +435,35 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 		end
 		recursiveAddItems( categoryItemsTable )
 		
-		local query = Format( 
-			"INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
-			Pointshop2.DB.SQLStr( mappings[1].itemClassName ),
-			tonumber( mappings[1].categoryId )
-		)
-		local mappings2 = {}
-		for i = 2, #mappings do
-			table.insert( mappings2, 
-				Format( "UNION SELECT %s, %i, NULL",
-					Pointshop2.DB.SQLStr( mappings[i].itemClassName ),
-					tonumber( mappings[i].categoryId )
-				)
-			)
+		-- Prevent error if no mappings are present
+		if #mappings == 0 then
+			return
 		end
 		
-		query = query .. table.concat( mappings2, "\n " )
-		Pointshop2.DB.DoQuery( query )
+		local splitted = LibK.splitTable( mappings, 50 )
+		for k, mappingsChunk in pairs( splitted ) do 
+			local query = Format( 
+				"INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
+				Pointshop2.DB.SQLStr( mappingsChunk[1].itemClassName ),
+				tonumber( mappingsChunk[1].categoryId )
+			)
+			
+			if #mappingsChunk > 1 then
+				local queryParts = {}
+				for i = 2, #mappingsChunk do
+					table.insert( queryParts, 
+						Format( "UNION SELECT %s, %i, NULL",
+							Pointshop2.DB.SQLStr( mappings[i].itemClassName ),
+							tonumber( mappingsChunk[i].categoryId )
+						)
+					)
+				end
+				
+				query = query .. table.concat( queryParts, "\n " )
+			end
+			
+			Pointshop2.DB.DoQuery( query )
+		end
 	end
 end
 
