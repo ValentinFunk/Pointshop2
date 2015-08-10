@@ -54,7 +54,9 @@ else
 			return
 		end
 		if ply == self:GetOwner( ) then
-			self:ClientRPC( "AttachOutfit" )
+			timer.Simple( 0.5, function( )
+				self:ClientRPC( "AttachOutfit" )
+			end )
 		end
 	end
 	Pointshop2.AddItemHook( "PlayerSpawn", ITEM )
