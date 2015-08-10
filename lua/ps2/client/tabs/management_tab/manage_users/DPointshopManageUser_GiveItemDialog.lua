@@ -57,6 +57,9 @@ function PANEL:Init( )
 			Derma_Message( err, "Error" )
 		end )
 		:Always( function( )
+			if IsValid( self.parent ) then
+				self.parent:RefreshInventory( )
+			end
 			self:Remove( )
 		end )
 	end
