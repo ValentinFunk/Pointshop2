@@ -435,34 +435,24 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 		end
 		recursiveAddItems( categoryItemsTable )
 		
+		for _, itemClassName in ipairs( mappings ) do
+			print( "\t" .. Pointshop2.GetItemClassByName( itemClassName.itemClassName ):GetPrintName(), itemClassName.itemClassName )
+		end
+		
 		-- Prevent error if no mappings are present
 		if #mappings == 0 then
 			return
 		end
 		
 		local splitted = LibK.splitTable( mappings, 50 )
+		local lastQuery = Promise.Resolve()
 		for k, mappingsChunk in pairs( splitted ) do 
-			local query = Format( 
-				"INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
-				Pointshop2.DB.SQLStr( mappingsChunk[1].itemClassName ),
-				tonumber( mappingsChunk[1].categoryId )
-			)
-			
-			if #mappingsChunk > 1 then
-				local queryParts = {}
-				for i = 2, #mappingsChunk do
-					table.insert( queryParts, 
-						Format( "UNION SELECT %s, %i, NULL",
-							Pointshop2.DB.SQLStr( mappings[i].itemClassName ),
-							tonumber( mappingsChunk[i].categoryId )
-						)
-					)
-				end
-				
-				query = query .. table.concat( queryParts, "\n " )
-			end
-			
-			Pointshop2.DB.DoQuery( query )
+			for k, v in pairs( mappingsChunk ) do
+				Pointshop2.DB.DoQuery( Format( "INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
+					Pointshop2.DB.SQLStr( v.itemClassName ),
+					tonumber( v.categoryId )
+				) )
+			end 
 		end
 	end
 end
