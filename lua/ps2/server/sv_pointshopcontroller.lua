@@ -635,7 +635,7 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return
 	end
 	
-	if not LibK.isProperNumber( addition ) then
+	if not LibK.isProperNumber( points ) then
 	KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
 		return
 	end
