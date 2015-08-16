@@ -13,9 +13,15 @@ function PANEL:Init( )
 	self.title:DockMargin( 0, 0, 0, 5 )
 	
 	self.panels = vgui.Create( "DPanel", self )
-	self.panels:Dock( FILL )
+	self.panels:Dock( TOP )
 	self.panels:DockMargin( 5, 5, 5, 5 )
 	self.panels.Paint = function( ) end
+	function self.panels:PerformLayout( )
+		self:SizeToChildren( false, true )
+	end
+end
+function PANEL:PerformLayout( )
+	self:SizeToChildren( false, true )
 end
 
 function PANEL:AddStep( name, panel )
@@ -28,11 +34,13 @@ function PANEL:AddStep( name, panel )
 	panel:SetParent( self.panels )
 	panel:SetVisible( false)
 	panel:SetZPos( -100 )
-	panel:Dock( FILL )
+	panel:Dock( TOP )
 	
 	if self.currentStep == 0 then
 		self:NextStep( )
 	end
+	
+	self:InvalidateLayout( )
 	
 	return index, self.steps[index]
 end
@@ -53,23 +61,27 @@ end
 
 function PANEL:PreviousStep( )
 	if self.currentStep == 1 then
-		error( "Underflow" )
+		error( "Can't go to previous step, no more steps left", 1 )
 	end
 	
-	self.currentStep = self.currentStep - 1
-	self:Update( )
-	
-	self:OnStepChanged( )
+	self:GoToStep( self.currentStep - 1 )
 end
 
 function PANEL:NextStep( )
 	if #self.steps <= self.currentStep then
-		self:OnCompleted( )
+		return self:OnCompleted( )
 	end
 	
-	self.currentStep = self.currentStep + 1
-	self:Update( )
+	self:GoToStep( self.currentStep + 1 )
+end
+
+function PANEL:GoToStep( stepNumber )
+	if stepNumber < 1 or stepNumber > #self.steps then
+		error( "Invalid step number given to DStepPanel:GoToStep()", 1 )
+	end
 	
+	self.currentStep = stepNumber
+	self:Update( )
 	self:OnStepChanged( )
 end
 
