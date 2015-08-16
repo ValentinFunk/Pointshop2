@@ -78,6 +78,10 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 		return def:Promise( )
 	end
 	
+	if not LibK.isProperNumber( newValue ) then
+		return Promise.Reject( 0, "Improper number passed" )
+	end
+	
 	local walletPromise = Deferred( ) 
 	local walletFound = false
 	local shouldBlock = Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.ShouldBlock" )

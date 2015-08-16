@@ -58,11 +58,21 @@ function Pointshop2Controller:addToPlayerWallet( ply, currencyType, addition )
 		return def:Promise( )
 	end
 	
+	if not LibK.isProperNumber( addition ) then
+		return Promise.Reject( 0, "Not a proper number" )
+	end
+	
 	if not ply.PS2_Wallet then
 		local def = Deferred( )
 		def:Reject( -3, "Player wallet not loaded" )
 		return def:Promise( )
 	end
+	
+	addition = math.floor( addition )
+	if addition == 0 then
+		return def:Reject( 0, "Can't give 0 points" )
+	end
+	
 	
 	return self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
 	:Done( function( wallet )

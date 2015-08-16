@@ -623,6 +623,8 @@ Pointshop2.SettingsLoadedPromise:Done( function( )
 end )
 
 function Pointshop2Controller:sendPoints( ply, targetPly, points )
+	points = math.floor( points )
+	
 	if points < 0 then
 		KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
 		return
@@ -630,6 +632,11 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 	
 	if points > ply.PS2_Wallet.points then
 		KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
+		return
+	end
+	
+	if not LibK.isProperNumber( addition ) then
+	KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
 		return
 	end
 	
