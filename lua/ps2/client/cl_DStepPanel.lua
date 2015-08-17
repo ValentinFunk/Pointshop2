@@ -13,15 +13,30 @@ function PANEL:Init( )
 	self.title:DockMargin( 0, 0, 0, 5 )
 	
 	self.panels = vgui.Create( "DPanel", self )
-	self.panels:Dock( TOP )
+	self.panels:Dock( FILL )
+	
 	self.panels:DockMargin( 5, 5, 5, 5 )
 	self.panels.Paint = function( ) end
 	function self.panels:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
 end
+
+-- Size to step panels
+function PANEL:SetAdaptiveSize( bAutoSize )
+	if bAutoSize then
+		self.panels:Dock( TOP )
+		self.autoSize = true
+	else
+		self.panels:Dock( FILL )
+		self.autoSize = false
+	end
+end
+
 function PANEL:PerformLayout( )
-	self:SizeToChildren( false, true )
+	if self.autoSize then
+		self:SizeToChildren( false, true )
+	end
 end
 
 function PANEL:AddStep( name, panel )
@@ -34,8 +49,12 @@ function PANEL:AddStep( name, panel )
 	panel:SetParent( self.panels )
 	panel:SetVisible( false)
 	panel:SetZPos( -100 )
-	panel:Dock( TOP )
-	
+	if self.autoSize then
+		panel:Dock( TOP )
+	else
+		panel:Dock( FILL )
+	end
+		
 	if self.currentStep == 0 then
 		self:NextStep( )
 	end

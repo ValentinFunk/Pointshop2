@@ -116,6 +116,10 @@ function PANEL:EditItem( persistence, itemClass )
 	self.pricePremium:SetPrice( persistence.pricePremium )
 end
 
+function PANEL:SetItemBase( itembase )
+	self.itembase = itembase
+end
+
 function PANEL:Paint( )
 
 end
