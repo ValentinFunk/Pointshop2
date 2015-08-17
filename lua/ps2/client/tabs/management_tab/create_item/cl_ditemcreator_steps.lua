@@ -10,6 +10,7 @@ function PANEL:Init( )
 	self.loadingNotifier:Dock( TOP )
 	
 	self.stepsPanel = vgui.Create( "DStepPanel", self )
+	self.stepsPanel:SetAdaptiveSize( true )
 	self.stepsPanel:Dock( TOP )
 	function self.stepsPanel:OnCompleted( )
 		self:GetParent( ):OnCompleted( ) 
@@ -84,6 +85,7 @@ end
 
 function PANEL:SetItemBase( itembase )
 	self.itembase = itembase
+	self.basicSettingsPanel:SetItemBase( itembase )
 end
 
 function PANEL:addFormButton( btn )
