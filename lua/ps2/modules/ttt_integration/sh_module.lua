@@ -108,6 +108,17 @@ MODULE.Settings.Server = {
 		},
 	},
 }
-	
+
+-- For Drops integration: Returns players that can get a drop once the round ends
+function MODULE.GetPlayersForDrops( )
+	local players = {}
+	for k, v in pairs( player.GetAll( ) ) do
+		if v:ShouldScore() then
+			table.insert( players, v )
+		end
+	end
+	return players
+end
+
 Pointshop2.RegisterModule( MODULE )
 Pointshop2.NotifyGamemodeModuleLoaded( "terrortown", MODULE )

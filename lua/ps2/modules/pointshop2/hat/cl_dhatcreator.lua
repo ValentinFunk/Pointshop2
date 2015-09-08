@@ -1,5 +1,17 @@
 local PANEL = {}
 
+function PANEL:Init( )
+	self.modelAndPositioningPanel = vgui.Create( "DItemCreator_HatStage" )
+	self.stepsPanel:AddStep( "Hat Settings", self.modelAndPositioningPanel )
+end
+
+vgui.Register( "DHatCreator", PANEL, "DItemCreator_Steps" )
+
+local PANEL = {}
+
+function PANEL:Paint( )
+end
+
 local function createHatPositioner( parentPanel )
 	local f = vgui.Create( "DHatPositioner" )
 	function f.OnSave( _self, outfit )
@@ -14,9 +26,7 @@ end
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
-	self:addSectionTitle( "Model and Positioning" )
-	
+
 	local openBtn = vgui.Create( "DButton", self )
 	openBtn:SetText( "Open Editor" )
 	openBtn:SetWide( 120 )
@@ -246,11 +256,6 @@ function PANEL:OutfitSaved( outfit )
 end
 
 function PANEL:Validate( saveTable )
-	local succ, err = self.BaseClass.Validate( self, saveTable )
-	if not succ then
-		return false, err
-	end
-	
 	if table.Count( saveTable.outfits ) == 0 then
 		return false, "Please create at least one outfit"
 	end
@@ -267,8 +272,6 @@ function PANEL:Validate( saveTable )
 end
 
 function PANEL:SaveItem( saveTable )
-	self.BaseClass.SaveItem( self, saveTable ) 
-	
 	saveTable.outfits = { }
 	saveTable.outfits[Pointshop2.HatPersistence.ALL_MODELS] = self.baseOutfit
 	
@@ -293,8 +296,6 @@ function PANEL:SaveItem( saveTable )
 end
 
 function PANEL:EditItem( persistence, itemClass )
-	self.BaseClass.EditItem( self, persistence.ItemPersistence, itemClass )
-	
 	self.baseOutfit = itemClass.getBaseOutfit( )
 	for model, outfitId in pairs( itemClass.outfitIds ) do
 		--Don't add the base item to the list
@@ -320,4 +321,4 @@ function PANEL:EditItem( persistence, itemClass )
 	self.invIconEditor:SetPacOutfit( self.baseOutfit )
 end
 
-vgui.Register( "DHatCreator", PANEL, "DItemCreator" )
+vgui.Register( "DItemCreator_HatStage", PANEL, "DItemCreator_Stage" )

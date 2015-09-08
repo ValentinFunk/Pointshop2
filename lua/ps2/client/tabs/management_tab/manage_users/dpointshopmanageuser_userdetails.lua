@@ -246,6 +246,7 @@ function PANEL:OpenGiveItemDialog( )
 	frame:MakePopup( )
 	frame:SetKPlayer( self.playerData )
 	frame:Center( )
+	frame.parent = self
 end
 
 function PANEL:RefreshInventory( )

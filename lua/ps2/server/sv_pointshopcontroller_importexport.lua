@@ -62,69 +62,9 @@ end
 function Pointshop2Controller:exportCategoryOrganization( )
 	return WhenAllFinished{ Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" ), 
 		Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ),
-		Pointshop2.ItemPersistence.getDbEntries( "WHERE 1" )
 	}
-	:Then( function( categories, itemMappings, persistences )
-		--Lookup for classes
-		local persistencesLookup = {}
-		for k, v in pairs( persistences ) do
-			persistencesLookup[v.id] = v
-		end
-	
-		local stack = {}
-		for k, v in pairs( self.itemCategories ) do
-			table.insert( stack, { 
-				self = {
-					id = tonumber( v.id ),
-					label = v.label,
-					icon = v.icon
-				},
-				subcategories = {},
-				items = {},
-				parentId = v.parent
-			} )
-			
-			local item = stack[#stack]
-			for k, dbItemMapping in pairs( self.itemMappings ) do
-				if dbItemMapping.categoryId == item.self.id then
-					table.insert( item.items, dbItemMapping.itemClass )
-				end
-			end
-		end
-		
-		local function findAndAddToParent( startNode, parentId, subcategory )
-			if startNode.self.id ==  parentId then
-				table.insert(startNode.subcategories, subcategory)
-				return true
-			end
-
-			for id, category in pairs( startNode.subcategories ) do
-				if findAndAddToParent( category, parentId, subcategory ) then
-					return true
-				end
-			end
-		end
-		
-		local n = 1
-		local tree
-		while ( #stack > 0 ) do
-			n = n +1
-			if n > 1000000 then
-				error( "Overflow" )
-				break
-			end
-			
-			local item = table.remove( stack )
-			if not item.parentId then
-				tree = item
-				continue
-			end
-			
-			if not tree or not findAndAddToParent( tree, item.parentId, item ) then
-				table.insert( stack, 1, item )
-				continue
-			end
-		end
+	:Then( function( categories, itemMappings )
+		local tree = Pointshop2.BuildTree( categories, itemMappings )
 		
 		local shopCategories = {}
 		for k, v in pairs( tree.subcategories ) do

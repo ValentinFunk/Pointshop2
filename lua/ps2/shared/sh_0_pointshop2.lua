@@ -137,6 +137,10 @@ function Pointshop2.GetPersistenceClassForItemClass( itemClass )
 end
 
 function Pointshop2.GetItemInSlot( ply, slotName )
+	if not ply.PS2_Slots then
+		return nil
+	end
+	
 	if CLIENT then
 		return ply.PS2_Slots[slotName]
 	end
@@ -175,7 +179,11 @@ function Pointshop2.NotifyGamemodeModuleLoaded( gamemodeName, mod )
 end
 
 function Pointshop2.IsCurrentGamemodePluginPresent( )
-	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )] != nil
+	return Pointshop2.GetCurrentGamemodePlugin( ) != nil
+end
+
+function Pointshop2.GetCurrentGamemodePlugin( )
+	return Pointshop2.GamemodeModules[engine.ActiveGamemode( )]
 end
 
 function Pointshop2.GetCategoryByName( name )
@@ -290,4 +298,49 @@ else
 			net.WriteTable( { ... } )
 		net.SendToServer( )
 	end
+end
+
+-- Sorts the tree to make sure categories are in the correct order
+local function recursiveSort( tree )
+	for k, v in pairs( tree.subcategories ) do
+		recursiveSort( v )
+	end
+	table.sort( tree.subcategories, function( a, b )
+		return a.self.id < b.self.id
+	end )
+end
+
+-- This converts the flat category structure as found in the database to a tree representation.
+-- itemMappings is a list of itemMapping DB entries, flatStructure is a list of category db entries
+function Pointshop2.BuildTree( flatStructure, itemMappings )
+	local root
+	local lookup = {}
+	for k, v in pairs( flatStructure ) do
+		local node = { 
+			self = {
+				id = tonumber( v.id ),
+				label = v.label,
+				icon = v.icon
+			},
+			subcategories = {},
+			items = {},
+			parentId = v.parent
+		}
+		lookup[v.id] = node
+		for k, dbItemMapping in pairs( itemMappings ) do
+			if dbItemMapping.categoryId == node.self.id then
+				table.insert( node.items, dbItemMapping.itemClass )
+			end
+		end
+	end
+	for k, v in pairs( lookup ) do
+		if lookup[v.parentId] then
+			lookup[v.parentId].subcategories = lookup[v.parentId].subcategories or {}
+			table.insert( lookup[v.parentId].subcategories, v )
+		else
+			root = v
+		end
+	end
+	recursiveSort( root )
+	return root
 end

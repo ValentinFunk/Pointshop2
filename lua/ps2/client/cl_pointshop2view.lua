@@ -187,49 +187,6 @@ function Pointshop2View:startSellItem( item )
 	end )
 end
 
-local function recursiveSort( tree )
-	for k, v in pairs( tree.subcategories ) do
-		recursiveSort( v )
-	end
-	table.sort( tree.subcategories, function( a, b )
-		return a.self.id < b.self.id
-	end )
-end
-
-local function buildTree( flatStructure, itemMappings )
-	local root
-	local lookup = {}
-	for k, v in pairs( flatStructure ) do
-		local node = { 
-			self = {
-				id = tonumber( v.id ),
-				label = v.label,
-				icon = v.icon
-			},
-			subcategories = {},
-			items = {},
-			parentId = v.parent
-		}
-		lookup[v.id] = node
-		for k, dbItemMapping in pairs( itemMappings ) do
-			if dbItemMapping.categoryId == node.self.id then
-				table.insert( node.items, dbItemMapping.itemClass )
-			end
-		end
-	end
-	for k, v in pairs( lookup ) do
-		if lookup[v.parentId] then
-			lookup[v.parentId].subcategories = lookup[v.parentId].subcategories or {}
-			table.insert( lookup[v.parentId].subcategories, v )
-		else
-			root = v
-		end
-	end
-	recursiveSort( root )
-	return root
-end
-
-
 function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, itemProperties )
 	KLogf( 5, "[PS2] Received Dynamic Properties, %i items in %i categories (%i props)", #itemMappings, #itemCategories, #itemProperties )
 	self.itemMappings = itemMappings
@@ -245,7 +202,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	
 	local startTime = SysTime( )
-	local tree = buildTree( self.itemCategories, self.itemMappings )
+	local tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
 	KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	
 	self.categoryItemsTable = tree or {}

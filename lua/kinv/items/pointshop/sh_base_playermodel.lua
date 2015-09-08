@@ -30,6 +30,7 @@ function ITEM:ApplyModel( )
 	end
 	
 	ply:SetModel( self.playerModel )
+	ply:SetupHands()
 	
 	local groups = string.Explode( " ", self.bodygroups ) 
 	for k = 0, ply:GetNumBodyGroups( ) - 1 do

@@ -5,10 +5,11 @@ end
 
 function PANEL:OnMousePressed( )
 	local creator = vgui.Create( self.itemInfo.creator )
-	creator:Center( )
 	creator:MakePopup( )
 	creator:SetItemBase( self.itemInfo.base )
 	creator:SetSkin( Pointshop2.Config.DermaSkin )
+	creator:InvalidateLayout( true )
+	creator:Center( )
 end
 
 function PANEL:SetItemInfo( itemInfo )

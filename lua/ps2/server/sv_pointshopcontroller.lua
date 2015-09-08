@@ -398,7 +398,6 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
 	
 	if Pointshop2.DB.CONNECTED_TO_MYSQL then
-		local query = "INSERT INTO ps2_itemmapping (itemClass, categoryId) VALUES "
 		local mappings = {}
 		local function recursiveAddItems( category )
 			for _, itemClassName in pairs( category.items ) do
@@ -410,8 +409,18 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 			end
 		end
 		recursiveAddItems( categoryItemsTable )
-		query = query .. table.concat( mappings, ", " )
-		Pointshop2.DB.DoQuery( query )
+		
+		-- Prevent error if no mappings are present
+		if #mappings == 0 then
+			return
+		end
+		
+		local splitted = LibK.splitTable( mappings, 50 )
+		for k, mappingsChunk in pairs(splitted) do
+			local query = "INSERT INTO ps2_itemmapping (itemClass, categoryId) VALUES "
+			query = query .. table.concat( mappingsChunk, ", " )
+			Pointshop2.DB.DoQuery( query )
+		end
 	else
 		
 		local mappings = {}
@@ -426,23 +435,25 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 		end
 		recursiveAddItems( categoryItemsTable )
 		
-		local query = Format( 
-			"INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
-			Pointshop2.DB.SQLStr( mappings[1].itemClassName ),
-			tonumber( mappings[1].categoryId )
-		)
-		local mappings2 = {}
-		for i = 2, #mappings do
-			table.insert( mappings2, 
-				Format( "UNION SELECT %s, %i, NULL",
-					Pointshop2.DB.SQLStr( mappings[i].itemClassName ),
-					tonumber( mappings[i].categoryId )
-				)
-			)
+		for _, itemClassName in ipairs( mappings ) do
+			print( "\t" .. Pointshop2.GetItemClassByName( itemClassName.itemClassName ):GetPrintName(), itemClassName.itemClassName )
 		end
 		
-		query = query .. table.concat( mappings2, "\n " )
-		Pointshop2.DB.DoQuery( query )
+		-- Prevent error if no mappings are present
+		if #mappings == 0 then
+			return
+		end
+		
+		local splitted = LibK.splitTable( mappings, 50 )
+		local lastQuery = Promise.Resolve()
+		for k, mappingsChunk in pairs( splitted ) do 
+			for k, v in pairs( mappingsChunk ) do
+				Pointshop2.DB.DoQuery( Format( "INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
+					Pointshop2.DB.SQLStr( v.itemClassName ),
+					tonumber( v.categoryId )
+				) )
+			end 
+		end
 	end
 end
 
@@ -612,6 +623,8 @@ Pointshop2.SettingsLoadedPromise:Done( function( )
 end )
 
 function Pointshop2Controller:sendPoints( ply, targetPly, points )
+	points = math.floor( points )
+	
 	if points < 0 then
 		KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
 		return
@@ -619,6 +632,11 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 	
 	if points > ply.PS2_Wallet.points then
 		KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
+		return
+	end
+	
+	if not LibK.isProperNumber( points ) then
+	KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
 		return
 	end
 	
