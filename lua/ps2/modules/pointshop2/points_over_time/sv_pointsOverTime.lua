@@ -1,4 +1,6 @@
 function Pointshop2.UpdatePointsOverTime( )
+	Pointshop2.StandardPointsBatch:begin( )
+	
 	local groupMultipliers = Pointshop2.GetSetting( "Pointshop 2", "PointsOverTime.GroupMultipliers" )
 	local points = Pointshop2.GetSetting( "Pointshop 2", "PointsOverTime.Points" )
 	for k, ply in pairs( player.GetAll( ) ) do
@@ -23,6 +25,8 @@ function Pointshop2.UpdatePointsOverTime( )
 			ply:PS2_AddStandardPoints( points, "Playing on the Server" )
 		end
 	end
+	
+	Pointshop2.StandardPointsBatch:finish( )
 end
  
 function Pointshop2.RegisterPOTtimer( )
