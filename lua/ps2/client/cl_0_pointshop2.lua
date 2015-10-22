@@ -13,7 +13,7 @@ function Pointshop2:OpenMenu( )
 	Pointshop2.Menu:MakePopup( )
 	Pointshop2.Menu:SetKeyboardInputEnabled( false )
 	Pointshop2.Menu:SetMouseInputEnabled( true )
-	
+
 	gui.EnableScreenClicker( true )
 end
 
@@ -23,13 +23,13 @@ end
 -----------------------------------------------------------]]
 local function PointshopMenuKeyboardFocusOn( pnl )
 	if not ValidPanel( Pointshop2.Menu ) then
-		return 
+		return
 	end
-	
-	if IsValid( pnl ) and not pnl:HasParent( Pointshop2.Menu ) then 
-		return 
+
+	if IsValid( pnl ) and not pnl:HasParent( Pointshop2.Menu ) then
+		return
 	end
-	
+
 	Pointshop2.Menu:StartKeyFocus( pnl )
 end
 hook.Add( "OnTextEntryGetFocus", "PointshopMenuKeyboardFocusOn", PointshopMenuKeyboardFocusOn )
@@ -40,20 +40,20 @@ hook.Add( "OnTextEntryGetFocus", "PointshopMenuKeyboardFocusOn", PointshopMenuKe
 -----------------------------------------------------------]]
 local function PointshopMenuKeyboardFocusOff( pnl )
 	if not ValidPanel( Pointshop2.Menu ) then
-		return 
+		return
 	end
-	
-	if IsValid( pnl ) and not pnl:HasParent( Pointshop2.Menu ) then 
-		return 
+
+	if IsValid( pnl ) and not pnl:HasParent( Pointshop2.Menu ) then
+		return
 	end
-	
+
 	Pointshop2.Menu:EndKeyFocus( pnl )
 end
 hook.Add( "OnTextEntryLoseFocus", "PointshopMenuKeyboardFocusOff", PointshopMenuKeyboardFocusOff )
 
 function Pointshop2:CloseMenu( )
 	if not IsValid( Pointshop2.Menu ) then
-		return 
+		return
 	end
 	Pointshop2.Menu:SetVisible( false )
 	if LibK.Debug then
@@ -92,7 +92,7 @@ function Pointshop2:GetPreviewModel( )
 	if previewInfo then
 		return previewInfo
 	end
-	
+
 	if self:IsPlayerModelEquipped( ) then
 		local playerModelItem = LocalPlayer( ).PS2_Slots["Model"]
 		return {
@@ -101,7 +101,7 @@ function Pointshop2:GetPreviewModel( )
 			bodygroups = playerModelItem.bodygroups
 		}
 	end
-	
+
 	return {
 		model = LocalPlayer( ):GetModel( ),
 		bodygroups = "0",
@@ -124,10 +124,14 @@ concommand.Add( "pointshop2_reload", function( )
 	end )
 end )
 
+concommand.Add( "pointshop2_toggle", function()
+	Pointshop2View:getInstance( ):toggleMenu( )
+end )
+
 -- Hide PAC Parts on First Person spectated player
 function Pointshop2.HidePacOnSpectate( )
-	if IsValid( LocalPlayer( ).lastSpecTarget ) 
-		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE 
+	if IsValid( LocalPlayer( ).lastSpecTarget )
+		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE
 	then
 		pac.ShowEntityParts( LocalPlayer( ).lastSpecTarget )
 		for k, v in pairs( LocalPlayer( ).lastSpecTarget.partsHidden or {} ) do
