@@ -12,7 +12,7 @@ local function addCsLuaRecursive( folder )
 			AddCSLuaFile( fullpath )
 		end
 	end
-	
+
 	for k, v in pairs( folders ) do
 		addCsLuaRecursive( folder .. "/" .. v )
 	end
@@ -24,8 +24,8 @@ LibK.InitializeAddon{
     author = "Kamshak",                   --Name of the author
     luaroot = "ps2",                      --Folder that contains the client/shared/server structure relative to the lua folder,
 	loadAfterGamemode = false,
-	version = "2.2.5",
-	requires = { "KInventory" }	
+	version = "2.3.0",
+	requires = { "KInventory" }
 }
 
 LibK.addReloadFile( "autorun/pointshop2_init.lua" )
