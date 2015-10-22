@@ -34,15 +34,19 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 		return
 	end
 
+    local promises = {}
 	for k, v in pairs( tables ) do
-        DB.TableExists( v )
+        table.insert( promises, DB.TableExists( v )
         :Then( function( exists )
             if exists then
                 DB.DoQuery("ALTER TABLE " .. v .. " ENGINE=InnoDB;")
                 KLogf(4, "Converted to InnoDB: %s", v)
             end
-        end )
+        end ) )
     end
+    WhenAllFinished(promises):Done(function()
+        def:Resolve()
+    end)
 end )
 
 DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
