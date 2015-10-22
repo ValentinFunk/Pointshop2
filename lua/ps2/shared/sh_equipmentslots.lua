@@ -31,7 +31,6 @@ end
 if CLIENT then
 	function Pointshop2.FindSlotThatContains(item)
 		for slotName, itemInSlot in pairs(LocalPlayer().PS2_Slots) do
-			print(slotName, itemInSlot:GetPrintName(), item:GetPrintName())
 			if itemInSlot == item then
 				return slotName
 			end
