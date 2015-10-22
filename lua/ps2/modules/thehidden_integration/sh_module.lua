@@ -28,9 +28,9 @@ MODULE.Settings.Server = {
 		},
 
 		Enable = {
-			value = 250,
-			label = "Give Humans PoT",
-			tooltip = "Gives players that are not The Hidden survival points.",
+			value = true,
+			label = "Enable",
+			tooltip = "Gives players that are not The Hidden survival points over time.",
 		},
 
 		Points = {

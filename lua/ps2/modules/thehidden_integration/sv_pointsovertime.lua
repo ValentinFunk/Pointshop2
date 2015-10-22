@@ -5,7 +5,7 @@ end
 function Pointshop2.UpdateHiddenPointsOverTime( )
 	local points = S( "PointsOverTime.Points" )
 	for k, ply in pairs( player.GetAll( ) ) do
-		if not ply:IsHidden() then
+		if not ply:IsHidden() and ply:Alive() and ply:GetTeam( ) != TEAM_SPECTATOR then
 			ply:PS2_AddStandardPoints( points, "Alive Bonus", true )
 		end
 	end
@@ -16,7 +16,7 @@ function Pointshop2.RegisterHiddenPOTtimer( )
 	if not S( "PointsOverTime.Enable" ) then
 		return
 	end
-	
+
 	local delayInSeconds = S( "PointsOverTime.Delay" ) * 60
 	timer.Create( "Pointshop2_POTTheHidden", delayInSeconds, 0, function( )
 		Pointshop2.UpdateHiddenPointsOverTime( )
