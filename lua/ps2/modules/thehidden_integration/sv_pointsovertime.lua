@@ -5,7 +5,7 @@ end
 function Pointshop2.UpdateHiddenPointsOverTime( )
 	local points = S( "PointsOverTime.Points" )
 	for k, ply in pairs( player.GetAll( ) ) do
-		if not ply:IsHidden() and ply:Alive() and ply:GetTeam( ) != TEAM_SPECTATOR then
+		if not ply:IsHidden() and ply:Alive() and ply:Team( ) != TEAM_SPECTATOR then
 			ply:PS2_AddStandardPoints( points, "Alive Bonus", true )
 		end
 	end
