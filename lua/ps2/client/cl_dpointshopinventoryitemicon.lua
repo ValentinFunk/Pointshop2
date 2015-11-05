@@ -2,9 +2,9 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
+
 	self:SetSize( 64, 64 )
-	
+
 	self:SetMouseInputEnabled( false )
 
 	hook.Add( "PS2_InvItemIconSelected", self, function( self, itemIcon )

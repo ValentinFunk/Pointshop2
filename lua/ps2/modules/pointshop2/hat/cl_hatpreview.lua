@@ -3,10 +3,10 @@ local previewItemClass
 local function validateOutfitList( previewPanel, ignorePreview )
 	previewPanel.outfits = {}
 
-	for _, item in pairs( LocalPlayer().PS2_EquippedItems ) do 
+	for _, item in pairs( LocalPlayer().PS2_EquippedItems ) do
 		local isHat = instanceOf( Pointshop2.GetItemClassByName( "base_hat" ), item )
 		if isHat then
-			local outfit, id = item.class.getOutfitForModel( previewPanel.Entity:GetModel() )
+			local outfit, id = item:getOutfitForModel( previewPanel.Entity:GetModel() )
 			previewPanel.outfits[id] = outfit
 		end
 	end
@@ -14,9 +14,9 @@ local function validateOutfitList( previewPanel, ignorePreview )
 		local outfit, id = previewItemClass.getOutfitForModel( previewPanel.Entity:GetModel( ) )
 		previewPanel.outfits[id] = outfit
 	end
-	
+
 	previewPanel.Entity.attachedOutfits = previewPanel.Entity.attachedOutfits or {}
-	
+
 	--Remove outfits not valid anymore
 	for id, outfit in pairs( previewPanel.Entity.attachedOutfits ) do
 		if not previewPanel.outfits[id] then
@@ -25,7 +25,7 @@ local function validateOutfitList( previewPanel, ignorePreview )
 			previewPanel.Entity.attachedOutfits[id] = nil
 		end
 	end
-	
+
 	--Add outfits that are not added yet
 	for id, outfit in pairs( previewPanel.outfits ) do
 		if not previewPanel.Entity.attachedOutfits[id] then
@@ -56,16 +56,16 @@ local function preStart3d( self, ignorePreview )
 		--print( "Setting ent up for PAC", self.Entity )
 		pac.SetupENT( self.Entity )
 	end
-	
+
 	validateOutfitList( self, ignorePreview )
-	
+
 	for k, v in pairs( self.Entity.pac_outfits or {} ) do
 		pac.HookEntityRender( self.Entity, v )
 	end
 end
 
 local function preDrawModel( self )
-	pac.ForceRendering(true)	
+	pac.ForceRendering(true)
 	pac.RenderOverride(self.Entity, "opaque")
 end
 
@@ -85,8 +85,8 @@ end )
 
 hook.Add( "PS2_InvPreviewPanelPaint_PreDrawModel", "prepac", function( self )
 	preDrawModel( self )
-end )	
-	
+end )
+
 hook.Add( "PS2_InvPreviewPanelPaint_PostDrawModel", "postpac", function( self )
 	postDrawModel( self )
 end )
@@ -98,8 +98,8 @@ end )
 
 hook.Add( "PS2_PreviewPanelPaint_PreDrawModel", "prepac", function( self )
 	preDrawModel( self )
-end )	
-	
+end )
+
 hook.Add( "PS2_PreviewPanelPaint_PostDrawModel", "postpac", function( self )
 	postDrawModel( self )
 end )

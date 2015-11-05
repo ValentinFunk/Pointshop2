@@ -17,39 +17,40 @@ if CLIENT then
 			PrintTable( self )
 			return
 		end
-		
+
 		if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then
 			return
 		end
-		
+
 		if not ply.AttachPACPart then
 			pac.SetupENT( ply )
 			ply:SetShowPACPartsInEditor( false )
 		end
-		
-		local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
+
+		local outfit, id = self:getOutfitForModel( ply:GetModel() )
+		self.outfit = outfit
 		ply:AttachPACPart( outfit )
 	end
 
 	function ITEM:RemoveOutfit( )
-		local ply = self:GetOwner() 
+		local ply = self:GetOwner()
 		if not ply.RemovePACPart then
 			return
 		end
-		
-		local outfit, id = self.class.getOutfitForModel( ply:GetModel( ) )
+
+		local outfit = self.outfit or self.class.getOutfitForModel( ply:GetModel() )
 		ply:RemovePACPart( outfit )
 	end
 else
-	function ITEM:PlayerSpawn( ply )		
+	function ITEM:PlayerSpawn( ply )
 		if not ply:Alive( ) then
 			return
 		end
-	
+
 		if ply.IsSpec and ply:IsSpec() then
 			return
 		end
-	
+
 		if ply.IsGhost and ply:IsGhost() then
 			return
 		end
@@ -70,52 +71,52 @@ else
 end
 
 function ITEM:OnEquip( )
-	if SERVER then 
+	if SERVER then
 		return
 	end
-	
+
 	local ply = self:GetOwner()
 	if not self:GetOwner() then
-		timer.Simple( 1, function() 
+		timer.Simple( 1, function()
 			if IsValid( self:GetOwner( ) ) then
 				self:OnEquip( )
 			end
 		end )
 		return
 	end
-	
+
 	if not ply:Alive( ) then
 		return
 	end
-	
+
 	if ply.IsSpec and ply:IsSpec() then
 		return
 	end
-	
+
 	if ply.IsGhost and ply:IsGhost() then
 		return
 	end
-	
+
 	self:AttachOutfit( )
 end
 
 function ITEM:OnHolster( ply )
-	if SERVER then 
+	if SERVER then
 		return
 	end
-	
+
 	self:RemoveOutfit( )
 end
 
 function Pointshop2.AllContentInstalled( self )
 	local outfit = self.getBaseOutfit( )
-	
+
 	local missingModels = {}
 	local function checkModel( part )
 		for k, v in pairs( part.children or {} ) do
 			checkModel( v )
 		end
-		
+
 		if part.self and part.self.Model then
 			local model = part.self.Model
 			if not file.Exists( model, "GAME" ) then
@@ -123,11 +124,11 @@ function Pointshop2.AllContentInstalled( self )
 			end
 		end
 	end
-	
-	for k, part in pairs( outfit ) do 
+
+	for k, part in pairs( outfit ) do
 		checkModel( part )
 	end
-	
+
 	return missingModels
 end
 
@@ -183,19 +184,19 @@ end
 */
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	ITEM.super.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
-	
+
 	itemTable.static.iconInfo = persistenceItem.iconInfo
 	itemTable.static.validSlots = persistenceItem.validSlots
 	itemTable.static.outfitIds = {}
 	for k, mapping in pairs( persistenceItem.OutfitHatPersistenceMapping ) do
 		itemTable.static.outfitIds[mapping.model] = mapping.outfitId
 	end
-	
+
 	function itemTable.static.getBaseOutfit( )
 		local outfitId = itemTable.outfitIds[Pointshop2.HatPersistence.ALL_MODELS]
 		return Pointshop2.Outfits[outfitId], outfitId
 	end
-	
+
 	function itemTable.static.getOutfitForModel( model )
 		local outfitId
 		if itemTable.outfitIds[model] then
@@ -209,6 +210,11 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 			outfitId = itemTable.outfitIds[Pointshop2.HatPersistence.ALL_MODELS]
 		end
 		return Pointshop2.Outfits[outfitId], outfitId
+	end
+
+	-- Can be used for outfits that the user can customize
+	function itemTable:getOutfitForModel( model )
+		return itemTable.static.getOutfitForModel( model )
 	end
 end
 
