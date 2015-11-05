@@ -9,7 +9,7 @@ end
 
 function PANEL:SetItem( item )
 	self.BaseClass.SetItem( self, item )
-	
+
 	if item.class.iconInfo.inv.useMaterialIcon then
 		self.image:Remove()
 		self.image = vgui.Create( "DImage", self )
@@ -20,8 +20,8 @@ function PANEL:SetItem( item )
 	else
 		local model = Pointshop2:GetPreviewModel()
 		self.image:ApplyModelInfo( model )
-		self.item = item 
-		self.image:SetPacOutfit( item.class.getOutfitForModel( model.model ) )
+		self.item = item
+		self.image:SetPacOutfit( item:getOutfitForModel( model.model ) )
 		self.image:SetViewInfo( item.class.iconInfo.inv.iconViewInfo )
 	end
 end

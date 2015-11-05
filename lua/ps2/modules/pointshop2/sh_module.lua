@@ -25,6 +25,12 @@ MODULE.Blueprints = {
 		base = "base_hat",
 		icon = "pointshop2/fedora.png",
 		creator = "DHatCreator"
+	},
+	{
+		label = "Text Hat",
+		base = "base_hat",
+		icon = "pointshop2/fedora.png",
+		creator = "DTextHatCreator"
 	}
 }
 
@@ -45,7 +51,7 @@ MODULE.SettingButtons = {
 		onClick = function( )
 			Pointshop2View:getInstance( ):installDefaults( )
 			Derma_Message( "We're installing the default items for you. Please give us about a minute, your shop will update automatically once the items are installed", "Information" )
-		end 
+		end
 	},
 	{
 		label = "Repair Database",
@@ -54,7 +60,7 @@ MODULE.SettingButtons = {
 			Derma_Query( "This will attempt to repair a broken database, then switch the map. If you have strange errors you can try this. Backup your database as you could lose data or problems could get worse. Open a support ticket in this case.", "Warning",
 			"Ok, do it", function( )
 				Pointshop2View:getInstance( ):fixDatabase( )
-			end, 
+			end,
 			"No", function( )
 			end )
 		end
@@ -92,7 +98,7 @@ MODULE.Settings.Shared = {
 		},
 		SellRatio = {
 			tooltip = "The price is multiplied with this to calculate the sell price",
-			label = "Item sell repay ratio", 
+			label = "Item sell repay ratio",
 			value = 0.75
 		},
 		SendPointsEnabled = {
@@ -105,7 +111,7 @@ MODULE.Settings.Shared = {
 			label = "Limit PAC access",
 			tooltip = "Restricts the use of the PAC editor to players/groups with the \"pointshop2 usepac\" permission."
 		},
-	}, 
+	},
 	InternalSettings = {
 		info = {
 			isManualSetting = true,
@@ -148,7 +154,7 @@ MODULE.Settings.Server = {
 		},
 		ShouldBlock = {
 			value = true,
-			label = "Blocking Transactions", 
+			label = "Blocking Transactions",
 			tooltip = "When turned on trades some performance for safety against data loss on gmod or sql server crashes"
 		},
 		BroadcastWallets = {
@@ -174,11 +180,11 @@ MODULE.Settings.Server = {
 			label = "Shop Key",
 			tooltip = "Key used to open the shop"
 		},
-		ShopChat = { 
+		ShopChat = {
 			value = "!shop",
 			possibleValues = {
 				"!shop",
-				"!ps", 
+				"!ps",
 				"!ps2",
 				"!pointshop",
 				"!pointshop2",
@@ -195,7 +201,7 @@ MODULE.Settings.Server = {
 		},
 		Delay = 10,
 		Points = 100,
-		GroupMultipliers = { 
+		GroupMultipliers = {
 			type = "table",
 			value = { }
 		}
