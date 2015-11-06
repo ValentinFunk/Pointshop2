@@ -153,7 +153,6 @@ function Pointshop2View:receiveSlots( slots )
 end
 
 function Pointshop2View:slotChanged( slot )
-	print("Slot Changed", slot.Item and slot.Item.id, slot.Item and KInventory.ITEMS[slot.Item.id])
 	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item and KInventory.ITEMS[slot.Item.id]
 	hook.Run( "PS2_SlotChanged", slot )
 end

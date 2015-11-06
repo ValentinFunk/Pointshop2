@@ -341,11 +341,9 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		slot.itemId = item.id
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		print("SlotChanged")
 		return slot:save( )
 	end )
 	:Then( function( slot )
-		print("RemoveItem")
 		return ply.PS2_Inventory:removeItem( item ) --unlink from inventory
 	end )
 	:Done( function( )
