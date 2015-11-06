@@ -1,11 +1,11 @@
 InventoryView = class( "InventoryView" )
-InventoryView.static.controller = "InventoryController" 
+InventoryView.static.controller = "InventoryController"
 InventoryView:include( BaseView )
 
 function InventoryView:initialize( )
 	self.inventories = {}
 	setmetatable( self.inventories, {__mode = 'v' } ) --weak token holder for easy access
-	
+
 	self.inventoryPanels = {}
 end
 
@@ -22,6 +22,7 @@ end
 
 function InventoryView:itemAdded( inventoryId, item )
 	local item = KInventory.ITEMS[item.id] or item
+	
 	if not self.inventories[inventoryId] then
 		error( "Cannot add item to inventory " .. inventoryId .. ": not cached on the client" )
 	end
@@ -32,21 +33,7 @@ function InventoryView:itemRemoved( inventoryId, itemId )
 	if not self.inventories[inventoryId] then
 		error( "Cannot remove item from inventory " .. inventoryId .. ": not cached on the client" )
 	end
-	
-	--hack: keep reference around for a bit
-	local item
-	for k, v in pairs( self.inventories[inventoryId].Items ) do
-		if v.id == itemId then
-			item = v
-			KInventory.ITEMS[item.id] = item
-		end
-	end
-	timer.Simple( 10, function( )
-		local x = "the item " .. item.id .. "was removed"
-		hook.Call( ".......nothing.", {}, x )
-	end )
-	--end hacky solution
-	
+
 	self.inventories[inventoryId]:removeItemById( itemId )
 	if self.inventoryPanels[inventoryId] then
 		self.inventoryPanels[inventoryId]:itemRemoved( itemId )
@@ -70,11 +57,11 @@ function InventoryView:displayInventory( inventoryId )
 			end
 		end
 	end
-	
+
 	if not self.inventories[inventoryId] then
 		error( "Cannot open inventory " .. tostring( inventoryId ) .. ": not cached on the client" )
 	end
-	
+
 	if IsValid( self.inventoryPanels[inventoryId] ) then
 		self.inventoryPanels[inventoryId]:MakePopup( )
 		self.inventoryPanels[inventoryId]:SetVisible( true )
@@ -83,7 +70,7 @@ function InventoryView:displayInventory( inventoryId )
 		invPanel:Center( )
 		invPanel:MakePopup( )
 		invPanel:setInventory( self.inventories[inventoryId] )
-		
+
 		self.inventoryPanels[inventoryId] = invPanel
 		invFrame = invPanel
 	end
