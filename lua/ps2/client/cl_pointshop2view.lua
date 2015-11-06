@@ -247,7 +247,7 @@ function Pointshop2View:getPersistenceForClass( itemClass )
 end
 
 function Pointshop2View:saveCategoryOrganization( categoryItemsTable )
-	self:controllerAction( "saveCategoryOrganization", categoryItemsTable )
+	LibK.GLib.Transfers.Send( 0, "Pointshop2.CategoryOrganization", util.TableToJSON( categoryItemsTable ) )
 end
 
 function Pointshop2View:equipItem( item, slotName )
