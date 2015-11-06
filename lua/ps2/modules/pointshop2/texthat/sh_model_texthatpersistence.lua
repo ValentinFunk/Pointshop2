@@ -40,6 +40,6 @@ function TexthatPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpd
 		texthatPersistence.outlineColor = saveTable.outlineColor
 		texthatPersistence.rainbow = saveTable.rainbow
 		texthatPersistence.size = saveTable.size
-		return playermodelPersistence:save( )
+		return texthatPersistence:save( )
 	end )
 end
