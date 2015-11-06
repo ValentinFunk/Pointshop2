@@ -1,5 +1,7 @@
 KInventory.ITEMS = {}
-setmetatable(KInventory.ITEMS, { __mode = 'v' }) --weak table, allow collection if not referenced anywhere else
+if SERVER then
+	setmetatable(KInventory.ITEMS, { __mode = 'v' }) --weak table, allow collection if not referenced anywhere else
+end
 
 local Item = class( "KInventory.Item" )
 KInventory.Item = Item
@@ -36,7 +38,7 @@ function Item:postLoad( )
 	local def = Deferred( )
 
 	--i know this is disgusting :( a possible alternative would be no relationships
-	local cached = KInventory.ITEMS[self.id] 
+	local cached = KInventory.ITEMS[self.id]
 	if cached then
 		for k, v in pairs( self ) do
 			if not cached[k] then
@@ -46,13 +48,13 @@ function Item:postLoad( )
 	else
 		KInventory.ITEMS[self.id] = self
 	end
-	
-	
+
+
 	local inv = KInventory.INVENTORIES[self.inventory_id]
 	if inv then
 		self.owner = inv:getOwner( )
 	end
-	
+
 	def:Resolve( )
 	return def:Promise( )
 end
