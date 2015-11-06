@@ -136,6 +136,11 @@ MODULE.Settings.Server = {
 			label = "Starting donator points",
 			value = 1000
 		},
+		PotAfkCheck = {
+			label = "Disable Points over Time for AFK Players",
+			tooltip = "When turned on player movements are checked to prevent AFK players from getting points over time.",
+			value = true
+		},
 	},
 	AdvancedSettings = {
 		info = {

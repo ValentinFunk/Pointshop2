@@ -7,17 +7,17 @@ end
 
 function PANEL:DropAction_EquipmentItem( drops, bDoDrop, command, x, y )
 	local itemsSlotHolder = self:GetParent( )
-	
+
 	local dropPanel = drops[1]
 	if not dropPanel then
 		return
 	end
-	
+
 	local dropItem = dropPanel.items[1]
 	if not dropItem then
 		return
 	end
-	
+
 	if itemsSlotHolder:CanHoldItem( dropItem ) then
 		self.invalidDrop = false
 		self:SetDropTarget( self.x, self.y, self:GetWide( ), self:GetTall( ) )
@@ -25,48 +25,22 @@ function PANEL:DropAction_EquipmentItem( drops, bDoDrop, command, x, y )
 		self.invalidDrop = true
 		self:SetDropTarget( self.x, self.y, self:GetWide( ), self:GetTall( ) )
 	end
-	
+
 	if not bDoDrop or self.invalidDrop then
-		return 
+		return
 	end
-	
+
 	if dropPanel:IsOurChild( self ) then
-		return 
+		return
 	end
-	
+
 	local oldParent = dropPanel:GetParent( )
-	
+
 	dropPanel = dropPanel:OnDrop( self )
 	self:DroppedOn( dropPanel )
-	
+
 	oldParent:OnModified( )
 	self:OnModified( )
-end
-
-function PANEL:DrawDragHover( x, y, w, h )
-	DisableClipping( true )
-
-	if not self.invalidDrop then
-		surface.SetDrawColor( 255, 190, 0, 100 )
-		surface.DrawRect( x, y, w, h )
-
-		surface.SetDrawColor( 255, 190, 0, 230 )
-		surface.DrawOutlinedRect( x, y, w, h )
-
-		surface.SetDrawColor( 255, 190, 0, 50 )
-		surface.DrawOutlinedRect( x-1, y-1, w+2, h+2 )
-	else
-		surface.SetDrawColor( 255, 0, 0, 100 )
-		surface.DrawRect( x, y, w, h )
-
-		surface.SetDrawColor( 255, 0, 0, 230 )
-		surface.DrawOutlinedRect( x, y, w, h )
-
-		surface.SetDrawColor( 255, 0, 0, 50 )
-		surface.DrawOutlinedRect( x-1, y-1, w+2, h+2 )
-	end
-
-	DisableClipping( false )
 end
 
 derma.DefineControl( "DItemSlotEquipment", "", PANEL, "DItemSlot" )
@@ -78,7 +52,10 @@ function PANEL:Init( )
 
 	self.actualSlot = vgui.Create( "DItemSlotEquipment", self )
 	self.actualSlot:Dock( TOP )
-	
+	function self.actualSlot:GetSlotTable( )
+		return self:GetParent():GetSlotTable( )
+	end
+
 	self.label = vgui.Create( "DLabel", self )
 	self.label:Dock( TOP )
 	self.label:SetContentAlignment( 5 )
@@ -86,11 +63,11 @@ function PANEL:Init( )
 	hook.Add( "PS2_SlotChanged", self, function( self, slot )
 		if slot.slotName == self.slotName then
 			self.actualSlot:removeItem( )
-			
+
 			if slot.Item then
 				local item = KInventory.ITEMS[slot.Item.id]
 				self.actualSlot:addItem( item )
-				
+
 				local function remove( )
 					if IsValid( self.actualSlot.itemStack ) then
 						self.actualSlot.itemStack:Think( )
@@ -99,14 +76,22 @@ function PANEL:Init( )
 						self.actualSlot.itemStack.icon:Select( )
 					end
 				end
-				
+
 				timer.Simple( 0.01, remove )
 				remove( )
 			end
 		end
 	end )
-	
+
 	derma.SkinHook( "Layout", "PointshopEquipmentSlot", self )
+end
+
+function PANEL:SetSlotTable( slotTable )
+	self.slotTable = slotTable
+end
+
+function PANEL:GetSlotTable()
+	return self.slotTable
 end
 
 function PANEL:SetLabel( txt )
@@ -119,7 +104,7 @@ function PANEL:PerformLayout( )
 end
 
 function PANEL:OnModified( )
-	Pointshop2View:getInstance( ):equipItem( self:GetItem( ), self.slotName ) 
+	Pointshop2View:getInstance( ):equipItem( self:GetItem( ), self.slotName )
 end
 
 function PANEL:GetItem( )

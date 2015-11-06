@@ -36,3 +36,7 @@ function Player:PS2_EasyAddItem( itemClassName, purchaseData, suppressNotify )
 	end
 	return Pointshop2Controller:getInstance():easyAddItem( self, itemClassName, purchaseData, suppressNotify )
 end
+
+function Player:PS2_DisplayInformation( text )
+	Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayInformation", self, text )
+end
