@@ -5,7 +5,7 @@ resource.AddWorkshop( "439856500" )
 
 function Pointshop2.ResetDatabase( )
 	local models = {}
-	local function add( tbl ) 
+	local function add( tbl )
 		for k, v in pairs( tbl ) do
 			if istable( v ) and v.dropTable then
 				table.insert( models, v )
@@ -14,7 +14,7 @@ function Pointshop2.ResetDatabase( )
 	end
 	add( Pointshop2 )
 	add( KInventory )
-	
+
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DisableForeignKeyChecks( true )
 	local promises = {}
@@ -25,9 +25,9 @@ function Pointshop2.ResetDatabase( )
 		end )
 		table.insert( promises, promise )
 	end
-	
+
 	LibK.ResetTableCache( )
-	
+
 	for k, v in pairs( models ) do
 		local promise = v:initializeTable( )
 		:Done( function( )
@@ -37,7 +37,7 @@ function Pointshop2.ResetDatabase( )
 	end
 	Pointshop2.DB.DisableForeignKeyChecks( false )
 	LibK.SetBlocking( false )
-	
+
 	return WhenAllFinished( promises )
 end
 
@@ -56,7 +56,7 @@ function Pointshop2.FixDatabase( )
 		local promises = {}
 		for _, persistenceModel in pairs( persistences ) do
 			local promise = persistenceModel.getDbEntries( "WHERE 1" )
-			:Then( function( persistentItems ) 
+			:Then( function( persistentItems )
 				local promises = {}
 				for _, item in pairs( persistentItems ) do
 					if not item.ItemPersistence then
@@ -70,7 +70,7 @@ function Pointshop2.FixDatabase( )
 		end
 		return WhenAllFinished( promises )
 	end )
-	
+
 	-- 1.1: Find all hats with broken settings
 	:Then( function( )
 		return Pointshop2.HatPersistence.getAll( )
@@ -101,12 +101,12 @@ function Pointshop2.FixDatabase( )
 		end
 		return WhenAllFinished( promises )
 	end )
-	
+
 	-- 3: Find all item mappings that don't have a valid class (base persistence)
 	:Then( function( )
 		return Pointshop2.ItemMapping.getAll( )
 	end )
-	:Then( function( itemMappings ) 
+	:Then( function( itemMappings )
 		local promises = {}
 		for k, itemMapping in pairs( itemMappings ) do
 			local promise = Pointshop2.ItemPersistence.findById( itemMapping.itemClass )
@@ -120,7 +120,7 @@ function Pointshop2.FixDatabase( )
 		end
 		return WhenAllFinished( promises )
 	end )
-	
+
 	-- 4: Remove settings wrongfully in the DB
 	:Then( function( )
 		return WhenAllFinished{
@@ -128,7 +128,20 @@ function Pointshop2.FixDatabase( )
 			Pointshop2.StoredSetting.removeWhere{ plugin = "Pointshop 2", path = "InternalSettings.ServerId" }
 		}
 	end )
-	
+
+	-- 5: Remove Inventory assocs wrongfully in the DB
+	:Then( function()
+		return KInventory.Item.getAll( )
+	end )
+	:Then( function(items)
+		return Promise.Map(items, function( item )
+			if item.Inventory then
+				item.Inventory = nil
+				return item:save( )
+			end
+		end )
+	end )
+
 	:Done( function( )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
 	end )
@@ -140,12 +153,12 @@ function Pointshop2.PlayerOwnsItem( ply, item )
 			return true
 		end
 	end
-	
+
 	for k, v in pairs( ply.PS2_Slots ) do
 		if v.itemId == item.id then
 			return true
 		end
 	end
-	
+
 	return false
 end
