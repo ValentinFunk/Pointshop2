@@ -118,3 +118,7 @@ end
 function ITEM.static.GetPointshopDescriptionControl( )
 	return "DTexthatItemDescription"
 end
+
+function ITEM.static.getPersistence( )
+	return Pointshop2.TexthatPersistence
+end

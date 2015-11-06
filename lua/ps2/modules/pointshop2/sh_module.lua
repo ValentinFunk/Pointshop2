@@ -28,7 +28,7 @@ MODULE.Blueprints = {
 	},
 	{
 		label = "Text Hat",
-		base = "base_hat",
+		base = "base_texthat",
 		icon = "pointshop2/fedora.png",
 		creator = "DTextHatCreator"
 	}
