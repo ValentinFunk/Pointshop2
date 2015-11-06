@@ -1,5 +1,5 @@
 Pointshop2View = class( "Pointshop2View" )
-Pointshop2View.static.controller = "Pointshop2Controller" 
+Pointshop2View.static.controller = "Pointshop2Controller"
 Pointshop2View:include( BaseView )
 
 hook.Add( "InitPostEntity", "InitializePlayers", function( )
@@ -8,7 +8,7 @@ hook.Add( "InitPostEntity", "InitializePlayers", function( )
 		ply.PS2_Slots = {}
 	end
 	LocalPlayer().PS2_Inventory = {}
-	
+
 	Pointshop2View:getInstance( ) --Create the view
 end )
 
@@ -19,23 +19,23 @@ function Pointshop2View:initialize( )
 	self.itemMappings = {}
 	self.itemCategories = {}
 	self.itemProperties = {}
-	
+
 	self.fullyInitialized = false
-	
+
 	self.clPromises = {
 		InventoryReceived = Deferred( ),
 		OutfitsReceived = Deferred( ),
 		SettingsReceived = Deferred( ),
 		DynamicsReceived = Deferred( )
 	}
-	
+
 	local promises = {}
 	for k, v in pairs( self.clPromises ) do
 		table.insert( promises, v:Promise( ) )
 	end
-	
+
 	Pointshop2.ClInitialized = WhenAllFinished( promises )
-	
+
 	Pointshop2.ClInitialized:Done( function( )
 		self.fullyInitialized = true
 		KLogf( 5, "[Pointshop2] Pointshop2 is now ready for use" )
@@ -49,31 +49,31 @@ local function resolveIfWaiting( deferred )
 end
 
 function Pointshop2View:toggleMenu( )
-	if self.loaderAttached then	
+	if self.loaderAttached then
 		--In the loading message, handlers are already registered
-		return 
+		return
 	end
-	
+
 	if self.fullyInitialized then
 		Pointshop2:ToggleMenu( )
 	else
 		self.loaderAttached = true
-		
+
 		local f = vgui.Create("DFrame" )
 		f:SetSkin( Pointshop2.Config.DermaSkin )
 		f:SetSize( 300, 130 )
 		f:SetPos( ScrW() / 2 - f:GetWide( ) / 2, 0 )
 		f:SetTitle( "Pointshop 2" )
-		
+
 		local lbl = vgui.Create( "DLabel", f )
 		lbl:SetText( "Loading Pointshop2, please wait a second.\nThe menu will open automatically." )
 		lbl:Dock( TOP )
 		lbl:SizeToContents( )
-		
+
 		local loading = vgui.Create( "DLoadingNotifier", f )
 		loading:Dock( TOP )
 		loading:Expand( )
-		
+
 		Pointshop2.ClInitialized:Done( function( )
 			Pointshop2:ToggleMenu( ) --Open the menu
 		end )
@@ -102,8 +102,8 @@ function Pointshop2View:walletChanged( newWallet, tries )
 			self:walletChanged( newWallet, tries + 1 )
 		end )
 	end
-	hook.Run( "PS2_WalletChanged", newWallet, ply ) 
-end 
+	hook.Run( "PS2_WalletChanged", newWallet, ply )
+end
 
 function Pointshop2View:receiveInventory( inventory )
 	InventoryView:getInstance( ):receiveInventory( inventory ) --Needed for KInventory to work properly
@@ -132,7 +132,7 @@ function Pointshop2View:itemChanged( item )
 			end
 		end
 	end
-	
+
 	if not found then
 		--Item was added
 		LocalPlayer().PS2_Inventory:addItem( item )
@@ -153,17 +153,6 @@ function Pointshop2View:receiveSlots( slots )
 end
 
 function Pointshop2View:slotChanged( slot )
-	if not slot.Item and LocalPlayer().PS2_Slots[slot.slotName] then
-		--hack: keep reference around for a bit
-		local item = LocalPlayer().PS2_Slots[slot.slotName]
-		timer.Simple( 10, function( )
-			local x = "the item " .. item.id .. "was removed"
-			hook.Call( ".......nothing.", {}, x )
-		end )
-		--end hacky solution
-
-	end
-	
 	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item and KInventory.ITEMS[slot.Item.id]
 	hook.Run( "PS2_SlotChanged", slot )
 end
@@ -192,21 +181,21 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.itemMappings = itemMappings
 	self.itemCategories = itemCategories
 	self.itemProperties = itemProperties
-	
-	
-	--Load persistent items	
+
+
+	--Load persistent items
 	local startTime = SysTime( )
 	for k, v in pairs( self.itemProperties ) do
 		Pointshop2.LoadPersistentItem( v )
 	end
 	KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
-	
+
 	local startTime = SysTime( )
 	local tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
 	KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
-	
+
 	self.categoryItemsTable = tree or {}
-	
+
 	--Hacky, dunno why this is needed
 	--hook.Call( "PS2_DynamicItemsUpdated" )
 	timer.Simple( 0.1, function( )
@@ -214,30 +203,30 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		hook.Call( "PS2_DynamicItemsUpdated" )
 		KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	end )
-	
+
 	resolveIfWaiting( self.clPromises.DynamicsReceived )
 end
 
 function Pointshop2View:loadDynamics( versionHash )
 	GLib.Resources.Resources["Pointshop2/dynamics"] = nil --Force resource reset
 	GLib.Resources.Get( "Pointshop2", "dynamics", versionHash, function( success, data )
-		if not success then 
+		if not success then
 			KLogf( 2, "[PS2][ERROR] Couldn't load dynamics resouce!" )
 			return
 		end
-		
+
 		local startTime = SysTime( )
 		local dynamicsDecoded = LibK.von.deserialize( data )[1]
-		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) ) 
+		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
 		--Back to classes
 		LibK.processNetTable( dynamicsDecoded[1] )
 		LibK.processNetTable( dynamicsDecoded[2] )
 		LibK.processNetTable( dynamicsDecoded[3] )
-		
+
 		--Pass to view
 		self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
-		
+
 		--Inform server
 		self:controllerAction( "dynamicsReceived" )
 	end )
@@ -284,7 +273,7 @@ function Pointshop2View:getCategoryOrganization( )
 	if not self.categoryItemsTable then
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
-	
+
 	return self.categoryItemsTable
 end
 
@@ -292,13 +281,13 @@ function Pointshop2View:getShopCategory( )
 	if not self.categoryItemsTable then
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
-	
+
 	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
 		if v.self.label == "Shop Categories" then
 			return v
 		end
 	end
-	
+
 	return {
 		items = {},
 		subcategories = {}
@@ -309,13 +298,13 @@ function Pointshop2View:getNoSaleCategory( )
 	if not self.categoryItemsTable then
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
-	
+
 	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
 		if v.self.label == "Not for sale Items" then
 			return v
 		end
 	end
-	
+
 	return {
 		items = {},
 		subcategories = {}
@@ -331,7 +320,7 @@ function Pointshop2View:getUncategorizedItems( )
 				found = true
 			end
 		end
-		if not found then 
+		if not found then
 			table.insert( uncategorized, itemClass )
 		end
 	end
@@ -354,14 +343,14 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	end
 
 	isRetry = isRetry or 0
-	
-	local ply 
+
+	local ply
 	for k, v in pairs( player.GetAll( ) ) do
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
 			ply = v
 		end
 	end
-	
+
 	if not IsValid( ply ) then
 		if isRetry > 0 then
 			KLogf( 4, "[PS2] Couldn't get it on retry D:" )
@@ -374,7 +363,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		end
 		return
 	end
-	
+
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 	ply.PS2_EquippedItems[item.id] = item
 	item.owner = ply
@@ -382,14 +371,14 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		debug.Trace( )
 		print( "Error in 0" )
 	end
-	
+
 	--Delay to next frame to clear stack
 	timer.Simple( 0, function( )
 		item:OnEquip( )
 	end )
 
 	Pointshop2.ITEMS[item.id] = item
-	
+
 	hook.Run( "PS2_ItemEquipped", ply, item )
 end
 
@@ -406,12 +395,12 @@ end
 function Pointshop2View:loadOutfits( versionHash )
 	LibK.GLib.Resources.Resources["Pointshop2/outfits"] = nil --Force resource reset
 	LibK.GLib.Resources.Get( "Pointshop2", "outfits", versionHash, function( success, data )
-		if not success then 
+		if not success then
 			KLogf( 2, "[PS2][ERROR] Couldn't load outfits resouce!" )
 			return
 		end
 		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
-		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash ) 
+		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash )
 		self:controllerAction( "outfitsReceived" )
 
 		resolveIfWaiting( Pointshop2View:getInstance( ).clPromises.OutfitsReceived )
@@ -442,13 +431,13 @@ end
 function Pointshop2View:loadSettings( versionHash )
 	GLib.Resources.Resources["Pointshop2/settings"] = nil --Force resource reset
 	GLib.Resources.Get( "Pointshop2", "settings", versionHash, function( success, data )
-		if not success then 
+		if not success then
 			KLogf( 2, "[PS2][ERROR] Couldn't load settings resouce!" )
 			return
 		end
 		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
-		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash ) 
-		
+		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash )
+
 		resolveIfWaiting( Pointshop2View:getInstance( ).clPromises.SettingsReceived )
 		hook.Run( "PS2_OnSettingsUpdate" )
 	end )
@@ -459,8 +448,8 @@ function Pointshop2View:saveSettings( mod, realm, settingsTbl )
 	outBuffer:String( mod.Name )
 	outBuffer:String( realm )
 	outBuffer:LongString( LibK.von.serialize( settingsTbl ) )
-	
-	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )	
+
+	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )
 end
 
 function Pointshop2View:sendPoints( ply, points )
@@ -477,7 +466,7 @@ end
 
 function Pointshop2View:removeItem( itemClass, refund )
 	hook.Run( "PS2_PreReload" )
-	
+
 	self:controllerTransaction( "removeItem", itemClass.className, refund )
 	:Done( function( )
 		KInventory.Items[itemClass.className] = nil
@@ -486,12 +475,12 @@ end
 
 function Pointshop2View:removeItems( itemClasses, refund )
 	hook.Run( "PS2_PreReload" )
-	
+
 	local classNames = {}
 	for k, v in pairs( itemClasses ) do
 		table.insert( classNames, v.className )
 	end
-	
+
 	self:controllerTransaction( "removeItems", classNames, refund )
 	:Done( function( removedNames )
 		for k, className in pairs( removedNames ) do
@@ -545,7 +534,7 @@ function Pointshop2View:displayError( infoStr )
 	local notification = vgui.Create( "KNotificationPanel" )
 	notification:setText( infoStr )
 	notification:setIcon( "icon16/exclamation.png" )
-	notification.sound = "kreport/electric_deny2.wav" 
+	notification.sound = "kreport/electric_deny2.wav"
 	notification:SetSkin( "KReport" )
 	LocalPlayer( ).notificationPanel:addNotification( notification )
 end

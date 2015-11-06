@@ -22,9 +22,10 @@ end
 
 function InventoryView:itemAdded( inventoryId, item )
 	local item = KInventory.ITEMS[item.id] or item
-	
+	KInventory.ITEMS[item.id] = item
+
 	if not self.inventories[inventoryId] then
-		error( "Cannot add item to inventory " .. inventoryId .. ": not cached on the client" )
+		error( "Cannot add item to inventory " .. inventoryId .. ": inventory not cached on the client" )
 	end
 	self.inventories[inventoryId]:addItem( item )
 end
