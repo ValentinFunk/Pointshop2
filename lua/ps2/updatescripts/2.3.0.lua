@@ -26,8 +26,12 @@ local def = Deferred( )
 hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 	DB = dbObj
 
+    if name != "Update" then
+		return
+	end
+
     if not DB.CONNECTED_TO_MYSQL then
-        def:Resolve()
+        return def:Resolve()
     end
 
 	if name != "Update" then

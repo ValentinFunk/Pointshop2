@@ -39,7 +39,7 @@ function Pointshop2.InitPromises( )
 		KLogf( 4, "[Pointshop2] Settings have been loaded" )
 	end )
 
-	Pointshop2.FullyInitializedPromise = WhenAllFinished{ 
+	Pointshop2.FullyInitializedPromise = WhenAllFinished{
 		Pointshop2.ItemsLoadedPromise:Promise( ),
 		Pointshop2.DatabaseConnectedPromise:Promise( ),
 		Pointshop2.SettingsLoadedPromise:Promise( ),
@@ -55,18 +55,18 @@ Pointshop2.InitPromises( )
 --Wait for this hook until initializing the database
 Pointshop2.LoadModulesPromise:Done( function( )
 	KLogf( 4, "[Pointshop2] Starting Database initialization" )
-	
+
 	LibK.SetupDatabase( "Pointshop2", Pointshop2, nil, true )
 	Pointshop2.DBInitialize( )
 end )
-	
+
 --Override for access controll
 --returns a promise, resolved if user can do it, rejected with error if he cant
 function Pointshop2Controller:canDoAction( ply, action )
 	local def = Deferred( )
 	if action == "saveCategoryOrganization" or
-	   action == "removeItem" or 
-	   action == "removeItems" or 
+	   action == "removeItem" or
+	   action == "removeItems" or
 	   action == "migrateServer" or
 	   action == "removeServer" or
 	   action == "updateServerRestrictions" or
@@ -126,7 +126,7 @@ function Pointshop2Controller:initializeInventory( ply )
 		if inventory then
 			return inventory
 		end
-		
+
 		inventory = KInventory.Inventory:new( )
 		inventory.ownerId = ply.kPlayerId
 		inventory.numSlots = Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.DefaultSlots" )
@@ -147,7 +147,7 @@ function Pointshop2Controller:initializeInventory( ply )
 			--Cache the inventory
 			ply.PS2_Inventory = inventory
 			KLogf( 5, "[PS2] Loaded inventory for player %s", ply:Nick( ) )
-			
+
 			--Network the Inventory to the player
 			self:startView( "Pointshop2View", "receiveInventory", ply, inventory )
 			--self:startView( "InventoryView", "receiveInventory", ply, inventory )
@@ -167,29 +167,29 @@ end
 */
 function Pointshop2Controller:initializeSlots( ply )
 	return Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
-	:Then( function( slots )		
+	:Then( function( slots )
 		ply.PS2_Slots = {}
 		for _, slot in pairs( slots ) do
 			ply.PS2_Slots[slot.id] = slot
 			KLogf( 5, "[PS2] Loaded slot %i for player %s", _, ply:Nick( ) )
 		end
 		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
-	
+
 		for _, slot in pairs( ply.PS2_Slots ) do
 			if not slot.itemId then continue end
-			
+
 			local item = slot.Item or KInventory.ITEMS[slot.itemId]
 			if not item then
 				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
 				continue
 			end
-			
+
 			item.owner = ply
 			if not IsValid( item:GetOwner() ) then
 				debug.Trace( )
 				print( "Error in 3" )
 			end
-			
+
 			--Delay to next frame to clear stack
 			timer.Simple( 0, function( )
 				if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
@@ -203,11 +203,11 @@ end
 
 function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
 	local args = {...}
-	
+
 	if type( plyOrPlys ) != "table" then
 		plyOrPlys = { plyOrPlys }
 	end
-	
+
 	for k, ply in pairs( plyOrPlys ) do
 		WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
 		:Done( function( )
@@ -218,24 +218,24 @@ end
 
 local function loadOrCreateCategoryTree( )
 	return Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" )
-	:Then( function( categories ) 
+	:Then( function( categories )
 		if #categories == 0 then
 			local rootNode = Pointshop2.Category:new( )
 			rootNode.label = "Root"
 			rootNode.icon = "Root"
-			
+
 			return rootNode:save( )
 			:Then( function( rootNode )
 				local notForSale = Pointshop2.Category:new( )
 				notForSale.label = "Not for sale Items"
 				notForSale.icon = "pointshop2/circle14.png"
 				notForSale.parent = rootNode.id
-				
+
 				local shopCategories = Pointshop2.Category:new( )
 				shopCategories.label = "Shop Categories"
 				shopCategories.icon = "pointshop2/folder62.png"
 				shopCategories.parent = rootNode.id
-				
+
 				return WhenAllFinished{ notForSale:save( ), shopCategories:save( ) }
 			end )
 			:Then( function( )
@@ -254,20 +254,20 @@ function Pointshop2Controller:loadDynamicInfo( )
 	}
 	:Then( function( itemMappings, categories )
 		local itemProperties = self.cachedPersistentItems
-		
+
 		self.itemCategories = categories
 		self.itemMappings = itemMappings
 		local tblData = {
-			generateNetTable( itemMappings ), 
+			generateNetTable( itemMappings ),
 			generateNetTable( categories ),
 			generateNetTable( itemProperties )
 		}
-		
+
 		local data = LibK.von.serialize( { tblData } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "dynamics", data )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Dynamics package loaded, version %s, %i item mappings, %i categories, %i items", resource:GetVersionHash(), table.Count( itemMappings ), table.Count( categories ), table.Count( itemProperties ) )
-		
+
 		self.dynamicsResource = resource
 	end )
 end
@@ -285,7 +285,7 @@ function Pointshop2Controller:sendDynamicInfo( ply )
 		end )
 		return
 	end
-	
+
 	self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
 end
 
@@ -301,14 +301,14 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 		if ply == plyToSendTo then
 			continue --handled in the slot-sender
 		end
-		
+
 		if not ply.PS2_Slots then
 			continue --handled in the slot-sender
 		end
-		
+
 		for _, slot in pairs( ply.PS2_Slots ) do
 			if not slot.itemId then continue end
-			
+
 			local item = KInventory.ITEMS[slot.itemId]
 			if not item then
 				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
@@ -327,7 +327,7 @@ end )
 local function initPlayer( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	local controller = Pointshop2Controller:getInstance( )
-	
+
 	Pointshop2.LoadModuleItemsPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
 		controller:sendWallet( ply )
@@ -338,7 +338,7 @@ local function initPlayer( ply )
 		timer.Simple( 2, function( )
 			WhenAllFinished{ controller:initializeInventory( ply ),
 				controller:initializeSlots( ply ),
-				ply.outfitsReceivedPromise 
+				ply.outfitsReceivedPromise
 			}
 			:Done( function( )
 				controller:sendActiveEquipmentTo( ply )
@@ -376,7 +376,7 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 	--Repopulate Categories Table
 	Pointshop2.Category.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate categories", errid, err ) end )
-	
+
 	local function recursiveAddCategory( category, parentId )
 		local dbCategory = Pointshop2.Category:new( )
 		dbCategory.label = category.self.label
@@ -392,29 +392,29 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 		:Fail( function( errid, err ) error( "Error saving subcategory", errid, err ) end )
 	end
 	recursiveAddCategory( categoryItemsTable )
-	
+
 	--Repopulate Item Mappings Table
 	Pointshop2.ItemMapping.removeDbEntries( "WHERE 1=1" )
 	:Fail( function( errid, err ) error( "Couldn't truncate item mappings", errid, err ) end )
-	
+
 	if Pointshop2.DB.CONNECTED_TO_MYSQL then
 		local mappings = {}
 		local function recursiveAddItems( category )
 			for _, itemClassName in pairs( category.items ) do
 				table.insert( mappings, string.format( "(%s, %s)", Pointshop2.DB.SQLStr( itemClassName ), Pointshop2.DB.SQLStr( category.id ) ) )
 			end
-			
+
 			for _, subcategory in pairs( category.subcategories ) do
 				recursiveAddItems( subcategory )
 			end
 		end
 		recursiveAddItems( categoryItemsTable )
-		
+
 		-- Prevent error if no mappings are present
 		if #mappings == 0 then
 			return
 		end
-		
+
 		local splitted = LibK.splitTable( mappings, 50 )
 		for k, mappingsChunk in pairs(splitted) do
 			local query = "INSERT INTO ps2_itemmapping (itemClass, categoryId) VALUES "
@@ -422,75 +422,85 @@ local function performSafeCategoryUpdate( categoryItemsTable )
 			Pointshop2.DB.DoQuery( query )
 		end
 	else
-		
+
 		local mappings = {}
 		local function recursiveAddItems( category )
 			for _, itemClassName in pairs( category.items ) do
 				table.insert( mappings, { itemClassName = itemClassName, categoryId = category.id } )
 			end
-			
+
 			for _, subcategory in pairs( category.subcategories ) do
 				recursiveAddItems( subcategory )
 			end
 		end
 		recursiveAddItems( categoryItemsTable )
-		
+
 		for _, itemClassName in ipairs( mappings ) do
 			print( "\t" .. Pointshop2.GetItemClassByName( itemClassName.itemClassName ):GetPrintName(), itemClassName.itemClassName )
 		end
-		
+
 		-- Prevent error if no mappings are present
 		if #mappings == 0 then
 			return
 		end
-		
+
 		local splitted = LibK.splitTable( mappings, 50 )
 		local lastQuery = Promise.Resolve()
-		for k, mappingsChunk in pairs( splitted ) do 
+		for k, mappingsChunk in pairs( splitted ) do
 			for k, v in pairs( mappingsChunk ) do
-				Pointshop2.DB.DoQuery( Format( "INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ", 
+				Pointshop2.DB.DoQuery( Format( "INSERT INTO ps2_itemmapping\n SELECT %s as itemClass, %i as categoryId, NULL as id ",
 					Pointshop2.DB.SQLStr( v.itemClassName ),
 					tonumber( v.categoryId )
 				) )
-			end 
+			end
 		end
 	end
 end
+
+local GLib = LibK.GLib
+GLib.Transfers.RegisterInitialPacketHandler( "Pointshop2.CategoryOrganization", function( userId )
+	local ply = GLib.PlayerMonitor:GetUserEntity( userId )
+	return PermissionInterface.query( ply, "pointshop2 manageitems" )
+end )
+
+GLib.Transfers.RegisterHandler( "Pointshop2.CategoryOrganization", function( userId, data )
+	Pointshop2Controller:getInstance( ):saveCategoryOrganization( GLib.PlayerMonitor:GetUserEntity( userId ), util.JSONToTable( data ) )
+end )
 
 function Pointshop2Controller:saveCategoryOrganization( ply, categoryItemsTable )
 	--Wrap it into a transaction in case anything happens.
 	--since tables are cleared and refilled for this it could fuck up the whole pointshop
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
-	:Fail( function( errid, err ) 
+	:Fail( function( errid, err )
 		KLogf( 2, "Error starting transaction: %s", err )
 		self:startView( "Pointshop2View", "displayError", ply, "A Technical error occured, your changes could not be saved!" )
 		error( "Error starting transaction:", err )
 	end )
-	
+
 	Pointshop2.DB.DisableForeignKeyChecks( true )
-	
+
 	local success, err = pcall( performSafeCategoryUpdate, categoryItemsTable )
 	if not success then
 		KLogf( 2, "Error saving categories: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		Pointshop2.DB.DisableForeignKeyChecks( false )
 		LibK.SetBlocking( false )
-		
+
 		self:startView( "Pointshop2View", "displayError", ply, "A technical error occured, your changes could not be saved!" )
 	else
 		KLogf( 4, "Categories Updated" )
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		Pointshop2.DB.DisableForeignKeyChecks( false )
 		LibK.SetBlocking( false )
-		
+
 		self:loadDynamicInfo( ):Done( function( )
 			for k, v in pairs( player.GetAll( ) ) do
 				self:sendDynamicInfo( v )
 			end
 		end )
 	end
-end	
+end
 
 function Pointshop2Controller:getPersistenceModels( )
 	local persistences = {}
@@ -501,20 +511,20 @@ function Pointshop2Controller:getPersistenceModels( )
 				KLogf( 2, "[Pointshop2][Error] Blueprint %s: couldn't find baseclass", v.base )
 				continue
 			end
-			
+
 			table.insert( persistences, class.getPersistence( ) )
 		end
 	end
 	return persistences
 end
-	
+
 function Pointshop2Controller:loadModuleItems( )
 	local promises = {}
 	self.cachedPersistentItems = {}
-	
+
 	for _, persistence in pairs( Pointshop2Controller:getPersistenceModels( ) ) do
 		local promise = persistence.getDbEntries( "WHERE 1" )
-		:Then( function( persistentItems ) 
+		:Then( function( persistentItems )
 			for _, persistentItem in pairs( persistentItems ) do
 				table.insert( self.cachedPersistentItems, persistentItem )
 				Pointshop2.LoadPersistentItem( persistentItem )
@@ -548,7 +558,7 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 		KLogf( 3, "[Pointshop2] Couldn't save item %s: invalid baseclass", saveTable.name, saveTable.baseClass )
 		return self:reportError( "Pointshop2View", ply, "Error saving item", 1, "Invalid Baseclass " .. saveTable.baseClass )
 	end
-	
+
 	--If persistenceId != nil update existing
 	class.getPersistence( ).createOrUpdateFromSaveTable( saveTable, saveTable.persistenceId != nil )
 	:Then( function( saved )
@@ -563,7 +573,7 @@ function Pointshop2Controller:moduleItemsChanged( outfitsChanged )
 	for k, v in pairs( player.GetAll( ) ) do
 		v.outfitsReceivedPromise = Deferred( )
 	end
-	
+
 	return self:loadModuleItems( )
 	:Then( function( )
 		if outfitsChanged == false then
@@ -605,7 +615,7 @@ function Pointshop2Controller:registerShopOpenHook( )
 	hook.Add( KeyToHook[Pointshop2.GetSetting( "Pointshop 2", "GUISettings.ShopKey" )], "PS2_MenuOpen", function( ply )
 		self:startView( "Pointshop2View", "toggleMenu", ply )
 	end )
-	
+
 	local ChatCommand = Pointshop2.GetSetting("Pointshop 2", "GUISettings.ShopChat")
 	hook.Add( "PlayerSay", "PS2_MenuOpen", function( ply, msg )
 		if string.len( ChatCommand ) > 0 then
@@ -624,43 +634,43 @@ end )
 
 function Pointshop2Controller:sendPoints( ply, targetPly, points )
 	points = math.floor( points )
-	
+
 	if points < 0 then
 		KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
 		return
 	end
-	
+
 	if points > ply.PS2_Wallet.points then
 		KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
 		return
 	end
-	
+
 	if not LibK.isProperNumber( points ) then
 	KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
 		return
 	end
-	
+
 	if not IsValid( targetPly ) then
 		--This could legitimately happen
 		KLogf( 4, "Player %s tried to send points to an invalid player!", ply:Nick( ) )
 		return
 	end
-	
+
 	if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SendPointsEnabled" ) == false then
 		KLogf( 3, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
 		return
 	end
-	
+
 	self:updatePlayerWallet( ply.kPlayerId, "points", ply.PS2_Wallet.points - points )
 	:Done( function( wallet )
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
 	end )
-	
+
 	self:updatePlayerWallet( targetPly.kPlayerId, "points", targetPly.PS2_Wallet.points + points )
 	:Done( function( wallet )
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( targetPly ), wallet )
 	end )
-	
+
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
 end
 
@@ -684,7 +694,7 @@ function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 		def:Reject( "An item " .. itemClassName .. " doesn't exist!" )
 		return def:Promise( )
 	end
-		
+
 	return removeSingleItem( itemClass )
 	:Then( function( )
 		return self:moduleItemsChanged( )
@@ -697,7 +707,7 @@ end
 function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
 	local promises = {}
 	local removedClassNames = {}
-	
+
 	for k, itemClassName in pairs( itemClassNames ) do
 		local promise = Promise.Resolve()
 		:Then( function( )
@@ -715,7 +725,7 @@ function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
 		end )
 		table.insert( promises, promise )
 	end
-	
+
 	return WhenAllFinished( promises )
 	:Then( function( )
 		return self:moduleItemsChanged( )
@@ -741,7 +751,7 @@ local function recurseFlatten( path, pathId, tab )
 	for k, v in pairs( files ) do
 		table.insert( tab, path .. "/" .. v )
 	end
-	
+
 	for k, v in pairs( folders ) do
 		recurseFlatten( path .. "/" .. v, pathId, tab )
 	end
@@ -751,10 +761,10 @@ end
 function Pointshop2Controller:generateModelCache( )
 	KLogf( 5, "[Pointshop 2] Generating model cache..." )
 	local startTime = SysTime( )
-	
+
 	self.gameModels = {}
 	self.addonModels = {}
-	
+
 	local games = engine.GetGames()
 	/*table.insert( games, {
 		mounted = true,
@@ -763,20 +773,20 @@ function Pointshop2Controller:generateModelCache( )
 	} )*/
 	for _, game in SortedPairsByMemberValue( games, "title" ) do
 		if ( !game.mounted ) then continue end
-		
+
 		self.gameModels[game.title] = recurseFlatten( "models", game.folder )
 	end
-	
+
 	for _, addon in SortedPairsByMemberValue( engine.GetAddons(), "title" ) do
-	
+
 		if ( !addon.downloaded || !addon.mounted ) then continue end
 		if ( addon.models <= 0 ) then continue end
-	
+
 		self.addonModels[addon.title] = recurseFlatten( "models", addon.title )
 	end
 	local data = util.TableToJSON( { games = self.gameModels,	addons = self.addonModels, addonTbl = engine.GetAddons() } )
 	KLogf( 5, "[Pointshop 2] Model cache created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
-	
+
 	local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "modelCache", data )
 	resource:GetCompressedData( ) --Force compression now
 end
