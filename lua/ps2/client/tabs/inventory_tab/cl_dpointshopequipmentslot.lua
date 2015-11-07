@@ -82,7 +82,6 @@ function PANEL:Init( )
 			end
 		end
 	end )
-
 	derma.SkinHook( "Layout", "PointshopEquipmentSlot", self )
 end
 
@@ -97,6 +96,10 @@ end
 function PANEL:SetLabel( txt )
 	self.slotName = txt
 	self.label:SetText( txt )
+
+	for k, v in pairs(LocalPlayer().PS2_Slots) do
+		hook.Run("PS2_SlotChanged", {slotName = k, Item = v})
+	end
 end
 
 function PANEL:PerformLayout( )
