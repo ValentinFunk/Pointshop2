@@ -6,6 +6,11 @@ ITEM.static.validSlots = {
 	"Hat",
 }
 
+function ITEM:initialize(id)
+	self.saveFields = self.saveFields or {}
+	table.insert(self.saveFields, "text")
+end
+
 function ITEM.static.getOutfitForModel( model )
 	return {
 		[1] = {
@@ -52,8 +57,28 @@ function ITEM.static.getOutfitForModel( model )
 				["Description"] = "add parts to me!",
 			},
 		},
-	}
+	}, 3385648173
 end
+
+if CLIENT then
+	function ITEM:UserSetText( text )
+		self.text = string.sub( text, 15 )
+		self:ServerRPC( "UserSetText", text )
+	end
+
+	function ITEM:SetText( text )
+		self.text = text
+	end
+else
+	function ITEM:UserSetText( text )
+		self.text = string.sub( text, 15 )
+		self:save()
+		print("tet", text)
+		self:ClientRPC("SetText", self.text)
+	end
+end
+
+
 
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	Pointshop2.Items.base_pointshop_item.generateFromPersistence( itemTable, persistenceItem.ItemPersistence )
@@ -109,10 +134,20 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 			},
 		},
 	}
+
+	function itemTable:getOutfitForModel( )
+		return self.baseOutfit, 3385648173
+	end
 end
 
 function ITEM.static:GetPointshopIconControl( )
 	return "DTexthatItemIcon"
+end
+
+function ITEM:getIcon( )
+	self.icon = vgui.Create( "DTexthatInventoryIcon" )
+	self.icon:SetItem( self )
+	return self.icon
 end
 
 function ITEM.static.GetPointshopDescriptionControl( )
