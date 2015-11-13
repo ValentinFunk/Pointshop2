@@ -218,6 +218,10 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	end
 end
 
+function ITEM:getOutfitForModel( model )
+	return self.class.getOutfitForModel( model )
+end
+
 function ITEM.static.GetPointshopIconDimensions( )
 	return Pointshop2.GenerateIconSize( 4, 4 )
 end

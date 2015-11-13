@@ -9,10 +9,10 @@ function Pointshop2.GetRegisteredItems( )
 	local pointshopItems = {}
 	for className, itemClass in pairs( KInventory.Items ) do
 		if subclassOf( KInventory.Items.base_pointshop_item, itemClass ) then
-			if itemClass.isBase then 
+			if itemClass.isBase then
 				continue
 			end
-			
+
 			table.insert( pointshopItems, itemClass )
 		end
 	end
@@ -43,7 +43,7 @@ end
 */
 function Pointshop2.AddItemHook( name, itemClass )
 	if itemClass.name == "DummyClass" then return end
-	
+
 	if SERVER then
 		hook.Add( name, "PS2Hook_" .. name .. itemClass.name, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
@@ -73,7 +73,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 						eqItem[name]( eqItem, ... )
 					end
 				end
-			end 
+			end
 		end )
 	end
 end
@@ -82,14 +82,14 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	if not persistentItem then
 		debug.Trace( )
 	end
-	
+
 	local baseClass = Pointshop2.GetItemClassByName( persistentItem.ItemPersistence.baseClass )
 	if not baseClass then
 		KLogf( 2, "[WARN] Invalid base class %s", persistentItem.ItemPersistence.baseClass )
 		debug.Trace( )
 		return
 	end
-	
+
 	local className = tostring( persistentItem.ItemPersistence.id )
 	local internalName = "KInventory.Items." .. className
 	KInventory.Items[className] = class( internalName, baseClass )
@@ -97,9 +97,9 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	KInventory.Items[className].static.originFilePath = "Pointshop2_Generated"
 	KInventory.Items[className].static._persistenceId = persistentItem.id
 	KInventory.Items[className].static.isBase = false
-	
+
 	baseClass.generateFromPersistence( KInventory.Items[className], persistentItem )
-	
+
 	KLogf( 4, "    -> Loaded persistent item %s", className )
 end
 
@@ -126,13 +126,12 @@ function Pointshop2.GetCreatorControlForClass( itemClass )
 end
 
 function Pointshop2.GetPersistenceClassForItemClass( itemClass )
-	for _, mod in pairs( Pointshop2.Modules ) do
-		for _, itemInfo in pairs( mod.Blueprints ) do
-			local baseClass = Pointshop2.GetItemClassByName( itemInfo.base )
-			if subclassOf( baseClass, itemClass ) then
-				return baseClass.getPersistence( )
-			end
+	local baseClass = itemClass
+	while baseClass do
+		if baseClass.getPersistence( ) then
+			return baseClass.getPersistence( )
 		end
+		baseClass = baseClass.super
 	end
 end
 
@@ -140,11 +139,11 @@ function Pointshop2.GetItemInSlot( ply, slotName )
 	if not ply.PS2_Slots then
 		return nil
 	end
-	
+
 	if CLIENT then
 		return ply.PS2_Slots[slotName]
 	end
-	
+
 	for k, slot in pairs( ply.PS2_Slots ) do
 		if slot.itemId then
 			return KInventory.ITEMS[slot.itemId]
@@ -157,7 +156,7 @@ function Pointshop2.GetServerById( id )
 	for k, v in pairs( servers ) do
 		if v.id == id then
 			return v
-		end 
+		end
 	end
 end
 
@@ -193,7 +192,7 @@ function Pointshop2.GetCategoryByName( name )
 	else
 		categories, mappings = Pointshop2Controller:getInstance( ).itemCategories, Pointshop2Controller:getInstance( ).itemMappings
 	end
-	
+
 	local category
 	for k, v in pairs( categories ) do
 		if v.label == name then
@@ -201,10 +200,10 @@ function Pointshop2.GetCategoryByName( name )
 			break
 		end
 	end
-	if not category then 
-		return false 
+	if not category then
+		return false
 	end
-	
+
 	category.items = {}
 	--Populate with item mappings
 	for k, v in pairs( mappings ) do
@@ -212,7 +211,7 @@ function Pointshop2.GetCategoryByName( name )
 			table.insert( category.items, Pointshop2.GetItemClassByName( v.itemClass ) )
 		end
 	end
-	
+
 	return category
 end
 
@@ -232,7 +231,7 @@ if SERVER then
 			net.WriteTable( { ... } )
 		net.Broadcast( )
 	end
-	
+
 	net.Receive( "PS2_ItemServerRPC", function( len, ply )
 		local itemId = net.ReadUInt( 32 )
 		local funcName = net.ReadString()
@@ -247,9 +246,9 @@ if SERVER then
 			end
 			KLogf( 4, "Pointshop2.ItemServerRPC(%i, %s, %s) len %i", itemId, funcName, argsStr, len )
 		end
-		
+
 		local item = Pointshop2.ITEMS[itemId]
-		if not item then 
+		if not item then
 			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
 			return
 		end
@@ -278,9 +277,9 @@ else
 			end
 			KLogf( 4, "Pointshop2.ItemClientRPC(%i, %s, %s) len %i", itemId, funcName, argsStr, len )
 		end
-		
+
 		local item = Pointshop2.ITEMS[itemId]
-		if not item then 
+		if not item then
 			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
 			return
 		end
@@ -290,7 +289,7 @@ else
 		end
 		item[funcName]( item, unpack( args ) )
 	end )
-	
+
 	function Pointshop2.ItemServerRPC( item, funcName, ... )
 		net.Start( "PS2_ItemServerRPC" )
 			net.WriteUInt( item.id, 32 )
@@ -316,7 +315,7 @@ function Pointshop2.BuildTree( flatStructure, itemMappings )
 	local root
 	local lookup = {}
 	for k, v in pairs( flatStructure ) do
-		local node = { 
+		local node = {
 			self = {
 				id = tonumber( v.id ),
 				label = v.label,

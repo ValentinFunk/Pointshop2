@@ -73,6 +73,9 @@ local function addEditMenu( panel, itemClass )
 			end )
 			return
 		end
+		if not persistence then
+			error("Could not find persistence for class " .. itemClass.PrintName)
+		end
 
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
