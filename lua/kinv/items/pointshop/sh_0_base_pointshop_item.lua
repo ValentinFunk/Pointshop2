@@ -85,6 +85,12 @@ function ITEM:OnHolster( )
 
 end
 
+-- Allow server method to be called by clients.
+ITEM.static.RPCMethods = { Hi = true }
+function ITEM.static.AllowRPC( rpcFuncName )
+		ITEM.static.RPCMethods[rpcFuncName] = true
+end
+	
 if SERVER then
 	/*
 		Calls the item function on the client
