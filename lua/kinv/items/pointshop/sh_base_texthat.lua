@@ -71,13 +71,12 @@ if CLIENT then
 	end
 else
 	function ITEM:UserSetText( text )
-		self.text = string.sub( text, 15 )
+		self.text = string.sub( text, 1, 16 )
 		self:save()
-		print("tet", text)
 		self:ClientRPC("SetText", self.text)
 	end
+	ITEM.AllowRPC( "UserSetText" )
 end
-
 
 
 function ITEM.static.generateFromPersistence( itemTable, persistenceItem )

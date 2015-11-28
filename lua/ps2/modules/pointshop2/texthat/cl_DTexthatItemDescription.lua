@@ -7,9 +7,10 @@ function PANEL:Init( )
         self.textEntry:Dock( TOP )
         self.textEntry:DockMargin( 0, 5, 0, 0 )
         self.textEntry:SetText( itemDesc.item.text or "Change Me" )
+		self.textEntry:SetTooltip( "Maximum 16 characters" )
         function self.textEntry:AllowInput( strValue )
-            if #strValue < 16 then
-                return true
+            if #self:GetValue( ) < 16 then
+                return false
             end
             return true
         end
