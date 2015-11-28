@@ -257,9 +257,15 @@ if SERVER then
 			return
 		end
 		if not item[funcName] then
-			KLogf( 3, "[WARN] Invalid RPC Method %s for itemId %s, name %s, class %s", funcName, itemId, item:GetPrintName( ), item.className )
+			KLogf( 2, "[ERROR] Invalid RPC Method %s for itemId %s, name %s, class %s, method does not exist", funcName, itemId, item:GetPrintName( ), item.class.className or "" )
 			return
 		end
+		
+		if not item.class.static.RPCMethods[funcName] then
+			KLogf( 2, "[ERROR] Invalid RPC Method %s for itemId %s, name %s, class %s, method is not whitelisted. Are you using ITEM.static.AllowRPC( funcName )?", funcName, itemId, item:GetPrintName( ), item.class.className or "" )
+			return
+		end
+		
 		item[funcName]( item, unpack( args ) )
 	end )
 else
@@ -267,6 +273,7 @@ else
 		local itemId = net.ReadUInt( 32 )
 		local funcName = net.ReadString()
 		local args = net.ReadTable( )
+
 		if LibK.Debug then
 			local argsStr = ""
 			for k, v in pairs( args ) do
