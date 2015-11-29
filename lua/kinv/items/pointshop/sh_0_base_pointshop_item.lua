@@ -1,6 +1,6 @@
---Indicates that this item base is statically lua defined and not loaded from a 
+--Indicates that this item base is statically lua defined and not loaded from a
 --persistence. This means that it cannot be edited dynamically
-ITEM.static._persistenceId = "STATIC" 
+ITEM.static._persistenceId = "STATIC"
 
 ITEM.PrintName = "Pointshop Item Base"
 ITEM.Material = "materials/error"
@@ -24,16 +24,16 @@ function ITEM:GetDescription( )
 end
 
 --CTOR
-function ITEM:initialize()
+function ITEM:initialize(id)
 	--Fields that are JSON saved for each item
 	self.saveFields = self.saveFields or {}
 	table.insert(self.saveFields, "purchaseData" )
 end
 
 function ITEM.static:GetBuyPrice( ply )
-	return { 
+	return {
 		points = self.Price.points,
-		premiumPoints = self.Price.premiumPoints 
+		premiumPoints = self.Price.premiumPoints
 	}
 end
 
@@ -46,9 +46,9 @@ function ITEM:GetSellPrice( ply )
 	if self.purchaseData then
 		self.purchaseData.amount = self.purchaseData.amount or 0
 		self.purchaseData.currency = self.purchaseData.currency or "points"
-		return math.floor( self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), self.purchaseData.currency		
+		return math.floor( self.purchaseData.amount * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), self.purchaseData.currency
 	end
-	
+
 	--Legacy way
 	if self.class.Price.points then
 		return math.floor( self.class.Price.points * Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SellRatio" ) ), "points"
@@ -64,7 +64,7 @@ end
 function ITEM:OnPurchased( )
 end
 
--- [TODO add to editor] -> Done for Hat 
+-- [TODO add to editor] -> Done for Hat
 function ITEM:CanBeEquipedInSlot( slotName )
 	return false
 end
@@ -85,6 +85,12 @@ function ITEM:OnHolster( )
 
 end
 
+-- Allow server method to be called by clients.
+ITEM.static.RPCMethods = { Hi = true }
+function ITEM.static.AllowRPC( rpcFuncName )
+		ITEM.static.RPCMethods[rpcFuncName] = true
+end
+	
 if SERVER then
 	/*
 		Calls the item function on the client
@@ -131,7 +137,7 @@ function ITEM.static:IsValidForServer( id )
 	if #self.Servers == 0 then
 		return true
 	end
-	
+
 	return table.HasValue( self.Servers, id )
 end
 

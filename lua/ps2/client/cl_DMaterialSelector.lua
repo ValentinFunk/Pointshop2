@@ -3,12 +3,12 @@ local PANEL = {}
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	self:SetSize( 25 + 64*8+63*4, 400 )
-	
+
 	self:SetTitle( "Select a Material" )
-	
+
 	local scroll = vgui.Create( "DScrollPanel", self )
 	scroll:Dock( FILL )
-	
+
 	self.layout = vgui.Create( "DIconLayout", scroll )
 	self.layout:SetSpaceX( 5 )
 	self.layout:SetSpaceY( 5 )
@@ -26,7 +26,7 @@ function PANEL:SetMaterials( dir, files )
 			table.insert( materials, v )
 		end
 	end
-	
+
 	for k, v in pairs( materials ) do
 		local btn = self.layout:Add( "DImageButton" )
 		btn:SetSize( 64, 64 )

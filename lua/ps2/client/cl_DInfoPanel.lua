@@ -10,17 +10,17 @@ function PANEL:Init( )
 		self:SizeToChildren( false, true )
 		self.icon:SetWide( self.icon:GetTall( ) )
 	end
-	
-	local icon = vgui.Create( "DImage", self.header ) 
+
+	local icon = vgui.Create( "DImage", self.header )
 	icon:Dock( LEFT )
 	icon:SetSize( 32, 32 )
 	self.header.icon = icon
-	
+
 	local title = vgui.Create( "DLabel", self.header )
 	title:Dock( TOP )
 	title:DockMargin( 5, 0, 0, 0 )
-	self.header.title = title 
-	
+	self.header.title = title
+
 	self.content = vgui.Create( "DMultilineLabel", self )
 	self.content:DockMargin( 5, 0, 5, 0 )
 	self.content:Dock( TOP )
@@ -45,7 +45,7 @@ end
 
 function PANEL:SetInfo( title, description, icon )
 	icon = icon or "pointshop2/info20.png"
-	
+
 	self.header.icon:SetMaterial( Material( icon, "noclamp smooth" ) )
 	self.header.title:SetText( title )
 	self.content:SetText( description )
@@ -70,7 +70,7 @@ function PANEL:Init( )
 end
 function PANEL:SetInfo( title, description, icon )
 	icon = icon or "pointshop2/info20.png"
-	
+
 	self.header.icon:SetMaterial( Material( icon, "noclamp smooth" ) )
 	self.header.title:SetText( title )
 	self.content:SetHTML( '<pre style="color:white; white-space: pre-wrap; word-wrap: break-word;">' ..  description )

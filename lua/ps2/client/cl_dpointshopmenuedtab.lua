@@ -4,8 +4,8 @@ local PANEL = { }
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	self:SetContentAlignment( 4 )
-	
-	
+
+
 	derma.SkinHook( "Layout", "PointshopMenuButton", self )
 end
 
@@ -13,11 +13,11 @@ function PANEL:PerformLayout( )
 	if self:GetSkin( ) then
 		self:SetFont( self:GetSkin( ).ButtonFont or "DermaDefault" )
 	end
-	
+
 	self:SetWide( self:GetParent( ):GetWide( ) )
-	
+
 	if not self.Image then return end
-	
+
 	if self:IsActive( ) or self.Hovered then
 		self.Image:SetImageColor( self:GetSkin( ).Highlight )
 		self:SetColor( self:GetSkin( ).Highlight )
@@ -25,7 +25,7 @@ function PANEL:PerformLayout( )
 		self.Image:SetImageColor( self:GetSkin( ).NormalBtn )
 		self:SetColor( self:GetSkin( ).NormalBtn )
 	end
-	
+
 	self.Image:SetSize( 32, 32 )
 	self.Image:SetPos( 10, self:GetTall( ) / 2 - self.Image:GetTall( ) / 2 )
 end
@@ -40,10 +40,10 @@ function PANEL:ApplySchemeSettings( )
 	end
 
 	self:SetTextInset( ExtraInset, 0 )
-	
+
 	local w, h = self:GetContentSize()
 	self:SetTall( h + 30 )
-	
+
 	DLabel.ApplySchemeSettings( self )
 end
 
@@ -55,7 +55,7 @@ local PANEL = { }
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
+
 	self.tabScroller:Remove( ) --dont need it
 	self.tabScroller = nil
 
@@ -64,14 +64,14 @@ function PANEL:Init( )
 	self.leftBar:SetWide( 245 )
 	self.leftBar:SetPadding( 10 )
 	Derma_Hook( self.leftBar, "Paint", "Paint", "InnerPanel" )
-	
+
 	local container = vgui.Create( "DSizeToContents", self.leftBar )
 	container:Dock( TOP )
 	function container:PerformLayout()
 		self:SizeToChildren( false, true )
 		self:SetTall( self:GetTall( ) + 10 )
 	end
-	
+
 	self.buttons = vgui.Create( "DIconLayout", container )
 	self.buttons:DockMargin( 10, 10, 10, 10 )
 	self.buttons:SetSpaceY( 10 )
@@ -104,21 +104,21 @@ end
 function PANEL:PerformLayout( )
 	local ActiveTab = self:GetActiveTab()
 	local Padding = self:GetPadding()
-	if not ActiveTab then 
-		return 
+	if not ActiveTab then
+		return
 	end
-	
+
 	self.buttons:PerformLayout( )
-	
+
 	ActiveTab:InvalidateLayout( true )
 	local ActivePanel = ActiveTab:GetPanel()
-	
+
 	for k, v in pairs( self.Items ) do
 		if v.Tab:GetPanel( ) == ActivePanel then
 			v.Tab:GetPanel( ):SetVisible( true )
 			--v.Tab:SetZPos( 100 )
 		else
-			v.Tab:GetPanel( ):SetVisible( false )	
+			v.Tab:GetPanel( ):SetVisible( false )
 			--v.Tab:SetZPos( 1 )
 		end
 
@@ -137,7 +137,7 @@ function PANEL:AddSheet( )
 end
 
 function PANEL:addMenuEntry( label, material, panel )
-	if not IsValid( panel ) then 
+	if not IsValid( panel ) then
 		error( "Invalid argument #3 given to addMenuEntry, expected Panel, got nil", 1 )
 		return
 	end
@@ -157,7 +157,7 @@ function PANEL:addMenuEntry( label, material, panel )
 
 	panel:SetParent( self )
 	panel:Dock( FILL )
-	
+
 	table.insert( self.Items, Sheet )
 
 	if ( !self:GetActiveTab() ) then
