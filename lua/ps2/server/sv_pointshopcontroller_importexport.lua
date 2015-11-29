@@ -1,6 +1,6 @@
 function Pointshop2Controller:exportItems( )
 	local promises = {}
-	
+
 	local exportTable = {}
 	for _, persistence in pairs( Pointshop2Controller:getPersistenceModels( ) ) do
 		if persistence.generateExportTable then
@@ -16,7 +16,7 @@ function Pointshop2Controller:exportItems( )
 			KLogf( 3, "[WARN] Couldn't export persistence %s, not implemented!", persistence.name )
 		end
 	end
-	
+
 	return WhenAllFinished( promises )
 	:Done( function( )
 		local filename = "ps2_export_".. os.date( "%Y-%m-%d_%H-%M" ) .. ".txt"
@@ -36,43 +36,43 @@ end
 
 function Pointshop2Controller:importItems( exportTable )
 	local promises = {}
-	
+
 	for persistenceClassName, exportData in pairs( exportTable ) do
 		local persistenceClass = getClass( persistenceClassName )
 		if not persistenceClass then
 			KLogf( 3, "[WARN] Not importing %s items, persistence not installed!" )
 			continue
 		end
-		
+
 		if not persistenceClass.importDataFromTable then
 			KLogf( 3, "[WARN] Not importing %s items, persistence not supported!" )
 			continue
 		end
-		
+
 		local promise = persistenceClass.importDataFromTable( exportData )
 		promise:Done( function( )
 			KLogf( 4, "    -> Imported %s", persistenceClassName )
 		end )
 		table.insert( promises, promise )
 	end
-	
+
 	return WhenAllFinished( promises )
 end
 
 function Pointshop2Controller:exportCategoryOrganization( )
-	return WhenAllFinished{ Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" ), 
+	return WhenAllFinished{ Pointshop2.Category.getDbEntries( "WHERE 1 ORDER BY parent ASC" ),
 		Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ),
 	}
 	:Then( function( categories, itemMappings )
 		local tree = Pointshop2.BuildTree( categories, itemMappings )
-		
+
 		local shopCategories = {}
 		for k, v in pairs( tree.subcategories ) do
 			if v.self.label == "Shop Categories" then
 				shopCategories = v.subcategories
 			end
 		end
-		
+
 		return shopCategories
 	end )
 	:Done( function( exportTable )
@@ -100,31 +100,31 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 		return dbCategory:save( )
 		:Done( function( )
 			print( "Saved", category.self.label)
-		end) 
+		end)
 		:Then( function( dbCategory )
 			local promises = {}
-			
+
 			category.id = dbCategory.id --need this later for the items
 			for _, subcategory in pairs( category.subcategories ) do
 				print( "Subcat", subcategory.self.label, dbCategory.id )
 				local promise = recursiveAddCategory( subcategory, dbCategory.id )
 				table.insert( promises, promise )
 			end
-			
+
 			return WhenAllFinished( promises )
 		end )
 		:Fail( function( errid, err ) error( "Error saving subcategory", errid, err ) end )
 	end
-	
+
 	local shopCategoryId = Pointshop2.GetCategoryByName( "Shop Categories" ).id
 	for k, category in pairs( importTable ) do
 		local promise = recursiveAddCategory( category, shopCategoryId )
 		table.insert( addCatPromises, promise )
 	end
 
-	
+
 	--Fucking sqlite...
-	local findItemIdByCRC 
+	local findItemIdByCRC
 	if Pointshop2.DB.CONNECTED_TO_MYSQL then
 		findItemIdByCRC = function( crc )
 			return Pointshop2.DB.DoQuery( Format( "SELECT id FROM ps2_itempersistence WHERE CRC32(CONCAT(baseClass, name, description)) = %s",
@@ -140,23 +140,23 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 		LibK.DB.SetBlocking( true )
 		local itemPersistenceIdMap = {}
 		Pointshop2.ItemPersistence.getDbEntries( "WHERE 1" )
-		:Done( function( persistences ) 
+		:Done( function( persistences )
 			for k, v in pairs( persistences ) do
 				local hash = util.CRC( v.baseClass .. v.name .. v.description )
 				print( hash )
 				itemPersistenceIdMap[hash] = v.id
-			end 
+			end
 		end )
 		LibK.DB.SetBlocking( false )
-		
+
 		findItemIdByCRC = function( crc )
 			local def = Deferred( )
 			def:Resolve( itemPersistenceIdMap[crc] )
 			return def:Promise( )
 		end
 	end
-	
-	
+
+
 	return WhenAllFinished( addCatPromises )
 	:Then( function( )
 		local importPromises = {}
@@ -169,13 +169,13 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 						ErrorNoHalt( "Couldn't find item id, skipping", crc )
 						return
 					end
-					
+
 					if not category.id then
 						print( "Item " .. id .. " invalid category " )
 						PrintTable( category )
 						return
 					end
-					
+
 					local itemMapping = Pointshop2.ItemMapping:new( )
 					itemMapping.itemClass = id
 					itemMapping.categoryId = category.id
@@ -184,20 +184,20 @@ function Pointshop2Controller:importCategoryOrganization( importTable )
 				:Fail( function( errid, err ) error( "Error saving item mapping", errid, err ) end )
 				table.insert( promises, promise )
 			end
-			
+
 			for _, subcategory in pairs( category.subcategories ) do
 				local promise = recursiveAddItems( subcategory )
 				table.insert( promises, promise )
 			end
-			
+
 			return WhenAllFinished( promises )
 		end
-		
+
 		for k, category in pairs( importTable ) do
 			local promise = recursiveAddItems( category )
 			table.insert( importPromises, promise )
 		end
-		
+
 		return WhenAllFinished( importPromises )
 	end )
 end
@@ -209,7 +209,7 @@ function Pointshop2Controller:resetToDefaults( )
 		--Reset All
 		return Pointshop2.ResetDatabase( )
 	end )
-	:Done( function( )
+	:Always( function( )
 		hook.Run( "Pointshop2_FullReset" )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
 	end )

@@ -42,6 +42,7 @@ function ITEM:InternalOnUse( )
 		KLogf( 2, "Error using item: %s", err )
 	end )
 end
+ITEM.static.AllowRPC( "InternalOnUse" )
 
 --SERVERSIDE: For override on item use
 function ITEM:OnUse( )

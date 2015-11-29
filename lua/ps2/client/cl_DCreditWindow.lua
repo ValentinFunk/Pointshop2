@@ -3,14 +3,14 @@ local PANEL = {}
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	self:SetTitle( "Pointshop 2 Credits" )
-	
+
 	self.scroll = vgui.Create( "DScrollPanel", self )
 	self.scroll:Dock( FILL )
 	self.scroll:GetCanvas( ):SetTall( 2000000 )
-	
+
 	self:SetSize( 500, 500 )
 	self:Center( )
-	
+
 	hook.Run( "PS2_PopulateCredits", self )
 end
 
@@ -26,7 +26,7 @@ vgui.Register( "DCreditWindow", PANEL, "DFrame" )
 
 hook.Add( "PS2_PopulateCredits", "AddIconCredits", function( panel )
 	panel:AddCreditSection( "Pointshop 2", [[
-Pointshop 2 designed & scripted with <3 by Kamshak. 
+Pointshop 2 designed & scripted with <3 by Kamshak.
 
 The script wouldn't be possible without the help of many people. Thanks go to:
 
@@ -48,7 +48,7 @@ Lexic for the creation of the lua Promises system used throughout the script to 
 
 To the server/community owners for sharing their experience with pointshop and giving great input on how to improve
 	]] )
-	
+
 	panel:AddCreditSection( "Icons", Pointshop2.IconCredits )
 end )
 

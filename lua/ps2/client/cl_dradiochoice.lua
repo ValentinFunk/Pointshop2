@@ -13,27 +13,27 @@ function PANEL:AddOption( optionText, forceNoCheck )
 	function choice.OnChange( pnl, val )
 		self:ChoiceSelected( pnl, val )
 	end
-	
+
 	local setValue = choice.Button.SetValue
 	function choice.Button.SetValue( btn, value )
 		if self:GetSelectedOption( ) and self:GetSelectedOption( ).Button == btn then
 			if not value then
-				return 
+				return
 			end
 		end
 		setValue( btn, value )
 	end
-	
+
 	if #self.Choices > 1 then
 		choice:DockMargin( 0, 5, 0, 0 )
 	end
-	
+
 	choice:Dock( TOP )
-	
+
 	if #self:GetChildren( ) == 1 and not forceNoCheck then
 		self:SelectChoice( 1 )
 	end
-	
+
 	return choice
 end
 
@@ -44,14 +44,14 @@ end
 
 function PANEL:ChoiceSelected( pnl, val )
 	if val == false then return end
-	
+
 	for k, v in pairs( self.Choices ) do
-		if not IsValid( v ) then continue end 
-		
-		if v == pnl then 
+		if not IsValid( v ) then continue end
+
+		if v == pnl then
 			continue
 		end
-		
+
 		v:SetChecked( false )
 	end
 	self:OnChange( )

@@ -240,8 +240,9 @@ function Pointshop2View:getPersistenceForClass( itemClass )
 	if itemClass._persistenceId == "STATIC" then
 		return "STATIC"
 	end
+	local persistenceClass = Pointshop2.GetPersistenceClassForItemClass( itemClass )
 	for k, v in pairs( self.itemProperties ) do
-		local persistenceClass = Pointshop2.GetPersistenceClassForItemClass( itemClass )
+		print(v.id, itemClass._persistenceId, instanceOf( persistenceClass, v ), persistenceClass, v.class.name, itemClass, v )
 		if v.id == itemClass._persistenceId and instanceOf( persistenceClass, v ) then
 			return v
 		end
