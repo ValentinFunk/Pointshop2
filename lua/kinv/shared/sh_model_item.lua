@@ -1,7 +1,5 @@
 KInventory.ITEMS = {}
-if SERVER then
-	setmetatable(KInventory.ITEMS, { __mode = 'v' }) --weak table, allow collection if not referenced anywhere else
-end
+setmetatable(KInventory.ITEMS, { __mode = 'v' }) --weak table, allow collection if not referenced anywhere else
 
 local Item = class( "KInventory.Item" )
 KInventory.Item = Item
