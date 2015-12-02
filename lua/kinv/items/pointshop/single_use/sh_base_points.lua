@@ -11,7 +11,7 @@ ITEM.material = "pointshop2/dollar103.png"
 ITEM.currencyType = "points"
 ITEM.amount = 100
 
-function ITEM:initialize( )
+function ITEM:initialize( id )
 	--Fields that are JSON saved for each item
 	self.saveFields = self.saveFields or {}
 	table.insert(self.saveFields, "currencyType" )
@@ -36,7 +36,7 @@ function ITEM:GetDescription( )
 	else
 		currencyStr = "Premium Points"
 	end
-	self.Description = "Gives you " .. self.amount .. " " .. currencyStr .. " when used." 
+	self.Description = "Gives you " .. self.amount .. " " .. currencyStr .. " when used."
 	return self.Description
 end
 
@@ -67,7 +67,7 @@ function ITEM:getIcon( )
 	else
 		self.material = "pointshop2/donation.png"
 	end
-		
+
 	self.icon = vgui.Create( "DPointshopMaterialInvIcon" )
 	self.icon:SetItem( self )
 	self.icon:SetSize( 64, 64 )
