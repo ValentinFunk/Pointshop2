@@ -12,6 +12,8 @@ ITEM.currencyType = "points"
 ITEM.amount = 100
 
 function ITEM:initialize( id )
+	KInventory.Items.base_pointshop_item.initialize( self, id )
+
 	--Fields that are JSON saved for each item
 	self.saveFields = self.saveFields or {}
 	table.insert(self.saveFields, "currencyType" )
