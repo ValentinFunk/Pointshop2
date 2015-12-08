@@ -225,3 +225,8 @@ end
 function ITEM.static.GetPointshopIconDimensions( )
 	return Pointshop2.GenerateIconSize( 4, 4 )
 end
+
+-- Overwrite to prevent Hat Preview (use for custom previews)
+function ITEM:NoPreview( )
+	return false
+end

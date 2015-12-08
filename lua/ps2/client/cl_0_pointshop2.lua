@@ -175,3 +175,5 @@ end )
 hook.Add( "OnReloaded", "InitNotifications", function( )
 	InitNotificationsPanel( )
 end )
+
+hook.Remove("InitPostEntity", "pace_autoload_parts")

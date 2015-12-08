@@ -5,7 +5,7 @@ local function validateOutfitList( previewPanel, ignorePreview )
 
 	for _, item in pairs( LocalPlayer().PS2_EquippedItems ) do
 		local isHat = instanceOf( Pointshop2.GetItemClassByName( "base_hat" ), item )
-		if isHat then
+		if isHat and not item:NoPreview() then
 			local outfit, id = item:getOutfitForModel( previewPanel.Entity:GetModel() )
 			previewPanel.outfits[id] = outfit
 		end
