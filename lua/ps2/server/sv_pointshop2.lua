@@ -159,7 +159,7 @@ function Pointshop2.FixDatabase( )
 			return Pointshop2.DB.DoQuery('SELECT w.id FROM ps2_weaponpersistence w INNER JOIN ps2_itempersistence ON ps2_itempersistence.id = w.itemPersistenceId WHERE ps2_itempersistence.baseClass="base_weapon_instaswitch"')
 			:Then(function(ids)
 				if ids and #ids then
-					return Pointshop2.DB.DoQuery('DELETE FROM ps2_weaponpersistence WHERE id IN (' .. table.concat(ids, ",") .. ')')
+					return Pointshop2.DB.DoQuery('DELETE FROM ps2_weaponpersistence WHERE id IN (' .. table.concat(LibK._.pluck(ids, 'id'), ",") .. ')')
 				end
 			end)
 		end
