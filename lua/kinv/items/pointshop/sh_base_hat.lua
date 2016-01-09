@@ -22,6 +22,10 @@ if CLIENT then
 			return
 		end
 
+		if hook.Run( "PS2_VisualsShouldShow", ply ) == false then
+			return
+		end
+
 		if not ply.AttachPACPart then
 			pac.SetupENT( ply )
 			ply:SetShowPACPartsInEditor( false )

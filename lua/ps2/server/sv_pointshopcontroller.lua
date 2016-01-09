@@ -342,6 +342,7 @@ local function initPlayer( ply )
 			}
 			:Done( function( )
 				controller:sendActiveEquipmentTo( ply )
+				hook.Run("PS2_PlayerFullyLoaded", ply)
 			end )
 		end )
 	end )

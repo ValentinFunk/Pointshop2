@@ -11,6 +11,10 @@ end
 
 function ITEM:AttachTrail( )
 	if SERVER then
+		if hook.Run( "PS2_VisualsShouldShow", ply ) == false then
+			return
+		end
+		
 		local ply = self:GetOwner()
 		if (ply.IsSpec and ply:IsSpec()) then
 			return
@@ -23,7 +27,7 @@ function ITEM:AttachTrail( )
 end
 
 function ITEM:TrailAdded( trailEnt )
-	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then 
+	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" ) then
 		if IsValid( trailEnt ) then
 			trailEnt:SetNoDraw( true )
 		end
@@ -63,7 +67,7 @@ function ITEM.static:GetPointshopIconControl( )
 end
 
 function ITEM.static:GetPointshopLowendIconControl( )
-	return "DPointshopSimpleTrailIcon" 
+	return "DPointshopSimpleTrailIcon"
 end
 
 function ITEM.static.getPersistence( )

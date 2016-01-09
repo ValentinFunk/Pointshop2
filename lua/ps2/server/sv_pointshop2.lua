@@ -185,3 +185,9 @@ function Pointshop2.PlayerOwnsItem( ply, item )
 
 	return false
 end
+
+function Pointshop2.BroadcastInfo( text )
+	for k, v in pairs( player.GetAll( ) ) do
+		v:PS2_DisplayInformation( text )
+	end
+end
