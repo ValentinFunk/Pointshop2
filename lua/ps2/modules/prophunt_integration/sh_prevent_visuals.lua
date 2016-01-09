@@ -4,4 +4,5 @@ local function hideOnProps(ply)
 	end
 end
 hook.Add( "PS2_VisualsShouldShow", "HideOnProps", hideOnProps )
-hook.Add( "PS2_PlayermodelShouldShow", "HideOnProps", hideOnProps)
+hook.Add( "PS2_PlayermodelShouldShow", "HideOnProps", hideOnProps )
+hook.Add( "PS2_WeaponShouldSpawn", "No weapons for props", hideOnProps )

@@ -1,9 +1,11 @@
+Pointshop2.PropHunt = {}
+
 local S = function( id )
 	return Pointshop2.GetSetting( "Prop Hunt Integration", id )
 end
 
 local teamPlayers
-local function PreRoundStart( num )
+local function Pointshop2.PropHunt.PreRoundStart( num )
 	teamPlayers = {}
 
 	for k, v in pairs( player.GetAll( ) ) do
@@ -27,8 +29,7 @@ local function PreRoundStart( num )
 	PrintTable(teamPlayers)
 end
 
-
-local function SetRoundResult( result, resulttext )
+local function Pointshop2.PropHunt.SetRoundResult( result )
 	if GAMEMODE.PS2_NoPoints then
 		return
 	end
@@ -77,24 +78,25 @@ local function SetRoundResult( result, resulttext )
 	hook.Call( "Pointshop2GmIntegration_RoundEnded" )
 end
 
-hook.Add( "PH_PropKilled", "PH_PropKilled", function( victim, inflictor, attacker )
+function Pointshop2.PropHunt.OnPropKilled( victim, inflictor, attacker )
 	if attacker:IsPlayer( ) and not GAMEMODE.PS2_NoPoints then
 		attacker:PS2_AddStandardPoints( S("Kills.HunterKillsProp"), "Killed Prop" )
 	end
-end )
+end
+hook.Add( "PS2_PH_PropKilled", "PH_PropKilled", Pointshop2.PropHunt.OnPropKilled )
 
 local function installHooks( )
 	GAMEMODE.OriginalSetRoundResult = GAMEMODE.OriginalSetRoundResult or GAMEMODE.SetRoundResult -- need to use this as fretta resets timer before OnRoundResult
 	GAMEMODE.OriginalPreRoundStart = GAMEMODE.OriginalPreRoundStart or GAMEMODE.PreRoundStart
 
 	function GAMEMODE:SetRoundResult( result, resulttext )
-		SetRoundResult( result, resulttext )
+		Pointshop2.PropHunt.SetRoundResult( result )
 		GAMEMODE.OriginalSetRoundResult( self, result, resulttext )
 	end
 
 	function GAMEMODE:PreRoundStart( num )
 		GAMEMODE.OriginalPreRoundStart( self, num )
-		PreRoundStart( num )
+		Pointshop2.PropHunt.PreRoundStart( num )
 	end
 end
 hook.Add( "InitPostEntity", "PS2_InstallPropHuntHooks", installHooks )

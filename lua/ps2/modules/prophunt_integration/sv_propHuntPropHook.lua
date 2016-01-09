@@ -26,7 +26,7 @@ local function hookProp()
     			net.WriteEntity( attacker )
 
     			net.Broadcast()
-                hook.Run( "PH_PropKilled", pl, inflictor, attacker )
+                hook.Run( "PS2_PH_PropKilled", pl, inflictor, attacker )
 
     			MsgAll(attacker:Name() .. " found and killed " .. pl:Name() .. "\n")
 
