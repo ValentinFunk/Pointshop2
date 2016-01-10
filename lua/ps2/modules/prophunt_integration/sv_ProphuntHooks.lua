@@ -5,7 +5,7 @@ local S = function( id )
 end
 
 local teamPlayers
-local function Pointshop2.PropHunt.PreRoundStart( num )
+function Pointshop2.PropHunt.PreRoundStart( num )
 	teamPlayers = {}
 
 	for k, v in pairs( player.GetAll( ) ) do
@@ -29,7 +29,7 @@ local function Pointshop2.PropHunt.PreRoundStart( num )
 	PrintTable(teamPlayers)
 end
 
-local function Pointshop2.PropHunt.SetRoundResult( result )
+function Pointshop2.PropHunt.SetRoundResult( result )
 	if GAMEMODE.PS2_NoPoints then
 		return
 	end
