@@ -15,7 +15,10 @@ function InventoryView:receiveInventory( inventory )
 		owner.inventories = owner.inventories or {}
 		table.insert( owner.inventories, inventory )
 	else
-		ErrorNoHalt( "WARNING: Pure weak reference to inventory " .. inventory.id .. "\n" )
+		KLogf( 3, "WARNING: Pure weak reference to inventory " .. inventory.id .. "\n" )
+		timer.Simple( 1, function( )
+			self:receiveInventory( inventory )
+		end )
 	end
 	self.inventories[inventory.id] = inventory
 end

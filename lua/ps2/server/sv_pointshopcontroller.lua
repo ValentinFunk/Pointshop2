@@ -330,10 +330,10 @@ local function initPlayer( ply )
 
 	Pointshop2.LoadModuleItemsPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
-		controller:sendWallet( ply )
 		return ply.dynamicsReceivedPromise
 	end )
 	:Done( function( )
+		controller:sendWallet( ply )
 		--TODO: Make a proper promise/transaction for this
 		timer.Simple( 2, function( )
 			WhenAllFinished{ controller:initializeInventory( ply ),

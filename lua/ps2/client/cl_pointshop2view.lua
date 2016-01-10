@@ -97,7 +97,7 @@ function Pointshop2View:walletChanged( newWallet, tries )
 			ply = v
 		end
 	end
-	if not ply and tries < 10 then
+	if not ply and tries < 100 then
 		timer.Simple( 0.5, function( )
 			self:walletChanged( newWallet, tries + 1 )
 		end )
@@ -231,7 +231,18 @@ function Pointshop2View:loadDynamics( versionHash )
 		self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
 
 		--Inform server
-		self:controllerAction( "dynamicsReceived" )
+		timer.Create( "CheckFullyLoaded", 0.1, 0, function()
+			local loaded = true
+			for k, v in pairs( player.GetAll( ) ) do
+				if v == LocalPlayer( ) && v:GetNWInt("KPlayerId", -1) == -1 then
+					loaded = false
+				end
+			end
+			if loaded then
+				timer.Destroy( "CheckFullyLoaded" )
+				self:controllerAction( "dynamicsReceived" )
+			end
+		end )
 	end )
 end
 
