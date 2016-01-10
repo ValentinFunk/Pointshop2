@@ -90,7 +90,7 @@ ITEM.static.RPCMethods = { Hi = true }
 function ITEM.static.AllowRPC( rpcFuncName )
 		ITEM.static.RPCMethods[rpcFuncName] = true
 end
-	
+
 if SERVER then
 	/*
 		Calls the item function on the client
@@ -166,6 +166,21 @@ function ITEM:getIcon( )
 		surface.DrawRect( 0, 0, w, h )
 	end
 	return self.icon
+end
+
+-- Hacky way to keep compatible
+function ITEM:getNewInventoryIcon( )
+	if self.icon then
+		local old = self.icon
+		self.icon = nil
+		local icon = self:getIcon( )
+		self.icon = old
+		return icon
+	else
+		local icon = self:getIcon( )
+		self.icon = nil
+		return icon
+	end
 end
 
 function ITEM:getLowendInventoryIcon( )
