@@ -1,67 +1,5 @@
 local SetupCategoryNode
 
-local nodeToSelect, nodeToSelectText
-
-local function genericDelete( panels )
-	local menu = DermaMenu( )
-	menu:SetSkin( Pointshop2.Config.DermaSkin )
-	local btn = menu:AddOption( "Delete", function( )
-		Derma_Query( "Do you really want to permanently remove " .. #panels .. " items?", "Confirm",
-			/*"Yes and refund players", function( )
-				Pointshop2View:getInstance( ):removeItem( itemClass, true )
-			end,*/
-			"Yes", function( )
-				local toRemove = {}
-				for k, v in pairs( panels ) do
-					local itemClass = v:GetItemClass( )
-
-					local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
-					if persistence == "STATIC" then
-						Derma_Message( "The Item " .. itemClass.PrintName .. " is Lua defined and cannot be deleted ingame. To delete it remove " .. itemClass.originFilePath, "Info" )
-						continue
-					end
-
-					table.insert( toRemove, itemClass )
-				end
-				Pointshop2View:getInstance( ):removeItems( toRemove )
-			end,
-			"No", function( )
-			end
-		)
-	end )
-	btn:SetImage( "pointshop2/cross66.png" )
-	btn.m_Image:SetSize( 16, 16 )
-
-	local btn = menu:AddOption( "Restrict Server", function( )
-		local frame = vgui.Create( "DSelectServers" )
-		frame:MakePopup( )
-		frame:Center( )
-		function frame.OnSave( )
-			local itemClassNames = {}
-			for k, v in pairs( panels ) do
-				local itemClass = v:GetItemClass( )
-
-				local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
-				if persistence == "STATIC" then
-					Derma_Message( "The Item " .. itemClass.PrintName .. " is Lua defined and cannot be modified ingame. To modify it edit " .. itemClass.originFilePath, "Info" )
-					continue
-				end
-
-				table.insert( itemClassNames, itemClass.className )
-			end
-			local validServers = frame:GetSelectedIds( )
-			Pointshop2View:getInstance( ):updateServerRestrictions( itemClassNames, validServers )
-		end
-	end )
-	btn:SetImage( "pointshop2/rack1.png" )
-	btn.m_Image:SetSize( 16, 16 )
-
-	menu:Open( )
-end
-hook.Add( "PS2_MultiItemSelectOpenMenu", "AddDeleteMenu", function( panels )
-	genericDelete( panels )
-end )
-
 local function addEditMenu( panel, itemClass )
 	function panel:OpenMenu( )
 		local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
@@ -232,6 +170,35 @@ function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, ri
 	end
 end
 
+local function treeNodeItemReceiver( self, Drops, bDoDrop, Command, x, y )
+	local closest = self:GetClosestChild( x, y )
+	if self.specialNode or closest.specialNode then return end -- prevent dropping items onto invalid item holders (not for sale category, shop category)
+
+	if ( !IsValid( closest ) ) then
+		return self:DropAction_Simple( Drops, bDoDrop, Command, x, y )
+	end
+
+	local x, y = closest:GetPos()
+	local w, h = closest:GetSize( )
+	self:SetDropTarget( x, y, w, h )
+
+	if ( table.HasValue( Drops, closest ) ) then return end
+	if ( !bDoDrop ) then return end
+
+	for k, v in pairs( Drops ) do
+		-- Don't drop one of our parents onto us
+		-- because we'll be sucked into a vortex
+		if ( v:IsOurChild( self ) ) then continue end
+
+		v = v:OnDrop( self )
+
+		if not closest.PropPanel then
+			closest:DoPopulate()
+		end
+		v:SetParent( closest.PropPanel.IconList )
+	end
+	self:OnModified()
+end
 
 local function PopulateWithExistingCategories( pnlContent, node, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	for id, subcategory in pairs( dataNode.subcategories ) do
@@ -243,24 +210,43 @@ local function PopulateWithExistingCategories( pnlContent, node, dataNode, noEdi
 	end
 end
 
-local categoriesNode, notForSaleNode
+-- ALlow items to be dropped directly onto the child nodes of this node, placing them in the content panel
+local function AllowItemDropping( node )
+	function node:InstallDraggable( node )
+		DTree_Node.InstallDraggable( self, node )
+		self.ChildNodes:Receiver( "SandboxContentPanel", treeNodeItemReceiver )
+
+		AllowItemDropping( node )
+	end
+end
+
+Pointshop2.nodeToSelectText = nil
 hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tree, node, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	local nodeToSelect
 	local old = tree.OnNodeSelected
 	function tree:OnNodeSelected( node )
 		old( self, node )
 		nodeToSelect = node
 	end
+	hook.Add( "PS2_PreReload", tree, function( )
+		if IsValid( nodeToSelect ) then
+			Pointshop2.nodeToSelectText = nodeToSelect:GetText( )
+		end
+	end )
 
-	local node = AddCategoryNode( pnlContent, "Shop Categories", "pointshop2/folder62.png", tree )
-	node:SetDraggableName( "CustomContent" )
-	node.specialNode = true
-	function node:DoRightClick( )
+	-- Allow dropping items into uncategorized
+	AllowItemDropping(tree.RootNode)
+
+	local categoriesNode = AddCategoryNode( pnlContent, "Shop Categories", "pointshop2/folder62.png", tree )
+	categoriesNode:SetDraggableName( "CustomContent" )
+	categoriesNode.specialNode = true
+	function categoriesNode:DoRightClick( )
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
 		local btn = menu:AddOption( "New Category", function( )
-			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", node )
-			node:SetExpanded( true )
-			node:InstallDraggable(n2)
+			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", categoriesNode )
+			categoriesNode:SetExpanded( true )
+			categoriesNode:InstallDraggable(n2)
 			timer.Simple( 0.1, function( )
 				n2:DoClick( )
 				n2:InternalDoClick()
@@ -273,8 +259,8 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 		btn.m_Image:SetSize( 16, 16 )
 		menu:Open( )
 	end
-	node.immuneToChanges = true
-	function node:DoPopulate( )
+	categoriesNode.immuneToChanges = true
+	function categoriesNode:DoPopulate( )
 		self.PropPanel = vgui.Create( "DPanel", pnlContent )
 		self.PropPanel:Dock( FILL )
 		self.PropPanel:DockMargin( 5, 5, 5, 5 )
@@ -302,26 +288,23 @@ When moving items first hover over the entry in the tree on the left, then drop 
 ]] )
 		info:DockMargin( 5, 5, 5, 5 )
 	end
-	categoriesNode = node
-	--node:InternalDoClick()
 
 	--Populate with existing stuff
 	local dataNode = Pointshop2View:getInstance( ):getShopCategory( )
-	PopulateWithExistingCategories( pnlContent, node, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
-	node:SetExpanded( true )
+	PopulateWithExistingCategories( pnlContent, categoriesNode, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	categoriesNode:SetExpanded( true )
 
-	local node = AddCategoryNode( pnlContent, "Not for sale Items", "pointshop2/circle14.png", tree, noEdit, rightClickNodeFunction, rightClickItemFunction )
-	node.immuneToChanges = true
-	node.specialNode = true
-	node:SetDraggableName( "CustomContent" )
-	notForSaleNode = node
-	function node:DoRightClick( )
+	local notForSaleNode = AddCategoryNode( pnlContent, "Not for sale Items", "pointshop2/circle14.png", tree, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	notForSaleNode.immuneToChanges = true
+	notForSaleNode.specialNode = true
+	notForSaleNode:SetDraggableName( "CustomContent" )
+	function notForSaleNode:DoRightClick( )
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
 		local btn = menu:AddOption( "New Category", function( )
-			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", node )
-			node:SetExpanded( true )
-			node:InstallDraggable(n2)
+			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", categoriesNode )
+			notForSaleNode:SetExpanded( true )
+			notForSaleNode:InstallDraggable(n2)
 			timer.Simple( 0.1, function( )
 				n2:DoClick( )
 				n2:InternalDoClick()
@@ -334,8 +317,9 @@ When moving items first hover over the entry in the tree on the left, then drop 
 		btn.m_Image:SetSize( 16, 16 )
 		menu:Open( )
 	end
-	local old = node.DoPopulate
-	function node:DoPopulate( )
+
+	local old = notForSaleNode.DoPopulate
+	function notForSaleNode:DoPopulate( )
 		self.PropPanel = vgui.Create( "DPanel", pnlContent )
 		self.PropPanel:Dock( FILL )
 		self.PropPanel:DockMargin( 5, 5, 5, 5 )
@@ -356,12 +340,11 @@ Categories and organization of items are saved, but the categories will not appe
 		info:DockMargin( 5, 5, 5, 5 )
 	end
 	local dataNode = Pointshop2View:getInstance( ):getNoSaleCategory( )
-	PopulateWithExistingCategories( pnlContent, node, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
-	node:SetExpanded( true )
+	PopulateWithExistingCategories( pnlContent, notForSaleNode, dataNode, noEdit, rightClickNodeFunction, rightClickItemFunction )
+	notForSaleNode:SetExpanded( true )
 
 	local node = AddCategoryNode( pnlContent, "Uncategorized Items", "pointshop2/folder62.png", tree, noEdit, rightClickNodeFunction, rightClickItemFunction )
 	node:SetDraggableName( "CustomContent" )
-	node.specialNode = true
 	function node:DoRightClick( )
 	end
 	node.immuneToChanges = true
@@ -391,7 +374,7 @@ Categories and organization of items are saved, but the categories will not appe
 			if node:HasChildren() then
 				selectNode( node )
 			end
-			if node:GetText( ) == nodeToSelectText then
+			if node:GetText( ) == Pointshop2.nodeToSelectText then
 				gotNode = true
 				timer.Simple( 0, function( )
 					node:InternalDoClick( )
@@ -401,7 +384,7 @@ Categories and organization of items are saved, but the categories will not appe
 		end
 	end
 
-	if nodeToSelectText then
+	if Pointshop2.nodeToSelectText then
 		selectNode( tree.RootNode )
 	end
 
@@ -411,65 +394,9 @@ Categories and organization of items are saved, but the categories will not appe
 			tree.RootNode.ChildNodes:GetChildren( )[1]:InternalDoClick( )
 		end )
 	end
-end )
 
-hook.Add( "PS2_PreReload", "RememberActiveCategory", function( )
-	if IsValid( nodeToSelect ) then
-		nodeToSelectText = nodeToSelect:GetText( )
-	end
-end )
 
-hook.Add( "PS2_OnSaveSpawnlist", "SaveCategories", function( )
-	if IsValid( nodeToSelect ) then
-		nodeToSelectText = nodeToSelect:GetText( )
-	end
-
-	local function recursiveAddCategory( node, tbl )
-		if not IsValid( node ) then
-			return
-		end
-
-		local nodeInTable = {
-			self = {
-				label = node:GetText( ),
-				icon = node:GetIcon( )
-			},
-			subcategories = { },
-			items = { }
-		}
-
-		if node.ChildNodes then
-			for k, childNode in pairs( node.ChildNodes:GetChildren( ) ) do
-				recursiveAddCategory( childNode, nodeInTable.subcategories )
-			end
-		end
-
-		--make sure it has all items it should contain
-		node:DoPopulate( )
-		for k, itemIcon in pairs( node.PropPanel:GetItems( ) ) do
-			table.insert( nodeInTable.items, itemIcon.itemClass.className )
-		end
-
-		table.insert( tbl, nodeInTable )
-	end
-
-	local categoriesWithItems = {
-		self = {
-			label = "Root",
-			icon = "Root",
-		},
-		items = {},
-		subcategories = {},
-	}
-	for k, v in ipairs( {categoriesNode, notForSaleNode} ) do
-		recursiveAddCategory( v, categoriesWithItems.subcategories )
-	end
-
-	if #categoriesWithItems == 1 then
-		debug.Trace()
-		Derma_Message( "Your changes cold not be saved. Please change something and save again", "Error")
-		return
-	end
-
-	Pointshop2View:getInstance( ):saveCategoryOrganization( categoriesWithItems )
+	hook.Add( "PS2_OnSaveSpawnlist", tree, function()
+		Pointshop2.DoSaveCategories( categoriesNode, notForSaleNode )
+	end )
 end )

@@ -343,6 +343,7 @@ function Pointshop2View:getUncategorizedItems( )
 end
 
 function Pointshop2View:createPointshopItem( saveTable )
+	PrintTable(saveTable)
 	hook.Run( "PS2_PreReload" )
 	self:controllerAction( "saveModuleItem", saveTable )
 end
