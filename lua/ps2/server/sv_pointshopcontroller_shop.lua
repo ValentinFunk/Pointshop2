@@ -4,6 +4,10 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 		return Promise.Reject( "Couldn't buy item, item " .. itemClassName .. " isn't valid" )
 	end
 
+	if itemClass.isBase then
+		return Promise.Reject( "You can not buy a base" )
+	end
+
 	if not ply:PS2_HasInventorySpace( 1 ) then
 		return Promise.Reject( "Inventory full" )
 	end

@@ -2,24 +2,24 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
+
 	self:DockPadding( 10, 0, 10, 10 )
-	
+
 	local label = vgui.Create( "DLabel", self )
 	label:SetText( "User Selection" )
 	label:SetColor( color_white )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
-	
+
 	self.container = vgui.Create( "DCategoryList", self )
 	self.container:Dock( FILL )
-	
+
 	function self.container:RequestToggle( category )
 		if category:GetExpanded( ) then
 			return false
 		end
-		
+
 		for k, v in pairs( self.pnlCanvas:GetChildren( ) ) do
 			if v != category then
 				v:DoExpansion( false )
@@ -27,7 +27,7 @@ function PANEL:Init( )
 		end
 		return true
 	end
-	
+
 	local original = self.container.Add
 	function self.container:Add( name )
 		local cat = original( self, name )
@@ -39,7 +39,7 @@ function PANEL:Init( )
 		end
 		return cat
 	end
-	
+
 	local onlinePlayersCategory = self.container:Add( "Online Players" )
 	self.onlinePlayersTable = vgui.Create( "DListView" )
 	self.onlinePlayersTable:SetTall( 500 )
@@ -47,11 +47,11 @@ function PANEL:Init( )
 	self.onlinePlayersTable:AddColumn( "Player" )
 	self.onlinePlayersTable:AddColumn( "Points" )
 	self.onlinePlayersTable:AddColumn( "Premium Points" )
-	
+
 	function self.onlinePlayersTable.OnRowSelected( tbl, rowId, row )
 		self:OnUserSelected( row.kPlayerId )
 	end
-	
+
 	function self.onlinePlayersTable:GetPlayerLine( ply )
 		for k, v in pairs( self:GetLines( ) ) do
 			if v.player == ply then
@@ -59,7 +59,7 @@ function PANEL:Init( )
 			end
 		end
 	end
-	
+
 	function self.onlinePlayersTable:Think( )
 		for k, v in pairs( player.GetAll( ) ) do
 			if not self:GetPlayerLine( v ) then
@@ -79,19 +79,19 @@ function PANEL:Init( )
 				hook.Add( "PS2_WalletChanged", line, line.WalletChanged )
 			end
 		end
-		
+
 		for k, v in pairs( self:GetLines( ) ) do
 			if not IsValid( v.player ) then
 				self:RemoveLine( v:GetID( ) )
 			end
 		end
 	end
-	
+
 	onlinePlayersCategory:SetContents( self.onlinePlayersTable )
 	onlinePlayersCategory:DockMargin( 5, 5, 5, 5 )
 	self.onlinePlayersTable:Dock( TOP )
-	onlinePlayersCategory.Header:DoClick( )	
-	
+	onlinePlayersCategory.Header:DoClick( )
+
 	local searchPlayerCategory = self.container:Add( "Search Players" )
 	searchPlayerCategory:DockMargin( 5, 5, 5, 5 )
 	self.searchPanel = vgui.Create( "DPanel" )
@@ -99,7 +99,7 @@ function PANEL:Init( )
 	self.searchPanel.Paint = function( ) end
 	searchPlayerCategory:SetContents( self.searchPanel )
 	self.searchPanel:Dock( TOP )
-	
+
 	self.searchPanel.resultsTable = vgui.Create( "DListView", self.searchPanel )
 	self.searchPanel.resultsTable:SetTall( 400 )
 	self.searchPanel.resultsTable:SetMultiSelect( false )
@@ -111,32 +111,39 @@ function PANEL:Init( )
 	function self.searchPanel.resultsTable:SetResultSet( results )
 		self:Clear( )
 		for k, result in pairs( results ) do
-			local line = self:AddLine( result.name, os.date( "%Y-%m-%d %H:%M", result.lastConnected ) ) 
+			local line = self:AddLine( result.name, os.date( "%Y-%m-%d %H:%M", result.lastConnected ) )
 			line.kPlayerId = result.id
 			if result.Wallet then
 				line:SetColumnText( 3, result.Wallet.points )
 				line:SetColumnText( 4, result.Wallet.premiumPoints )
+			end
+			function line:GetSortValue( colId )
+				if colId == 3 or colId == 4 then
+					return tonumber( self.Columns[colId].Value ) or -math.huge
+				else
+					return self.Columns[colId].Value
+				end
 			end
 		end
 	end
 	function self.searchPanel.resultsTable.OnRowSelected( tbl, rowId, row )
 		self:OnUserSelected( row.kPlayerId )
 	end
-	
+
 	self.searchForm = vgui.Create( "DPanel", self.searchPanel )
 	self.searchForm:SetTall( 100 )
 	self.searchForm:Dock( TOP )
 	self.searchForm.Paint = function( ) end
-	
+
 	local left = vgui.Create( "DPanel", self.searchForm )
 	left:Dock( LEFT )
 	left.Paint = function( ) end
 	left:SetWide( 150 )
 	left:DockPadding( 5, 5, 5, 5 )
-	
+
 	left.textEntry = vgui.Create( "DTextEntry", left )
 	left.textEntry:Dock( TOP )
-	
+
 	left.radioBtns = vgui.Create( "DRadioChoice", left )
 	left.radioBtns:AddOption( "Name" )
 	left.radioBtns:AddOption( "Steam ID" )
@@ -147,13 +154,13 @@ function PANEL:Init( )
 	left.radioBtns:SetTall( 60 )
 	left.radioBtns:Dock( TOP )
 	left.radioBtns:DockMargin( 0, 5, 5, 0 )
-	
+
 	local right = vgui.Create( "DPanel", self.searchForm )
 	right:Dock( LEFT )
 	right.Paint = function( ) end
 	right:DockPadding( 5, 5, 5, 5 )
 	right:SetWide( 100 )
-	
+
 	self.searchBtn = vgui.Create( "DButton", right )
 	self.searchBtn:SetText( "Search" )
 	self.searchBtn:SetImage( "pointshop2/magnifier12.png" )
@@ -172,7 +179,7 @@ function PANEL:Init( )
 		end )
 		self.searchBtn:SetDisabled( true )
 	end
-	
+
 	self:InvalidateLayout( )
 end
 

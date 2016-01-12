@@ -21,23 +21,27 @@ function ITEM:ApplyModel( )
 	if CLIENT then
 		return
 	end
-	
+
+	if hook.Run( "PS2_PlayermodelShouldShow", ply ) == false then
+		return
+	end
+
 	local ply = self:GetOwner( )
-	
+
 	if not IsValid( ply ) then
 		ErrorNoHalt( "[PS2] Invalid owner for item " .. self.id .. ": " .. tostring( ply ) )
 		return
 	end
-	
+
 	ply:SetModel( self.playerModel )
 	ply:SetupHands()
-	
-	local groups = string.Explode( " ", self.bodygroups ) 
+
+	local groups = string.Explode( " ", self.bodygroups )
 	for k = 0, ply:GetNumBodyGroups( ) - 1 do
 		if ( ply:GetBodygroupCount( k ) <= 1 ) then continue end
 		ply:SetBodygroup( k, groups[ k + 1 ] or 0 )
 	end
-	
+
 	if ply:SkinCount( ) - 1 > 0 then
 		ply:SetSkin( self.skin )
 	end
@@ -70,11 +74,11 @@ function ITEM:PlayerSetModel( ply )
 			tostring(self:GetOwner()), type(self:GetOwner()) )
 		return
 	end
-	
+
 	if ply != self:GetOwner( ) then
 		return
 	end
-	
+
 	self:ApplyModel( )
 	timer.Simple( 1, function( )
 		self:ApplyModel( )

@@ -142,6 +142,29 @@ function Pointshop2.FixDatabase( )
 		end )
 	end )
 
+	-- 6: Fix wrong persistence for instaswitch Weapons
+	:Then( function()
+		return Pointshop2.DB.DoQuery([[INSERT INTO ps2_instatswitchweaponpersistence (weaponClass, loadoutType, itemPersistenceId)
+		    SELECT WP.weaponClass AS weaponClass, WP.loadoutType AS loadoutType, WP.itemPersistenceId AS itemPersistenceId
+		    FROM `ps2_itempersistence` IP, ps2_weaponpersistence WP
+		    WHERE IP.baseClass="base_weapon_instaswitch" AND WP.itemPersistenceId = IP.id]])
+	end )
+	:Then( function( )
+		if Pointshop2.DB.CONNECTED_TO_MYSQL then
+			return Pointshop2.DB.DoQuery([[DELETE w FROM ps2_weaponpersistence w
+				INNER JOIN `ps2_itempersistence`
+					ON ps2_itempersistence.id = w.itemPersistenceId
+				WHERE ps2_itempersistence.baseClass="base_weapon_instaswitch"]])
+		else
+			return Pointshop2.DB.DoQuery('SELECT w.id FROM ps2_weaponpersistence w INNER JOIN ps2_itempersistence ON ps2_itempersistence.id = w.itemPersistenceId WHERE ps2_itempersistence.baseClass="base_weapon_instaswitch"')
+			:Then(function(ids)
+				if ids and #ids then
+					return Pointshop2.DB.DoQuery('DELETE FROM ps2_weaponpersistence WHERE id IN (' .. table.concat(LibK._.pluck(ids, 'id'), ",") .. ')')
+				end
+			end)
+		end
+	end )
+
 	:Done( function( )
 		RunConsoleCommand( "changelevel", game.GetMap( ) )
 	end )
@@ -161,4 +184,10 @@ function Pointshop2.PlayerOwnsItem( ply, item )
 	end
 
 	return false
+end
+
+function Pointshop2.BroadcastInfo( text )
+	for k, v in pairs( player.GetAll( ) ) do
+		v:PS2_DisplayInformation( text )
+	end
 end
