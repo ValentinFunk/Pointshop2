@@ -33,6 +33,7 @@ if CLIENT then
 
 		local outfit, id = self:getOutfitForModel( ply:GetModel() )
 		self.outfit = outfit
+		self.model = ply:GetModel()
 		ply:AttachPACPart( outfit )
 	end
 
@@ -45,6 +46,19 @@ if CLIENT then
 		local outfit = self.outfit or self.class.getOutfitForModel( ply:GetModel() )
 		ply:RemovePACPart( outfit )
 	end
+
+	-- Monitor Model Changes
+	function ITEM:Think( )
+		if not self.outfit or not self.model or not IsValid( self:GetOwner( ) ) then
+			return
+		end
+
+		if self.model != self:GetOwner( ):GetModel( ) then
+			self:RemoveOutfit( )
+			self:AttachOutfit( )
+		end
+	end
+	Pointshop2.AddItemHook( "Think", ITEM )
 else
 	function ITEM:PlayerSpawn( ply )
 		if not ply:Alive( ) then
@@ -58,6 +72,7 @@ else
 		if ply.IsGhost and ply:IsGhost() then
 			return
 		end
+
 		if ply == self:GetOwner( ) then
 			timer.Simple( 0.5, function( )
 				self:ClientRPC( "AttachOutfit" )
