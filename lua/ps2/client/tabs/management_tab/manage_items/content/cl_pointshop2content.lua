@@ -302,7 +302,7 @@ When moving items first hover over the entry in the tree on the left, then drop 
 		local menu = DermaMenu( )
 		menu:SetSkin( self:GetSkin( ).Name )
 		local btn = menu:AddOption( "New Category", function( )
-			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", categoriesNode )
+			local n2 = AddCategoryNode( pnlContent, "New Category", "pointshop2/folder62.png", notForSaleNode )
 			notForSaleNode:SetExpanded( true )
 			notForSaleNode:InstallDraggable(n2)
 			timer.Simple( 0.1, function( )
