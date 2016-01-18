@@ -9,7 +9,9 @@ hook.Add( "InitPostEntity", "InitializePlayers", function( )
 	end
 	LocalPlayer().PS2_Inventory = {}
 
-	Pointshop2View:getInstance( ) --Create the view
+	timer.Simple( 0.5, function( )
+		Pointshop2View:getInstance( ) --Create the view
+	end )
 end )
 
 local GLib = LibK.GLib

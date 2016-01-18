@@ -165,6 +165,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 
 	def:Then( function( )
+		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 		item:OnHolster( )
 		item:OnSold( )
 		local amount, currencyType = item:GetSellPrice( )
@@ -178,6 +179,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	:Then( function( )
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
 		hook.Run( "PS2_SoldItem", ply )
+
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )

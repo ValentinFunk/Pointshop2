@@ -11,10 +11,10 @@ end
 
 function ITEM:AttachTrail( )
 	if SERVER then
-		if hook.Run( "PS2_VisualsShouldShow", ply ) == false then
+		if hook.Run( "PS2_VisualsShouldShow", self:GetOwner( ) ) == false then
 			return
 		end
-		
+
 		local ply = self:GetOwner()
 		if (ply.IsSpec and ply:IsSpec()) then
 			return
