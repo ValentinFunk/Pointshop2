@@ -22,14 +22,14 @@ function ITEM:ApplyModel( )
 		return
 	end
 
-	if hook.Run( "PS2_PlayermodelShouldShow", ply ) == false then
-		return
-	end
-
 	local ply = self:GetOwner( )
 
 	if not IsValid( ply ) then
 		ErrorNoHalt( "[PS2] Invalid owner for item " .. self.id .. ": " .. tostring( ply ) )
+		return
+	end
+
+	if hook.Run( "PS2_PlayermodelShouldShow", ply ) == false then
 		return
 	end
 
