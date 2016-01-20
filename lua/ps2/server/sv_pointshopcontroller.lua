@@ -28,10 +28,19 @@ function Pointshop2.InitPromises( )
 		KLogf( 4, "[Pointshop2] The database was connected" )
 	end )
 	function Pointshop2.onDatabaseConnected( )
+		if not Pointshop2.DB then
+			Pointshop2.DatabaseError = true
+			return
+		end
+
 		DATABASES["KInventory"] = Pointshop2.DB
 		Pointshop2.LoadModulesPromise:Done( function( )
 			Pointshop2.DatabaseConnectedPromise:Resolve( )
 		end )
+	end
+	function Pointshop2.onDatabaseConnectionFailed( err )
+		Pointshop2.DatabaseConnectedPromise:Reject( err )
+		KLogf( 1, "[Pointshop2] The database is not set up correctly!")
 	end
 
 	Pointshop2.SettingsLoadedPromise = Deferred( )
@@ -271,22 +280,20 @@ function Pointshop2Controller:loadDynamicInfo( )
 		self.dynamicsResource = resource
 	end )
 end
-Pointshop2.LoadModuleItemsPromise:Done( function( )
-	Pointshop2Controller:getInstance( ):loadDynamicInfo( )
+Pointshop2.DynamicsLoadedPromise = Pointshop2.LoadModuleItemsPromise:Then( function( )
+	return Pointshop2Controller:getInstance( ):loadDynamicInfo( )
 end )
 function Pointshop2Controller:sendDynamicInfo( ply )
 	if ply.dynamicsReceivedPromise._promise._state != "pending" then
 		ply.dynamicsReceivedPromise = Deferred( )
 	end
 	if not self.dynamicsResource then
-		KLogf( 4, "[Pointshop2] Dynamics resource not loaded yet, trying again later" )
-		timer.Simple( 0.5, function( )
-			self:sendDynamicInfo( ply )
-		end )
-		return
+		KLogf( 3, "[Pointshop2] Dynamics resource not loaded when player joined" )
 	end
 
-	self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
+	Pointshop2.DynamicsLoadedPromise:Done( function( )
+		self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
+	end )
 end
 
 function Pointshop2Controller:dynamicsReceived( ply )
@@ -327,6 +334,14 @@ end )
 local function initPlayer( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
 	local controller = Pointshop2Controller:getInstance( )
+
+	Pointshop2.DatabaseConnectedPromise:Fail( function( err )
+		if ply:IsAdmin( ) then
+			timer.Simple( 2, function( )
+				ply:PS2_DisplayError( "[CRITICAL][ADMIN ONLY] Your MySQL configuration is faulty. (" .. err .. "). Please fix these errors. Other parts of your server can be affected by errors if this is not fixed.", 1000 )
+			end )
+		end
+	end )
 
 	Pointshop2.LoadModuleItemsPromise:Then( function( )
 		controller:sendDynamicInfo( ply )

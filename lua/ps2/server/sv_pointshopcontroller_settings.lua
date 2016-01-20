@@ -6,7 +6,7 @@ function Pointshop2Controller:loadSettings( noTransmit )
 	for k, mod in pairs( Pointshop2.Modules ) do
 		table.insert( moduleInitPromises, Pointshop2.InitializeModuleSettings( mod ) )
 	end
-	
+
 	return WhenAllFinished( moduleInitPromises )
 	:Then( function( )
 		local data = LibK.von.serialize( { Pointshop2.Settings.Shared } )
@@ -19,7 +19,7 @@ function Pointshop2Controller:loadSettings( noTransmit )
 		end
 	end )
 	:Done( function( )
-		Pointshop2.SettingsLoadedPromise:Resolve( )
+		Pointshop2.SettingsLoadedPromise:Resolve( LibK.GLib.Resources.Resources["Pointshop2/settings"] )
 		hook.Run( "PS2_OnSettingsUpdate" )
 	end )
 	:Fail( function( )
@@ -27,9 +27,9 @@ function Pointshop2Controller:loadSettings( noTransmit )
 	end )
 end
 Pointshop2.DatabaseConnectedPromise:Done( function( )
-	Pointshop2Controller:initServer( )
-	:Done( function( )
-		Pointshop2Controller:getInstance( ):loadSettings( )
+	return Pointshop2Controller:initServer( )
+	:Then( function( )
+		return Pointshop2Controller:getInstance( ):loadSettings( )
 	end )
 end )
 
@@ -37,10 +37,11 @@ function Pointshop2Controller:SendInitialSettingsPackage( ply )
 	local resource = LibK.GLib.Resources.Resources["Pointshop2/settings"]
 	if not resource then
 		KLogf( 4, "[Pointshop2] Settings package not loaded yet, trying again later" )
-		timer.Simple( 1, function( ) self:SendInitialSettingsPackage( ply ) end )
-		return
 	end
-	self:startView( "Pointshop2View", "loadSettings", ply, resource:GetVersionHash( ) )
+
+	Pointshop2.SettingsLoadedPromise:Done( function( resource )
+		self:startView( "Pointshop2View", "loadSettings", ply, resource:GetVersionHash( ) )
+	end )
 end
 hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestSettings", function( ply )
 	timer.Simple( 1, function( )
@@ -59,7 +60,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.Settings", GLib.NullCallback )
 GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, data )
 	local inBuffer = GLib.StringInBuffer( data )
 	local modName = inBuffer:String( )
-	
+
 	local ply
 	for k, v in pairs( player.GetAll( ) ) do
 		if GLib.GetPlayerId( v ) == userId then
@@ -67,18 +68,18 @@ GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, 
 			break
 		end
 	end
-	
+
 	if not PermissionInterface.query( ply, "pointshop2 managemodules" ) then
 		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %s, not allowed", userId )
 		return false
 	end
-	
-	local settings = table.Merge( Pointshop2.Settings.Server, Pointshop2.Settings.Shared )[modName] 
+
+	local settings = table.Merge( Pointshop2.Settings.Server, Pointshop2.Settings.Shared )[modName]
 	if not settings then
 		KLogf( 3, "[Pointshop2] Rejecting settings transfer for %s, settings %s not found", userId, modName )
 		return false
 	end
-	
+
 	local outBuffer = GLib.StringOutBuffer( )
 	outBuffer:LongString( LibK.von.serialize( settings ) )
 	return true, outBuffer:GetString( )
@@ -92,12 +93,12 @@ GLib.Transfers.RegisterInitialPacketHandler( "Pointshop2.SettingsUpdate", functi
 			break
 		end
 	end
-	
+
 	if not PermissionInterface.query( ply, "pointshop2 managemodules" ) then
 		KLogf( 3, "[Pointshop2] Rejecting settings update from %s, insufficient permissions", ply:Nick( ) )
 		return false
 	end
-	
+
 	return true
 end )
 
@@ -109,12 +110,12 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 	local modName = inBuffer:String( )
 	local realm = inBuffer:String( )
 	local serializedData = inBuffer:LongString( )
-	
+
 	local newSettings = LibK.von.deserialize( serializedData )
 	Pointshop2.StoredSetting.findAllByPlugin( modName )
 	:Then( function( stored )
 		local promises = {}
-		
+
 		for settingPath, settingValue in pairs( newSettings ) do
 			local needsUpdate, settingToUpdate
 			for k, storedSetting in pairs( stored ) do
@@ -134,7 +135,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 				end
 				continue --Setting already exists in the database
 			end
-			
+
 			--Check if we need to skip this because it should not be saved to DB
 			print(settingPath)
 			local pathRoot = string.Explode( ".", settingPath )[1]
@@ -143,7 +144,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 			if settingsMeta.noDbSetting then
 				continue
 			end
-			
+
 			--Doesn't exist, create new:
 			local storedSetting = Pointshop2.StoredSetting:new( )
 			storedSetting.plugin = modName
@@ -154,7 +155,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 		return WhenAllFinished( promises )
 	end )
 	:Then( function( )
-		local dontSendToClients = ( realm == "Server" ) 
+		local dontSendToClients = ( realm == "Server" )
 		return Pointshop2Controller:getInstance( ):reloadSettings( dontSendToClients )
 	end )
 	:Done( function( )

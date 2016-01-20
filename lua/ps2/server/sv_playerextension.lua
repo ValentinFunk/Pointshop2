@@ -37,10 +37,10 @@ function Player:PS2_EasyAddItem( itemClassName, purchaseData, suppressNotify )
 	return Pointshop2Controller:getInstance():easyAddItem( self, itemClassName, purchaseData, suppressNotify )
 end
 
-function Player:PS2_DisplayInformation( text )
-	Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayInformation", self, text )
+function Player:PS2_DisplayInformation( text, time )
+	Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayInformation", self, text, time )
 end
 
-function Player:PS2_DisplayError( text )
-	Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayError", self, text )
+function Player:PS2_DisplayError( text, time )
+	Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayError", self, text, time )
 end
