@@ -9,7 +9,11 @@ end
 
 function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
-	self.image:SetImage( itemClass.material )
+	if itemClass.material then
+		self.image:SetImage( itemClass.material )
+	else
+		ErrorNoHalt( "Invalid material on item class " .. tostring( itemClass.name ) )
+	end
 end
 
 function PANEL:SetItem( item )
