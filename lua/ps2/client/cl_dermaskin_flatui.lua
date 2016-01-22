@@ -143,19 +143,19 @@ function SKIN:LayoutPointshopFrame( panel )
 	function panel.contentsPanel:PerformLayout( )
 		local ActiveTab = self:GetActiveTab()
 		local Padding = self:GetPadding()
-		if not ActiveTab then 
-			return 
+		if not ActiveTab then
+			return
 		end
-		
+
 		ActiveTab:InvalidateLayout( true )
 		local ActivePanel = ActiveTab:GetPanel()
-		
+
 		for k, v in pairs( self.Items ) do
 			if v.Tab:GetPanel( ) == ActivePanel then
 				v.Tab:GetPanel( ):SetVisible( true )
 				v.Tab:SetZPos( 100 )
 			else
-				v.Tab:GetPanel( ):SetVisible( false )	
+				v.Tab:GetPanel( ):SetVisible( false )
 				v.Tab:SetZPos( 1 )
 			end
 
@@ -164,7 +164,7 @@ function SKIN:LayoutPointshopFrame( panel )
 
 		ActivePanel:InvalidateLayout( )
 		ActivePanel:SetTall( self:GetTall( ) )
-		
+
 
 		-- Give the animation a chance
 		self.animFade:Run( )
@@ -232,8 +232,8 @@ function SKIN:PaintButton( panel, w, h )
 	if IsValid( panel.m_Image ) then
 		panel.m_Image:SetImageColor( color_white )
 	end
-	
-	
+
+
 	if panel.Hovered or panel.Highlight or panel.Selected then
 		surface.SetDrawColor( self.Highlight )
 		surface.DrawRect( 0, 0, w, h )
@@ -242,7 +242,7 @@ function SKIN:PaintButton( panel, w, h )
 		end
 		panel:SetTextStyleColor( self.Colours.Label.Dark )
 	end
-	
+
 	if panel:GetDisabled( ) then
 		surface.SetDrawColor( Color( self.ButtonColor.r - 20, self.ButtonColor.g - 20, self.ButtonColor.b - 20 ) )
 		surface.DrawRect( 0, 0, w, h )
@@ -271,7 +271,7 @@ function SKIN:PaintBigButtonLabel( panel, w, h )
 end
 
 local function compareColors( c1, c2 )
-	return c1.r == c2.r and c2.g == c1.g and c1.b == c2.b and c1.a == c2.a 
+	return c1.r == c2.r and c2.g == c1.g and c1.b == c2.b and c1.a == c2.a
 end
 
 function SKIN:PaintSelection( panel, w, h )
@@ -300,10 +300,10 @@ function SKIN:LayoutPropertySheetSheet( panel, sheet )
 		local w, h = self:GetContentSize()
 		self:SetTextInset( 10, -0 )
 		self:SetSize( w + 10, self:GetParent( ):GetTall( ) )
-		
-		
+
+
 		self:SetContentAlignment( 5 )
-		
+
 		DLabel.ApplySchemeSettings( self )
 	end
 	sheet.Tab:SetFont( SKIN.TabFont )
@@ -317,10 +317,10 @@ function SKIN:LayoutInlineSheetSheet( panel, sheet )
 		local w, h = self:GetContentSize()
 		self:SetTextInset( 10, -0 )
 		self:SetSize( w + 10, self:GetParent( ):GetTall( ) )
-		
-		
+
+
 		self:SetContentAlignment( 5 )
-		
+
 		DLabel.ApplySchemeSettings( self )
 	end
 	sheet.Tab:SetFont( SKIN.fontName )
@@ -340,21 +340,21 @@ function SKIN:PaintTree( panel, w, h )
 	surface.DrawRect( 0, 0, w, h )
 end
 
-function SKIN:PaintFrame( panel, w, h ) 
+function SKIN:PaintFrame( panel, w, h )
 	if not panel.startTime then
 		panel.startTime = SysTime( )
-	
-	
+
+
 		panel.btnMaxim:SetVisible( false )
 		panel.btnMinim:SetVisible( false )
-		
+
 		panel.lblTitle:SetFont( "PS2_Normal" )
 	end
-	
-	local c 
+
+	local c
 	for k, v in pairs( panel:GetChildren( ) ) do
 		if v:HasFocus( ) then
-			c = true 
+			c = true
 		end
 	end
 	if panel:HasHierarchicalFocus() then Derma_DrawBackgroundBlur( panel, panel.startTime ) end
@@ -365,10 +365,10 @@ end
 function SKIN:PaintCollapsibleCategory( panel, w, h )
 	panel.Header:SetFont( "PS2_Normal" )
 	panel.Header:SetTall( 25 )
-	
+
 	surface.SetDrawColor( self.ButtonColor )
 	surface.DrawRect( 0, 0, panel.Header:GetWide( ), panel.Header:GetTall( ) )
-	
+
 	surface.SetDrawColor( self.InnerPanel )
 	surface.DrawRect( 0, panel.Header:GetTall( ), w, h - panel.Header:GetTall( ) )
 end
@@ -391,7 +391,7 @@ function SKIN:PaintRadioButton( panel, w, h )
 		else
 			self.tex.RadioButton( 0, 0, w, h )
 		end
-	end	
+	end
 end
 
 function SKIN:PaintScrollBarGrip( panel, w, h )
