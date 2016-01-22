@@ -240,7 +240,8 @@ function SKIN:PaintButton( panel, w, h )
 		if IsValid( panel.m_Image ) then
 			panel.m_Image:SetImageColor( self.Colours.Label.Dark )
 		end
-		panel:SetTextStyleColor( self.Colours.Label.Dark )
+		panel:SetTextStyleColor( Color( 0, 0, 0 ) )
+		panel:SetColor( Color( 0, 0, 0 ) )
 	end
 
 	if panel:GetDisabled( ) then
