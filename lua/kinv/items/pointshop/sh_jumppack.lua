@@ -159,6 +159,8 @@ function ITEM.static.getBaseOutfit( )
 end
 
 function ITEM:Think( )
+	KInventory.Items.base_hat.Think( self )
+	
 	if self:GetOwner( ):KeyDown( IN_JUMP ) then
 		self:GetOwner( ):SetVelocity( self:GetOwner( ):GetUp( ) * 6 )
 	end
