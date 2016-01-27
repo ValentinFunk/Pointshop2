@@ -80,7 +80,7 @@ function Pointshop2View:toggleMenu( )
 			Pointshop2:ToggleMenu( ) --Open the menu
 		end )
 		:Fail( function( errid, err )
-			self:displayError( "There was an error loading Pointshop 2. Please tell an admin: " .. errid .. ": " .. err, "Error" )
+			self:displayError( "There was an error loading Pointshop 2. Please tell an admin: " .. errid .. ": " .. err )
 		end )
 		:Always( function( )
 			f:Remove( )
@@ -165,7 +165,7 @@ end
 function Pointshop2View:startBuyItem( itemClass, currencyType )
 	self:controllerTransaction( "buyItem", itemClass.className, currencyType )
 	:Fail( function( err )
-		self:displayError( "Error selling the item: " .. err, "Error" )
+		self:displayError( "Error selling the item: " .. err )
 	end )
 end
 
@@ -177,7 +177,7 @@ function Pointshop2View:startSellItem( item )
 		hook.Run( "PS2_InvItemIconSelected" )
 	end )
 	:Fail( function( err )
-		self:displayError( "Error selling the item: " .. err, "Error" )
+		self:displayError( "Error selling the item: " .. err )
 	end )
 end
 
