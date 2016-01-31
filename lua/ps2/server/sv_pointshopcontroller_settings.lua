@@ -23,6 +23,7 @@ function Pointshop2Controller:loadSettings( noTransmit )
 		hook.Run( "PS2_OnSettingsUpdate" )
 	end )
 	:Fail( function( )
+		error( "Loading settings failed" )
 		Pointshop2.SettingsLoadedPromise:Reject( )
 	end )
 end
@@ -110,6 +111,15 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 	local modName = inBuffer:String( )
 	local realm = inBuffer:String( )
 	local serializedData = inBuffer:LongString( )
+	local dontSendToClients = ( realm == "Server" )
+
+	local ply
+	for k, v in pairs( player.GetAll( ) ) do
+		if GLib.GetPlayerId( v ) == userId then
+			ply = v
+			break
+		end
+	end
 
 	local newSettings = LibK.von.deserialize( serializedData )
 	Pointshop2.StoredSetting.findAllByPlugin( modName )
@@ -137,7 +147,6 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 			end
 
 			--Check if we need to skip this because it should not be saved to DB
-			print(settingPath)
 			local pathRoot = string.Explode( ".", settingPath )[1]
 			local mod = Pointshop2.GetModule( modName )
 			local settingsMeta = mod.Settings.Shared[pathRoot] or mod.Settings.Server[pathRoot]
@@ -155,8 +164,17 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 		return WhenAllFinished( promises )
 	end )
 	:Then( function( )
-		local dontSendToClients = ( realm == "Server" )
 		return Pointshop2Controller:getInstance( ):reloadSettings( dontSendToClients )
+	end )
+	-- Notify the client that requested the save if the server settings have been successfully saved
+	:Then( function( )
+		if dontSendToClients then
+			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "serverSettingsSaved", ply, modName, false )
+		end
+	end, function( errid, err )
+		if dontSendToClients then
+			Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "serverSettingsSaved", ply, modName, err )
+		end
 	end )
 	:Done( function( )
 		hook.Run( "PS2_OnSettingsUpdate" )

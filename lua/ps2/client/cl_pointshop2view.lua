@@ -462,12 +462,29 @@ function Pointshop2View:loadSettings( versionHash )
 end
 
 function Pointshop2View:saveSettings( mod, realm, settingsTbl )
+	self.settingsPromises = self.settingsPromises or {}
+	self.settingsPromises[mod.Name] = Deferred( )
+
 	local outBuffer = GLib.StringOutBuffer( )
 	outBuffer:String( mod.Name )
 	outBuffer:String( realm )
 	outBuffer:LongString( LibK.von.serialize( settingsTbl ) )
 
 	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )
+
+	return self.settingsPromises[mod.Name]:Promise( )
+end
+
+-- This is called when a client saves serverside settings. Used to create visual indicator
+-- of server settings saving.
+function Pointshop2View:serverSettingsSaved( modName, err )
+	if self.settingsPromises then
+		if err then
+			self.settingsPromises[modName]:Reject( err )
+		else
+			self.settingsPromises[modName]:Resolve( )
+		end
+	end
 end
 
 function Pointshop2View:sendPoints( ply, points )

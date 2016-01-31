@@ -6,18 +6,11 @@ function PANEL:Init( )
 end
 
 function PANEL:OnMousePressed( )
-	self:OnLoad( )
-	
-	local outBuffer = GLib.StringOutBuffer()
-	outBuffer:String( self.mod.Name )
-	local transfer = GLib.Transfers.Request( "Server", "Pointshop2.Settings", outBuffer:GetString() )
-	transfer:AddEventListener( "Finished", function( )
-		self:OnLoadFinished( true )
-		local inBuffer = GLib.StringInBuffer( transfer:GetData( ) )
-		local serializedData = inBuffer:LongString( )
-		
-		local data = LibK.von.deserialize( serializedData )
-		
+	self:OnLoad( ) -- Notify parent to show loading indicator
+	Pointshop2.RequestSettings( self.mod.Name )
+	:Then( function( data )
+		self:OnLoadFinished( true ) -- Notify parent to hide loading indicator
+
 		if self.settingsInfo.onClick then
 			self.settingsInfo.onClick( )
 		else
@@ -28,13 +21,12 @@ function PANEL:OnMousePressed( )
 			creator:SetModule( self.mod )
 			creator:SetData( data )
 		end
-	end )
-	transfer:AddEventListener( "RequestRejected", function( )
-		self:OnLoadFinished( false, "Transfer Request was rejected" )
+	end, function( err )
+		self:OnLoadFinished( false, err ) -- Notify parent to hide loading indicator
 	end )
 end
 
-function PANEL:SetSettingsInfo( settingsInfo, mod )	
+function PANEL:SetSettingsInfo( settingsInfo, mod )
 	self.icon:SetMaterial( Material( settingsInfo.icon, "noclamp smooth" ) )
 	self.label:SetText( settingsInfo.label )
 	self.settingsInfo = settingsInfo

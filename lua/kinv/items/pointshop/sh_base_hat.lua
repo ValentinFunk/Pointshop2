@@ -60,6 +60,9 @@ if CLIENT then
 	end
 	Pointshop2.AddItemHook( "Think", ITEM )
 else
+	function ITEM:Think( )
+	end
+
 	function ITEM:PlayerSpawn( ply )
 		if not ply:Alive( ) then
 			return

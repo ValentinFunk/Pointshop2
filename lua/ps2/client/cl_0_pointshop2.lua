@@ -129,19 +129,6 @@ concommand.Add( "pointshop2_toggle", function()
 end )
 
 -- Hide PAC Parts on First Person spectated player
-function Pointshop2.HidePacOnSpectate( )
-	if IsValid( LocalPlayer( ).lastSpecTarget )
-		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE
-	then
-		pac.ShowEntityParts( LocalPlayer( ).lastSpecTarget )
-		for k, v in pairs( LocalPlayer( ).lastSpecTarget.partsHidden or {} ) do
-			pac.HookEntityRender( LocalPlayer( ).lastSpecTarget, v )
-		end
-		LocalPlayer( ).lastSpecTarget = nil
-	end
-end
-hook.Add( "Think", "PS2_HidePacOnSpectate", Pointshop2.HidePacOnSpectate )
-
 hook.Add( "PostDrawOpaqueRenderables", "UnhookPac", function( )
 	if LocalPlayer( ):GetObserverMode() == OBS_MODE_IN_EYE then
 		local ply = LocalPlayer( ):GetObserverTarget( )
@@ -155,6 +142,20 @@ hook.Add( "PostDrawOpaqueRenderables", "UnhookPac", function( )
 		end
 	end
 end )
+
+-- Unhide parts when player is not spectated anymore
+function Pointshop2.HidePacOnSpectate( )
+	if IsValid( LocalPlayer( ).lastSpecTarget )
+		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE
+	then
+		pac.ShowEntityParts( LocalPlayer( ).lastSpecTarget )
+		for k, v in pairs( LocalPlayer( ).lastSpecTarget.partsHidden or {} ) do
+			pac.HookEntityRender( LocalPlayer( ).lastSpecTarget, v )
+		end
+		LocalPlayer( ).lastSpecTarget = nil
+	end
+end
+hook.Add( "Think", "PS2_HidePacOnSpectate", Pointshop2.HidePacOnSpectate )
 
 local function InitNotificationsPanel( )
 	if IsValid( LocalPlayer( ).notificationPanel ) then
@@ -176,4 +177,26 @@ hook.Add( "OnReloaded", "InitNotifications", function( )
 	InitNotificationsPanel( )
 end )
 
-hook.Remove("InitPostEntity", "pace_autoload_parts")
+hook.Remove("InitPostEntity", "pace_autoload_parts") -- Disable PAC autoload
+
+-- Used to request a Settings table from the server to get serverside settings for a specified module
+-- returns a Promise
+function Pointshop2.RequestSettings( moduleName )
+	local def = Deferred( )
+
+	local outBuffer = GLib.StringOutBuffer()
+	outBuffer:String( moduleName )
+	local transfer = GLib.Transfers.Request( "Server", "Pointshop2.Settings", outBuffer:GetString() )
+	transfer:AddEventListener( "Finished", function( )
+		local inBuffer = GLib.StringInBuffer( transfer:GetData( ) )
+		local serializedData = inBuffer:LongString( )
+
+		local data = LibK.von.deserialize( serializedData )
+		def:Resolve( data )
+	end )
+	transfer:AddEventListener( "RequestRejected", function( )
+		def:Reject( "Transfer Request was rejected" )
+	end )
+
+	return def:Promise( )
+end

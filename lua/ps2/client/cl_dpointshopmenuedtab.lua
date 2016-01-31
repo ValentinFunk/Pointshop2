@@ -32,7 +32,7 @@ end
 
 function PANEL:ApplySchemeSettings( )
 	self:SetContentAlignment( 4 )
-	
+
 	local ExtraInset = 20
 
 	if ( self.Image ) then
@@ -85,6 +85,13 @@ end
 function PANEL:SetActiveTab( tab )
 	DPropertySheet.SetActiveTab( self, tab )
 	self:OnTabChanged( tab )
+	for k, v in pairs( self.Items ) do
+		if v.Tab == tab then
+			if v.Panel.OnActivate then
+				v.Panel:OnActivate( )
+			end
+		end
+	end
 end
 
 function PANEL:Clear( )

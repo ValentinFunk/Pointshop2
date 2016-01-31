@@ -42,5 +42,8 @@ function Player:PS2_DisplayInformation( text, time )
 end
 
 function Player:PS2_DisplayError( text, time )
+	if isstring( time ) then
+		time = nil
+	end
 	Pointshop2Controller:getInstance( ):startView( "Pointshop2View", "displayError", self, text, time )
 end
