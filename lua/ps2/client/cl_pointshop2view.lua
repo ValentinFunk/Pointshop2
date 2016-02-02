@@ -165,7 +165,7 @@ end
 function Pointshop2View:startBuyItem( itemClass, currencyType )
 	self:controllerTransaction( "buyItem", itemClass.className, currencyType )
 	:Fail( function( err )
-		self:displayError( "Error selling the item: " .. err )
+		self:displayError( "Error buying the item: " .. err )
 	end )
 end
 
@@ -278,12 +278,13 @@ function Pointshop2View:equipItem( item, slotName )
 	end
 end
 
-function Pointshop2View:displayItemAddedNotify( item )
-	local notify = vgui.Create( "DNewItemPopup" )
-	notify:SetItem( item )
-	notify:MakePopup( )
-	notify:InvalidateLayout( true )
-	notify:Center( )
+function Pointshop2View:displayItemAddedNotify( item, text )
+	local notification = vgui.Create( "DItemReceivedNotification" )
+	notification:SetItem( item )
+	if text and isstring( text ) then
+		notification.lbl:SetText( text )
+	end
+	LocalPlayer( ).notificationPanel:addNotification( notification )
 end
 
 function Pointshop2View:getCategoryOrganization( )
