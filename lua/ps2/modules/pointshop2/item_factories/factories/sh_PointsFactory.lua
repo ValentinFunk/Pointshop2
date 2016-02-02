@@ -31,14 +31,11 @@ PointsFactory.Settings = {
 /*
 	Creates an item as needed
 */
-function PointsFactory:CreateItem( )
+function PointsFactory:CreateItem( temporaryInstance )
 	local item = Pointshop2.GetItemClassByName( "base_points" ):new( )
 	item.amount = self.settings["BasicSettings.Amount"]
 	item.currencyType = self.settings["BasicSettings.CurrencyType"]
-	return item:save( )
-	:Then( function( item )
-		return item
-	end )
+	return temporaryInstance and item or item:save( )
 end
 
 /*
@@ -57,7 +54,7 @@ function PointsFactory:GetShortDesc( )
 		currencyStr = "Premium Points"
 		self.material = "pointshop2/donation.png"
 	end
-	return currencyStr .. ": " .. self.settings["BasicSettings.Amount"] 
+	return currencyStr .. ": " .. self.settings["BasicSettings.Amount"]
 end
 
 Pointshop2.ItemFactory.RegisterFactory( PointsFactory )

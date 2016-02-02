@@ -8,7 +8,7 @@ function ItemFactory.static.RegisterFactory( itemFactory )
 		KLogf( 2, "[ERROR] Invalid Item Factory registered!" )
 		error( "Invalid itemFactory passed to ItemFactory.RegisterFactory: Does not inherit ItemFactory", 1 )
 	end
-	
+
 	table.insert( ItemFactory.static.Factories, itemFactory )
 end
 
@@ -61,6 +61,6 @@ end
 /*
 	Creates an item as needed
 */
-function ItemFactory:CreateItem( )
+function ItemFactory:CreateItem( saveToDb )
 	error( "Virtual function call" )
 end

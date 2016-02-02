@@ -32,18 +32,18 @@ function ItemFromCategoryFactory:IsValid( )
 	if not category then
 		return false
 	end
-	
+
 	if #category.items == 0 then
 		return false
 	end
-	
+
 	return true
 end
 
 /*
 	Creates an item as needed
 */
-function ItemFromCategoryFactory:CreateItem( )
+function ItemFromCategoryFactory:CreateItem( temporaryInstance )
 	local category = Pointshop2.GetCategoryByName( self.settings["ManualSettings.CategoryName"] )
 	if not category then
 		return Promise.Reject( "Invalid Category " .. self.settings["ManualSettings.CategoryName"] )
@@ -61,11 +61,11 @@ function ItemFromCategoryFactory:CreateItem( )
 			end
 			weight = ( 1 / weight ) * 100
 		end
-		
+
 		sum = sum + weight
 		table.insert( sumTbl, { sum = sum, itemClass = v } )
 	end
-	
+
 	--Pick element
 	local r = math.random() * sum
 	local itemClass
@@ -75,13 +75,13 @@ function ItemFromCategoryFactory:CreateItem( )
 			break
 		end
 	end
-	
+
 	if not itemClass then
-	
+
 	end
-	
+
 	local item = itemClass:new( )
-	return item:save( )
+	return temporaryInstance and item or item:save( )
 end
 
 /*

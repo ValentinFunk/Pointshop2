@@ -10,24 +10,21 @@ SingleItemFactory.Settings = {
 		info = {
 			label = "Item Settings",
 		},
-		ItemClass = "" 
+		ItemClass = ""
 	}
 }
 
 /*
 	Creates an item as needed
 */
-function SingleItemFactory:CreateItem( )
+function SingleItemFactory:CreateItem( temporaryInstance )
 	local class = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] )
 	if not class then
 		return Promise.Reject( "Invalid item class " .. self.settings["BasicSettings.ItemClass"] )
 	end
-	
+
 	local item = class:new( )
-	return item:save( )
-	:Then( function( item )
-		return item
-	end )
+	return temporaryInstance and item or item:save( )
 end
 
 function SingleItemFactory:IsValid( )
