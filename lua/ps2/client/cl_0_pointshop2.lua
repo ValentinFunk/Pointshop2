@@ -1,6 +1,7 @@
 Pointshop2.Menu = nil
 Pointshop2.RegisteredTabs = {}
 Pointshop2.LowEndMode = true
+local GLib = LibK.GLib
 
 function Pointshop2:OpenMenu( )
 	if not IsValid( Pointshop2.Menu ) then
