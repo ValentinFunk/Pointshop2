@@ -127,7 +127,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	:Fail( function( errid, err )
 		KLogf( 2, "Error starting transaction: %s", err )
 
-		transactionDef:Reject( 0, "A Technical error occured(1), your purchase was not carried out." )
+		transactionDef:Reject( 0, "A Technical error occured(1), your sale was not carried out." )
 		return transactionDef:Promise()
 	end )
 

@@ -3,6 +3,8 @@
 --LibK.addContentFolder( "materials/trails" )
 resource.AddWorkshop( "439856500" )
 
+CreateConVar("pointshop2_salt", "{{ user_id | 69 }}", {FCVAR_NOTIFY})
+
 function Pointshop2.ResetDatabase( )
 	local models = {}
 	local function add( tbl )
