@@ -150,7 +150,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 			local pathRoot = string.Explode( ".", settingPath )[1]
 			local mod = Pointshop2.GetModule( modName )
 			local settingsMeta = mod.Settings.Shared[pathRoot] or mod.Settings.Server[pathRoot]
-			if settingsMeta.noDbSetting then
+			if ( settingsMeta.info and settingsMeta.info.noDbSetting ) or settingsMeta.noDbSetting then
 				continue
 			end
 
