@@ -17,8 +17,8 @@ Server:include( DatabaseModel )
 
 function Server:setToCurrentServer( )
 	local ip, port = Pointshop2.GetServerIpAndPort( )
-	server.ip = ip
-	server.port = port
-	server.serverHash = Pointshop2.CalculateServerHash( )
-	server.name = GetConVarString( "hostname" )
+	self.ip = ip
+	self.port = port
+	self.serverHash = Pointshop2.CalculateServerHash( )
+	self.name = GetConVarString( "hostname" )
 end
