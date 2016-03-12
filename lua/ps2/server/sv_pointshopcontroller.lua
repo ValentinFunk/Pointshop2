@@ -277,6 +277,7 @@ function Pointshop2Controller:loadDynamicInfo( )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Dynamics package loaded, version %s, %i item mappings, %i categories, %i items", resource:GetVersionHash(), table.Count( itemMappings ), table.Count( categories ), table.Count( itemProperties ) )
 
+		self.tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
 		self.dynamicsResource = resource
 	end )
 end

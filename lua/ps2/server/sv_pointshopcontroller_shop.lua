@@ -12,6 +12,10 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 		return Promise.Reject( "Inventory full" )
 	end
 
+	if table.HasValue( self.tree:getNotForSaleItemClassNames( ), itemClassName ) then
+		return Promise.Reject( "This item cannot be bought" )
+	end
+
 	return Promise.Resolve( )
 end
 
@@ -53,6 +57,7 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
 	return self:isValidPurchase( ply, itemClassName )
 	:Then( function( )
 		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+
 		local price = itemClass:GetBuyPrice( ply )
 		if not price then
 			KLogf( 3, "Player %s tried to buy item %s which cannot be bought! Hacking Attempt?", ply:Nick(), itemClass )
