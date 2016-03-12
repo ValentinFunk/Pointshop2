@@ -12,7 +12,9 @@ ITEM.static.Price = {
 }
 
 ITEM.static.Servers = {
+}
 
+ITEM.static.Ranks = {
 }
 
 function ITEM:GetPrintName( )
@@ -156,7 +158,7 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.Ranks = persistenceItem.ranks or {}
 end
 
-function ITEM:PassesRankCheck( ply )
+function ITEM.static:PassesRankCheck( ply )
 	if self.Ranks and #self.Ranks > 0 then
 		if not table.HasValue( self.Ranks, ply:GetUserGroup( ) ) then
 			return false

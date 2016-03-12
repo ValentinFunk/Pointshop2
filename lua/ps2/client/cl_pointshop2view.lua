@@ -346,7 +346,6 @@ function Pointshop2View:getUncategorizedItems( )
 end
 
 function Pointshop2View:createPointshopItem( saveTable )
-	PrintTable(saveTable)
 	hook.Run( "PS2_PreReload" )
 	self:controllerAction( "saveModuleItem", saveTable )
 end
@@ -579,4 +578,9 @@ function Pointshop2View:displayError( infoStr, duration )
 		notification.duration = duration
 	end
 	LocalPlayer( ).notificationPanel:addNotification( notification )
+end
+
+function Pointshop2View:updateRankRestrictions( itemClassNames, validRanks )
+	hook.Run( "PS2_PreReload" )
+	self:controllerAction( "updateRankRestrictions", itemClassNames, validRanks )
 end

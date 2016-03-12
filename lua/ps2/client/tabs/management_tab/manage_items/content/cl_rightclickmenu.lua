@@ -52,6 +52,31 @@ local function genericDelete( panels )
 	btn:SetImage( "pointshop2/rack1.png" )
 	btn.m_Image:SetSize( 16, 16 )
 
+	local btn = menu:AddOption( "Restrict Ranks", function( )
+		local frame = vgui.Create( "DSelectRanks" )
+		frame:MakePopup( )
+		frame:Center( )
+		function frame.OnSave( )
+			local itemClassNames = {}
+			for k, v in pairs( panels ) do
+				local itemClass = v:GetItemClass( )
+
+				local persistence = Pointshop2View:getInstance( ):getPersistenceForClass( itemClass )
+				if persistence == "STATIC" then
+					Derma_Message( "The Item " .. itemClass.PrintName .. " is Lua defined and cannot be modified ingame. To modify it edit " .. itemClass.originFilePath, "Info" )
+					continue
+				end
+
+				table.insert( itemClassNames, itemClass.className )
+			end
+
+			local validRanks = frame:GetSelectedRanks( )
+			Pointshop2View:getInstance( ):updateRankRestrictions( itemClassNames, validRanks )
+		end
+	end )
+	btn:SetImage( "pointshop2/sign.png" )
+	btn.m_Image:SetSize( 16, 16 )
+
 	menu:Open( )
 end
 

@@ -13,10 +13,10 @@ end
 
 -- This converts the flat category structure as found in the database to a tree representation.
 -- itemMappings is a list of itemMapping DB entries, flatStructure is a list of category db entries
-function CategoryTree:initialize( itemMappings, flatStructure )
+function CategoryTree:initialize( flatStructure, itemMappings )
   local root = self
-  local lookup = {}
 
+  local lookup = {}
   for k, v in pairs( flatStructure ) do
     local node = {
       self = {
@@ -28,7 +28,16 @@ function CategoryTree:initialize( itemMappings, flatStructure )
       items = {},
       parentId = v.parent
     }
-    lookup[v.id] = node
+		if not v.parent then
+			for _k, _v in pairs( node ) do
+				self[_k] = _v
+			end
+			lookup[v.id] = self
+			node = self
+		else
+    	lookup[v.id] = node
+		end
+
     for k, dbItemMapping in pairs( itemMappings ) do
       if dbItemMapping.categoryId == node.self.id then
         table.insert( node.items, dbItemMapping.itemClass )
@@ -40,8 +49,6 @@ function CategoryTree:initialize( itemMappings, flatStructure )
     if lookup[v.parentId] then
       lookup[v.parentId].subcategories = lookup[v.parentId].subcategories or {}
       table.insert( lookup[v.parentId].subcategories, v )
-    else
-      root = v
     end
   end
   recursiveSort( root )
@@ -83,7 +90,7 @@ function CategoryTree:getNotForSaleItemClassNames( )
     end
     recursiveAddItemIds( self:getNotForSaleNode( ) )
 
-    self._nfsItemIds = categories
+    self._nfsItemIds = itemIds
   end
 
   return self._nfsItemIds

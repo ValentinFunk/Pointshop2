@@ -79,6 +79,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 	   action == "migrateServer" or
 	   action == "removeServer" or
 	   action == "updateServerRestrictions" or
+		 action == "updateRankRestrictions" or
 	   action == "requestMaterials"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
