@@ -160,8 +160,13 @@ function Pointshop2.GetServerById( id )
 	end
 end
 
+function Pointshop2.GetServerIpAndPort( )
+	return unpack( string.Split( game.GetIPAddress(), ":" ) )
+end
+
 function Pointshop2.CalculateServerHash( )
-	return util.CRC( GetConVarString( "ip" ) .. GetConVarString( "hostport" ) )
+	local ip, port = Pointshop2.GetServerIpAndPort( )
+	return util.CRC( ip .. port )
 end
 
 local serverId
@@ -260,12 +265,12 @@ if SERVER then
 			KLogf( 2, "[ERROR] Invalid RPC Method %s for itemId %s, name %s, class %s, method does not exist", funcName, itemId, item:GetPrintName( ), item.class.className or "" )
 			return
 		end
-		
+
 		if not item.class.static.RPCMethods[funcName] then
 			KLogf( 2, "[ERROR] Invalid RPC Method %s for itemId %s, name %s, class %s, method is not whitelisted. Are you using ITEM.static.AllowRPC( funcName )?", funcName, itemId, item:GetPrintName( ), item.class.className or "" )
 			return
 		end
-		
+
 		item[funcName]( item, unpack( args ) )
 	end )
 else

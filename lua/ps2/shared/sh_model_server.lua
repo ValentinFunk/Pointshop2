@@ -1,5 +1,5 @@
 Pointshop2.Server = class( "Pointshop2.Server" )
-local Server = Pointshop2.Server 
+local Server = Pointshop2.Server
 
 Server.static.DB = "Pointshop2"
 
@@ -14,3 +14,11 @@ Server.static.model = {
 }
 
 Server:include( DatabaseModel )
+
+function Server:setToCurrentServer( )
+	local ip, port = Pointshop2.GetServerIpAndPort( )
+	server.ip = ip
+	server.port = port
+	server.serverHash = Pointshop2.CalculateServerHash( )
+	server.name = GetConVarString( "hostname" )
+end
