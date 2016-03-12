@@ -16,6 +16,10 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 		return Promise.Reject( "This item cannot be bought" )
 	end
 
+	if not item:PassesRankCheck( ply ) then
+		return Promise.Reject( "You are not the correct rank to buy this item" )
+	end
+
 	return Promise.Resolve( )
 end
 
