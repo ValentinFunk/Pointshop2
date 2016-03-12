@@ -1,5 +1,5 @@
 Pointshop2.ItemPersistence = class( "Pointshop2.ItemPersistence" )
-local ItemPersistence = Pointshop2.ItemPersistence 
+local ItemPersistence = Pointshop2.ItemPersistence
 
 ItemPersistence.static.DB = "Pointshop2"
 
@@ -9,7 +9,7 @@ ItemPersistence.static.model = {
 		baseClass = "string", --Controller
 		price = "optKey", --INT NULL
 		pricePremium = "optKey", --INT NULL
-		ranks = "table",
+		ranks = "json",
 		name = "string",
 		description = "text",
 		createdAt = "createdTime",
@@ -34,7 +34,7 @@ function ItemPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate
 		local instance = ItemPersistence:new( )
 		def:Resolve( instance )
 	end
-	
+
 	return def:Then( function( instance )
 		instance.price = saveTable.price
 		instance.pricePremium = saveTable.pricePremium

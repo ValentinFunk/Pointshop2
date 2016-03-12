@@ -2,14 +2,14 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
+
 	self:DockPadding( 8, 0, 8, 8 )
 
 	self.titleLabel = vgui.Create( "DLabel", self )
 	self.titleLabel:Dock( TOP )
 	self.titleLabel:SetFont( self:GetSkin( ).TabFont )
 	self.titleLabel:SetText( "No Item selected" )
-	
+
 	self.description = vgui.Create( "DMultilineLabel", self )
 	self.description:Dock( TOP )
 	self.description:SetMaxHeight( 200 )
@@ -20,7 +20,7 @@ function PANEL:Init( )
 	end )
 	self.description:SetText( "Please Select an Item" )
 	self.description:SetFontInternal( self:GetSkin( ).TextFont )
-	
+
 	self.buttonsPanel = vgui.Create( "DPanel", self )
 	self.buttonsPanel:Dock( TOP )
 	self.buttonsPanel:DockMargin( 0, 8, 0, 0 )
@@ -30,7 +30,7 @@ function PANEL:Init( )
 	function self.buttonsPanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
-	
+
 	local itemDesc = self
 	function self.buttonsPanel:AddBuyOption( icon, price, type )
 		local pnl = vgui.Create( "DPanel", itemDesc.buttonsPanel )
@@ -41,64 +41,64 @@ function PANEL:Init( )
 			self.buyBtn:SetSize( 100, 25 )
 			local h = math.max( self.label:GetTall( ), self.buyBtn:GetTall( ) )
 			self:SetTall( h )
-			
+
 			self.icon:SetPos( 0, ( h - self.icon:GetTall( ) ) / 2 )
 			self.label:SetPos( 0 + self.icon:GetTall( ) + 5, ( h - self.label:GetTall( ) ) / 2 )
 			self.buyBtn:SetPos( self:GetWide( ) - self.buyBtn:GetWide( ), ( h - self.buyBtn:GetTall( ) ) / 2 )
 		end
-		
+
 		pnl.icon = vgui.Create( "DImage", pnl )
 		pnl.icon:SetImage( icon )
 		pnl.icon:SetSize( 16, 16 )
-		
+
 		pnl.label = vgui.Create( "DLabel", pnl )
 		pnl.label:SetFont( itemDesc:GetSkin( ).fontName )
 		pnl.label:SetText( price )
 		pnl.label:SetColor( color_white )
 		pnl.label:SizeToContents( )
-		
+
 		pnl.buyBtn = vgui.Create( "DButton", pnl )
 		pnl.buyBtn:SetText( "Buy Now" )
 		function pnl.buyBtn:DoClick( )
 			Pointshop2View:getInstance( ):startBuyItem( itemDesc.itemClass, type )
 		end
-		
-		local function updatePrices( )
-			--Check 
+
+		function pnl.buyBtn:Think( )
+			pnl.buyBtn:SetDisabled( false )
+			pnl.buyBtn:SetText( "Buy Now" )
+
 			local pts = tonumber( LocalPlayer( ).PS2_Wallet[type] )
 			if pts < price then
-				--pnl.label:SetColor( Color( 255, 0, 0 ) )
 				pnl.buyBtn:SetDisabled( true )
 				pnl.buyBtn:SetText( "Can't afford" )
-			else
-				pnl.buyBtn:SetDisabled( false )
-				pnl.label:SetColor( color_white )
-				pnl.buyBtn:SetText( "Buy Now" )
+			end
+
+			if not itemDesc.itemClass:PassesRankCheck( LocalPlayer( ) ) then
+				self:SetDisabled( true )
+				self:SetText( "Wrong Rank")
 			end
 		end
-		updatePrices( )
-		hook.Add( "PS2_WalletChanged", pnl, updatePrices )
-		
+
 		return pnl
 	end
-	
+
 	function self.buttonsPanel:Reset( )
 		for k, v in pairs( self:GetChildren( ) ) do
-			v:Remove( ) 
+			v:Remove( )
 		end
 		self:InvalidateLayout( )
 	end
-	
+
 	function self.buttonsPanel:AddBuyButtons( priceInfo )
 		if priceInfo.points then
 			self:AddBuyOption( "pointshop2/dollar103_small.png", priceInfo.points, "points" )
 		end
-		
+
 		if priceInfo.premiumPoints then
 			self:AddBuyOption( "pointshop2/donation_small.png", priceInfo.premiumPoints, "premiumPoints" )
 		end
 	end
-	
+
 	function self.buttonsPanel:AddSellButton( item )
 		self.sellBtn = vgui.Create( "DButton", self )
 		function self.sellBtn:Think( )
@@ -114,19 +114,65 @@ function PANEL:Init( )
 			Pointshop2View:getInstance( ):startSellItem( itemDesc.item )
 		end
 	end
-	
+
 	hook.Run( "PS2_ItemDescription_Init", self )
+end
+
+function PANEL:UpdateRankRestrictions( itemClass )
+	if IsValid( self.ranksPanel ) then
+		self.ranksPanel:Remove( )
+	end
+
+	local ranks = itemClass.Ranks
+	if #ranks == 0 then
+		return
+	end
+
+	self.ranksPanel = vgui.Create( "DPanel", self )
+	self.ranksPanel:Dock( TOP )
+	self.ranksPanel:DockMargin( 0, 8, 0, 0 )
+	Derma_Hook( self.ranksPanel, "Paint", "Paint", "InnerPanelBright" )
+	self.ranksPanel:SetTall( 100 )
+	self.ranksPanel:DockPadding( 5, 5, 5, 5 )
+	function self.ranksPanel:PerformLayout( )
+		self:SizeToChildren( false, true )
+	end
+
+	local label = vgui.Create( "DLabel", self.ranksPanel )
+	label:SetText( "This item is restricted to these ranks:" )
+	label:Dock( TOP )
+	label:SizeToContents( )
+
+	for k, v in pairs( ranks ) do
+		local label = vgui.Create( "DLabel", self.ranksPanel )
+		label:SetText( "- " .. PermissionInterface.getRankTitle( v ) )
+		label:Dock( TOP )
+		label:SizeToContents( )
+		label:DockMargin( 5, 0, 0, 0 )
+	end
+
+	local label = vgui.Create( "DLabel", self.ranksPanel )
+	label:Dock( TOP )
+	label:SizeToContents( )
+
+	if not itemClass:PassesRankCheck( LocalPlayer( ) ) then
+		label:SetText( "You can not purchase this item." )
+		label:SetColor( Color( 255, 0, 0 ) )
+	else
+		label:SetText( "You can purchase this item." )
+		label:SetColor( Color( 0, 255, 0 ) )
+	end
 end
 
 function PANEL:UpdateServerRestrictions( servers )
 	if IsValid( self.restrictionsPanel ) then
 		self.restrictionsPanel:Remove( )
 	end
-	
+
 	if #servers == 0 then
 		return
 	end
-	
+
 	self.restrictionsPanel = vgui.Create( "DPanel", self )
 	self.restrictionsPanel:Dock( TOP )
 	self.restrictionsPanel:DockMargin( 0, 8, 0, 0 )
@@ -136,12 +182,12 @@ function PANEL:UpdateServerRestrictions( servers )
 	function self.restrictionsPanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
-	
+
 	local label = vgui.Create( "DLabel", self.restrictionsPanel )
 	label:SetText( "This item is restricted to these servers:" )
 	label:Dock( TOP )
 	label:SizeToContents( )
-	
+
 	for k, v in pairs( servers ) do
 		local label = vgui.Create( "DLabel", self.restrictionsPanel )
 		label:SetText( "- " .. Pointshop2.GetServerById( v ).name )
@@ -149,7 +195,7 @@ function PANEL:UpdateServerRestrictions( servers )
 		label:SizeToContents( )
 		label:DockMargin( 5, 0, 0, 0 )
 	end
-	
+
 	local label = vgui.Create( "DLabel", self.restrictionsPanel )
 	label:Dock( TOP )
 	label:SizeToContents( )
@@ -167,11 +213,11 @@ function PANEL:SelectionReset( )
 	self.titleLabel:SizeToContents( )
 	self.description:SetText( "Please Select an Item" )
 	self.buttonsPanel:Reset( )
-	
+
 	if self.restrictionsPanel then
 		self.restrictionsPanel:Remove( )
 	end
-	
+
 	hook.Run( "PS2_ItemDescription_SelectionReset", self )
 end
 
@@ -181,15 +227,16 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
 
 	self.titleLabel:SetText( itemClass.PrintName )
 	self.titleLabel:SizeToContents( )
-	
+
 	self.description:SetText( itemClass.Description )
-	
+
 	self.buttonsPanel:Reset( )
 	if not noBuyPanel then
 		self.buttonsPanel:AddBuyButtons( itemClass:GetBuyPrice( LocalPlayer( ) ) )
 	end
-	
+
 	self:UpdateServerRestrictions( itemClass.Servers )
+	self:UpdateRankRestrictions( itemClass )
 
 	hook.Run( "PS2_ItemDescription_SetItemClass", self, itemClass )
 end
@@ -197,17 +244,17 @@ end
 function PANEL:SetItem( item, noButtons )
 	self:SetItemClass( item.class, true )
 	self.item = item
-	
+
 	self.titleLabel:SetText( item:GetPrintName( ) )
 	self.titleLabel:SizeToContents( )
-	
+
 	self.description:SetText( item:GetDescription( ) )
-	
+
 	self.buttonsPanel:Reset( )
 	if item:CanBeSold( ) and not noButtons then --todo
 		self.buttonsPanel:AddSellButton( item )
 	end
-	
+
 	hook.Run( "PS2_ItemDescription_SetItem", self, item )
 end
 

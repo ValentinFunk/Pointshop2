@@ -59,6 +59,19 @@ local function addEditMenu( panel, itemClass )
 		btn:SetImage( "pointshop2/rack1.png" )
 		btn.m_Image:SetSize( 16, 16 )
 
+		local btn = menu:AddOption( "Restrict Ranks", function( )
+			local frame = vgui.Create( "DSelectRanks" )
+			frame:MakePopup( )
+			frame:Center( )
+			frame:SetSelectedRanks( itemClass.Ranks or { } )
+			function frame.OnSave( )
+				local validRanks = frame:GetSelectedRanks( )
+				Pointshop2View:getInstance( ):updateRankRestrictions( { itemClass.className }, validRanks )
+			end
+		end )
+		btn:SetImage( "pointshop2/sign.png" )
+		btn.m_Image:SetSize( 16, 16 )
+
 		hook.Run( "PS2_ItemEditOptions", menu, itemClass )
 
 		menu:Open( )

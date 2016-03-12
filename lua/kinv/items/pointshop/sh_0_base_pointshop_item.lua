@@ -12,7 +12,9 @@ ITEM.static.Price = {
 }
 
 ITEM.static.Servers = {
+}
 
+ITEM.static.Ranks = {
 }
 
 function ITEM:GetPrintName( )
@@ -153,6 +155,16 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
 	itemTable.Servers = persistenceItem.servers or {}
+	itemTable.Ranks = persistenceItem.ranks or {}
+end
+
+function ITEM.static:PassesRankCheck( ply )
+	if self.Ranks and #self.Ranks > 0 then
+		if not table.HasValue( self.Ranks, ply:GetUserGroup( ) ) then
+			return false
+		end
+	end
+	return true
 end
 
 /*
