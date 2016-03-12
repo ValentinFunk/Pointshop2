@@ -6,14 +6,24 @@
 local DB
 
 local function addSettingsField( )
-	return DB.DoQuery( "ALTER TABLE `ps2_settings` ADD `serverId` INT NULL" )
+	return DB.FieldExistsInTable( "ps2_settings", "serverId" )
+	:Then( function( exists )
+		if not exists then 
+			DB.DoQuery( "ALTER TABLE `ps2_settings` ADD `serverId` INT NULL" )
+		end
+	end )
 	:Done( function( )
 		print( "\t Added column serverId to settings" )
 	end )
 end
 
 local function addServersField( )
-	return DB.DoQuery( "ALTER TABLE `ps2_itempersistence` ADD `servers` TEXT" )
+	return DB.FieldExistsInTable( "ps2_itempersistence", "servers" )
+	:Then( function( exists )
+		if not exists then
+			DB.DoQuery( "ALTER TABLE `ps2_itempersistence` ADD `servers` TEXT" )
+		end
+	end )
 	:Done( function( )
 		print( "\t Added column servers to persistence" )
 	end )
@@ -22,11 +32,11 @@ end
 local def = Deferred( )
 hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 	DB = dbObj
-	
+
 	if name != "Update" then
 		return
 	end
-	
+
 	Promise.Resolve( )
 	:Then( function( )
 		if DB.CONNECTED_TO_MYSQL then
