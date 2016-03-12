@@ -545,6 +545,7 @@ function Pointshop2View:removeServer( server )
 end
 
 function Pointshop2View:updateServerRestrictions( itemClassNames, serverIds )
+	hook.Run( "PS2_PreReload" )
 	self:controllerAction( "updateServerRestrictions", itemClassNames, serverIds )
 end
 
