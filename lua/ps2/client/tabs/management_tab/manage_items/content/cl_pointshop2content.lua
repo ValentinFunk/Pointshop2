@@ -249,6 +249,9 @@ hook.Add( "PS2_PopulateContent", "AddPointshopContent", function( pnlContent, tr
 
 	-- Allow dropping items into uncategorized
 	AllowItemDropping(tree.RootNode)
+	function tree.RootNode:OnModified( )
+		hook.Run( "PS2_SpawnlistContentChanged" )
+	end
 
 	local categoriesNode = AddCategoryNode( pnlContent, "Shop Categories", "pointshop2/folder62.png", tree )
 	categoriesNode:SetDraggableName( "CustomContent" )
