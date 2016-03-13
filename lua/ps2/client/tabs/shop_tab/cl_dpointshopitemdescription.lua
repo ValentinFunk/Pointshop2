@@ -144,8 +144,13 @@ function PANEL:UpdateRankRestrictions( itemClass )
 	label:SizeToContents( )
 
 	for k, v in pairs( ranks ) do
+		local title = PermissionInterface.getRankTitle( v )
+		if not title then
+			continue
+		end
+		
 		local label = vgui.Create( "DLabel", self.ranksPanel )
-		label:SetText( "- " .. PermissionInterface.getRankTitle( v ) )
+		label:SetText( "- " .. title )
 		label:Dock( TOP )
 		label:SizeToContents( )
 		label:DockMargin( 5, 0, 0, 0 )
