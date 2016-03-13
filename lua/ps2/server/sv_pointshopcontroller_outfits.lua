@@ -1,6 +1,6 @@
 function Pointshop2Controller:loadOutfits( )
-	return WhenAllFinished{ Pointshop2.StoredOutfit.getAll( ), Pointshop2.StoredOutfit.getVersionHash( ) }
-	:Then( function( outfits, versionHash )
+	return WhenAllFinished{ Pointshop2.StoredOutfit.getAll( ) }
+	:Then( function( outfits )
 
 		local outfitsAssoc = {}
 		for k, v in pairs( outfits ) do
@@ -10,8 +10,8 @@ function Pointshop2Controller:loadOutfits( )
 
 		local data = LibK.von.serialize( { outfitsAssoc } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "outfits", data )
-		resource:SetVersionHash( tostring( versionHash ) )
 		resource:GetCompressedData( ) --Force compression now
+		local versionHash = resource:GetVersionHash( )
 		KLogf( 4, "[Pointshop2] Outfit package loaded, version " .. versionHash .. " " .. #outfitsAssoc .. " outfits." )
 
 		self:startView( "Pointshop2View", "loadOutfits", player.GetAll( ), versionHash )
