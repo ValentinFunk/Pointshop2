@@ -155,7 +155,11 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
 	itemTable.Servers = persistenceItem.servers or {}
-	itemTable.Ranks = persistenceItem.ranks or {}
+	if not persistenceItem.ranks or persistenceItem.ranks == "" then
+		itemTable.Ranks = {}
+	else
+	 	itemTable.Ranks = persistenceItem.ranks
+ end
 end
 
 function ITEM.static:PassesRankCheck( ply )

@@ -38,7 +38,7 @@ function ItemPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate
 	return def:Then( function( instance )
 		instance.price = saveTable.price
 		instance.pricePremium = saveTable.pricePremium
-		instance.ranks = ""
+		instance.ranks = {}
 		instance.name = saveTable.name
 		instance.baseClass = saveTable.baseClass
 		instance.description = saveTable.description

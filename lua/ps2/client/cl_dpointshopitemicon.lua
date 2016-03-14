@@ -57,6 +57,12 @@ function PANEL:SetItemClass( itemClass )
 		icon:SetSize( 12, 12 )
 	end
 
+	if itemClass.Ranks and #itemClass.Ranks > 0 then
+		local icon = self.iconContainer:Add( "DImage" )
+		icon:SetMaterial( Material( "pointshop2/sign_small.png", "noclamp smooth" ) )
+		icon:SetSize( 12, 12 )
+	end
+
 	hook.Run( "PS2_ItemIconSetClass", self, itemClass )
 
 	self:SetSize( w, h )
