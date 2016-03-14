@@ -23,7 +23,7 @@ hook.Add("OnEndRoundResult", "PS2_MUEndRound", function(result)
 	if result == 2 then
 		for k, v in pairs(player.GetAll()) do
 			if not table.HasValue(playersInRound, v) then
-				continues
+				continue
 			end
 
 			if v:GetMurderer() then
