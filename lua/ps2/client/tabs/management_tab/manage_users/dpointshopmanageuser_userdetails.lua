@@ -2,35 +2,35 @@ local PANEL = {}
 
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
-	
+
 	self:DockPadding( 10, 0, 10, 10 )
-	
+
 	local label = vgui.Create( "DLabel", self )
 	label:SetText( "User Details" )
 	label:SetColor( color_white )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
-	
+
 	self.loadingNotifier = vgui.Create( "DLoadingNotifier", self )
 	self.loadingNotifier:Dock( TOP )
-	
+
 	self.detailsPanel = vgui.Create( "DPanel", self )
 	self.detailsPanel:Dock( FILL )
 	self.detailsPanel:DockPadding( 5, 5, 5, 5 )
 	Derma_Hook( self.detailsPanel, "Paint", "Paint", "InnerPanel" )
-	
+
 	/* Player Info */
 	self.generalInfo = self:AddCategory( "Player Info" )
 	self.generalInfo:SetTall( 64 + 10 )
-	
+
 	self.generalInfo.avatar = vgui.Create( "AvatarImage", self.generalInfo )
 	self.generalInfo.avatar:SetPos( 5, 5 )
 	self.generalInfo.avatar:SetSteamID( "BOT", 64 )
 	self.generalInfo.avatar:SetSize( 64, 64 )
 	self.generalInfo.avatar:Dock( LEFT )
 	self.generalInfo.avatar:DockMargin( 0, 0, 10, 0 )
-	
+
 	self.generalInfo.infoPanel = vgui.Create( "DPanel", self.generalInfo )
 	self.generalInfo.infoPanel:Dock( FILL )
 	self.generalInfo.infoPanel.Paint = function( ) end
@@ -41,14 +41,14 @@ function PANEL:Init( )
 		pnl:SetText( name )
 		pnl:SetFont( self:GetSkin( ).TextFont )
 		pnl:SizeToContents( )
-		
+
 		return pnl
 	end
-	
+
 	self.generalInfo.infoPanel.name = self.generalInfo.infoPanel:AddLabel( "Name" )
 	self.generalInfo.infoPanel.steamId = self.generalInfo.infoPanel:AddLabel( "Steam-ID" )
 	self.generalInfo.infoPanel.lastConnected = self.generalInfo.infoPanel:AddLabel( "Last Connected" )
-	
+
 	/* Wallet */
 	self.walletInfo = self:AddCategory( "Player Wallet" )
 	function self.walletInfo:PerformLayout( )
@@ -59,7 +59,7 @@ function PANEL:Init( )
 		end
 	end
 	self.walletInfo:SetTall( 70 )
-	
+
 	local frame = self
 	function self.walletInfo:AddCurrencyPanel( name, label, value, icon )
 		local pnl = vgui.Create( "DPanel", self )
@@ -67,22 +67,22 @@ function PANEL:Init( )
 		pnl:Dock( LEFT )
 		pnl:DockPadding( 5, 5, 5, 5 )
 		pnl.Paint = function( ) end
-		
+
 		pnl.displayPnl = vgui.Create( "DPanel", pnl )
 		pnl.displayPnl:Dock( TOP )
 		pnl.displayPnl.Paint = function( ) end
-		
+
 		pnl.icon = vgui.Create( "DImage", pnl.displayPnl )
 		pnl.icon:SetMaterial( Material( icon, "noclamp smooth" ) )
 		pnl.icon:Dock( LEFT )
 		pnl.icon:DockMargin( 0, 2, 5, 2 )
 		pnl.icon:SetSize( 20, 20 )
-		
+
 		pnl.label = vgui.Create( "DLabel", pnl.displayPnl )
 		pnl.label:SetText( value )
 		pnl.label:SetFont( self:GetSkin( ).fontName )
 		pnl.label:Dock( FILL )
-		
+
 		pnl.changeButton = vgui.Create( "DButton", pnl )
 		pnl.changeButton:SetText( "Edit" )
 		pnl.changeButton:SetImage( "pointshop2/pencil54.png" )
@@ -90,8 +90,8 @@ function PANEL:Init( )
 		pnl.changeButton:DockMargin( 0, 5, 0, 0 )
 		pnl.changeButton:Dock( TOP )
 		function pnl.changeButton:DoClick( )
-			Derma_StringRequest( "Input", 
-				"Please enter the new amount of " .. label, 
+			Derma_StringRequest( "Input",
+				"Please enter the new amount of " .. label,
 				tostring( pnl.label:GetText( ) ),
 				function( newValue )
 					if not tonumber( newValue ) then
@@ -100,13 +100,13 @@ function PANEL:Init( )
 					end
 					frame:ChangePlayerWallet( name, newValue )
 				end
-			)				
+			)
 		end
-		
+
 		function pnl:SetValue( val )
 			self.label:SetText( val )
 		end
-		
+
 		return pnl
 	end
 	self.pointsPanel = self.walletInfo:AddCurrencyPanel( "points", "Points", 0, "pointshop2/dollar103_small.png" )
@@ -116,13 +116,16 @@ function PANEL:Init( )
 	self.invCategory, self.invCategoryPnl = self:AddCategory( "Player Inventory" )
 	local scroll = vgui.Create( "DScrollPanel", self.invCategory )
 	scroll:Dock( FILL )
-	self.inventoryPanel = vgui.Create( "DItemsContainer", scroll )
-	self.inventoryPanel:Dock( FILL )
+	self.inventoryPanel = vgui.Create( "DIconLayout", scroll )
+	self.inventoryPanel:Dock( TOP )
+	self.inventoryPanel:SetSpaceY( 10 )
+	self.inventoryPanel:SetSpaceX( 10 )
+
 	self.invCategory:Dock( FILL )
 	self.invCategoryPnl:Dock( FILL )
 	function self.inventoryPanel:Paint( w, h )
 	end
-	
+
 	self.invButtonPanel = vgui.Create( "DPanel", self.invCategoryPnl )
 	self.invButtonPanel:Dock( BOTTOM )
 	self.invButtonPanel:DockMargin( 5, 5, 5, 5 )
@@ -134,7 +137,7 @@ function PANEL:Init( )
 			v:SetWide( w )
 		end
 	end
-	
+
 	self.invButtonPanel.giveItemButton = vgui.Create( "DButton", self.invButtonPanel )
 	self.invButtonPanel.giveItemButton:SetImage( "pointshop2/plus24.png" )
 	self.invButtonPanel.giveItemButton.m_Image:SetSize( 16, 16 )
@@ -143,7 +146,7 @@ function PANEL:Init( )
 	function self.invButtonPanel.giveItemButton.DoClick( )
 		self:OpenGiveItemDialog( )
 	end
-	
+
 	self.invButtonPanel.refreshButton = vgui.Create( "DButton", self.invButtonPanel )
 	self.invButtonPanel.refreshButton:SetImage( "pointshop2/actualize.png" )
 	self.invButtonPanel.refreshButton.m_Image:SetSize( 16, 16 )
@@ -153,7 +156,7 @@ function PANEL:Init( )
 	function self.invButtonPanel.refreshButton.DoClick( )
 		self:RefreshInventory( )
 	end
-	
+
 	self.detailsPanel:SetDisabled( true )
 end
 
@@ -162,7 +165,7 @@ function PANEL:ChangePlayerWallet( name, value )
 	Pointshop2View:getInstance( ):adminChangeWallet( self.playerData.id, name, value )
 	:Done( function( wallet )
 		self.pointsPanel:SetValue( wallet.points )
-		self.premiumPointsPanel:SetValue(  wallet.premiumPoints ) 
+		self.premiumPointsPanel:SetValue(  wallet.premiumPoints )
 		self:NotifyLoading( false, true )
 	end )
 	:Fail( function( errid, err )
@@ -191,53 +194,79 @@ function PANEL:AddCategory( name )
 	function categoryPanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
-	
+
 	categoryPanel.header = vgui.Create( "DLabel", categoryPanel )
 	categoryPanel.header:SetText( name )
 	categoryPanel.header:SetFont( self:GetSkin( ).SmallTitleFont )
 	categoryPanel.header:Dock( TOP )
 	categoryPanel.header:DockMargin( 5, 5, 5, 5 )
 	categoryPanel.header:SetTextStyleColor( self:GetSkin( ).Colours.Label.Bright )
-	
+
 	categoryPanel.contents = vgui.Create( "DPanel", categoryPanel )
 	categoryPanel.contents:Dock( TOP )
 	categoryPanel.contents:SetTall( 128 )
 	categoryPanel.contents:DockPadding( 5, 5, 5, 5 )
 	categoryPanel.contents.Paint = function( ) end
-	
+
 	return categoryPanel.contents, categoryPanel
 end
 
 function PANEL:SetPlayerData( playerData )
 	self.playerData = playerData
-	
+
 	self.generalInfo.avatar:SetSteamID( playerData.steam64 or "BOT", 64 )
 	self.generalInfo.infoPanel.name:SetText( playerData.name or "ERROR" )
 	self.generalInfo.infoPanel.steamId:SetText( playerData.player or "ERROR" )
 	self.generalInfo.infoPanel.lastConnected:SetText( "Last Connected: " .. os.date( "%Y-%m-%d %H:%M", playerData.updated_at or 0 ) )
-	
+
 	if not playerData.wallet or not playerData.steam64 then
 		local str = "Error: Couldn't get the info! Take a screen of this:"
 		str = str .. LibK.luadata.Encode( playerData or {} )
 		Derma_Message( str, "Warning" )
 	else
 		self.pointsPanel:SetValue( playerData.wallet.points )
-		self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints ) 
+		self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints )
 	end
-	
+
+	-- Clear Inv panel
+	for k,v in pairs(self.inventoryPanel:GetChildren()) do v:Remove() end
+
+	-- add items
 	if playerData.inventory then
-		self.inventoryPanel:setCategoryName( "Pointshop2_AdminInventory" .. playerData.id )
-		self.inventoryPanel:setItems( playerData.inventory:getItems( ) )
-		self.inventoryPanel:initSlots( playerData.inventory:getNumSlots( ) )
+		for _, v in pairs(playerData.inventory:getItems()) do
+			local icon = v:getNewInventoryIcon()
+			function icon.OnMousePressed(icon, mcode)
+				if mcode != MOUSE_RIGHT then
+					return
+				end
+				local menu = DermaMenu()
+				menu:AddOption( "Remove", function()
+					self:NotifyLoading( true )
+					self.inventoryPanel:SetDisabled(true)
+					icon:Remove()
+					Pointshop2View:getInstance():adminRemoveItem(ply, v.id)
+					:Fail( function( err )
+						Pointshop2View:getInstance():displayError("Error removing item: " .. err)
+					end )
+					:Always( function( )
+						self:RefreshInventory( )
+						self.inventoryPanel:SetDisabled(false)
+					end )
+				end )
+				menu:Open()
+			end
+			icon:SetParent(self.inventoryPanel)
+		end
+		self.inventoryPanel:Layout()
 	end
 end
 
 function PANEL:PlayerWalletChanged( wallet, ply )
 	if not self.playerData then return end
-	
+
 	if wallet.ownerId == self.playerData.id then
 		self.pointsPanel:SetValue( wallet.points )
-		self.premiumPointsPanel:SetValue( wallet.premiumPoints ) 
+		self.premiumPointsPanel:SetValue( wallet.premiumPoints )
 	end
 end
 
@@ -253,7 +282,7 @@ function PANEL:RefreshInventory( )
 	if not self.playerData then
 		ErrorNoHalt( "Couldn't refresh user: no previous user selected!" )
 	end
-	
+
 	self:NotifyLoading( true )
 	Pointshop2View:getInstance( ):getUserDetails( self.playerData.id )
 	:Done( function( result )

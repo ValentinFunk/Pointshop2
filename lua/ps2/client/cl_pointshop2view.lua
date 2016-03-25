@@ -107,6 +107,10 @@ function Pointshop2View:walletChanged( newWallet, tries )
 	hook.Run( "PS2_WalletChanged", newWallet, ply )
 end
 
+function Pointshop2View:adminRemoveItem( ply, itemId )
+	return self:controllerTransaction( "adminRemoveItem", itemId )
+end
+
 function Pointshop2View:receiveInventory( inventory )
 	InventoryView:getInstance( ):receiveInventory( inventory ) --Needed for KInventory to work properly
 	LocalPlayer().PS2_Inventory = inventory

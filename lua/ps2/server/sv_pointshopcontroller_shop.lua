@@ -232,6 +232,16 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
 	end )
 end
 
+function Pointshop2Controller:adminRemoveItem(ply, itemId)
+	print(ply, itemId)
+	local item = KInventory.ITEMS[itemId]
+	if not item then
+		return Promise.Reject("Invalid Item")
+	end
+
+	return self:removeItemFromPlayer(ply, item)
+end
+
 function Pointshop2Controller:unequipItem( ply, slotName )
 	local slot
 	for k, v in pairs( ply.PS2_Slots ) do

@@ -110,7 +110,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 	elseif action == "searchPlayers" or
 		   action == "getUserDetails" or
 		   action == "adminChangeWallet" or
-		   action == "adminGiveItem"
+		   action == "adminGiveItem" or
+			 action == "adminRemoveItem"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageusers" ) then
 			def:Resolve( )
