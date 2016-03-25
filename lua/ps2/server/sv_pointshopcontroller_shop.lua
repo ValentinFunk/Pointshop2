@@ -355,6 +355,9 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 			moveOldItemDef:Resolve( )
 			oldItem:OnHolster( ply )
 			self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, oldItem.id )
+			slot.Item = nil
+			slot.itemId = nil
+			hook.Run( "PS2_SlotChanged", ply, slot, nil )
 		end, function( errid, err )
 			moveOldItemDef:Reject( errid, err )
 		end )
@@ -366,6 +369,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		slot.itemId = item.id
 		slot.Item = item
 		self:startView( "Pointshop2View", "slotChanged", ply, slot )
+		hook.Run( "PS2_SlotChanged", ply, slot, item )
 		return slot:save( )
 	end )
 	:Then( function( slot )
