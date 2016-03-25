@@ -91,9 +91,18 @@ function ItemFromCategoryFactory:GetConfiguratorControl( )
 	return "DItemFromCategoryFactoryConfigurator"
 end
 
+function ItemFromCategoryFactory:IsValid( )
+	local category = Pointshop2.GetCategoryByName( self.settings["ManualSettings.CategoryName"] )
+	return category
+end
+
 function ItemFromCategoryFactory:GetShortDesc( )
 	local category = Pointshop2.GetCategoryByName( self.settings["ManualSettings.CategoryName"] )
-	return "Random Item: " .. category.label
+	if category then
+		return "Random Item: " .. category.label
+	else
+		return "<Invalid Category " .. self.settings["ManualSettings.CategoryName"] .. ">"
+	end
 end
 
 Pointshop2.ItemFactory.RegisterFactory( ItemFromCategoryFactory )
