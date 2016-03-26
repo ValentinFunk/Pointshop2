@@ -23,7 +23,7 @@ MODULE.Settings.Server = {
 		info = {
 			label = "Murdering rewards"
 		},
-		
+
 		MurderKillsBystander = {
 			value = 50,
 			label = "Murderer killed a bystander",
@@ -47,7 +47,11 @@ MODULE.Settings.Server = {
 			label = "Bystander killed the Murderer",
 			tooltip = "Reward for preventing the crime",
 		},
-
+		PickupLoot = {
+				value = 25,
+				label = "Picked up loot",
+				tooltip = "Reward for picking up Loot"
+		}
 	},
 	RoundWin = {
 		info = {
@@ -71,11 +75,6 @@ MODULE.Settings.Server = {
 			tooltip = "Bonus for each survived Bystander",
 		},
 	},
-	PickupLoot = {
-			value = 25,
-			label = "Picked up loot",
-			tooltip = "Reward for picking up Loot"
-	}
 }
 
 -- For Drops integration: Returns players that can get a drop once the round ends

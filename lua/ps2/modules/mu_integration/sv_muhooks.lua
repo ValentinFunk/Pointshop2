@@ -12,7 +12,7 @@ hook.Add("OnStartRound", "PS2_MUBeginRound", function()
 end)
 
 hook.Add("PlayerPickupLoot", "PS2_PlayerPickupLoot", function(ply, ent)
-	ply:PS2_AddStandardPoints( MurderSetting("PickupLoot"), "Found Loot", true)
+	ply:PS2_AddStandardPoints( MurderSetting("Kills.PickupLoot"), "Found Loot", true)
 end)
 
 // Only if the hook is defined. Not defined by default. Be aware.
