@@ -1,7 +1,7 @@
 --network wallets to owning players and all admins
 function Pointshop2Controller:getWalletChangeSubscribers( ply )
 	if Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.BroadcastWallets" ) then
-		return player.GetAll() 
+		return player.GetAll()
 	else
 		local receivers = { ply }
 		for k, v in pairs( player.GetAll( ) ) do
@@ -53,27 +53,22 @@ end
 
 function Pointshop2Controller:addToPlayerWallet( ply, currencyType, addition )
 	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
-		local def = Deferred( )
-		def:Reject( -2, "Invalid currency type " .. currencyType )
-		return def:Promise( )
+		return Promise.Reject(-2, "Invalid currency type " .. currencyType)
 	end
-	
+
 	if not LibK.isProperNumber( addition ) then
 		return Promise.Reject( 0, "Not a proper number" )
 	end
-	
+
 	if not ply.PS2_Wallet then
-		local def = Deferred( )
-		def:Reject( -3, "Player wallet not loaded" )
-		return def:Promise( )
+		return Promise.Reject(-2, "Player wallet not loaded")
 	end
-	
+
 	addition = math.floor( addition )
 	if addition == 0 then
-		return def:Reject( 0, "Can't give 0 points" )
+		return Promise.Resolve()
 	end
-	
-	
+
 	return self:updatePlayerWallet( ply.kPlayerId, currencyType, ply.PS2_Wallet[currencyType] + addition )
 	:Done( function( wallet )
 		self:broadcastWalletChanges( wallet )

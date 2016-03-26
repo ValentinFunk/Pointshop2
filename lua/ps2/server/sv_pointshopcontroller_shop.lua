@@ -233,7 +233,6 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
 end
 
 function Pointshop2Controller:adminRemoveItem(ply, itemId)
-	print(ply, itemId)
 	local item = KInventory.ITEMS[itemId]
 	if not item then
 		return Promise.Reject("Invalid Item")
@@ -272,7 +271,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 
-	ply.PS2_Inventory:addItem( item )
+	return ply.PS2_Inventory:addItem( item )
 	:Then( function( )
 		slot.itemId = nil
 		slot.Item = nil

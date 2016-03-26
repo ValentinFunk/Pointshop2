@@ -240,6 +240,7 @@ function PANEL:SetPlayerData( playerData )
 					return
 				end
 				local menu = DermaMenu()
+				menu:SetSkin( Pointshop2.Config.DermaSkin )
 				menu:AddOption( "Remove", function()
 					self:NotifyLoading( true )
 					self.inventoryPanel:SetDisabled(true)
