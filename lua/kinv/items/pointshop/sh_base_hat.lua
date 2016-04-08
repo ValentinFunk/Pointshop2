@@ -7,6 +7,7 @@ ITEM.category = "Hats"
 ITEM.color = ""
 
 function ITEM:initialize( )
+	self.attached = false
 end
 
 if CLIENT then
@@ -35,9 +36,12 @@ if CLIENT then
 		self.outfit = outfit
 		self.model = ply:GetModel()
 		ply:AttachPACPart( outfit )
+		self.attached = true
 	end
 
 	function ITEM:RemoveOutfit( )
+		self.attached = false
+
 		local ply = self:GetOwner()
 		if not ply.RemovePACPart then
 			return
@@ -56,6 +60,15 @@ if CLIENT then
 		if self.model != self:GetOwner( ):GetModel( ) then
 			self:RemoveOutfit( )
 			self:AttachOutfit( )
+		end
+
+		local shouldShow = not ( hook.Run( "PS2_VisualsShouldShow", self:GetOwner( ) ) == false )
+		if shouldShow != self.attached then
+			if shouldShow then
+				self:AttachOutfit( )
+			else
+				self:RemoveOutfit( )
+			end
 		end
 	end
 	Pointshop2.AddItemHook( "Think", ITEM )
