@@ -5,24 +5,24 @@ function Pointshop2Controller:searchPlayers( ply, subject, attribute )
 		def:Reject( "Invalid attribute " .. attribute )
 		return def:Promise( )
 	end
-	
-	
+
+
 	return LibK.Player.findPlayers( subject, attributeTranslate[attribute] )
-	:Then( function( players ) 
+	:Then( function( players )
 		local ids = {}
 		local playerNames = {}
 		for k, v in pairs( players ) do
 			table.insert( ids, tonumber( v.id ) )
 			table.insert( playerNames, { id = v.id, name = v.name, lastConnected = v.updated_at } )
 		end
-		
+
 		local def = Deferred( )
-		
+
 		if #ids == 0 then
 			def:Resolve( {} )
 			return def:Promise( )
 		end
-		
+
 		Pointshop2.Wallet.getDbEntries( "WHERE ownerId IN (" .. table.concat( ids, ', ' ) .. ")" )
 		:Done( function( wallets )
 			for k, v in pairs( playerNames ) do
@@ -37,16 +37,16 @@ function Pointshop2Controller:searchPlayers( ply, subject, attribute )
 		:Fail( function( errid, err )
 			def:Fail( 1, "Error fetching wallets: " .. err )
 		end	)
-		
+
 		return def:Promise( )
 	end )
 end
 
 function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 	local def = Deferred( )
-	
-	WhenAllFinished{ LibK.Player.findById( kPlayerId ), 
-					 Pointshop2.Wallet.findByOwnerId( kPlayerId ), 
+
+	WhenAllFinished{ LibK.Player.findById( kPlayerId ),
+					 Pointshop2.Wallet.findByOwnerId( kPlayerId ),
 					 KInventory.Inventory.findByOwnerId( kPlayerId )
 	}:Then( function( dbPlayer, wallet, inventory )
 		dbPlayer.wallet = wallet
@@ -67,7 +67,7 @@ function Pointshop2Controller:getUserDetails( ply, kPlayerId )
 	:Fail( function( errid, err )
 		def:Reject( errid, err )
 	end )
-	
+
 	return def:Promise( )
 end
 
@@ -77,23 +77,23 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 		def:Reject( 0, "Invalid currency type " .. currencyType )
 		return def:Promise( )
 	end
-	
+
 	if not LibK.isProperNumber( newValue ) then
 		return Promise.Reject( 0, "Improper number passed" )
 	end
-	
-	local walletPromise = Deferred( ) 
+
+	local walletPromise = Deferred( )
 	local walletFound = false
 	local shouldBlock = Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.ShouldBlock" )
 	for k, v in pairs( player.GetAll( ) ) do
 		if v.kPlayerId == kPlayerId then
-			if v.PS2_Wallet then 
+			if v.PS2_Wallet then
 				walletPromise:Resolve( v.PS2_Wallet )
 				walletFound = true
 			end
 		end
 	end
-	
+
 	if not walletFound then
 		Pointshop2.Wallet.findByOwnerId( kPlayerId )
 		:Done( function( wallet )
@@ -103,11 +103,11 @@ function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newVa
 			walletPromise:Reject( errid, err )
 		end )
 	end
-	
+
 	if walletFound and shouldBlock then --no need to block if player is offline
 		Pointshop2.DB:SetBlocking( true ) --don't want player to sell/buy stuff during our update
 	end
-	
+
 	newValue = tonumber( newValue )
 	return walletPromise:Then( function( wallet )
 		wallet[currencyType] = newValue
@@ -130,11 +130,11 @@ end
 function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount )
 	-- Player is online do standard stuff
 	for k, v in pairs( player.GetAll( ) ) do
-		if v:SteamID( ) == steamId then
+		if v:SteamID( ) == steamId and v.PS2_Wallet then
 			return self:addToPlayerWallet( v, currencyType, amount )
 		end
 	end
-	
+
 	return LibK.Player.findByPlayer( steamId )
 	:Then( function( ply )
 		-- Player may or may not be in DB, create if not
@@ -151,7 +151,7 @@ function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount 
 	:Then( function( ply )
 		return WhenAllFinished{ Pointshop2.Wallet.findByOwnerId( ply.id ), Promise.Resolve( ply ) }
 	end )
-	:Then( function( wallet, kPlayer  ) 
+	:Then( function( wallet, kPlayer  )
 		-- Player might not have a PS2 Wallet yet, create it if he does not
 		if not wallet then
 			local wallet = Pointshop2.Wallet:new( )
@@ -166,7 +166,7 @@ function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount 
 		if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
 			return Promise.Reject( 1, "Invalid Currency " .. tostring( currencyType ) )
 		end
-		
+
 		wallet[currencyType] = wallet[currencyType] + amount
 		return wallet:save( )
 	end )
@@ -174,18 +174,18 @@ end
 
 function Pointshop2Controller:adminGiveItem( ply, kPlayerId, itemClassName )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
-	
-	if not itemClass then 
+
+	if not itemClass then
 		return Promise.Reject( "Invalid item class " .. itemClassName )
 	end
-	
+
 	local ply
 	for k, v in pairs( player.GetAll( ) ) do
 		if v.kPlayerId == kPlayerId then
 			ply = v
 		end
 	end
-	
+
 	return Promise.Resolve()
 	:Then( function( )
 		local item = itemClass:new( )
@@ -199,7 +199,7 @@ function Pointshop2Controller:adminGiveItem( ply, kPlayerId, itemClassName )
 	end )
 	:Then( function( item )
 		KInventory.ITEMS[item.id] = item
-		
+
 		if IsValid( ply ) then
 			return WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
 			:Then( function( )
