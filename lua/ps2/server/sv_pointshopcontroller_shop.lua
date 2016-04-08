@@ -381,6 +381,9 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 			print( "Error in 0" )
 		end
 
+		slot.Item = item
+		slot.itemId = item.id
+
 		--Delay to next frame to clear stack
 		timer.Simple( 0, function( )
 			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
@@ -390,7 +393,6 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 			end
 		end )
 
-		slot.Item = item
 		Pointshop2.DB.DoQuery( "COMMIT" )
 		LibK.SetBlocking( false )
 	end )
