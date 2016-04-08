@@ -25,49 +25,49 @@ MODULE.Settings.Server = {
 	Kills = {
 		info = {
 			label = "Kill Rewards"
-		},		
-		
+		},
+
 		ZombieKillsHuman = {
 			value = 250,
 			label = "Zombie kills Human",
 			tooltip = "Points awarded to a Zombie when he kills a Human",
 		},
-		
-		HeadcrabKillsHuman = { 
+
+		HeadcrabKillsHuman = {
 			value = 250,
 			label = "Headcrab kills Human",
 			tooltip = "Points awarded to a Headcrab when he kills a Human",
 		},
-		
-		BossKillsHuman = { 
+
+		BossKillsHuman = {
 			value = 250,
 			label = "Boss kills Human",
 			tooltip = "Points awarded to a Boss when he kills a Human",
 		},
-		
+
 		HumanKillsZombie = {
-			value = 150, 
+			value = 150,
 			label = "Human kills Zombie",
 			tooltip = "Points awarded to a Human when he kills a Zombie",
 		},
-		
-		HumanKillsHeadcrab = { 
+
+		HumanKillsHeadcrab = {
 			value = 150,
 			label = "Human kills Headcrab",
 			tooltip = "Points awarded to a Human when he kills a Headcrab"
 		},
-		
+
 		HumanKillsBoss = {
 			value = 150,
 			label = "Human kills Boss",
 			tooltip = "Points awarded to a Human when he kills a Boss",
 		},
-		
+
 		HumanKillsCrow = {
 			value = 50,
 			label = "Human kills Crow",
 			tooltip = "Points awarded to a Human when he kills a Crow",
-		},	
+		},
 	},
 	RoundWin = {
 		info = {
@@ -77,26 +77,26 @@ MODULE.Settings.Server = {
 			value = 1000,
 			label = "Humans win",
 			tooltip = "Points awarded to every Human when they win the round"
-		},		
-		
+		},
+
 		LastHumanToDie = {
 			value = 5,
 			label = "Last human to be alive",
 			tooltip = "Points awarded to the last surviving Human (every second)"
 		},
-		
+
 		Zombie = {
 			value = 100,
 			label = "Zombies win",
 			tooltip = "Points awarded to every Zombie when they kill all the Humans"
 		},
-		
+
 	},
 	Redeemed = {
 		info = {
-			label = "Redeeming Rewards" 
+			label = "Redeeming Rewards"
 		},
-		Redeem = { 
+		Redeem = {
 			value = 250,
 			label = "Redeemed himself",
 			tooltip = "Points awarded to a player for redeeming himself"
@@ -113,6 +113,17 @@ MODULE.Settings.Server = {
 		},
 	},
 }
-	
+
+-- For Drops integration: Returns players that can get a drop once the round ends
+function MODULE.GetPlayersForDrops( )
+	local players = {}
+	for k, v in pairs( player.GetAll( ) ) do
+		if not v:GetNWBool("playerafk") then
+			table.insert( players, v )
+		end
+	end
+	return players
+end
+
 Pointshop2.RegisterModule( MODULE )
 Pointshop2.NotifyGamemodeModuleLoaded( "zombiesurvival", MODULE )
