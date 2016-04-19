@@ -60,9 +60,6 @@ hook.Add("PlayerDeath", "PS2_PlayerDeath", function(victim, inflictor, attacker)
 	else -- Bystander
 		if victim:GetMurderer() and MurderSetting("Kills.BystanderKillsMurderer") then
 			attacker:PS2_AddStandardPoints(MurderSetting("Kills.BystanderKillsMurderer"), "Killed the Murderer")
-
-		else -- Bystander
-			attacker:PS2_AddStandardPoints(MurderSetting("Kills.BystanderKillsBystander"), "Killed Bystander")
 		end
 
 	end

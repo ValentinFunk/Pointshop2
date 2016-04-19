@@ -36,12 +36,6 @@ MODULE.Settings.Server = {
 			tooltip = "Reward for crime",
 		},
 
-		BystanderKillsBystander = {
-			value = -1000,
-			label = "Bystander killed Bystander",
-			tooltip = "Punishment",
-		},
-
 		BystanderKillsMurderer = {
 			value = 200,
 			label = "Bystander killed the Murderer",
