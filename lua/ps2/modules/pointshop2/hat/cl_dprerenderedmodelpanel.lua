@@ -10,7 +10,7 @@ function PANEL:SetPacOutfit( outfit )
 			self.Entity:RemovePACPart( oldOutf:ToTable( ) )
 		end
 	end
-	
+
 	self.pacOutfit = outfit
 	if not self.pacOutfit then
 		return debug.Trace()
@@ -37,12 +37,12 @@ end
 function PANEL:ApplyModelInfo( modelInfo )
 	self:SetModel( modelInfo.model )
 
-	local groups = string.Explode( " ", modelInfo.bodygroups ) 
+	local groups = string.Explode( " ", modelInfo.bodygroups )
 	for k = 0, self.Entity:GetNumBodyGroups( ) - 1 do
 		if ( self.Entity:GetBodygroupCount( k ) <= 1 ) then continue end
 		self.Entity:SetBodygroup( k, groups[ k + 1 ] or 0 )
 	end
-	
+
 	if self.Entity:SkinCount( ) - 1 > 0 then
 		self.Entity:SetSkin( modelInfo.skin )
 	end
@@ -58,22 +58,22 @@ function PANEL:Paint( w, h )
 			--["$vertexalpha"] = 1
 		} )
 	end
-	
+
 	if not self.dirty and not self.forceRender then
 		self:PaintCached( w, h )
 		return
 	end
-	
+
 	local oldRt = render.GetRenderTarget( )
 	render.SetRenderTarget( self.rt )
 		render.Clear( 47, 47, 47, 255, true, true )
 		self:PaintActual( w, h )
 	render.SetRenderTarget( oldRt )
-	
+
 	self.mat:SetTexture( "$basetexture", self.rt )
-	
+
 	self:PaintCached( w, h )
-	
+
 	self.LastPaint = RealTime()
 	self.framesDrawn = self.framesDrawn or 0
 	self.framesDrawn = self.framesDrawn + 1
@@ -99,12 +99,12 @@ end
 function PANEL:PaintActual( w, h )
 	if not IsValid( self.Entity ) or
 	   not self.pacOutfit or
-	   not self.viewInfo then 
+	   not self.viewInfo then
 		--surface.SetDrawColor( 255, 0, 255, 100 )
 		--surface.DrawRect( 0, 0, w, h )
 		return
 	end
-	
+
 	pac.Think()
 	cam.Start3D( self.viewInfo.origin, self.viewInfo.angles, self.viewInfo.fov - 20, 0, 0, 256, 256, 5, 4096 )
 		cam.IgnoreZ( true )
@@ -113,23 +113,23 @@ function PANEL:PaintActual( w, h )
 		render.ResetModelLighting( self.colAmbientLight.r/255, self.colAmbientLight.g/255, self.colAmbientLight.b/255 )
 		render.SetColorModulation( self.colColor.r/255, self.colColor.g/255, self.colColor.b/255 )
 		render.SetBlend( self.colColor.a/255 )
-		
+
 		for i=0, 6 do
 			local col = self.DirectionalLight[ i ]
 			if ( col ) then
 				render.SetModelLighting( i, col.r/255, col.g/255, col.b/255 )
 			end
 		end
-		
-		--pac.HookEntityRender( self.Entity, self.pacOutfit )
+
+		pac.FlashlightDisable( true )
 		pac.ForceRendering( true )
 			pac.RenderOverride( self.Entity, "opaque" )
 			pac.RenderOverride( self.Entity, "translucent", true )
 			self.Entity:DrawModel( )
 			pac.RenderOverride( self.Entity, "translucent", true )
 		pac.ForceRendering( false )
-		--pac.UnhookEntityRender( self.Entity, self.pacOutfit )
-		
+		pac.FlashlightDisable( false )
+
 		cam.IgnoreZ( false )
 		render.SuppressEngineLighting( false )
 	cam.End3D( )
