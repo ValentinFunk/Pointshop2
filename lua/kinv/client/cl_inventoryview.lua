@@ -24,7 +24,13 @@ function InventoryView:receiveInventory( inventory )
 end
 
 function InventoryView:itemAdded( inventoryId, item )
-	local item = KInventory.ITEMS[item.id] or item
+	if KInventory.ITEMS[item.id] then
+		ErrorNoHalt("Item " .. inventoryId .. "Exists")
+		PrintTable(item)
+		PrintTable(KInventory.ITEMS[item.id])
+	end
+
+	-- local item = KInventory.ITEMS[item.id] or item
 	KInventory.ITEMS[item.id] = item
 
 	if not self.inventories[inventoryId] then

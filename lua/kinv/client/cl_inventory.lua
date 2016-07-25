@@ -19,11 +19,11 @@ function Inventory:removeItemById( itemId )
 			removed = true
 		end
 	end
-	
+
 	if removed then
 		hook.Run( "KInv_ItemRemoved", self, itemId )
-		--do callback stuff
+		KInventory.ITEMS[itemId] = nil
 	end
-	
+
 	return removed
 end
