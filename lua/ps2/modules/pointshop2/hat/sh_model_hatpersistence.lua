@@ -1,5 +1,5 @@
 Pointshop2.HatPersistence = class( "Pointshop2.HatPersistence" )
-local HatPersistence = Pointshop2.HatPersistence 
+local HatPersistence = Pointshop2.HatPersistence
 
 HatPersistence.static.DB = "Pointshop2"
 
@@ -38,20 +38,20 @@ function HatPersistence:removeOutfits( )
 		for k, v in pairs( mappings ) do
 			table.insert( mappingIds, v.id )
 		end
-		
+
 		local outfitIds = {}
 		for k, v in pairs( mappings ) do
 			if not table.HasValue( outfitIds ) then
 				table.insert( outfitIds, v.outfitId )
 			end
 		end
-		
+
 		--Remove all persistence mappings
 		local removeMappings = Pointshop2.OutfitHatPersistenceMapping.removeDbEntries( Format( "WHERE id IN (%s)", table.concat( mappingIds, "," ) ) )
-		
+
 		--Remove all outfits
 		local removeOutfits = Pointshop2.StoredOutfit.removeDbEntries( Format( "WHERE id IN (%s)", table.concat( outfitIds, "," ) ) )
-		
+
 		return WhenAllFinished{ removeMappings, removeOutfits }
 	end )
 end
@@ -70,7 +70,7 @@ function HatPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate 
 	:Then( function( hat )
 		hat.iconInfo = saveTable.iconInfo or {}
 		hat.validSlots = saveTable.validSlots
-		if doUpdate then
+		if doUpdate and saveTable.outfitsChanged then
 			--For simplicity remove all OutfitMappings and recreate them
 			return WhenAllFinished{ hat:save( ), hat:removeOutfits( ) }
 		else
@@ -78,6 +78,10 @@ function HatPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate 
 		end
 	end )
 	:Then( function( hat )
+		if doUpdate and not saveTable.outfitsChanged then
+			return
+		end
+
 		local outfitPromises = {}
 		for model, outfitTable in pairs( saveTable.outfits ) do
 			--Save Outfit
@@ -117,12 +121,12 @@ end
 local copyModelFields = LibK.copyModelFields
 function HatPersistence.static.importDataFromTable( exportTable )
 	local promises = {}
-	
+
 	for _, instanceExport in pairs( exportTable ) do
 		--Create basic persistence
 		local itemPersistence = Pointshop2.ItemPersistence:new( )
 		copyModelFields( itemPersistence, instanceExport.ItemPersistence, Pointshop2.ItemPersistence.model )
-		
+
 		local promise = itemPersistence:save( )
 		:Then( function( itemPersistence )
 			--Create hat persistence
@@ -133,13 +137,13 @@ function HatPersistence.static.importDataFromTable( exportTable )
 		end )
 		:Then( function( actualPersistence )
 			local mappingPromises = {}
-			
+
 			--Create outfits and set up mappings
 			for k, mappingExport in pairs( instanceExport.OutfitHatPersistenceMapping ) do
 				--Create outfit
 				local outfit = Pointshop2.StoredOutfit:new( )
 				outfit.outfitData = mappingExport.outfit
-				
+
 				local mappingPromise = outfit:save( )
 				:Then( function( outfit )
 					--Create mapping
@@ -147,18 +151,18 @@ function HatPersistence.static.importDataFromTable( exportTable )
 					mapping.model = mappingExport.model
 					mapping.hatPersistenceId = actualPersistence.id
 					mapping.outfitId = outfit.id
-					
+
 					return mapping:save( )
 				end )
 				table.insert( mappingPromises, mappingPromise )
 			end
-			
+
 			return WhenAllFinished( mappingPromises )
 		end )
-		
+
 		table.insert( promises, promise )
 	end
-	
+
 	return WhenAllFinished( promises )
 end
 
@@ -167,7 +171,7 @@ function HatPersistence.static.customRemove( itemClass )
 	for k, v in pairs( itemClass.outfitIds ) do
 		table.insert( ids, tonumber(v) )
 	end
-	
+
 	return WhenAllFinished{
 		Pointshop2.StoredOutfit.removeDbEntries( "WHERE id IN (" .. table.concat( ids, ',' ) .. ")" ),
 		Pointshop2.ItemPersistence.removeWhere{ id = itemClass.className }
