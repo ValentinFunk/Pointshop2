@@ -34,7 +34,7 @@ function PANEL:Init( )
 	openBtn.m_Image:SetSize( 16, 16 )
 	function openBtn.DoClick( )
 		self.currentModel = Pointshop2.HatPersistence.ALL_MODELS
-		
+
 		local menu = DermaMenu( )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 		if self.baseOutfit then
@@ -44,7 +44,7 @@ function PANEL:Init( )
 			end )
 			menu:AddSpacer( )
 		end
-		
+
 		menu:AddOption( "Create new Outfit", function( )
 			local f = createHatPositioner( self )
 			f:NewEmptyOutfit( )
@@ -56,15 +56,15 @@ function PANEL:Init( )
 		menu:Open( )
 		menu:MakePopup( )
 	end
-	
+
 	local desc = vgui.Create( "DLabel", self )
 	desc:SetText( "The Base outfit is applied to every Playermodel.\nUse Model Specific Outfits to adjust your item for special Player Models" )
 	desc:Dock( TOP )
 	desc:SizeToContents( )
 	desc:DockMargin( 5, 5, 5, 5 )
-	
+
 	self:addFormItem( "Base Outfit", openBtn )
-	
+
 	self.addBtn = vgui.Create( "DButton", self )
 	self.addBtn:SetText( "Add" )
 	self.addBtn:SetWide( 120 )
@@ -72,10 +72,10 @@ function PANEL:Init( )
 	self.addBtn.m_Image:SetSize( 16, 16 )
 	self.addBtn:Dock( LEFT )
 	self.addBtn:SetDisabled( true )
-	function self.addBtn.DoClick( )	
+	function self.addBtn.DoClick( )
 		local menu = DermaMenu( )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
-		
+
 		local function requestModel( clone, overrideMdlPath )
 			local modelPath = overrideMdlPath
 			local function openEditor( )
@@ -96,7 +96,7 @@ function PANEL:Init( )
 					f:NewEmptyOutfit( )
 				end
 			end
-			if not modelPath then 
+			if not modelPath then
 				Derma_StringRequest( "Enter a model path", "Enter the path of the model", "models/player/alyx.mdl", function( mdlPath )
 					modelPath = mdlPath
 					openEditor( )
@@ -107,7 +107,7 @@ function PANEL:Init( )
 				openEditor( )
 			end
 		end
-		
+
 		local sub = menu:AddSubMenu( "Specify custom Model Path" )
 		sub:AddOption( "Clone Base Outfit", function( )
 			requestModel( true )
@@ -115,7 +115,7 @@ function PANEL:Init( )
 		sub:AddOption( "New Outfit", function( )
 			requestModel( false )
 		end )
-		
+
 		local cssSub = menu:AddSubMenu( "All CS:S Models" )
 		cssSub:AddOption( "Clone Base Outfit", function( )
 			requestModel( true, Pointshop2.HatPersistence.ALL_CSS_MODELS )
@@ -123,13 +123,13 @@ function PANEL:Init( )
 		cssSub:AddOption( "New Outfit", function( )
 			requestModel( false, Pointshop2.HatPersistence.ALL_CSS_MODELS )
 		end )
-		
+
 		menu:Open( )
 		menu:MakePopup( )
 	end
-	
+
 	local pnl = self:addFormItem( "Model Specific Outfit", self.addBtn )
-	
+
 	self.listView = vgui.Create( "DListView", self )
 	self.listView:Dock( TOP )
 	self.listView:DockMargin( 5, 5, 5, 5 )
@@ -140,10 +140,10 @@ function PANEL:Init( )
 		--No Duplicates
 		for k, v in pairs( listView:GetLines( ) ) do
 			if v.Columns[1]:GetText( ) == model then
-				return 
+				return
 			end
 		end
-		
+
 		local line = DListView.AddLine( listView, model, outfitId, action )
 		local button = vgui.Create( "DButton", line )
 		button.Value = 0
@@ -172,15 +172,15 @@ function PANEL:Init( )
 		line.Columns[3] = button
 		return line
 	end
-	
+
 	function self.listView:PerformLayout( )
 		DListView.PerformLayout( self )
 		self:SetTall( math.Clamp( 100, 50, #self:GetLines( ) * 20 + 20 ) )
 	end
-	
-	
+
+
 	self:addSectionTitle( "Item Icon" )
-	
+
 	local iconSheet = vgui.Create( "DPropertySheet", self )
 	iconSheet:Dock( TOP )
 	iconSheet:SetTall( 200 )
@@ -188,28 +188,28 @@ function PANEL:Init( )
 	iconSheet:DockMargin( 5, 5, 5, 5 )
 	iconSheet.Paint = function( s, w, h )
 	end
-	
+
 	self.shopIconEditor = vgui.Create( "DHatIconEditor", iconSheet )
 	self.shopIconEditor:SetIconSize( KInventory.Items.base_hat.GetPointshopIconDimensions( ) )
-	
+
 	local shopIconSheet = iconSheet:AddSheet( "Shop Icon", self.shopIconEditor )
 	derma.SkinHook( "Layout", "InlineSheetSheet", self, shopIconSheet )
-	
+
 	self.invIconEditor = vgui.Create( "DHatIconEditor", iconSheet )
 	self.invIconEditor:SetIconSize( 64, 64 )
-	
+
 	local invIconSheet = iconSheet:AddSheet( "Inventory Icon", self.invIconEditor )
 	derma.SkinHook( "Layout", "InlineSheetSheet", self, invIconSheet )
 	invIconSheet.Tab:SetFont( self:GetSkin( ).TextFont )
-	
+
 	self:addSectionTitle( "Slots" )
-	
+
 	local lbl = vgui.Create( "DLabel", self )
 	lbl:Dock( TOP )
 	lbl:SetText( "Select the slots that this item can be equipped in" )
 	lbl:SizeToContents( )
 	lbl:DockMargin( 5, 0, 5, 5 )
-	
+
 	self.slotLayout = vgui.Create( "DIconLayout", self )
 	self.slotLayout:Dock( TOP )
 	self.slotLayout:DockMargin( 5, 5, 5, 5 )
@@ -219,7 +219,7 @@ function PANEL:Init( )
 	function self.slotLayout:PerformLayout( )
 		old( self )
 	end
-	
+
 	self.checkBoxes = {}
 	for _, name in pairs( Pointshop2.ValidHatSlots ) do
 		local chkBox = vgui.Create( "DCheckBoxLabel", self.slotLayout )
@@ -227,7 +227,7 @@ function PANEL:Init( )
 		chkBox:SizeToContents( )
 		self.checkBoxes[name] = chkBox
 	end
-	
+
 end
 
 function PANEL:IconViewInfoSaved( viewInfo )
@@ -237,7 +237,8 @@ end
 
 function PANEL:OutfitSaved( outfit )
 	pace.Backup( outfit, os.time( ) .. self.currentModel ) --Just to be save
-	
+	self.outfitsChanged = true
+
 	if self.currentModel == Pointshop2.HatPersistence.ALL_MODELS then
 		self.baseOutfit = outfit
 		self.shopIconEditor:SetPacOutfit( outfit )
@@ -251,7 +252,7 @@ function PANEL:OutfitSaved( outfit )
 			end
 		end
 	end
-	
+
 	return true
 end
 
@@ -259,34 +260,36 @@ function PANEL:Validate( saveTable )
 	if table.Count( saveTable.outfits ) == 0 then
 		return false, "Please create at least one outfit"
 	end
-	
+
 	if saveTable.useMaterialIcon and #saveTable.iconMaterial == 0 then
 		return false, "Please supply a material path"
 	end
-	
+
 	if table.Count( saveTable.validSlots ) == 0 then
 		return false, "Please select one or more slots"
 	end
-	
+
 	return true
 end
 
 function PANEL:SaveItem( saveTable )
 	saveTable.outfits = { }
 	saveTable.outfits[Pointshop2.HatPersistence.ALL_MODELS] = self.baseOutfit
-	
+
 	for k, line in pairs( self.listView:GetLines( ) ) do
 		if line.outfit then
 			local model = line.Columns[1]:GetText( )
-			saveTable.outfits[model] = line.outfit 
+			saveTable.outfits[model] = line.outfit
 		end
 	end
-	
-	saveTable.iconInfo = { 
+
+	saveTable.iconInfo = {
 		shop = self.shopIconEditor:GetIconInfo( ),
 		inv = self.invIconEditor:GetIconInfo( ),
 	}
-	
+
+	saveTable.outfitsChanged = self.outfitsChanged
+
 	saveTable.validSlots = {}
 	for slotName, checkBox in pairs( self.checkBoxes ) do
 		if checkBox:GetChecked( ) then
@@ -297,26 +300,27 @@ end
 
 function PANEL:EditItem( persistence, itemClass )
 	self.baseOutfit = itemClass.getBaseOutfit( )
+
 	for model, outfitId in pairs( itemClass.outfitIds ) do
 		--Don't add the base item to the list
 		if model == Pointshop2.HatPersistence.ALL_MODELS then
 			continue
 		end
-		
+
 		local line = self.listView:AddLine( model, "Yes", "" )
 		line.outfit = Pointshop2.Outfits[outfitId]
 	end
 	self.addBtn:SetDisabled( false )
-	
+
 	for k, slotName in pairs( itemClass.validSlots ) do
 		if self.checkBoxes[slotName] then
 			self.checkBoxes[slotName]:SetChecked( true )
 		end
 	end
-	
+
 	self.shopIconEditor:SetIconInfo( itemClass.iconInfo.shop )
 	self.invIconEditor:SetIconInfo( itemClass.iconInfo.inv )
-	
+
 	self.shopIconEditor:SetPacOutfit( self.baseOutfit )
 	self.invIconEditor:SetPacOutfit( self.baseOutfit )
 end

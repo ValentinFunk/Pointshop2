@@ -294,7 +294,7 @@ function Pointshop2Controller:sendDynamicInfo( ply )
 		KLogf( 3, "[Pointshop2] Dynamics resource not loaded when player joined" )
 	end
 
-	Pointshop2.DynamicsLoadedPromise:Done( function( )
+Pointshop2.DynamicsLoadedPromise:Done( function( )
 		self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
 	end )
 end
@@ -578,6 +578,49 @@ Pointshop2.FullyInitializedPromise:Done( function( )
 	loadPersistent( )
 end )
 
+function Pointshop2Controller:updateItemPersistence( saveTable )
+	local class = Pointshop2.GetItemClassByName( saveTable.baseClass )
+	local outfitsChanged = saveTable.baseClass == "base_hat" and saveTable.outfitsChanged
+
+	return class.getPersistence( ).findByItemPersistenceId( saveTable.persistenceId )
+	:Then( function( persistentItem )
+		-- Update cached copy for new players
+		for k, v in pairs( self.cachedPersistentItems ) do
+			if v.itemPersistenceId == saveTable.persistenceId then
+				self.cachedPersistentItems[k] = persistentItem
+			end
+		end
+
+		-- Update KInventory.Items entry
+		Pointshop2.LoadPersistentItem( persistentItem )
+
+		-- If outfits have changed reload & resend outfits
+		if outfitsChanged then
+			for k, v in pairs( player.GetAll( ) ) do
+				v.outfitsReceivedPromise = Deferred( )
+			end
+
+			return self:loadOutfits( ):Then( function( )
+				return persistentItem
+			end )
+		end
+
+		return persistentItem
+	end )
+	:Then( function( persistentItem )
+		-- Send info to players as soon as they received the outfits change
+		if outfitsChanged then
+			for k, v in pairs( player.GetAll( ) ) do
+				v.outfitsReceivedPromise:Done(function( )
+						self:startView( "Pointshop2View", "updateItemPersistence", v, persistentItem )
+				end)
+			end
+		else
+			self:startView( "Pointshop2View", "updateItemPersistence", player.GetAll(), persistentItem )
+		end
+	end )
+end
+
 function Pointshop2Controller:saveModuleItem( ply, saveTable )
 	local class = Pointshop2.GetItemClassByName( saveTable.baseClass )
 	if not class then
@@ -586,10 +629,16 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 	end
 
 	--If persistenceId != nil update existing
-	class.getPersistence( ).createOrUpdateFromSaveTable( saveTable, saveTable.persistenceId != nil )
+	local isUpdate = saveTable.persistenceId != nil
+	class.getPersistence( ).createOrUpdateFromSaveTable( saveTable, isUpdate )
 	:Then( function( saved )
 		KLogf( 4, "[Pointshop2] Saved item %s", saveTable.name )
-		self:moduleItemsChanged( )
+		-- Use shortcut path for updates, do a full reload on newly created items
+		if isUpdate then
+			return self:updateItemPersistence( saveTable )
+		else
+			return self:moduleItemsChanged( )
+		end
 	end, function( errid, err )
 		self:reportError( "Pointshop2View", ply, "Error saving item", errid, err )
 	end )

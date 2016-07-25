@@ -216,6 +216,34 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	resolveIfWaiting( self.clPromises.DynamicsReceived )
 end
 
+/*
+	Called when a shop item (item persistence) has been updated
+*/
+function Pointshop2View:updateItemPersistence( itemPersistence )
+	if not self.itemProperties then
+		KLogf(3, "[WARN] Player received item update but items weren't loaded yet")
+		return
+	end
+
+	-- Update persistence object cache
+	for k, v in pairs( self.itemProperties ) do
+		if v.itemPersistenceId == itemPersistence.itemPersistenceId then
+			self.itemProperties[k] = itemPersistence
+		end
+	end
+
+	-- Update class (KInventory.Items[id])
+	Pointshop2.LoadPersistentItem( itemPersistence )
+
+	-- Update Shop
+	timer.Simple( 0.1, function( )
+		local startTime = SysTime( )
+		hook.Call( "PS2_DynamicItemsUpdated" )
+		KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+	end )
+	KLogf( 5, "[Pointshop 2] Reloaded item %s", itemPersistence.ItemPersistence.name )
+end
+
 function Pointshop2View:loadDynamics( versionHash )
 	GLib.Resources.Resources["Pointshop2/dynamics"] = nil --Force resource reset
 	GLib.Resources.Get( "Pointshop2", "dynamics", versionHash, function( success, data )
@@ -252,14 +280,12 @@ function Pointshop2View:loadDynamics( versionHash )
 	end )
 end
 
---This is a bit confusing, sorry
 function Pointshop2View:getPersistenceForClass( itemClass )
 	if itemClass._persistenceId == "STATIC" then
 		return "STATIC"
 	end
 	local persistenceClass = Pointshop2.GetPersistenceClassForItemClass( itemClass )
 	for k, v in pairs( self.itemProperties ) do
-		print(v.id, itemClass._persistenceId, instanceOf( persistenceClass, v ), persistenceClass, v.class.name, itemClass, v )
 		if v.id == itemClass._persistenceId and instanceOf( persistenceClass, v ) then
 			return v
 		end
