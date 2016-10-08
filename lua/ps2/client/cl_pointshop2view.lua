@@ -42,6 +42,10 @@ function Pointshop2View:initialize( )
 		self.fullyInitialized = true
 		KLogf( 5, "[Pointshop2] Pointshop2 is now ready for use" )
 	end )
+
+	if LocalPlayer():IsAdmin() and not pac.FlashlightDisable then
+		self:displayError( "[CRITICAL][ADMIN ONLY] Your PAC3 version is outdated and will cause errors. Please download the newest PAC version from GitHub (https://github.com/CapsAdmin/pac3).", 1000 )
+	end
 end
 
 local function resolveIfWaiting( deferred )
