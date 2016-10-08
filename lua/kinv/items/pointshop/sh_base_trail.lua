@@ -56,9 +56,11 @@ function ITEM:PlayerDeath( victim, inflictor, attacker )
 		self:RemoveTrail( )
 	end
 end
+ITEM.PlayerSilentDeath = ITEM.PlayerDeath
 Pointshop2.AddItemHook( "PlayerDeath", ITEM )
+Pointshop2.AddItemHook( "PlayerSilentDeath", ITEM )
 
-function ITEM:OnHolster( ply )
+function ITEM:OnHolster( )
 	self:RemoveTrail( )
 end
 

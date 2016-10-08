@@ -102,7 +102,9 @@ else
 			self:ClientRPC( "RemoveOutfit" )
 		end
 	end
+	ITEM.PlayerSilentDeath = ITEM.PlayerDeath
 	Pointshop2.AddItemHook( "PlayerDeath", ITEM )
+	Pointshop2.AddItemHook( "PlayerSilentDeath", ITEM )
 end
 
 function ITEM:OnEquip( )
