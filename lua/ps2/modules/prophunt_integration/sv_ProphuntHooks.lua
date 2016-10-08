@@ -25,8 +25,6 @@ function Pointshop2.PropHunt.PreRoundStart( num )
 		GAMEMODE.PS2_NoPoints = true
 		Pointshop2.BroadcastInfo( "No points will be given this round. Minimum of " .. S('RoundWin.MinimumPlayers') .. " players required" )
 	end
-	print("round started")
-	PrintTable(teamPlayers)
 end
 
 function Pointshop2.PropHunt.SetRoundResult( result )
