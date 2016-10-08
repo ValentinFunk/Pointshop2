@@ -69,11 +69,3 @@ local function ApplyHook_PlayerSetUpForRound( )
 end
 hook.Add( "InitPostEntity", "Replace", ApplyHook_PlayerSetUpForRound )
 hook.Add( "OnReloaded", "Replace", ApplyHook_PlayerSetUpForRound )
-
-hook.Add( "PS2_PreventApplyItem", "PreventHiddenModel", function( item, ply )
-	print( "PreventHiddenModel", item, ply )
-	local isPlayermodel = instanceOf( Pointshop2.GetItemClassByName( "base_playermodel" ), item )
-	if isPlayermodel and ply:IsHidden( ) then
-		return true
-	end
-end )
