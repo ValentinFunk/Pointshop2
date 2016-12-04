@@ -5,27 +5,18 @@
 
 local DB
 
-local function addSettingsField( )
-	return DB.FieldExistsInTable( "ps2_settings", "serverId" )
+local function addYearField( )
+	return DB.FieldExistsInTable( "ps2_adventcalendaruses", "year" )
 	:Then( function( exists )
 		if not exists then
-			return DB.DoQuery( "ALTER TABLE `ps2_settings` ADD `serverId` INT NULL" )
+			return DB.DoQuery( "ALTER TABLE `ps2_adventcalendaruses` ADD `year` INT NULL" )
+        :Then(function()
+          return DB.DoQuery( "UPDATE `ps2_adventcalendaruses` SET `year` = 2015 WHERE 1")
+        end)
 		end
 	end )
 	:Then( function( )
-		print( "\t Added column serverId to settings" )
-	end )
-end
-
-local function addServersField( )
-	return DB.FieldExistsInTable( "ps2_itempersistence", "servers" )
-	:Then( function( exists )
-		if not exists then
-			DB.DoQuery( "ALTER TABLE `ps2_itempersistence` ADD `servers` TEXT" )
-		end
-	end )
-	:Done( function( )
-		print( "\t Added column servers to persistence" )
+		print( "\t Added column year to ps2_adventcalendaruses" )
 	end )
 end
 
@@ -40,12 +31,12 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 	Promise.Resolve( )
 	:Then( function( )
 		if DB.CONNECTED_TO_MYSQL then
-			return DB.DoQuery( "SHOW TABLES LIKE 'ps2_itempersistence'" )
+			return DB.DoQuery( "SHOW TABLES LIKE 'ps2_adventcalendaruses'" )
 			:Then( function( exists )
 				return exists
 			end )
 		else
-			return DB.DoQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ps2_itempersistence'" )
+			return DB.DoQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ps2_adventcalendaruses'" )
 			:Then( function( result )
 				local exists = result and result[1] and result[1].name
 				return exists
@@ -55,7 +46,7 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 	:Then( function( shouldUpdate )
 		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", shouldUpdate and "need" or "not need" )
 		if shouldUpdate then
-			return WhenAllFinished{ addSettingsField(), addServersField() }
+			return addYearField()
 			:Fail( function( errid, err )
 				KLogf( 3, "[WARN] Error during update: %i, %s. Ignore this if you run multiple servers on a single database.", errid, err )
 				def:Resolve( )
