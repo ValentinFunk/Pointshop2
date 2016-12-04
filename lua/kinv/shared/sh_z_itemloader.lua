@@ -3,6 +3,7 @@ KInventory.Items = {} --Item Registry
 --Load the item into a dummy ITEM table, to find out what ITEM.baseClass is
 local function getBaseClass( filepath )
 	local ITEM = class( "DummyClass" ) --gets auto garbage collected
+	ITEM.static.AllowRPC = function() end
 	local environment = {}
 	environment.ITEM = ITEM
 	setmetatable( environment, { __index = _G } ) --make sure that func can access the real _G
@@ -11,10 +12,10 @@ local function getBaseClass( filepath )
 		KLogf( 2, "      -> [ERROR] Couldn't load item file %s", filepath )
 		return
 	end
-	
+
 	setfenv( func, environment ) -- _G for func now becomes environment
 	func( )
-	
+
 	return ITEM.baseClass
 end
 
@@ -25,13 +26,13 @@ local function loadItem( filepath, filename )
 		KLogf( 2, "[ERROR] Item %s has an invalid realm %s! Please name your file sh_/cl_/sv_item_name.lua", filepath, realm )
 		return
 	end
-	
+
 	local withoutRealm = string.sub( filename, 4, #filename )
 	withoutRealm = string.lower( withoutRealm )
 	withoutRealm = string.gsub( withoutRealm, "^%d+_", "" ) --Remove load order e.g. sv_0_itembase.lua
 	local className = string.gsub( withoutRealm, ".lua", "" )
 	local internalName = "KInventory.Items." .. className
-	
+
 	local baseItem = KInventory.Item
 	local baseClassName = getBaseClass( filepath )
 	if baseClassName then
@@ -41,7 +42,7 @@ local function loadItem( filepath, filename )
 			return
 		end
 	end
-	
+
 	--Set up the environment for the function
 	local environment = {}
 	--Create a new Class for each item class
@@ -50,23 +51,23 @@ local function loadItem( filepath, filename )
 	--make it accessible via ITEM
 	environment.ITEM = KInventory.Items[className]
 	setmetatable( environment, { __index = _G } ) --make sure that func can access the real _G
-	
+
 	local func = CompileFile( filepath )
 	if not func then
 		KLogf( 2, "      -> [ERROR] Couldn't load item file %s", filename )
 		KInventory.Items[className] = nil --remove the class
 		return
 	end
-	
+
 	setfenv( func, environment ) -- _G for func now becomes environment
 	func( )
-	
+
 	if KInventory.Mixins[className] then
 		for _, mixin in pairs( KInventory.Mixins[className] ) do
 			KInventory.Items[className]:include( mixin )
 		end
 	end
-	
+
 	--lastly give the class it's className. Internal classname can be accessed with .name
 	KInventory.Items[className].static.className = className
 	KInventory.Items[className].static.originFilePath = filepath
@@ -76,7 +77,7 @@ local function loadItem( filepath, filename )
 	else
 		KInventory.Items[className].static.isBase = false
 	end
-	
+
 	KLogf( 4, "     -> Item %s (Base: %s) loaded!", className, baseItem.className or "No Base" )
 end
 
@@ -90,7 +91,7 @@ local function includeFolder( folder )
 		end
 		loadItem( fullpath, filename )
 	end
-	
+
 	for k, v in pairs( folders ) do
 		includeFolder( folder .. "/" .. v )
 	end

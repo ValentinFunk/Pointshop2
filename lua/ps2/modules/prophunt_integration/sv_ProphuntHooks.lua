@@ -6,6 +6,7 @@ end
 
 local teamPlayers
 function Pointshop2.PropHunt.PreRoundStart( num )
+	if team.NumPlayers( TEAM_PROPS ) == 0 or team.NumPlayers( TEAM_HUNTERS ) == 0 then return end
 	teamPlayers = {}
 
 	for k, v in pairs( player.GetAll( ) ) do
