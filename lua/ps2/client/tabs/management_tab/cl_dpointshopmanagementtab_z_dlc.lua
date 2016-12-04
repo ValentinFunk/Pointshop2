@@ -27,7 +27,7 @@ function PANEL:Init( )
 	Promise.Resolve( )
 	:Then( function( )
 		local def = Deferred( )
-		http.Fetch( "https://storage.sbg-1.runabove.io/v1/AUTH_66fcef59d5fa44c39f33878dbaeb3904/ps2_static/dlc.lua", function( body, len, headers, code )
+		http.Fetch( "https://static.pointshop2.com/dlc.lua", function( body, len, headers, code )
 			if code != 200 then
 				return def:Reject( 'HTTP Error - No internet or server is down' )
 			end
