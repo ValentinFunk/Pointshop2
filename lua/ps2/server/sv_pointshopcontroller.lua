@@ -333,8 +333,8 @@ hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( ply )
 	ply.dynamicsReceivedPromise = Deferred( )
 	ply.outfitsReceivedPromise = Deferred( )
 	ply.fullyLoadedPromise = Deferred( )
-	hook.Add( "PS2_PlayerFullyLoaded", "FullyLoadedResolver_" .. ply:SteamID(), function( self, ply )
-		if self == ply then
+	hook.Add( "PS2_PlayerFullyLoaded", "FullyLoadedResolver_" .. ply:SteamID(), function( loadedPly )
+		if loadedPly == ply then
 			ply.fullyLoadedPromise:Resolve( )
 			hook.Remove( "PS2_PlayerFullyLoaded", "FullyLoadedResolver_" .. ply:SteamID( ) )
 		end
