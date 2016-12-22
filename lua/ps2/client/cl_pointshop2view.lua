@@ -17,6 +17,8 @@ end )
 local GLib = LibK.GLib
 
 function Pointshop2View:initialize( )
+	self.SlotChanges = {} -- Prevents uncaching of items during slot changes
+
 	--Dynamic Properties
 	self.itemMappings = {}
 	self.itemCategories = {}
@@ -166,8 +168,13 @@ function Pointshop2View:receiveSlots( slots )
 end
 
 function Pointshop2View:slotChanged( slot )
-	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item and KInventory.ITEMS[slot.Item.id]
+	slot.Item = slot.Item and KInventory.ITEMS[slot.Item.id]
+	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item
 	hook.Run( "PS2_SlotChanged", slot )
+
+	if slot.Item then
+		self.SlotChanges[slot.Item.id] = true
+	end
 end
 
 function Pointshop2View:startBuyItem( itemClass, currencyType )
@@ -385,15 +392,9 @@ function Pointshop2View:createPointshopItem( saveTable )
 end
 
 Pointshop2.ITEMS = {}
-setmetatable( Pointshop2.ITEMS, { __mode = 'v' } ) --weak reference holder
+//setmetatable( Pointshop2.ITEMS, { __mode = 'v' } ) --weak reference holder
 
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
-	if item:GetOwner( ) == LocalPlayer( ) then
-		if KInventory.ITEMS[item.id] then
-			item = KInventory.ITEMS[item.id]
-		end
-	end
-
 	isRetry = isRetry or 0
 
 	local ply
@@ -416,6 +417,12 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		return
 	end
 
+	if ply == LocalPlayer( ) then
+		if KInventory.ITEMS[item.id] then
+			item = KInventory.ITEMS[item.id]
+		end
+	end
+
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 	ply.PS2_EquippedItems[item.id] = item
 	item.owner = ply
@@ -429,6 +436,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		item:OnEquip( )
 	end )
 
+	print(item, Pointshop2.ITEMS[item.id])
 	Pointshop2.ITEMS[item.id] = item
 
 	hook.Run( "PS2_ItemEquipped", ply, item )

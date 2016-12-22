@@ -30,7 +30,7 @@ function InventoryView:itemAdded( inventoryId, item )
 		PrintTable(KInventory.ITEMS[item.id])*/
 	end
 
-	-- local item = KInventory.ITEMS[item.id] or item
+	local item = KInventory.ITEMS[item.id] or item
 	KInventory.ITEMS[item.id] = item
 
 	if not self.inventories[inventoryId] then

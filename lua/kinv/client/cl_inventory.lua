@@ -22,7 +22,13 @@ function Inventory:removeItemById( itemId )
 
 	if removed then
 		hook.Run( "KInv_ItemRemoved", self, itemId )
-		KInventory.ITEMS[itemId] = nil
+		print("unsetting")
+		local changed = Pointshop2View:getInstance().SlotChanges[itemId]
+		if changed then
+			Pointshop2View:getInstance().SlotChanges[itemId] = false
+		else
+			KInventory.ITEMS[itemId] = nil
+		end
 	end
 
 	return removed

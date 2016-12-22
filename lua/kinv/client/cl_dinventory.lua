@@ -4,13 +4,13 @@ function PANEL:Init( )
 	self.categories:Dock( FILL )
 	self.categories:DockMargin( 0, 5, 0, 0 )
 	self.categoryLookup = {}
-	
+
 	self.weightPanel = vgui.Create( "DPanel", self )
 	self.weightPanel:DockMargin( 5, 5, 5, 5 )
 	self.weightPanel:Dock( BOTTOM )
-	
+
 	Derma_Hook( self.weightPanel, "Paint", "Paint", "WeightPanel" )
-	
+
 	local weightText = vgui.Create( "DLabel", self.weightPanel )
 	weightText:Dock( FILL )
 	weightText:SetContentAlignment( 5 )
@@ -24,7 +24,7 @@ function PANEL:Init( )
 			end
 		end
 	end
-	
+
 	derma.SkinHook( "Layout", "InventoryFrame", self )
 end
 
@@ -34,10 +34,10 @@ function PANEL:setInventory( inventory )
 
 	self.categorizedItems = {}
 	self.categorizedItems["All"] = inventory.Items
-	
+
 	local categories = {}
 	for k, v in pairs( self.inventory.Items ) do
-		if v.category then 
+		if v.category then
 			self.categorizedItems[v.category] = self.categorizedItems[v.category] or {}
 			table.insert( self.categorizedItems[v.category], v )
 		end
@@ -65,12 +65,12 @@ end
 
 vgui.Register( "DInventory", PANEL, "DPanel" )
 
-/* 
+/*
 
 local hoverPanel, lastHoverItem
 hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 	if ( dragndrop.m_Dragging != nil ) then return end
-	
+
 	local hoverItem = vgui.GetHoveredPanel( )
 	if not IsValid( hoverItem ) then
 		if IsValid( hoverPanel ) then
@@ -78,14 +78,14 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 		end
 		return
 	end
-	
+
 	if hoverItem != lastHoverItem then
 		if IsValid( hoverPanel ) then
 			hoverPanel:Remove( )
 		end
 	end
 	lastHoverItem = hoverItem
-	
+
 	if hoverItem.stackPanel then
 		local stackPanel = hoverItem.stackPanel
 		if not IsValid( hoverPanel ) then
@@ -94,23 +94,23 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 			hoverPanel:SetTargetPanel( stackPanel )
 			hoverPanel:SetItem( stackPanel.items[1] )
 		end
-		
+
 		DisableClipping( true )
 		local itemBottomCenterX, itemBottomCenterY = stackPanel:LocalToScreen( stackPanel:GetWide( ) / 2, stackPanel:GetTall( ) )
-		local paintPosX, paintPosY = itemBottomCenterX - hoverPanel:GetWide( ) / 2, itemBottomCenterY 
-		
+		local paintPosX, paintPosY = itemBottomCenterX - hoverPanel:GetWide( ) / 2, itemBottomCenterY
+
 		paintPosX = math.Clamp( paintPosX, 0, ScrW( ) )
 		if paintPosX + hoverPanel:GetWide( ) > ScrW( ) then
 			paintPosX = ScrW( ) - hoverPanel:GetWide( )
 		end
-		
+
 		if paintPosY + hoverPanel:GetTall( ) > ScrH( ) then
-			paintPosY = ScrH( ) - hoverPanel:GetTall( ) 
+			paintPosY = ScrH( ) - hoverPanel:GetTall( )
 			hoverPanel:SetTargetPanel( nil )
 		else
 			hoverPanel:SetTargetPanel( stackPanel )
 		end
-		
+
 		hoverPanel:SetPaintedManually( false )
 		hoverPanel:PaintAt( paintPosX, paintPosY )
 		hoverPanel:SetPaintedManually( true )
