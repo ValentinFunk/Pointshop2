@@ -12,3 +12,10 @@ end )
 hook.Add( "TTTPlayerColor", "FixTTTModel", function( )
 	hook.Run( "PS2_DoUpdatePreviewModel" )
 end )
+
+/*
+Lebofly: one more thing for you, for TTT the preview model usually sticks being whatever playermodel you had equipped on say DR. Which is a problem if the servers don't both use custom player models
+*/
+hook.Add( "PlayerSpawn", "FixTTTPlayerModel", function( )
+	hook.Run( "PS2_DoUpdatePreviewModel" )
+end )
