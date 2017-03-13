@@ -202,29 +202,30 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.itemCategories = itemCategories
 	self.itemProperties = itemProperties
 
-
-	--Load persistent items
-	local startTime = SysTime( )
-	for k, v in pairs( self.itemProperties ) do
-		Pointshop2.LoadPersistentItem( v )
-	end
-	KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
-
-	local startTime = SysTime( )
-	local tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
-	KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
-
-	self.categoryItemsTable = tree or {}
-
-	--Hacky, dunno why this is needed
-	--hook.Call( "PS2_DynamicItemsUpdated" )
-	timer.Simple( 0.1, function( )
+	Pointshop2View:getInstance( ).clPromises.SettingsReceived:Done( function()
+		--Load persistent items
 		local startTime = SysTime( )
-		hook.Call( "PS2_DynamicItemsUpdated" )
-		KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
-	end )
+		for k, v in pairs( self.itemProperties ) do
+			Pointshop2.LoadPersistentItem( v )
+		end
+		KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
-	resolveIfWaiting( self.clPromises.DynamicsReceived )
+		local startTime = SysTime( )
+		local tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
+		KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+
+		self.categoryItemsTable = tree or {}
+
+		--Hacky, dunno why this is needed
+		--hook.Call( "PS2_DynamicItemsUpdated" )
+		timer.Simple( 0.1, function( )
+			local startTime = SysTime( )
+			hook.Call( "PS2_DynamicItemsUpdated" )
+			KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+		end )
+
+		resolveIfWaiting( self.clPromises.DynamicsReceived )
+	end )
 end
 
 /*
