@@ -195,6 +195,7 @@ MODULE.Settings.Server = {
 		},
 		Delay = 10,
 		Points = 100,
+		ForceEnable = false,
 		GroupMultipliers = {
 			type = "table",
 			value = { }
