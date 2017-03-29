@@ -4,21 +4,20 @@ local S = function( id )
 	return Pointshop2.GetSetting( "Prop Hunt Integration", id )
 end
 
-local teamPlayers
 function Pointshop2.PropHunt.PreRoundStart( num )
 	if team.NumPlayers( TEAM_PROPS ) == 0 or team.NumPlayers( TEAM_HUNTERS ) == 0 then return end
-	teamPlayers = {}
+	GAMEMODE.ps2TeamPlayers = {}
 
 	for k, v in pairs( player.GetAll( ) ) do
-		teamPlayers[v:Team()] = teamPlayers[v:Team()] or {}
-		table.insert( teamPlayers[v:Team()],  v )
+		GAMEMODE.ps2TeamPlayers[v:Team()] = GAMEMODE.ps2TeamPlayers[v:Team()] or {}
+		table.insert( GAMEMODE.ps2TeamPlayers[v:Team()],  v )
 	end
 
 	if #player.GetAll( ) > S('RoundWin.MinimumPlayers') then
 		GAMEMODE.Jackpot = #player.GetAll( ) * S('RoundWin.TimeJackpotPerPlayer')
 		for k, v in pairs( player.GetAll( ) ) do
 			if v:Team() == TEAM_HUNTERS then
-				v:PS2_DisplayInformation( "Round started. Points pot is at " .. GAMEMODE.Jackpot .. " points. It decreases by " .. math.floor( GAMEMODE.Jackpot / ( ROUND_TIME / 60 ) ) .. " points every minute, kill the Props quickly for maximum reward!" )
+				v:PS2_DisplayInformation( "Round started. Points pot is at " .. GAMEMODE.Jackpot .. " points. It decreases by " .. math.floor( GAMEMODE.Jackpot / ( GAMEMODE.RoundLength / 60 ) ) .. " points every minute, kill the Props quickly for maximum reward!" )
 			end
 		end
 		GAMEMODE.PS2_NoPoints = false
@@ -37,9 +36,11 @@ function Pointshop2.PropHunt.SetRoundResult( result )
 		return
 	end
 
+	GAMEMODE.ps2TeamPlayers = GAMEMODE.ps2TeamPlayers or {}
+
 	Pointshop2.StandardPointsBatch:begin( )
 	if result == TEAM_PROPS then
-		for k, v in pairs( teamPlayers[TEAM_PROPS] ) do
+		for k, v in pairs( GAMEMODE.ps2TeamPlayers[TEAM_PROPS] ) do
 			if not IsValid( v ) then
 				return
 			end
@@ -53,12 +54,12 @@ function Pointshop2.PropHunt.SetRoundResult( result )
 
 	if result == TEAM_HUNTERS then
 		local aliveHuntersCount = 0
-		for k, v in pairs( teamPlayers[TEAM_HUNTERS] ) do
+		for k, v in pairs( GAMEMODE.ps2TeamPlayers[TEAM_HUNTERS] ) do
 			if IsValid( v ) and v:Alive() and v:Team() == TEAM_HUNTERS then
 				aliveHuntersCount = aliveHuntersCount + 1
 			end
 		end
-		for k, v in pairs( teamPlayers[TEAM_HUNTERS] ) do
+		for k, v in pairs( GAMEMODE.ps2TeamPlayers[TEAM_HUNTERS] ) do
 			if not IsValid( v ) then
 				return
 			end
@@ -67,8 +68,8 @@ function Pointshop2.PropHunt.SetRoundResult( result )
 				v:PS2_AddStandardPoints( S('RoundWin.AliveBonus'), 'Alive Bonus', true )
 			end
 			local timeElapsed = GetGlobalFloat( "RoundEndTime" ) - CurTime()
-			timeElapsed = timeElapsed > 0 and timeElapsed or ROUND_TIME
-			local pot = GAMEMODE.Jackpot * ( 1 - timeElapsed / ROUND_TIME )
+			timeElapsed = timeElapsed > 0 and timeElapsed or GAMEMODE.RoundLength
+			local pot = GAMEMODE.Jackpot * ( 1 - timeElapsed / GAMEMODE.RoundLength )
 			v:PS2_AddStandardPoints( math.floor( pot / aliveHuntersCount ), 'Winning the round', true )
 		end
 	end
