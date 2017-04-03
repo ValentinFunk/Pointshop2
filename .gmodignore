@@ -14,3 +14,4 @@ build.js
 dist/*
 dist/
 README.md
+changelog_footer_template.hbs
