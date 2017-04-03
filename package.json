@@ -1,0 +1,32 @@
+{
+  "name": "Pointshop2",
+  "version": "0.0.0-development",
+  "main": "index.js",
+  "repository": "git@github.com:Kamshak/Pointshop2.git",
+  "author": "Valentin Funk <funk.valentin@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^4.0.0",
+    "last-release-git": "^0.0.2",
+    "scriptfodder-publish": "^1.6.1",
+    "semantic-release": "^6.3.2",
+    "semantic-release-noop": "^1.1.0",
+    "semantic-sf-release": "^1.0.0",
+    "shx": "^0.2.2"
+  },
+  "release": {
+    "getLastRelease": "last-release-git",
+    "verifyConditions": "semantic-release-noop"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && scriptfodder-publish --version-from-package && semantic-sf-release post"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "dependencies": {
+    "last-release-git": "^0.0.2",
+    "request-promise": "^4.2.0"
+  }
+}
