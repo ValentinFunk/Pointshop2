@@ -2160,9 +2160,9 @@ semantic-release@^6.3.2:
     run-series "^1.1.3"
     semver "^5.2.0"
 
-semantic-sf-release@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/semantic-sf-release/-/semantic-sf-release-2.2.1.tgz#b59d1d17e7f3240128ba69e66db4d55767fd311a"
+semantic-sf-release@2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/semantic-sf-release/-/semantic-sf-release-2.2.2.tgz#3b00558fdcf5dcfb825919544e5a0ad21a4288fd"
   dependencies:
     "@kamshak/release-notes-generator" "^1.0.2"
     "@semantic-release/commit-analyzer" "^2.0.0"

@@ -1,0 +1,8 @@
+box: node:6
+build:
+  steps:
+    - npm-install
+    - script:
+      name: update version
+      code: |
+        npm run sf-release

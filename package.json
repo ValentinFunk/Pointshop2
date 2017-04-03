@@ -11,7 +11,7 @@
     "scriptfodder-publish": "^1.6.1",
     "semantic-release": "^6.3.2",
     "semantic-release-noop": "^1.1.0",
-    "semantic-sf-release": "2.2.1",
+    "semantic-sf-release": "2.2.2",
     "shx": "^0.2.2"
   },
   "release": {
