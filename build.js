@@ -45,7 +45,6 @@ Check Installation, Guide and Developer.pdf for more information.`)
 
   cp('package.json', 'dist')
   cp('.gmodignore', 'dist')
-  glob.sync('*.tmp.md').map(x => cp(x, 'dist'))
 }
 
 createRelease()

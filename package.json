@@ -11,7 +11,7 @@
     "scriptfodder-publish": "^1.6.1",
     "semantic-release": "^6.3.2",
     "semantic-release-noop": "^1.1.0",
-    "semantic-sf-release": "^1.0.0",
+    "semantic-sf-release": "2.2.1",
     "shx": "^0.2.2"
   },
   "release": {
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "node build.js",
     "upload": "scriptfodder-publish --version-from-package --relative-to=dist",
-    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && build && upload && semantic-sf-release post"
+    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && npm run build && npm run upload && semantic-sf-release post"
   },
   "publishConfig": {
     "access": "restricted"
@@ -30,5 +30,8 @@
     "glob": "^7.1.1",
     "last-release-git": "^0.0.2",
     "request-promise": "^4.2.0"
+  },
+  "generateNotes": {
+    "footerPartial": "changelog_footer_template.hbs"
   }
 }

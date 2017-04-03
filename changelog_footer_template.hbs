@@ -1,0 +1,20 @@
+{{#if noteGroups}}
+{{#each noteGroups}}
+
+### {{title}}
+
+{{#each notes}}
+* {{#if commit.scope}}**{{commit.scope}}:** {{/if}}{{text}}
+{{/each}}
+{{/each}}
+
+{{/if}}
+
+### How to update
+
+- To update this addon simply remove your existing libk and pointshop2 folders and upload the new ones from the zip.
+- (If you are using mysql, please don't foget to reenter your mysql configuration into the libk config file)
+- Afterwards please restart your server.
+- Configuration and created items will stay the same. 
+
+**Important**: When you upload files don't forget to check for failed transfers. (Tab at the bottom if using FileZilla)
