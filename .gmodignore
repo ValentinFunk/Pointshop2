@@ -10,3 +10,7 @@ package.json
 *.tmp.md
 .env
 yarn.lock
+build.js
+dist/*
+dist/
+README.md

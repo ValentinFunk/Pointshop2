@@ -20,12 +20,14 @@
   },
   "scripts": {
     "build": "node build.js",
-    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && scriptfodder-publish --version-from-package && semantic-sf-release post"
+    "upload": "scriptfodder-publish --version-from-package --relative-to=dist",
+    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && build && upload && semantic-sf-release post"
   },
   "publishConfig": {
     "access": "restricted"
   },
   "dependencies": {
+    "glob": "^7.1.1",
     "last-release-git": "^0.0.2",
     "request-promise": "^4.2.0"
   }

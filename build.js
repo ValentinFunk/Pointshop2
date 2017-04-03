@@ -5,13 +5,47 @@ const {
     exec
 } = require('shelljs')
 const request = require('request-promise')
-const { writeFileSync } = require('fs')
+const { writeFileSync, readFileSync } = require('fs')
+const glob = require('glob')
 
-rm('-rf', 'dist')
-mkdir(['dist', 'dist/pointshop2'])
-cp('-R', './*', 'dist/')
-cp('.gmodignore', 'dist/')
+async function createRelease () {
+  rm('-rf', 'dist')
+  mkdir(['dist', 'dist/pointshop2'])
 
-const pdf = await request('http://media.readthedocs.org/pdf/pointshop2/latest/pointshop2.pdf')
-console.log(pdf)
-writeFileSync('dist/pointshop2/Installation, Guide and Developer.pdf', pdf)
+  const ignoreGlobs = readFileSync('.gmodignore', 'utf-8')
+        .split(/[\r\n]+/)
+        .filter(Boolean)
+
+  const folders = glob.sync('**/', {
+    ignore: ignoreGlobs
+  })
+  folders.map(x => mkdir('dist/pointshop2/' + x))
+
+  const files = glob.sync('**', {
+    ignore: ignoreGlobs,
+    nodir: true
+  })
+  files.map(file => cp(file, 'dist/pointshop2/' + file))
+
+  const pdf = await request({
+    url: 'http://media.readthedocs.org/pdf/pointshop2/latest/pointshop2.pdf',
+    method: 'GET',
+    encoding: null
+  })
+  writeFileSync('dist/Installation, Guide and Developer.pdf', pdf)
+  writeFileSync('dist/Don\'t forget to download PAC3.txt',
+`Please download PAC3 from https://github.com/CapsAdmin/pac3/ and install it as an addon. 
+Check Installation, Guide and Developer.pdf for more information.`)
+
+  const version = JSON.parse(readFileSync('package.json')).version
+  writeFileSync('dist/pointshop2/lua/autorun/pointshop2_build.lua', `${version}`)
+
+  exec('git clone git@github.com:Kamshak/LibK.git dist/libk')
+  rm('-rf', 'dist/libk/.git')
+
+  cp('package.json', 'dist')
+  cp('.gmodignore', 'dist')
+  glob.sync('*.tmp.md').map(x => cp(x, 'dist'))
+}
+
+createRelease()
