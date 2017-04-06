@@ -6,7 +6,10 @@ end
 
 function Pointshop2.PropHunt.PreRoundStart( num )
 	if team.NumPlayers( TEAM_PROPS ) == 0 or team.NumPlayers( TEAM_HUNTERS ) == 0 then return end
-	GAMEMODE.ps2TeamPlayers = {}
+	GAMEMODE.ps2TeamPlayers = GAMEMODE.ps2TeamPlayers or {
+		[TEAM_PROPS] = {},
+		[TEAM_HUNTERS] = {}
+	}
 
 	for k, v in pairs( player.GetAll( ) ) do
 		GAMEMODE.ps2TeamPlayers[v:Team()] = GAMEMODE.ps2TeamPlayers[v:Team()] or {}
@@ -36,7 +39,10 @@ function Pointshop2.PropHunt.SetRoundResult( result )
 		return
 	end
 
-	GAMEMODE.ps2TeamPlayers = GAMEMODE.ps2TeamPlayers or {}
+	GAMEMODE.ps2TeamPlayers = GAMEMODE.ps2TeamPlayers or {
+		[TEAM_PROPS] = {},
+		[TEAM_HUNTERS] = {}
+	}
 
 	Pointshop2.StandardPointsBatch:begin( )
 	if result == TEAM_PROPS then
