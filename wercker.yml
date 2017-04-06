@@ -6,3 +6,9 @@ build:
       name: update version
       code: |
         npm run sf-release
+  after-steps:
+    - slack-notifier:
+      url: $SLACK_URL
+      channel: general
+      username: DeployBot
+      branch: master
