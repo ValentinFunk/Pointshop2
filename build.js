@@ -38,7 +38,7 @@ async function createRelease () {
 Check Installation, Guide and Developer.pdf for more information.`)
 
   const version = JSON.parse(readFileSync('package.json')).version
-  writeFileSync('dist/pointshop2/lua/autorun/pointshop2_build.lua', `PS2_BUILD = ${version}`)
+  writeFileSync('dist/pointshop2/lua/autorun/pointshop2_build.lua', `PS2_BUILD = "${version}"`)
 
   exec('git clone git@github.com:Kamshak/LibK.git dist/libk')
   rm('-rf', 'dist/libk/.git')
