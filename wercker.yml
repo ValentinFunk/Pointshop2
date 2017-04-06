@@ -1,4 +1,4 @@
-box: node:6
+box: node:7
 build:
   steps:
     - npm-install
