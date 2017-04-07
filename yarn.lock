@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@kamshak/release-notes-generator@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@kamshak/release-notes-generator/-/release-notes-generator-1.0.2.tgz#87a623d45ec689130dd51f6d86ce248a73866a0f"
+"@kamshak/release-notes-generator@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@kamshak/release-notes-generator/-/release-notes-generator-1.0.3.tgz#81fefd878954de8179f2c2181d7c3ecc73b5e49d"
   dependencies:
     conventional-changelog "^1.1.3"
     github-url-from-git "^1.4.0"
@@ -1622,8 +1622,8 @@ ms@0.7.2:
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.2.tgz#ae25cf2512b3885a1d95d7f037868d8431124765"
 
 nan@^2.3.0:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.5.1.tgz#d5b01691253326a97a2bbee9e61c55d8d60351e2"
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.6.1.tgz#8c84f7b14c96b89f57fbc838012180ec8ca39a01"
 
 nerf-dart@^1.0.0:
   version "1.0.0"
@@ -1914,8 +1914,8 @@ randomatic@^1.1.3:
     kind-of "^3.0.2"
 
 rc@^1.1.7:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/rc/-/rc-1.2.0.tgz#c7de973b7b46297c041366b2fd3d2363b1697c66"
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/rc/-/rc-1.2.1.tgz#2e03e8e42ee450b8cb3dce65be1bf8974e1dfd95"
   dependencies:
     deep-extend "~0.4.0"
     ini "~1.3.0"
@@ -2118,9 +2118,9 @@ safe-buffer@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.0.1.tgz#d263ca54696cd8a306b5ca6551e92de57918fbe7"
 
-scriptfodder-publish@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/scriptfodder-publish/-/scriptfodder-publish-1.6.1.tgz#69f5ff07d27911268841be60cc5ef9067444d39d"
+scriptfodder-publish@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/scriptfodder-publish/-/scriptfodder-publish-1.6.2.tgz#e3c9dca6a9bdd9ffc4be6c1d962ee61a440bc431"
   dependencies:
     archiver "^1.3.0"
     babel-cli "^6.24.0"
@@ -2164,7 +2164,7 @@ semantic-sf-release@2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/semantic-sf-release/-/semantic-sf-release-2.2.2.tgz#3b00558fdcf5dcfb825919544e5a0ad21a4288fd"
   dependencies:
-    "@kamshak/release-notes-generator" "^1.0.2"
+    "@kamshak/release-notes-generator" "^1.0.3"
     "@semantic-release/commit-analyzer" "^2.0.0"
     "@semantic-release/condition-travis" "^5.0.2"
     "@semantic-release/error" "^1.0.0"
