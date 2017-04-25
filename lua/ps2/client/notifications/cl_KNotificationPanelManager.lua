@@ -88,6 +88,10 @@ function PANEL:Think( )
 		self.panelSlidingIn = table.remove( self.notificationsWaiting, 1 ) --Dequeue
 		self.panelSlidingIn:SetParent( self )
 		self.panelSlidingIn:SetVisible( true )
+		if not self.panelSlidingIn.duration or not isnumber(self.panelSlidingIn.duration) then
+			KLogf(2, "KNotification Manager: got duration %s", tostring(self.panelSlidingIn.duration))
+			self.panelSlidingIn.duration = 15
+		end
 		self.panelSlidingIn.slideOutStart = CurTime( ) + self.panelSlidingIn.duration + self.slideInDuration
 		self.slidingStarted = CurTime( )
 		table.insert( self.notifications, self.panelSlidingIn )
