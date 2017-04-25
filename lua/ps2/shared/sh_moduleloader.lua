@@ -92,6 +92,14 @@ function Pointshop2.InitializeModuleSettings( modTable )
 	:Then( function( storedSettings )
 		local storedMap = {}
 		for k, v in pairs( storedSettings ) do
+			-- Never load nodb settings. They should not end up in the DB but this could be caused by
+			-- using old DB versions.
+			local pathRoot = string.Explode( ".", v.path )[1]
+			local settingsMeta = modTable.Settings.Shared[pathRoot] or modTable.Settings.Server[pathRoot]
+			if settingsMeta and ( ( settingsMeta.info and settingsMeta.info.noDbSetting ) or settingsMeta.noDbSetting ) then
+				continue
+			end
+
 			storedMap[v.path] = v.value
 		end
 		
