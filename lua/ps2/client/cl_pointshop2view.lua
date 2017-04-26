@@ -47,8 +47,17 @@ function Pointshop2View:initialize( )
 end
 
 local function notifyError()
+	if not IsValid(LocalPlayer()) then
+		timer.Simple(2, notifyError)
+		return
+	end
+
+	if LocalPlayer():IsAdmin() and not pac then
+		Pointshop2View:getInstance():displayError( "[CRITICAL][ADMIN ONLY] PAC3 is not installed correctly. Expect errors! Please install PAC3 from GitHub: bit.ly/getpac3", 1000 )
+	end
+
 	if LocalPlayer():IsAdmin() and not pac.FlashlightDisable then
-		Pointshop2View:getInstance():displayError( "[CRITICAL][ADMIN ONLY] Your PAC3 version is outdated and will cause errors. Please download the newest PAC version from GitHub (https://github.com/CapsAdmin/pac3).", 1000 )
+		Pointshop2View:getInstance():displayError( "[CRITICAL][ADMIN ONLY] Your PAC3 version is outdated and will cause errors. Please download the newest PAC version from GitHub: bit.ly/getpac3.", 1000 )
 	end
 end
 hook.Add("InitPostEntity", "ErrorNotifier", function() timer.Simple(2, notifyError) end)
