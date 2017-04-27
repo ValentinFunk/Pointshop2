@@ -11,6 +11,7 @@ ItemPersistence.static.model = {
 		pricePremium = "optKey", --INT NULL
 		ranks = "json",
 		name = "string",
+		uuid = "string",
 		description = "text",
 		createdAt = "createdTime",
 		updatedAt = "updatedTime",
@@ -32,6 +33,7 @@ function ItemPersistence.static.createOrUpdateFromSaveTable( saveTable, doUpdate
 		end )
 	else
 		local instance = ItemPersistence:new( )
+		instance.uuid = LibK.GetUUID()
 		def:Resolve( instance )
 	end
 

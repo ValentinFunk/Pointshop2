@@ -26,7 +26,8 @@ local function importDataFromTable( class, exportTable )
 	for _, instanceExport in pairs( exportTable ) do
 		local itemPersistence = Pointshop2.ItemPersistence:new( )
 		copyModelFields( itemPersistence, instanceExport.ItemPersistence, Pointshop2.ItemPersistence.model )
-		
+		itemPersistence.uuid = LibK.GetUUID()
+
 		local promise = itemPersistence:save( )
 		:Then( function( itemPersistence )
 			local actualPersistence = class:new( )

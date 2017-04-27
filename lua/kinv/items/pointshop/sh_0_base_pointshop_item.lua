@@ -152,6 +152,7 @@ function ITEM.static.generateFromPersistence( itemTable, persistenceItem )
 		points = persistenceItem.price,
 		premiumPoints = persistenceItem.pricePremium,
 	}
+	itemTable.static.UUID = persistenceItem.uuid
 	itemTable.PrintName = persistenceItem.name
 	itemTable.Description = persistenceItem.description
 	itemTable.Servers = persistenceItem.servers or {}

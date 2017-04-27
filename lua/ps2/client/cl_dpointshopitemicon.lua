@@ -17,13 +17,14 @@ function PANEL:Init( )
 	self.Label:SetContentAlignment( 5 )
 	self.Label:DockMargin( 0, 4, 0, 4 )
 	self.Label:SetTextColor( Color( 255, 255, 255, 255 ) )
-	self.Label:SetExpensiveShadow( 1, Color( 0, 0, 0, 200 ) )
+	--self.Label:SetExpensiveShadow( 1, Color( 0, 0, 0, 200 ) )
 
-	self.iconContainer = vgui.Create( "DIconLayout", self )
+	self.iconContainer = self.iconContainer or vgui.Create( "DIconLayout", self )
 	self.iconContainer:SetSpaceX( 5 )
-	self.iconContainer:DockMargin( 5, 5, 5, 0 )
+	self.iconContainer:SetPos(8, 8)
+	--self.iconContainer:DockMargin( 5, 5, 5, 0 )
 	self.iconContainer:SetTall( 12 )
-	self.iconContainer:Dock( TOP )
+	--self.iconContainer:Dock( TOP )
 	function self.iconContainer:Think( )
 		if #self:GetChildren( ) == 0 then
 			self:SetVisible( false )
@@ -37,6 +38,20 @@ function PANEL:Init( )
 			self:OnDeselected( )
 		end
 	end )
+end
+
+function PANEL:PerformLayout()
+	self.iconContainer = self.iconContainer or vgui.Create( "DIconLayout", self )
+	if IsValid(self.iconContainer) then
+		self.iconContainer:SetWidth(self:GetWide())
+	end
+end
+
+function PANEL:PaintOver(w, h)
+	self.iconContainer:SetPaintedManually(true)
+	self.iconContainer:PaintManual()
+	self.iconContainer:SetPaintedManually(false)
+	self:DrawSelections()
 end
 
 function PANEL:GetItemClass( )
@@ -87,10 +102,6 @@ end
 
 function PANEL:OpenMenu( )
 	--For override
-end
-
-function PANEL:PaintOver( w, h )
-	self:DrawSelections()
 end
 
 function PANEL:OnSelected( )
