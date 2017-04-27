@@ -43,8 +43,24 @@ MODULE.SettingButtons = {
 		label = "Install Default Items",
 		icon = "pointshop2/download7.png",
 		onClick = function( )
-			Pointshop2View:getInstance( ):installDefaults( )
-			Derma_Message( "We're installing the default items for you. Please give us about a minute, your shop will update automatically once the items are installed", "Information" )
+			Promise.Resolve()
+			:Then(function()
+				if Pointshop2.GetItemClassByPrintName( "Hatchet" ) then
+					local def = Deferred()
+					Derma_Query( "It looks as if you have already installed the default items. If you install them again, you might get duplicates and a bit of a mess. Do you want to proceed?", "Warning",
+						"Ok, do it", function( )
+							def:Resolve()
+						end,
+						"No", function( )
+							def:Reject()
+						end )
+					return def:Promise()
+				end
+			end)
+			:Then(function()
+				Pointshop2View:getInstance( ):installDefaults( )
+				Derma_Message( "We're installing the default items for you. Please give us about a minute, your shop will update automatically once the items are installed", "Information" )
+			end)
 		end
 	},
 	{
