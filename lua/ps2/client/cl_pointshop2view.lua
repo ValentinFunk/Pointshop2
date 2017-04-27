@@ -75,7 +75,9 @@ function Pointshop2View:toggleMenu( )
 	end
 
 	if self.fullyInitialized then
+		local startTime = SysTime( )
 		Pointshop2:ToggleMenu( )
+		KLogf( 5, "[Pointshop 2] Menu opened in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	else
 		self.loaderAttached = true
 
