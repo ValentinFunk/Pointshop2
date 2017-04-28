@@ -1,58 +1,3 @@
-local plyModel = hook.Run( "PS2_GsetPreviewModel" ) or "models/player/alyx.mdl"
-local entity = ClientsideModel( plyModel, RENDER_GROUP_OPAQUE_ENTITY )
-pac.SetupENT( entity )
-entity:SetNoDraw(true)
-entity:SetIK( false )
-local colAmbientLight = Color( 50, 50, 50 )
-local colColor = Color( 255, 255, 255, 255 )
-local directionalLight = {
-	[BOX_TOP] = Color(255, 255, 255),
-	[BOX_FRONT] = Color(255, 255, 255)
-}
-local function paintActual(itemClass)
-	local outfit = itemClass.getOutfitForModel(plyModel)
-	pac.SetupENT( entity )
-	entity:AttachPACPart(outfit)
-    entity:FrameAdvance( 100 )
-
-
-	local viewInfo = itemClass.iconInfo.shop.iconViewInfo
-	for i = 1, 100 do
-		pac.Think()
-	end
-	
-	cam.Start3D( viewInfo.origin, viewInfo.angles, viewInfo.fov - 20, 0, 0, 512, 512, 5, 4096 )
-		cam.IgnoreZ( true )
-		render.SuppressEngineLighting( true )
-		render.SetLightingOrigin( entity:GetPos() )
-		render.ResetModelLighting( colAmbientLight.r/255, colAmbientLight.g/255, colAmbientLight.b/255 )
-		render.SetColorModulation( colColor.r/255, colColor.g/255, colColor.b/255 )
-		render.SetBlend( 1 )
-
-		for i=0, 6 do
-			local col = directionalLight[ i ]
-			if ( col ) then
-				render.SetModelLighting( i, col.r/255, col.g/255, col.b/255 )
-			end
-		end
-
-		pac.FlashlightDisable( true )
-		pac.ForceRendering( true )
-			pac.RenderOverride( entity, "opaque" )
-			pac.RenderOverride( entity, "translucent", true )
-			entity:DrawModel( )
-			pac.RenderOverride( entity, "translucent", true )
-		pac.ForceRendering( false )
-		pac.FlashlightDisable( false )
-
-		cam.IgnoreZ( false )
-		render.SuppressEngineLighting( false )
-	cam.End3D( )
-
-	entity:RemovePACPart(outfit)
-end
-
-
 local mat_BlurX			= Material( "pp/blurx" )
 local mat_BlurY			= Material( "pp/blury" )
 local mat_Copy 			= Material( "pp/copy" )
@@ -106,7 +51,13 @@ function Pointshop2.RenderModelIcon(itemClass)
 			surface.SetDrawColor( 255, 255, 255, 255 )
 			surface.SetMaterial(csgoBg)
 			surface.DrawTexturedRect(0, 0, 512, 512)
-			paintActual(itemClass)
+			if not itemClass.PaintIcon then
+				KLogf(1, "Item class %s(%s) is missing a PaintIcon", itemClass.name, itemClass.PrintName)
+			elseif Pointshop2.DbgOverrideIcon then 
+				Pointshop2.DbgOverrideIcon(itemClass)
+			else
+				itemClass:PaintIcon()
+			end
 			blur(rt, 100, 100, 512, 512, 2, 2, 25)
 
 			cam.IgnoreZ(true)

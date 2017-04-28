@@ -76,6 +76,14 @@ local function loadItem( filepath, filename )
 		KInventory.Items[className].static.isBase = true
 	else
 		KInventory.Items[className].static.isBase = false
+
+		-- Give file generated things an uuid for static icons
+		local disallowed = {"/", "\\", ".", " "}
+		local uid = filepath
+		for k, v in pairs(disallowed) do
+			uid = string.Replace(uid, v, "_")
+		end
+		KInventory.Items[className].static.UUID = uid
 	end
 
 	KLogf( 4, "     -> Item %s (Base: %s) loaded!", className, baseItem.className or "No Base" )

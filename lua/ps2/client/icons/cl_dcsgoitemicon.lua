@@ -1,3 +1,6 @@
+--[[
+    Base for CSGO Style item icons (prerendered)
+]]--
 local PANEL = {}
 
 function PANEL:Init( )
@@ -14,7 +17,7 @@ function PANEL:Init( )
 end
 
 function PANEL:PerformLayout()
-	self.BaseClass.PerformLayout(self)
+	DPointshopItemIcon.PerformLayout(self)
 
 	self.Label:SetWide(self:GetWide())
 	self.Label:SetPos(0, self:GetTall() - 25)
@@ -22,32 +25,16 @@ function PANEL:PerformLayout()
 end
 
 function PANEL:SetItemClass( itemClass )
-	self.BaseClass.SetItemClass( self, itemClass )
-	
-	if itemClass.iconInfo.inv.useMaterialIcon then
-		self.image:SetSize( 64, 64 )
-		self.image:SetImage( itemClass.iconInfo.inv.iconMaterial )
-	else
-		Pointshop2.RequestIcon(itemClass, self):Then(function(icon)
-			if IsValid(self) then
-				self.image:SetMaterial(icon)
-			end
-		end)
-	end
+	DPointshopItemIcon.SetItemClass( self, itemClass )
+    Pointshop2.RequestIcon(itemClass, self):Then(function(icon)
+        if IsValid(self) then
+            self.image:SetMaterial(icon)
+        end
+    end)
 end
 
 function PANEL:SetItem( item )
 	self:SetItemClass( item.class )
-end
-
-function PANEL:OnSelected( )
-	self.image.forceRender = true
-	hook.Run( "PACItemSelected", self.itemClass )
-end
-
-function PANEL:OnDeselected( )
-	self.image.forceRender = false
-	hook.Run( "PACItemDeSelected", self.itemClass )
 end
 
 local function drawOutlinedBox( x, y, w, h, thickness, clr )
@@ -58,7 +45,7 @@ local function drawOutlinedBox( x, y, w, h, thickness, clr )
 end
 
 function PANEL:PaintOver(w, h)
-	self.BaseClass.PaintOver(self, w, h)
+	DPointshopItemIcon.PaintOver(self, w, h)
 
 	self.Label:SetPaintedManually(true)
 	self.Label:PaintManual()
@@ -69,16 +56,4 @@ function PANEL:PaintOver(w, h)
 	end
 end
 
-derma.DefineControl( "DPointshopHatIcon", "", PANEL, "DPointshopItemIcon" )
-
-local PANEL = {}
-
-function PANEL:OnSelected( )
-	hook.Run( "PACItemSelected", self.itemClass )
-end
-
-function PANEL:OnDeselected( )
-	hook.Run( "PACItemDeSelected", self.itemClass )
-end
-
-derma.DefineControl( "DPointshopSimpleHatIcon", "", PANEL, "DPointshopSimpleItemIcon" )
+derma.DefineControl( "DCsgoItemIcon", "", PANEL, "DPointshopItemIcon" )
