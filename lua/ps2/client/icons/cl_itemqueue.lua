@@ -22,8 +22,6 @@ function Pointshop2.RequestIcon( itemClass, panel )
 
 	-- Check if the icon exists
 	local path = getIconPath( itemClass )
-
-	print(path)
 	if file.Exists( "materials/" .. path, "GAME" ) then
 		return Promise.Resolve(Material( path ))
 	end
