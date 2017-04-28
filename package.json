@@ -8,7 +8,7 @@
   "devDependencies": {
     "dotenv": "^4.0.0",
     "last-release-git": "^0.0.2",
-    "scriptfodder-publish": "^1.6.2",
+    "scriptfodder-publish": "^1.7.2",
     "semantic-release": "^6.3.2",
     "semantic-release-noop": "^1.1.0",
     "semantic-sf-release": "2.2.2",
@@ -21,7 +21,8 @@
   "scripts": {
     "build": "node build.js",
     "upload": "scriptfodder-publish --version-from-package --relative-to=dist",
-    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && npm run build && npm run upload && semantic-sf-release post"
+    "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && npm run build && npm run upload && semantic-sf-release post",
+    "local-pkg": "npm run build && npm run scriptfodder-publish --version-from-package --relative-to=dist --zip-only"
   },
   "publishConfig": {
     "access": "restricted"
