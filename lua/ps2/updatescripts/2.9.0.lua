@@ -1,6 +1,6 @@
 /*
 	This update script is ran when pointshop2 is updated from a version before the update system was in place.
-	It is also run on a clean install so some checks are required.
+	It is also run on a clean install so some checks are required. 
 */
 
 local DB
