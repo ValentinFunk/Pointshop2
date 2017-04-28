@@ -6,7 +6,7 @@
 local DB
 
 local function forceValidUuids()
-	return Pointshop2.DB.DoQuery('SELECT id FROM ps2_itempersistence WHERE uuid IS NULL'):Then(function(rows)
+	return DB.DoQuery('SELECT id FROM ps2_itempersistence WHERE uuid IS NULL'):Then(function(rows)
 		local query = "UPDATE ps2_itempersistence SET uuid = CASE id "
 		local ids = LibK._.pluck(rows, 'id')
 		local parts = {}
