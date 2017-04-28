@@ -5,17 +5,29 @@
 
 local DB
 
+local function forceValidUuids()
+	return Pointshop2.DB.DoQuery('SELECT id FROM ps2_itempersistence WHERE uuid IS NULL'):Then(function(rows)
+		local query = "UPDATE ps2_itempersistence SET uuid = CASE id "
+		local ids = LibK._.pluck(rows, 'id')
+		local parts = {}
+		for _, id in pairs( ids ) do
+			table.insert( parts, Format( 'WHEN "%i" THEN "%s"', id, LibK.GetUUID() ) )
+		end
+		query = query .. table.concat( parts, " " )
+		query = query .. ' ELSE uuid END WHERE id IN (' .. table.concat( ids, ', ' ) .. ')'
+		return DB.DoQuery(query)
+	end)
+end
+
 local function addUuidField( )
 	return DB.FieldExistsInTable( "ps2_itempersistence", "uuid" )
 	:Then( function( exists )
-        print("uuid", exists)
 		if not exists then
-			return DB.DoQuery( "ALTER TABLE `ps2_itempersistence` ADD `uuid` VARCHAR(255) NULL" )
+			return DB.DoQuery( "ALTER TABLE `ps2_itempersistence` ADD `uuid` VARCHAR(255) NOT NULL DEFAULT \"NOTSET\"" )
             :Then(function()
                 return DB.DoQuery( "SELECT id FROM `ps2_itempersistence`" )
             end)
             :Then(function(rows)
-                PrintTable(rows)
                 local query = "UPDATE ps2_itempersistence SET uuid = CASE id "
                 local ids = LibK._.pluck(rows, 'id')
                 local parts = {}
@@ -23,7 +35,8 @@ local function addUuidField( )
                     table.insert( parts, Format( 'WHEN "%i" THEN "%s"', id, LibK.GetUUID() ) )
                 end
                 query = query .. table.concat( parts, " " )
-                query = query .. ' ELSE uuid END WHERE id IN (' .. table.concat( ownerIds, ', ' ) .. ')'
+                query = query .. ' ELSE uuid END WHERE id IN (' .. table.concat( ids, ', ' ) .. ')'
+				return DB.DoQuery(query)
             end)
 		end
 	end )
@@ -64,7 +77,7 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 				def:Resolve( )
 			end )
 		else
-			return Promise.Resolve( )
+			return forceValidUuids()
 		end
 	end )
 	:Done( function( )
