@@ -71,13 +71,11 @@ hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
 	:Then( function( shouldUpdate )
 		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", shouldUpdate and "need" or "not need" )
 		if shouldUpdate then
-			return addUuidField()
+			return WhenAllFinished{ forceValidUuids(), addUuidField() }
 			:Fail( function( errid, err )
 				KLogf( 3, "[WARN] Error during update: %i, %s. Ignore this if you run multiple servers on a single database.", errid, err )
 				def:Resolve( )
 			end )
-		else
-			return forceValidUuids()
 		end
 	end )
 	:Done( function( )
