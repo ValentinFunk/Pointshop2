@@ -6,7 +6,12 @@
 local DB
 
 local function forceValidUuids()
-	return DB.DoQuery('SELECT id FROM ps2_itempersistence WHERE uuid IS NULL'):Then(function(rows)
+	return DB.DoQuery('SELECT id FROM ps2_itempersistence WHERE uuid IS NULL')
+	:Then(function(rows)
+		if not rows then 
+			return 
+		end
+
 		local query = "UPDATE ps2_itempersistence SET uuid = CASE id "
 		local ids = LibK._.pluck(rows, 'id')
 		local parts = {}
@@ -28,6 +33,10 @@ local function addUuidField( )
                 return DB.DoQuery( "SELECT id FROM `ps2_itempersistence`" )
             end)
             :Then(function(rows)
+				if not rows then 
+					return 
+				end
+
                 local query = "UPDATE ps2_itempersistence SET uuid = CASE id "
                 local ids = LibK._.pluck(rows, 'id')
                 local parts = {}
