@@ -64,3 +64,25 @@ end
 function ItemFactory:CreateItem( saveToDb )
 	error( "Virtual function call" )
 end
+
+/*
+	This returns a weighted chance table that represents the chance that the factory generates
+	a certain item eg:
+	{
+		[KInventory.Items.123] = 1, -- Since sum(key) = 10, weight 1 means 10% chance
+		[KInventory.Items.233] = 3, -- weight 3 = 30% chance
+		[KInventory.Items.534] = 4, -- 4 = 40%
+		[KInventory.Items.111] = 2  -- 2 = 20%
+
+		or for dynamically generated items:
+
+		[{
+			isInfoTable = true,
+			item = Pointshop2.GetItemClassByName( "base_points" ),
+			printName = self:GetShortDesc( )
+		}] = 123
+	}
+*/
+function ItemFactory:GetChanceTable( )
+	error( "Virtual function call" )
+end

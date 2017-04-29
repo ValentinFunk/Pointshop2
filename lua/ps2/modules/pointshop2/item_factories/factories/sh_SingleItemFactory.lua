@@ -27,6 +27,17 @@ function SingleItemFactory:CreateItem( temporaryInstance )
 	return temporaryInstance and item or item:save( )
 end
 
+function PointsFactory:GetChanceTable( )
+	local itemClass = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] )
+	if not itemClass then
+		error( "Invalid item class " .. self.settings["BasicSettings.ItemClass"] )
+	end
+
+	return {
+		[itemClass] = 1
+	}
+end
+
 function SingleItemFactory:IsValid( )
 	local class = Pointshop2.GetItemClassByName( self.settings["BasicSettings.ItemClass"] )
 	return class != nil

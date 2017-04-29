@@ -38,6 +38,18 @@ function PointsFactory:CreateItem( temporaryInstance )
 	return temporaryInstance and item or item:save( )
 end
 
+function PointsFactory:GetChanceTable( )
+	local infoTable = {
+		isInfoTable = true,
+		item = Pointshop2.GetItemClassByName( "base_points" ),
+		printName = self:GetShortDesc( )
+	}
+
+	return {
+		[infoTable] = 1
+	}
+end
+
 /*
 	Name of the control used to configurate this factory
 */
