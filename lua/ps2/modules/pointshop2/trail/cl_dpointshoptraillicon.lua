@@ -31,8 +31,8 @@ function PANEL:Think( )
 	if not self.NormalTexture then
 		return
 	end
-	
-	if self.Hovered or self:IsChildHovered( 1 ) or self.Selected then
+
+	if not self.noSelect and ( self.Hovered or self:IsChildHovered( 1 ) or self.Selected ) then
 		self.image:SetMaterial( self.ScrollingTexture )
 	else
 		self.image:SetMaterial( self.NormalTexture )

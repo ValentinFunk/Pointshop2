@@ -20,8 +20,8 @@ function PANEL:PerformLayout()
 	DPointshopItemIcon.PerformLayout(self)
 
 	self.Label:SetWide(self:GetWide())
-	self.Label:SetPos(0, self:GetTall() - 25)
-	self.Label:SetTall(25)
+	self.Label:SetPos(0, self:GetTall() - self:GetTall() * 0.234375)
+	self.Label:SetTall(self:GetTall() * 0.234375)
 end
 
 function PANEL:SetItemClass( itemClass )
@@ -51,9 +51,33 @@ function PANEL:PaintOver(w, h)
 	self.Label:PaintManual()
 	self.Label:SetPaintedManually(false)
 	
-	if self.Selected or self.Hovered or self:IsChildHovered( 2 ) then
+	if self.noSelect then
+		return
+	end
+	
+	local isChildHovered = self.IsHoveredRecursive and self:IsHoveredRecursive() or self:IsChildHovered( 2 )
+	if self.Selected or self.Hovered or isChildHovered then
 		drawOutlinedBox( 0, 0, w, h, 3, self:GetSkin().Highlight )
 	end
+end
+
+function PANEL:SetRarity(rarityInfo)
+	DPointshopItemIcon.SetRarity(self, rarityInfo, true)
+
+	local rc = rarityInfo.color
+	local c = Color(rarityInfo.color.r, rarityInfo.color.g, rarityInfo.color.b, 220)
+	function self.Label:Paint(w, h)
+		surface.SetDrawColor(c)
+		surface.DrawRect(0, 0, w, h)
+	end
+end
+
+function PANEL.PreloadIcon(itemClass) 
+	return Pointshop2.RequestIcon(itemClass)
+end
+
+function PANEL:SetAlpha(alpha)
+	self.image:SetAlpha(alpha)
 end
 
 derma.DefineControl( "DCsgoItemIcon", "", PANEL, "DPointshopItemIcon" )

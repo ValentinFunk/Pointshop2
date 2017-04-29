@@ -40,6 +40,34 @@ function PANEL:Init( )
 	end )
 end
 
+local function mul(c, f)
+	return Color(c.r * f, c.g * f, c.b * f)
+end
+
+function PANEL:SetRarity(rarityInfo, hack)
+	local rc = rarityInfo.color
+	local c = mul(rc, 1.1)
+	function self.Label:Paint(w, h)
+		surface.SetDrawColor(c)
+		surface.DrawRect(0, 0, w, h)
+	end
+	self.Label:SetTall(self:GetTall() * 0.234375)
+	if not hack then
+		self.Label:DockMargin( 0, 0, 0, 0 )
+		self:DockPadding( 1, 1, 1, 1 )
+	end
+
+    // Counting the perceptive luminance - human eye favors green color... 
+    local a = 1 - ( 0.299 * rc.r + 0.587 * rc.g + 0.114 * rc.b)/255;
+
+    if (a < 0.5) then
+       self.Label:SetColor( mul(rc, 0.2) )
+    else
+       self.Label:SetColor( color_white )
+	   self.Label:SetExpensiveShadow( 1, mul(rc, 0.4) )
+	end
+end
+
 function PANEL:PerformLayout()
 	self.iconContainer = self.iconContainer or vgui.Create( "DIconLayout", self )
 	if IsValid(self.iconContainer) then
@@ -51,6 +79,10 @@ function PANEL:PaintOver(w, h)
 	self.iconContainer:SetPaintedManually(true)
 	self.iconContainer:PaintManual()
 	self.iconContainer:SetPaintedManually(false)
+
+	if self.noSelect then
+		return
+	end
 	self:DrawSelections()
 end
 
@@ -112,6 +144,10 @@ function PANEL:OnDeselected( )
 end
 
 function PANEL:Select( )
+	if self.noSelect then
+		return
+	end
+
 	self.Selected = true
 	self.item =  self.item and KInventory.ITEMS[self.item.id]
 	hook.Run( "PS2_ItemIconSelected", self, self.item or self.itemClass )
@@ -119,6 +155,10 @@ function PANEL:Select( )
 end
 
 function PANEL:OnMousePressed( mcode )
+	if self.noSelect then
+		return
+	end
+
 	DPanel.OnMousePressed( self, mcode )
 
 	if mcode == MOUSE_RIGHT then

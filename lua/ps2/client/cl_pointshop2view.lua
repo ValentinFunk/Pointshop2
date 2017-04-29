@@ -1,6 +1,7 @@
 Pointshop2View = class( "Pointshop2View" )
 Pointshop2View.static.controller = "Pointshop2Controller"
 Pointshop2View:include( BaseView )
+Pointshop2View.static.instance = nil
 
 hook.Add( "InitPostEntity", "InitializePlayers", function( )
 	for k, ply in pairs( player.GetAll( ) ) do
@@ -279,9 +280,15 @@ function Pointshop2View:loadDynamics( versionHash )
 		end
 
 		local startTime = SysTime( )
-		local dynamicsDecoded = LibK.von.deserialize( data )[1]
+		local dynamicsDecoded = LibK.luadata.Decode( data )[1]
 		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
+		for k, dyn in pairs(dynamicsDecoded[3]) do
+			print(dyn._classname)
+			if dyn._classname == "Pointshop2.CratePersistence" then
+				PrintTable(dyn)
+			end
+		end
 		--Back to classes
 		LibK.processNetTable( dynamicsDecoded[1] )
 		LibK.processNetTable( dynamicsDecoded[2] )

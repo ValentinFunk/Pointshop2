@@ -36,11 +36,23 @@ end
 
 local UID = "ItemTextureRT"
 local csgoBg = Material('materials/itembg-ps2.png')
-function Pointshop2.RenderModelIcon(itemClass)
-	local rt = GetRenderTarget( UID, 512, 512 )
-	local mat = CreateMaterial( UID .. "_Mat", "UnlitGeneric", {
-		["$basetexture"] = rt,
-	} )
+local g_rt, g_mat
+function Pointshop2.RenderModelIcon(itemClass, newMaterial)
+	local rt, mat
+	if newMaterial then
+		rt = GetRenderTarget( LibK.GetUUID(), 512, 512 )
+		mat = CreateMaterial( LibK.GetUUID() .. "_Mat", "UnlitGeneric", {
+			["$basetexture"] = rt,
+		} )
+	else
+		g_rt = g_rt or GetRenderTarget( UID, 512, 512 )
+		rt = g_rt
+		
+		g_mat = g_mat or CreateMaterial( UID .. "_Mat", "UnlitGeneric", {
+			["$basetexture"] = rt,
+		} )
+		mat = g_mat
+	end
 
 	local oldW, oldH = ScrW(), ScrH()
 	local oldRt = render.GetRenderTarget( )
@@ -73,4 +85,17 @@ function Pointshop2.RenderModelIcon(itemClass)
 
 	mat:SetTexture( "$basetexture", rt )
 	return mat
+end
+
+local materialsCached = {}
+function Pointshop2.RenderMaterialIcon(material)
+	if not materialsCached[material] then
+		materialsCached[material] = Pointshop2.RenderModelIcon({
+			PaintIcon = function() --prerender context viewport is always 512x512
+				surface.SetMaterial(Material(material))
+				surface.DrawTexturedRect(64 + 60, 64 + 15, 512 - 120 - 128, 512 - 120 - 128)
+			end
+		}, true)
+	end	
+	return materialsCached[material]
 end

@@ -79,7 +79,11 @@ end
 		[{
 			isInfoTable = true,
 			item = Pointshop2.GetItemClassByName( "base_points" ),
-			printName = self:GetShortDesc( )
+			getIcon = function() return vgui.Create("MyIconControl") end
+			printName = self:GetShortDesc( ),
+			createItem = function(temporaryInstance)
+				return self:CreateItem(temporaryInstance)
+			end
 		}] = 123
 	}
 */

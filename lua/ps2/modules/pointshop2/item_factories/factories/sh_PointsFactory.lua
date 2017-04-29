@@ -42,7 +42,20 @@ function PointsFactory:GetChanceTable( )
 	local infoTable = {
 		isInfoTable = true,
 		item = Pointshop2.GetItemClassByName( "base_points" ),
-		printName = self:GetShortDesc( )
+		printName = self:GetShortDesc( ),
+		getIcon = function() 
+			local control = vgui.Create("DCsgoItemIcon")
+			local material = self.settings["BasicSettings.CurrencyType"] == "premiumPoints" and "pointshop2/donation.png" or "pointshop2/dollar103.png"
+			function control:Paint(w, h)
+				surface.SetMaterial(Pointshop2.RenderMaterialIcon(material))
+				surface.DrawTexturedRect(0, 0, w, h)
+			end
+			control.Label:SetText(self:GetShortDesc( ))
+			return control
+		end,
+		createItem = function(temporaryInstance)
+			return self:CreateItem(temporaryInstance)
+		end
 	}
 
 	return {

@@ -217,7 +217,8 @@ function SKIN:PaintTopBar( panel, w, h )
 end
 
 function SKIN:PaintPointshopItemIcon( panel, w, h )
-	if panel.Selected or panel.Hovered or panel:IsChildHovered( 2 ) then
+	local isChildHovered = panel.IsHoveredRecursive and panel:IsHoveredRecursive() or panel:IsChildHovered( 2 )
+	if not panel.noSelect and ( panel.Selected or panel.Hovered or isChildHovered ) then
 		draw.RoundedBox( 6, 0, 0, w, h, self.Highlight )
 		draw.RoundedBox( 6, 2, 2, w - 4, h - 4, Color( 47, 47, 47 ) )
 	else
