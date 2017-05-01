@@ -1,6 +1,5 @@
 Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
-Pointshop2Controller.static.instance = nil
 
 function Pointshop2.InitPromises( )
 	Pointshop2.LoadModulesPromise = Deferred( )
@@ -269,14 +268,13 @@ function Pointshop2Controller:loadDynamicInfo( )
 
 		self.itemCategories = categories
 		self.itemMappings = itemMappings
-
 		local tblData = {
 			generateNetTable( itemMappings ),
 			generateNetTable( categories ),
 			generateNetTable( itemProperties )
 		}
 
-		local data = LibK.luadata.Encode( { tblData } )
+		local data = LibK.von.serialize( { tblData } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "dynamics", data )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Dynamics package loaded, version %s, %i item mappings, %i categories, %i items", resource:GetVersionHash(), table.Count( itemMappings ), table.Count( categories ), table.Count( itemProperties ) )

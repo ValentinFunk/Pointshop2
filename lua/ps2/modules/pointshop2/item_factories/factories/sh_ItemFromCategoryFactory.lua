@@ -43,12 +43,12 @@ end
 function ItemFromCategoryFactory:GetChanceTable( )
 	local category = Pointshop2.GetCategoryByName( self.settings["ManualSettings.CategoryName"] )
 	if not category then
-		return Promise.Reject( "Invalid Category " .. self.settings["ManualSettings.CategoryName"] )
+		LibK.GLib.Error( "Invalid Category " .. self.settings["ManualSettings.CategoryName"] )
 	end
 
 	local weightedChances = {}
 	local sum = 0
-	for k, itemClass in pairs( category.items ) do
+	for k, itemClass in ipairs( category.items ) do
 		local weight = 1
 		if self.settings["BasicSettings.WeightedRandom"] then
 			if itemClass.Price.points then
@@ -59,7 +59,7 @@ function ItemFromCategoryFactory:GetChanceTable( )
 			weight = ( 1 / weight ) * 100
 		end
 
-		weightedChances[itemClass] = weight
+		table.insert(weightedChances, {chance = weight, itemOrInfo = itemClass})
 	end
 
 	return weightedChances
@@ -71,9 +71,9 @@ end
 function ItemFromCategoryFactory:CreateItem( temporaryInstance )
 	local sumTbl = {}
 	local sum = 0
-	for itemClass, weight in pairs( self:GetChanceTable() ) do
-		sum = sum + weight
-		table.insert( sumTbl, { sum = sum, itemClass = itemClass } )
+	for _, info in pairs( self:GetChanceTable() ) do
+		sum = sum + info.chance
+		table.insert( sumTbl, { sum = sum, itemClass = info.itemOrInfo } )
 	end
 
 	--Pick element
@@ -87,9 +87,7 @@ function ItemFromCategoryFactory:CreateItem( temporaryInstance )
 	end
 
 	if not itemClass then
-		KLogf(1, "Crate could not create item, invalid state" )
-		debug.Trace()
-		return
+		LibK.GLib.Error(1, "Crate could not create item, invalid state" )
 	end
 
 	local item = itemClass:new( )

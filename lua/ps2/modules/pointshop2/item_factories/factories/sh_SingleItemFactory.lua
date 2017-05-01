@@ -34,7 +34,7 @@ function SingleItemFactory:GetChanceTable( )
 	end
 
 	return {
-		[itemClass] = 1
+		{ chance = 1, itemOrInfo = itemClass }
 	}
 end
 

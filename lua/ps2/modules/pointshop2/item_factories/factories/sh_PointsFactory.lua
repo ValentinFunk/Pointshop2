@@ -59,7 +59,7 @@ function PointsFactory:GetChanceTable( )
 	}
 
 	return {
-		[infoTable] = 1
+		{ chance = 1, itemOrInfo = infoTable }
 	}
 end
 
