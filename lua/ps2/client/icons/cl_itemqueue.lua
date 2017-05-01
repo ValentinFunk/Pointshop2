@@ -13,7 +13,7 @@ local function getIconPath( itemClass )
 	return string.format( "spawnicons/%s_256.png", getIconUID(itemClass) )
 end
 
-function Pointshop2.RequestIcon( itemClass, panel )
+function Pointshop2.RequestIcon( itemClass )
 	local iconID  = getIconUID( itemClass )
 	local pending = promises[iconID]
 	if pending then
