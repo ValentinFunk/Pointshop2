@@ -10,8 +10,19 @@ function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
 	
 	self.NormalTexture = Material( itemClass.material )
+	if not self.NormalTexture then
+		KLogf(2, "Item " .. itemClass.PrintName .. " there is an error with the texture " .. itemClass.material .. ": it could not be loaded")
+		self.ScrollingTexture = self.NormalTexture
+		return
+	end
+	if not self.NormalTexture:GetTexture( "$basetexture" ) then
+		KLogf(2, "Item " .. itemClass.PrintName .. " there is an error with the texture " .. itemClass.material .. ": $basetexture could not be found")
+		self.ScrollingTexture = self.NormalTexture
+		return
+	end
+
 	self.ScrollingTexture = CreateMaterial( "PS2_MatScrollingTrailIcn" .. itemClass.material, "UnlitGeneric", {
-		["$basetexture"] = Material( itemClass.material ):GetTexture( "$basetexture" ):GetName( ),
+		["$basetexture"] = self.NormalTexture:GetTexture( "$basetexture" ):GetName( ),
 		["$translucent"] = 1,
 		Proxies = {
 			TextureScroll = {
