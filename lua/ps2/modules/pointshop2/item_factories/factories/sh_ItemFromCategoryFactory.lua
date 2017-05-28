@@ -87,7 +87,7 @@ function ItemFromCategoryFactory:CreateItem( temporaryInstance )
 	end
 
 	if not itemClass then
-		LibK.GLib.Error(1, "Crate could not create item, invalid state" )
+		LibK.GLib.Error("Crate could not create item, invalid state" )
 	end
 
 	local item = itemClass:new( )
