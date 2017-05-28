@@ -27,20 +27,26 @@ function ITEM:InternalOnUse( )
 
 	local succ, err = pcall( self.OnUse, self )
 	if not succ then
-		KLogf( 2, "[ERROR] Item %s Use failed: %s", self.class.name, err )
-		debug.Trace( )
+		LibK.GLib.Error( Format( "[ERROR] Item %s Use failed: %s", self.class.name, err ) )
 		return
 	end
 	self.used = true
 
 	local ply = self:GetOwner( )
-
-	Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, self )
-	:Then( function( )
+	Promise.Resolve()
+	:Then(function() 
+		-- Pcall returns either the argument or the returned value
+		-- By wrapping the return value in a promise here we make sure
+		-- that if a promise is returned we wait on it.
+		return err 
+	end):Then( function( )
 		KLogf( 4, "Player %s used an item", ply:Nick( ) )
 	end, function( errid, err )
-		KLogf( 2, "Error using item: %s", err )
+		LibK.GLib.Error( Format( "Error using item: %s %s", tostring(errid), tostring(err) ) )
 	end )
+	:Always(function() 
+		return Pointshop2Controller:getInstance( ):removeItemFromPlayer( ply, self )
+	end)
 end
 ITEM.static.AllowRPC( "InternalOnUse" )
 
