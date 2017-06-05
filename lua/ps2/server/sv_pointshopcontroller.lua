@@ -531,7 +531,7 @@ end
 function Pointshop2Controller:getPersistenceModels( )
 	local persistences = {}
 	for _, mod in pairs( Pointshop2.Modules ) do
-		for k, v in pairs( mod.Blueprints ) do
+		for k, v in pairs( mod.Blueprints or {} ) do
 			local class = Pointshop2.GetItemClassByName( v.base )
 			if not class then
 				KLogf( 2, "[Pointshop2][Error] Blueprint %s: couldn't find baseclass", v.base )
