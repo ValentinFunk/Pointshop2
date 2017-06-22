@@ -390,6 +390,7 @@ hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function
 	timer.Simple( 1, function( )
 		if not IsValid( ply ) then
 			KLogf( 4, "[PS2] Loading a player failed, possible disconnect" )
+			return
 		end
 		initPlayer( ply )
 	end )
