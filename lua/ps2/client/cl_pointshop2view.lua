@@ -109,6 +109,34 @@ function Pointshop2View:toggleMenu( )
 	end
 end
 
+function Pointshop2View:HandleDecodeError( func, errClass )
+	KLogf( 1, "Error decoding call for %s, faulty class %s", func, errClass )
+	if not LocalPlayer():IsAdmin() then
+		self:displayError( "There was an error loading Pointshop 2 Data. Please tell an admin: Error calling " .. func .. " faulty class: " .. errClass )
+	else
+		local notification = vgui.Create( "KNotificationPanel" )
+		notification:setText( "[ADMIN ONLY] There was an error loading Pointshop 2 Data. The recommended step is to try repairing the database. The worst thing that can happen is that some items end up in uncategorized.\nIf you want to be 100% sure please take a database backup before running the repair!\n You need reset permissions to be able to perform this action." )
+		notification:setIcon( "icon16/exclamation.png" )
+		notification.sound = "kreport/electric_deny2.wav"
+		notification:SetSkin( Pointshop2.Config.DermaSkin )
+		notification.duration = 360
+
+		local btn = vgui.Create( "DButton", notification )
+		btn:SetText( "Repair Database" )
+		function btn.DoClick() 
+			self:controllerAction( "fixDatabase" )
+		end
+		btn:SizeToContents()
+		btn:Dock( TOP )
+		btn:DockMargin( 5, 5, 5, 5 )
+		btn:SetTall( 30 )
+		notification:SetMouseInputEnabled( true )
+		btn:SetMouseInputEnabled( true )
+
+		LocalPlayer( ).notificationPanel:addNotification( notification )
+	end
+end
+
 function Pointshop2View:walletChanged( newWallet, tries )
 	tries = tries or 0
 	local ply

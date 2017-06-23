@@ -165,7 +165,7 @@ local function InitNotificationsPanel( )
 
 	local notificationPanel = vgui.Create( "KNotificationManagerPanel" )
 	notificationPanel:SetPos( 5, 5 )
-	notificationPanel:ParentToHUD( )
+	--notificationPanel:ParentToHUD( )
 	notificationPanel:SetSize( 250, 0 )
 	LocalPlayer( ).notificationPanel = notificationPanel
 end

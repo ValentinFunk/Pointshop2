@@ -76,10 +76,8 @@ function Pointshop2Controller:canDoAction( ply, action )
 	if action == "saveCategoryOrganization" or
 	   action == "removeItem" or
 	   action == "removeItems" or
-	   action == "migrateServer" or
-	   action == "removeServer" or
 	   action == "updateServerRestrictions" or
-		 action == "updateRankRestrictions" or
+	   action == "updateRankRestrictions" or
 	   action == "requestMaterials"
 	then
 		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
@@ -87,7 +85,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action =="adminGetServers" then
+	elseif action =="adminGetServers" or action == "migrateServer" or action == "removeServer" then
 		if PermissionInterface.query( ply, "pointshop2 manageservers" ) then
 			def:Resolve( )
 		else

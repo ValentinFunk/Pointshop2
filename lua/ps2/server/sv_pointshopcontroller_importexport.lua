@@ -229,5 +229,24 @@ function Pointshop2Controller:installDefaults( )
 end
 
 function Pointshop2Controller:fixDatabase( )
-	Pointshop2.FixDatabase( )
+	return Pointshop2.FixDatabase( )
 end
+
+local messageLater
+hook.Add( "LibK_InvalidClassError", "ShowRepairDatabaseHint", function( class, className )
+	local admins = {}
+	for k, v in pairs(player.GetAll()) do
+		table.insert(admins, v)
+	end
+
+	messageLater = className
+	Pointshop2Controller:getInstance():startView( "Pointshop2View", "HandleDecodeError", admins, "SERVER", className )
+end )
+
+hook.Add( "PS2_PlayerFullyLoaded", "ErrorNotifier", function( ply ) 
+	timer.Simple( 2, function( ) 
+		if IsValid( ply ) and ply:IsAdmin( ) and messageLater then
+			Pointshop2Controller:getInstance():startView( "Pointshop2View", "HandleDecodeError", ply, "SERVER", messageLater )
+		end
+	end )
+end )

@@ -12,39 +12,39 @@ function PANEL:Init( )
 	self.icon = vgui.Create( "DImage", self.iconContainer )
 	self.icon:Dock( TOP )
 	
-	self.descriptionLabel = vgui.Create( "RichText", self )
-	self.descriptionLabel:SetFontInternal( self:GetSkin( ).TextFont )
+	self.descriptionLabel = vgui.Create( "DMultilineLabel", self )
+	self.descriptionLabel.font = self:GetSkin( ).TextFont
 	self.descriptionLabel:DockMargin( 5, 5, 5, 5 )
-	self.descriptionLabel:Dock( FILL )
-	self.descriptionLabel:SetVerticalScrollbarEnabled( false )
-	self.descriptionLabel:SetPaintBackgroundEnabled( false )
-	
-	function self.descriptionLabel:Paint( )
-	end
+	self.descriptionLabel:Dock( TOP )
 
 	self.targetHeight = 100
 	self.duration = 10
 end
 
 function PANEL:setText( str )
-	self.descriptionLabel:SetFontInternal( self:GetSkin( ).TextFont )
 	self.descriptionLabel:SetText( str )
+	for i = 0.1, 0.5, 0.01 do
+		timer.Simple(i, function()
+			if IsValid(self) then
+				self:RecalculateTargetSize()
+			end
+		end)
+	end
 end
 
-function PANEL:Think( )
-	self.descriptionLabel:SetFontInternal( self:GetSkin( ).TextFont )
-	self.done = self.done or 1
-	if self.done < 10 then
-		self.descriptionLabel:SetToFullHeight( )
-		self.descriptionLabel:SetFontInternal( self:GetSkin( ).TextFont )
-		self.descriptionLabel:SetTall( self.descriptionLabel:GetTall( ) + 30 )
-		local x, y = self.descriptionLabel:GetPos( )
-		self:SetTall( self.descriptionLabel:GetTall( ) + y )
-		self.targetHeight = self.descriptionLabel:GetTall( ) + y
-		self.descriptionLabel:SetFontInternal( self:GetSkin( ).TextFont )
-		self.done = self.done + 1
-	end
-	self.descriptionLabel:SetFontInternal( self:GetSkin( ).TextFont )
+function PANEL:RecalculateTargetSize() 
+	local _oldSize = self:GetTall()
+	self:SetTall( 10000 )
+	self.descriptionLabel:PerformLayout( )
+	self.descriptionLabel:InvalidateLayout( true )
+	self.descriptionLabel:SetToFullHeight( )
+	print( self:GetTall(), self.descriptionLabel:GetTall() )
+
+	self:SizeToChildren( false, true )
+	print( self:GetTall(), self.descriptionLabel:GetTall() )
+	self.targetHeight = self:GetTall() + 5
+
+	self:SetTall( _oldSize )
 end
 
 function PANEL:setIcon( icon )
