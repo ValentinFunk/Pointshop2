@@ -80,8 +80,6 @@ end
 -- directly linked to the item persistence constraint of Pointshop 2
 -- to prevent DB corruption
 function Item:preSave()
-	print("preSave")
-	PrintTable(self.class)
 	if self.class._persistenceId != "STATIC" then
 		self.itempersistence_id = self.class.className
 	end
