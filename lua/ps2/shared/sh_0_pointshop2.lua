@@ -314,3 +314,30 @@ end
 function Pointshop2.BuildTree( flatStructure, itemMappings )
 	return Pointshop2.CategoryTree:new( flatStructure, itemMappings )
 end
+
+/*
+	Developer utility Function, prints item names and their classes:
+	1: Lamp Hat
+	2: SMG1
+*/
+function Pointshop2.PrintItemClasses()
+	local str = LibK._(Pointshop2.GetRegisteredItems()):chain()
+		:map(function(item)
+			return { className = item.className, name = item:GetPrintName() }
+		end)
+		:sort(function(a, b)
+			if tonumber(a.className) and tonumber(b.className) then
+				return tonumber(a.className) < tonumber(b.className)
+			elseif tonumber(a) and not tonumber(b) then
+				return false
+			else
+				return a.className < b.className
+			end
+		end)
+		:map(function(entry)
+			return entry.className .. ": " .. entry.name
+		end)
+		:join("\n")
+		:value()
+	return str
+end
