@@ -11,7 +11,7 @@ end )
 
     if DB.CONNECTED_TO_MYSQL then
         return DB.DoQuery([[
-            UPDATE kinv_items SET itempersistence_id = IF(CAST(SUBSTRING(itemclass, 18) AS INTEGER) = 0, NULL, CAST(SUBSTRING(itemclass, 18) AS INTEGER))
+            UPDATE kinv_items SET itempersistence_id = IF(CAST(SUBSTRING(itemclass, 18) AS SIGNED) = 0, NULL, CAST(SUBSTRING(itemclass, 18) AS SIGNED))
         ]])
     else
         return Promise.Resolve()
