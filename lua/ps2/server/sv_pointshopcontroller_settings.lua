@@ -35,7 +35,7 @@ hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestSettings", function( ply )
 		Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )
 	end )
 end )
-hook.Add( "OnReloaded", "InitialRequestSettingsR", function( )
+Pointshop2.BootstrappedPromise:Then( function() 
 	for k, ply in pairs( player.GetAll( ) ) do
 		timer.Simple( 1, function( )
 			Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )

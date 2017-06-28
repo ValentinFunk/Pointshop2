@@ -106,5 +106,5 @@ local function installHooks( )
 	end
 end
 
-LibK.WhenAddonsLoaded( "Pointshop2" ):Then( installHooks )
+LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( installHooks )
 hook.Add( "OnReloaded", "PS2_ReloadPropHuntHooks", installHooks )

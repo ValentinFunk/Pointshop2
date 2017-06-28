@@ -40,4 +40,4 @@ local function hookProp()
     end
 end
 
-LibK.WhenAddonsLoaded( "Pointshop2" ):Then( hookProp )
+LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( hookProp )

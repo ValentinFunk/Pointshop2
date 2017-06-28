@@ -322,9 +322,20 @@ hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function
 		end
 		initPlayer( ply )
 	end )
+	ply._initHandled = true
+end )
+Pointshop2.BootstrappedPromise:Then( function() 
+	for k, ply in pairs( player.GetAll( ) ) do
+		if ply._initHandled then return end
+		
+		initPlayer( ply )
+		ply._initHandled = true
+	end
 end )
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
-	reloadAllPlayers( )
+	for k, v in pairs(player.GetAll()) do
+		v._initHandled = false
+	end
 end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )

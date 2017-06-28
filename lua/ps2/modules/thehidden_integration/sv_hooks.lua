@@ -68,5 +68,5 @@ local function ApplyHook_PlayerSetUpForRound( )
 	KLog( 4, "Hooked TheHidden Player:SetUpForRound@" .. tostring( old ) )
 end
 
-LibK.WhenAddonsLoaded( "Pointshop2" ):Then( ApplyHook_PlayerSetUpForRound )
+LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( ApplyHook_PlayerSetUpForRound )
 hook.Add( "OnReloaded", "Replace", ApplyHook_PlayerSetUpForRound )

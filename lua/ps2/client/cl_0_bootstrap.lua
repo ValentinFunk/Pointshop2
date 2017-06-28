@@ -11,3 +11,6 @@ hook.Add( "OnReloaded", "PS2_ReloadItems", KInventory.loadAllItems )
     This includes all of the ps2 modules files in "lua/ps2/modules" after InitPostEntity.
 ]]--
 LibK.InitPostEntityPromise:Then( Pointshop2.LoadModules )
+hook.Add( "OnReloaded", "PS2_ReloadModules", function()
+    Pointshop2.LoadModules()
+end )

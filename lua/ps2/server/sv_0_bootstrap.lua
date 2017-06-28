@@ -1,15 +1,15 @@
 -- Returns a promise that wraps the promise given by fn
--- This is used to make sure that the global promise is available
+-- This is used to make sure that the global promises are available
 -- befre the function is evaluated.
 function wrapPromise( fn )
     local def = Deferred()
 
-    timer.Simple( 0.001, function()
-        fn( ):Then( function( ... ) 
-            def:Resolve( ... ) 
-        end, function( ... )
-            def:Reject( ... )
-        end )
+    LibK.WhenAddonsLoaded{ "Pointshop2" }
+    :Then( fn )
+    :Then( function( ... ) 
+        return def:Resolve( ... ) 
+    end, function( ... )
+        def:Reject( ... )
     end )
 
     return def:Promise()
@@ -25,7 +25,7 @@ function Pointshop2.Bootstrap()
         return LibK.InitPostEntityPromise
             :Then( Pointshop2.LoadModules )
             :Then( function( )
-                KLogf( 4, "[Pointshop 2] All Modules were loaded" )
+                KLogf( 4, "[Pointshop 2] All modules were loaded" )
                 hook.Run( "PS2_ModulesLoaded" )
             end )
     end )
@@ -136,10 +136,29 @@ function Pointshop2.Bootstrap()
         end )
     end )
 
+    --[[
+        # Create the outfits resource
+        This creates the outfits resource that is sent to the client.
+    ]]--
+    Pointshop2.OutfitsLoadedPromise = wrapPromise( function ( )
+        return Pointshop2.DatabaseConnectedPromise:Then( function( )
+            return Pointshop2Controller:getInstance( ):loadOutfits( )
+        end ):Then( function( )
+            return LibK.GLib.Resources.Resources["Pointshop2/outfits"]
+        end )
+    end )
+
     Pointshop2.BootstrappedPromise = WhenAllFinished{
         Pointshop2.DynamicsLoadedPromise,
-        Pointshop2.ModuleItemsLoadedPromise
+        Pointshop2.ModuleItemsLoadedPromise,
+        Pointshop2.OutfitsLoadedPromise
     }
 end
 
-Pointshop2.Bootstrap()
+Pointshop2.Bootstrap( )
+
+-- For ps2_reload
+if (GAMEMODE or GM)._PS2_LOADED then 
+    LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( Pointshop2.LoadModules )
+end
+(GAMEMODE or GM)._PS2_LOADED = true

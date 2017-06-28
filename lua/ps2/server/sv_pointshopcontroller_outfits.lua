@@ -17,11 +17,6 @@ function Pointshop2Controller:loadOutfits( )
 		self:startView( "Pointshop2View", "loadOutfits", player.GetAll( ), versionHash )
 	end )
 end
-Pointshop2.OutfitsLoadedPromise = Pointshop2.DatabaseConnectedPromise:Then( function( )
-	return Pointshop2Controller:getInstance( ):loadOutfits( )
-end ):Then( function( )
-	return LibK.GLib.Resources.Resources["Pointshop2/outfits"]
-end )
 
 function Pointshop2Controller:SendInitialOutfitPackage( ply )
 	local resource = LibK.GLib.Resources.Resources["Pointshop2/outfits"]
@@ -38,7 +33,7 @@ hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestOutfits", function( ply )
 		Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
 	end )
 end )
-hook.Add( "OnReloaded", "InitialRequestOutfitsR", function( )
+Pointshop2.BootstrappedPromise:Then( function() 
 	for k, ply in pairs( player.GetAll( ) ) do
 		timer.Simple( 1, function( )
 			Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
