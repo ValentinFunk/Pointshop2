@@ -4,6 +4,7 @@ function PANEL:Init()
 	self:SetVerticalScrollbarEnabled( false )
 	self.maxHeight = false
 	self._lastNumLines = 0
+	self.textHeight = 12
 end
 
 function PANEL:SetMaxHeight( maxHeight )
@@ -17,10 +18,15 @@ function PANEL:Think()
 		self:SetFontInternal( self.font or self:GetSkin( ).TextFont or "Default" )
 		self:InvalidateParent()
 	end
+	self:SetFontInternal( self.font or self:GetSkin( ).TextFont or "Default" )
+end
+
+function PANEL:Paint()
+	self.textHeight = draw.GetFontHeight( self.font or self:GetSkin( ).TextFont or "Default" )
 end
 
 function PANEL:SizeToContents()
-	self:SetToFullHeight( )
+	self:SetTall( self:GetNumLines( ) * self.textHeight * 1.2 )
 
 	if self.maxHeight then
 		if self:GetTall( ) > self.maxHeight then
@@ -30,6 +36,8 @@ function PANEL:SizeToContents()
 			self:SetVerticalScrollbarEnabled( false )
 		end
 	end
+
+	self:SetTall( self:GetTall() )
 end
 
 vgui.Register( "DMultilineLabel", PANEL, "RichText" )

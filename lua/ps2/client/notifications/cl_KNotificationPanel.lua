@@ -16,8 +16,6 @@ function PANEL:Init( )
 	self.descriptionLabel.font = self:GetSkin( ).TextFont
 	self.descriptionLabel:DockMargin( 5, 5, 5, 5 )
 	self.descriptionLabel:Dock( TOP )
-	self.descriptionLabel._lastNumLines = 0
-
 
 	self.targetHeight = 100
 	self.duration = 10
@@ -32,8 +30,13 @@ function PANEL:PerformLayout()
 end
 
 function PANEL:RecalculateTargetSize() 
-	self:SizeToChildren( false, true )
-	self.targetHeight = self:GetTall() + 5
+	local targetHeight = 0
+	for k, v in ipairs( self:GetChildren( ) ) do
+		local x, y = v:GetPos()
+		targetHeight = math.max( targetHeight, y + v:GetTall() )
+	end
+
+	self.targetHeight = targetHeight + 7
 end
 
 function PANEL:setIcon( icon )
