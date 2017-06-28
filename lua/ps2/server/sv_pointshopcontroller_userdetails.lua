@@ -6,39 +6,34 @@ function Pointshop2Controller:searchPlayers( ply, subject, attribute )
 		return def:Promise( )
 	end
 
+	local ids = {}
+	local playerNames = {}
 
-	return LibK.Player.findPlayers( subject, attributeTranslate[attribute] )
+	return LibK.Player.findPlayers( subject, attributeTranslate[attribute], 100 )
 	:Then( function( players )
-		local ids = {}
-		local playerNames = {}
 		for k, v in pairs( players ) do
 			table.insert( ids, tonumber( v.id ) )
 			table.insert( playerNames, { id = v.id, name = v.name, lastConnected = v.updated_at } )
 		end
 
-		local def = Deferred( )
-
 		if #ids == 0 then
-			def:Resolve( {} )
-			return def:Promise( )
+			return Promise.Resolve( {} )
 		end
 
-		Pointshop2.Wallet.getDbEntries( "WHERE ownerId IN (" .. table.concat( ids, ', ' ) .. ")" )
-		:Done( function( wallets )
-			for k, v in pairs( playerNames ) do
-				for _, wallet in pairs( wallets ) do
-					if wallet.ownerId == v.id then
-						v.Wallet = wallet
-					end
+		return Pointshop2.Wallet.getDbEntries( "WHERE ownerId IN (" .. table.concat( ids, ', ' ) .. ")" )
+	end )
+	:Then( function( wallets )
+		for k, v in pairs( playerNames ) do
+			for _, wallet in pairs( wallets ) do
+				if wallet.ownerId == v.id then
+					v.Wallet = wallet
 				end
 			end
-			def:Resolve( playerNames )
-		end )
-		:Fail( function( errid, err )
-			def:Fail( 1, "Error fetching wallets: " .. err )
-		end	)
-
-		return def:Promise( )
+		end
+		
+		return playerNames
+	end, function( errid, err )
+		return Promise.Reject( 1, "Error fetching wallets: " .. err )
 	end )
 end
 
