@@ -168,6 +168,5 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 end )
 
 function Pointshop2Controller:reloadSettings( dontSendToClients )
-	Pointshop2.SettingsLoadedPromise = Deferred() --to avoid error because of double resolve
 	return Pointshop2Controller:getInstance( ):loadSettings( dontSendToClients )
 end
