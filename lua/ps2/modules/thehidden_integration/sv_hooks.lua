@@ -67,5 +67,6 @@ local function ApplyHook_PlayerSetUpForRound( )
 	GAMEMODE.PlayerSetModel = function() end
 	KLog( 4, "Hooked TheHidden Player:SetUpForRound@" .. tostring( old ) )
 end
-hook.Add( "InitPostEntity", "Replace", ApplyHook_PlayerSetUpForRound )
+
+LibK.WhenAddonsLoaded( "Pointshop2" ):Then( ApplyHook_PlayerSetUpForRound )
 hook.Add( "OnReloaded", "Replace", ApplyHook_PlayerSetUpForRound )

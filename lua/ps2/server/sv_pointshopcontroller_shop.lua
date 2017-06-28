@@ -116,7 +116,6 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 		return item:save( )
 	end )
 	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
 		return ply.PS2_Inventory:addItem( item )
 		:Then( function( )
 			item:OnPurchased( )

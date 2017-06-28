@@ -39,4 +39,5 @@ local function hookProp()
     	end
     end
 end
-hook.Add( "InitPostEntity", "PS2_HookProp", hookProp )
+
+LibK.WhenAddonsLoaded( "Pointshop2" ):Then( hookProp )

@@ -139,11 +139,6 @@ local function includeFolder( folder )
 end
 
 function Pointshop2.LoadModules( )
-	if SERVER and Pointshop2.LoadModulesPromise._promise._state != "pending" then
-		KLogf( 3, "[WARN] Module Promise already %s", Pointshop2.LoadModulesPromise._promise._state )
-		return
-	end
-	
 	local files, folders = file.Find( "ps2/modules/*", "LUA" )
 	for k, folder in pairs( folders ) do
 		local shouldLoad, detectedName = true, ""
@@ -176,35 +171,4 @@ function Pointshop2.LoadModules( )
 			KLogf( 3, "Error loading module %s, sh_module.lua not found", folder )
 		end
 	end
-	
-	Pointshop2.ModulesLoaded = true
-	hook.Run( "PS2_ModulesLoaded" )
-	if SERVER then
-		Pointshop2.LoadModulesPromise:Resolve( )
-	end
 end
-Pointshop2.ModulesLoaded = false
-
-
-if SERVER then
-	WhenAllFinished{ LibK.WhenAddonsLoaded{ "Pointshop2" }, LibK.InitPostEntityPromise }
-	:Done( function()
-		Pointshop2.LoadModules( )
-	end )
-else
-	if GAMEMODE then 
-		LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( function( )
-			Pointshop2.LoadModules( )
-		end )
-	else
-		hook.Add( "InitPostEntity", "LoadModules", function( )
-			Pointshop2.LoadModules( )
-		end )
-	end
-end
-	
-hook.Remove( "OnReloaded", "Do", function( )
-	LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( function( )
-		Pointshop2.LoadModules( )
-	end )
-end )

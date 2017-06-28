@@ -105,22 +105,6 @@ local function includeFolder( folder )
 	end
 end
 
-local function loadItems( )
+function KInventory.loadAllItems()
 	includeFolder( "kinv/items" )
-	hook.Run( "KInv_ItemsLoaded" )
 end
-
-WhenAllFinished{ LibK.WhenAddonsLoaded{ "Pointshop2" }, LibK.InitPostEntityPromise }
-:Done( function()
-	loadItems( )
-end )
-
-hook.Add( "OnReloaded", "LoadItems", function( )
-	if SERVER then
-		if Pointshop2.ItemsLoadedPromise._promise._state == "pending" then
-			loadItems( )
-		end
-	else
-		loadItems( )
-	end
-end )

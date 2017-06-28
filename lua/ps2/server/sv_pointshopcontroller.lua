@@ -1,74 +1,6 @@
 Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
 
-function Pointshop2.InitPromises( )
-	Pointshop2.LoadModulesPromise = Deferred( )
-	Pointshop2.LoadModulesPromise:Done( function( )
-		KLogf( 4, "[Pointshop 2] All Modules were loaded" )
-	end )
-
-	Pointshop2.LoadModuleItemsPromise = Deferred( )
-	Pointshop2.LoadModuleItemsPromise:Done( function( )
-		KLogf( 4, "[Pointshop2] All Module items were loaded" )
-	end )
-
-	Pointshop2.ItemsLoadedPromise = Deferred( )
-	Pointshop2.ItemsLoadedPromise:Done( function( )
-		KLogf( 4, "[Pointshop2] All Items were loaded by KInv" )
-	end )
-	Pointshop2.ItemsLoadedPromise:Fail( function( )
-		debug.Trace( )
-	end )
-	hook.Add( "KInv_ItemsLoaded", "ResolveDeferred", function( )
-		Pointshop2.ItemsLoadedPromise:Resolve( ) --Trigger ready for all listeners
-	end )
-
-	Pointshop2.DatabaseConnectedPromise = Deferred( )
-	Pointshop2.DatabaseConnectedPromise:Done( function( )
-		KLogf( 4, "[Pointshop2] The database was connected" )
-	end )
-	function Pointshop2.onDatabaseConnected( )
-		if not Pointshop2.DB then
-			Pointshop2.DatabaseError = true
-			return
-		end
-
-		DATABASES["KInventory"] = Pointshop2.DB
-		Pointshop2.LoadModulesPromise:Done( function( )
-			Pointshop2.DatabaseConnectedPromise:Resolve( )
-		end )
-	end
-	function Pointshop2.onDatabaseConnectionFailed( err )
-		Pointshop2.DatabaseConnectedPromise:Reject( err )
-		KLogf( 1, "[Pointshop2] The database is not set up correctly!")
-	end
-
-	Pointshop2.SettingsLoadedPromise = Deferred( )
-	Pointshop2.SettingsLoadedPromise:Done( function( )
-		KLogf( 4, "[Pointshop2] Settings have been loaded" )
-	end )
-
-	Pointshop2.FullyInitializedPromise = WhenAllFinished{
-		Pointshop2.ItemsLoadedPromise:Promise( ),
-		Pointshop2.DatabaseConnectedPromise:Promise( ),
-		Pointshop2.SettingsLoadedPromise:Promise( ),
-		Pointshop2.LoadModulesPromise:Promise( )
-	}
-	Pointshop2.FullyInitializedPromise:Done( function( )
-		KLogf( 4, "[Pointshop2] The initial load stage has been completed" )
-	end )
-end
-Pointshop2.InitPromises( )
-
---Modules can contain own models and are loaded on InitPostEntity.
---Wait for this hook until initializing the database
-Pointshop2.LoadModulesPromise:Done( function( )
-	KLogf( 4, "[Pointshop2] Starting Database initialization" )
-
-	LibK.SetupDatabase( "Pointshop2", Pointshop2, nil, true )
-	Pointshop2.DBInitialize( )
-end )
-
 --Override for access controll
 --returns a promise, resolved if user can do it, rejected with error if he cant
 function Pointshop2Controller:canDoAction( ply, action )
@@ -85,7 +17,7 @@ function Pointshop2Controller:canDoAction( ply, action )
 		else
 			def:Reject( 1, "Permission Denied" )
 		end
-	elseif action =="adminGetServers" or action == "migrateServer" or action == "removeServer" then
+	elseif action == "adminGetServers" or action == "migrateServer" or action == "removeServer" then
 		if PermissionInterface.query( ply, "pointshop2 manageservers" ) then
 			def:Resolve( )
 		else
@@ -281,18 +213,16 @@ function Pointshop2Controller:loadDynamicInfo( )
 		self.dynamicsResource = resource
 	end )
 end
-Pointshop2.DynamicsLoadedPromise = Pointshop2.LoadModuleItemsPromise:Then( function( )
-	return Pointshop2Controller:getInstance( ):loadDynamicInfo( )
-end )
+
 function Pointshop2Controller:sendDynamicInfo( ply )
-	if ply.dynamicsReceivedPromise._promise._state != "pending" then
+	if getPromiseState( ply.dynamicsReceivedPromise ) != "pending" then
 		ply.dynamicsReceivedPromise = Deferred( )
 	end
 	if not self.dynamicsResource then
 		KLogf( 3, "[Pointshop2] Dynamics resource not loaded when player joined" )
 	end
 
-Pointshop2.DynamicsLoadedPromise:Done( function( )
+	Pointshop2.DynamicsLoadedPromise:Done( function( )
 		self:startView( "Pointshop2View", "loadDynamics", ply, self.dynamicsResource:GetVersionHash() )
 	end )
 end
@@ -340,7 +270,7 @@ hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( ply )
 end )
 
 local function initPlayer( ply )
-	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
+	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
 	local controller = Pointshop2Controller:getInstance( )
 
 	Pointshop2.DatabaseConnectedPromise:Fail( function( err )
@@ -351,7 +281,7 @@ local function initPlayer( ply )
 		end
 	end )
 
-	Pointshop2.LoadModuleItemsPromise:Then( function( )
+	Pointshop2.ModuleItemsLoadedPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
 		return ply.dynamicsReceivedPromise
 	end )
@@ -384,7 +314,7 @@ local function reloadAllPlayers( )
 end
 
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function( ply )
-	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), Pointshop2.LoadModuleItemsPromise:Promise( )._state )
+	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
 	timer.Simple( 1, function( )
 		if not IsValid( ply ) then
 			KLogf( 4, "[PS2] Loading a player failed, possible disconnect" )
@@ -560,22 +490,6 @@ function Pointshop2Controller:loadModuleItems( )
 
 	return WhenAllFinished( promises )
 end
-local function loadPersistent( )
-	KLogf( 4, "[Pointshop2] Loading Module items" )
-	Pointshop2Controller:getInstance( ):loadModuleItems( )
-	:Done( function( )
-		Pointshop2.LoadModuleItemsPromise:Resolve( )
-		KLogf( 4, "[Pointshop2] Loaded Module items from DB" )
-	end )
-	:Fail( function( errid, err )
-		Pointshop2.LoadModuleItemsPromise:Reject( errid, err )
-		KLogf( 2, "[Pointshop2] Couldn't load persistent items: %i - %s", errid, err )
-	end )
-end
---When KInventory has loaded all item bases and the database has been connected we load persistent items
-Pointshop2.FullyInitializedPromise:Done( function( )
-	loadPersistent( )
-end )
 
 function Pointshop2Controller:updateItemPersistence( saveTable )
 	local class = Pointshop2.GetItemClassByName( saveTable.baseClass )

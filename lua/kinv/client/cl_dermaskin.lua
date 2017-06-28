@@ -132,6 +132,5 @@ derma.DefineSkin( SKIN.Name, "KInventory default skin", SKIN )
 
 end --function loadSkin
 
-
 hook.Add( "Initialize", SKIN.Name .. "init", loadSkin, 100 )
 hook.Add( "OnReloaded", SKIN.Name .. "reload", loadSkin, 100 )

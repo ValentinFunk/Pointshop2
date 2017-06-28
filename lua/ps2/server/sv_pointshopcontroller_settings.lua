@@ -18,21 +18,7 @@ function Pointshop2Controller:loadSettings( noTransmit )
 			self:startView( "Pointshop2View", "loadSettings", player.GetAll( ), resource:GetVersionHash( ) )
 		end
 	end )
-	:Done( function( )
-		Pointshop2.SettingsLoadedPromise:Resolve( LibK.GLib.Resources.Resources["Pointshop2/settings"] )
-		hook.Run( "PS2_OnSettingsUpdate" )
-	end )
-	:Fail( function( )
-		error( "Loading settings failed" )
-		Pointshop2.SettingsLoadedPromise:Reject( )
-	end )
 end
-Pointshop2.DatabaseConnectedPromise:Done( function( )
-	return Pointshop2Controller:initServer( )
-	:Then( function( )
-		return Pointshop2Controller:getInstance( ):loadSettings( )
-	end )
-end )
 
 function Pointshop2Controller:SendInitialSettingsPackage( ply )
 	local resource = LibK.GLib.Resources.Resources["Pointshop2/settings"]

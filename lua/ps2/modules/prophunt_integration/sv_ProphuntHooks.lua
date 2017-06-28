@@ -105,5 +105,6 @@ local function installHooks( )
 		Pointshop2.PropHunt.PreRoundStart( num )
 	end
 end
-hook.Add( "InitPostEntity", "PS2_InstallPropHuntHooks", installHooks )
+
+LibK.WhenAddonsLoaded( "Pointshop2" ):Then( installHooks )
 hook.Add( "OnReloaded", "PS2_ReloadPropHuntHooks", installHooks )
