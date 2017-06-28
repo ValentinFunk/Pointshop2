@@ -2,19 +2,19 @@
 	This update script is ran when pointshop2 is updated from a version before the update system was in place.
 	It is also run on a clean install so some checks are required.
 */
-
-local DB
+local DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
 
 local function addYearField( )
 	return DB.FieldExistsInTable( "ps2_adventcalendaruses", "year" )
 	:Then( function( exists )
 		if not exists then
 			return DB.DoQuery( "ALTER TABLE `ps2_adventcalendaruses` ADD `year` INT NULL" )
-        :Then(function()
-          return DB.DoQuery( "UPDATE `ps2_adventcalendaruses` SET `year` = 2015 WHERE 1" )
-        end):Then(function()
-					return DB.DoQuery( 'UPDATE ps2_settings SET plugin="Daily Rewards / Advent Calendar" WHERE plugin="Advent Calendar"' )
-				end )
+			:Then(function()
+				return DB.DoQuery( "UPDATE `ps2_adventcalendaruses` SET `year` = 2015 WHERE 1" )
+			end)
+			:Then(function()
+				return DB.DoQuery( 'UPDATE ps2_settings SET plugin="Daily Rewards / Advent Calendar" WHERE plugin="Advent Calendar"' )
+			end )
 		end
 	end )
 	:Then( function( )
@@ -22,50 +22,24 @@ local function addYearField( )
 	end )
 end
 
-local def = Deferred( )
-hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
-	DB = dbObj
-
-	if name != "Update" then
-		return
-	end
-
-	Promise.Resolve( )
+return DB.ConnectionPromise
 	:Then( function( )
-		if DB.CONNECTED_TO_MYSQL then
-			return DB.DoQuery( "SHOW TABLES LIKE 'ps2_adventcalendaruses'" )
-			:Then( function( exists )
-				return exists
-			end )
-		else
-			return DB.DoQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ps2_adventcalendaruses'" )
-			:Then( function( result )
-				local exists = result and result[1] and result[1].name
-				return exists
-			end )
-		end
+		return DB.TableExists('ps2_adventcalendaruses')
 	end )
-	:Then( function( shouldUpdate )
+	:Then( function( tableExists )
+		if tableExists then
+			return DB.FieldExistsInTable( "ps2_adventcalendaruses", "year" )
+		end
+		return false
+	end )
+	:Then( function( fieldExists )
+		local shouldUpdate = !fieldExists
 		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", shouldUpdate and "need" or "not need" )
 		if shouldUpdate then
 			return addYearField()
-			:Fail( function( errid, err )
-				KLogf( 3, "[WARN] Error during update: %i, %s. Ignore this if you run multiple servers on a single database.", errid, err )
-				def:Resolve( )
-			end )
-		else
-			return Promise.Resolve( )
 		end
 	end )
-	:Done( function( )
-		def:Resolve( )
-	end )
-	:Fail( function( errid, err )
+	:Then( function() end, function( errid, err )
 		KLogf( 2, "[ERROR] Error during update: %i, %s.", errid, err )
-		def:Reject( errid, err )
+		return Promise.Reject( errid, err )
 	end )
-end )
-
-DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
-
-return def:Promise( )

@@ -19,40 +19,25 @@ local tables = {
     "libk_player"
 }
 
-local DB
-
-local def = Deferred( )
-
-hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
-	DB = dbObj
-
-    if name != "Update" then
-		return
-	end
-
+local DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
+return DB.ConnectionPromise
+:Then(function()
     if not DB.CONNECTED_TO_MYSQL then
-        return def:Resolve()
+        return
     end
-
-	if name != "Update" then
-		return
-	end
 
     local promises = {}
 	for k, v in pairs( tables ) do
-        table.insert( promises, DB.TableExists( v )
+        local promise = DB.TableExists( v )
         :Then( function( exists )
             if exists then
-                DB.DoQuery("ALTER TABLE " .. v .. " ENGINE=InnoDB;")
                 KLogf(4, "Converted to InnoDB: %s", v)
+                return DB.DoQuery("ALTER TABLE " .. v .. " ENGINE=InnoDB;")
             end
-        end ) )
+        end )
+
+        table.insert( promises, promise )
     end
-    WhenAllFinished(promises):Done(function()
-        def:Resolve()
-    end)
+
+    return WhenAllFinished(promises)
 end )
-
-DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
-
-return def:Promise( )

@@ -1,4 +1,4 @@
-local DB
+local DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
 
 local function convertCategoryOrganization( )
 	Pointshop2 = {}
@@ -45,44 +45,17 @@ local function convertCategoryOrganization( )
 	end )
 end
 
-local def = Deferred( )
-
-hook.Add( "LibK_DatabaseInitialized", "Initialized", function( dbObj, name )
-	DB = dbObj
-
-	if name != "Update" then
-		return
-	end
-
-	Promise.Resolve( )
-	:Then( function( )
-		if DB.CONNECTED_TO_MYSQL then
-			return DB.DoQuery( "SHOW TABLES LIKE 'ps2_itempersistence'" )
-			:Then( function( exists )
-				return exists
-			end )
-		else
-			return DB.DoQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ps2_itempersistence'" )
-			:Then( function( result )
-				local exists = result and result[1] and result[1].name
-				return exists
-			end )
-		end
-	end )
-	:Then( function( shouldUpdate )
-		KLogf( 2, "[INFO] We are on %s, %s", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", tostring(shouldUpdate) )
-		if shouldUpdate then
-			return convertCategoryOrganization( )
-		end
-	end )
-	:Then( function( )
-		def:Resolve( )
-	end, function( errid, err )
-		KLogf( 2, "[ERROR] Error during update: %i, %s.", errid, err )
-		def:Reject( errid, err )
-	end )
+return DB.ConnectionPromise
+:Then( function( )
+	return DB.TableExists( 'ps2_itempersistence' )
 end )
-
-DB = LibK.getDatabaseConnection( LibK.SQL, "Update" )
-
-return def:Promise( )
+:Then( function( shouldUpdate )
+	KLogf( 2, "[INFO] We are on %s, %s", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", tostring(shouldUpdate) )
+	if shouldUpdate then
+		return convertCategoryOrganization( )
+	end
+end )
+:Then( function( )	end, function( errid, err )
+	KLogf( 2, "[ERROR] Error during update: %i, %s.", errid, err )
+	return Promise.Reject( errid, err )
+end )

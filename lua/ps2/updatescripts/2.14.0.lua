@@ -13,8 +13,6 @@ end )
         return DB.DoQuery([[
             UPDATE kinv_items SET itempersistence_id = IF(CAST(SUBSTRING(itemclass, 18) AS SIGNED) = 0, NULL, CAST(SUBSTRING(itemclass, 18) AS SIGNED))
         ]])
-    else
-        return Promise.Resolve()
     end
 end )
 :Then( function() end, function( errid, err )
