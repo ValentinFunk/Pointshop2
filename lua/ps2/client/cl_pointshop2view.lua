@@ -2,7 +2,7 @@ Pointshop2View = class( "Pointshop2View" )
 Pointshop2View.static.controller = "Pointshop2Controller"
 Pointshop2View:include( BaseView )
 
-hook.Add( "InitPostEntity", "InitializePlayers", function( )
+LibK.InitPostEntityPromise:Done( function( )
 	for k, ply in pairs( player.GetAll( ) ) do
 		ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 		ply.PS2_Slots = {}

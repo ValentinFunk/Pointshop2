@@ -1,7 +1,7 @@
 --Using GLib to allow LOADS of settings to be sent
 local GLib = LibK.GLib
 
-function Pointshop2Controller:loadSettings( noTransmit )
+function Pointshop2Controller:loadSettings( )
 	local moduleInitPromises = {}
 	for k, mod in pairs( Pointshop2.Modules ) do
 		table.insert( moduleInitPromises, Pointshop2.InitializeModuleSettings( mod ) )
@@ -13,10 +13,6 @@ function Pointshop2Controller:loadSettings( noTransmit )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "settings", data )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Settings package loaded, version " .. resource:GetVersionHash( ) )
-
-		if not noTransmit then
-			self:startView( "Pointshop2View", "loadSettings", player.GetAll( ), resource:GetVersionHash( ) )
-		end
 	end )
 end
 
@@ -30,18 +26,6 @@ function Pointshop2Controller:SendInitialSettingsPackage( ply )
 		self:startView( "Pointshop2View", "loadSettings", ply, resource:GetVersionHash( ) )
 	end )
 end
-hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestSettings", function( ply )
-	timer.Simple( 1, function( )
-		Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )
-	end )
-end )
-Pointshop2.BootstrappedPromise:Then( function() 
-	for k, ply in pairs( player.GetAll( ) ) do
-		timer.Simple( 1, function( )
-			Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )
-		end )
-	end
-end )
 
 GLib.Transfers.RegisterHandler( "Pointshop2.Settings", GLib.NullCallback )
 GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, data )
@@ -168,5 +152,13 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 end )
 
 function Pointshop2Controller:reloadSettings( dontSendToClients )
-	return Pointshop2Controller:getInstance( ):loadSettings( dontSendToClients )
+	return Pointshop2Controller:getInstance( ):loadSettings( ):Then( function( )
+		if  dontSendToClients then
+			return
+		end
+
+		for k, ply in pairs(player.GetAll()) do
+			Pointshop2Controller:getInstance( ):SendInitialSettingsPackage( ply )
+		end
+	end )
 end

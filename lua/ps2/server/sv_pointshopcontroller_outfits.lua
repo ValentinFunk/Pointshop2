@@ -13,8 +13,6 @@ function Pointshop2Controller:loadOutfits( )
 		resource:GetCompressedData( ) --Force compression now
 		local versionHash = resource:GetVersionHash( )
 		KLogf( 4, "[Pointshop2] Outfit package loaded, version " .. versionHash .. " " .. #outfitsAssoc .. " outfits." )
-
-		self:startView( "Pointshop2View", "loadOutfits", player.GetAll( ), versionHash )
 	end )
 end
 
@@ -28,18 +26,6 @@ function Pointshop2Controller:SendInitialOutfitPackage( ply )
 		self:startView( "Pointshop2View", "loadOutfits", ply, resource:GetVersionHash( ) )
 	end )
 end
-hook.Add( "LibK_PlayerInitialSpawn", "InitialRequestOutfits", function( ply )
-	timer.Simple( 1, function( )
-		Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
-	end )
-end )
-Pointshop2.BootstrappedPromise:Then( function() 
-	for k, ply in pairs( player.GetAll( ) ) do
-		timer.Simple( 1, function( )
-			Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( ply )
-		end )
-	end
-end )
 
 --Player notifies us that he has loaded and decoded all PAC outfits
 function Pointshop2Controller:outfitsReceived( ply )

@@ -156,9 +156,3 @@ function Pointshop2.Bootstrap()
 end
 
 Pointshop2.Bootstrap( )
-
--- For ps2_reload
-if (GAMEMODE or GM)._PS2_LOADED then 
-    LibK.WhenAddonsLoaded{ "Pointshop2" }:Then( Pointshop2.LoadModules )
-end
-(GAMEMODE or GM)._PS2_LOADED = true

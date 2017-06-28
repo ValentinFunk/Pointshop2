@@ -257,7 +257,7 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 	end
 end
 
-hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( ply )
+local function enforceValidPromise( ply )
 	ply.dynamicsReceivedPromise = Deferred( )
 	ply.outfitsReceivedPromise = Deferred( )
 	ply.fullyLoadedPromise = Deferred( )
@@ -267,7 +267,7 @@ hook.Add( "PlayerInitialSpawn", "EnforceValidPromise", function( ply )
 			hook.Remove( "PS2_PlayerFullyLoaded", "FullyLoadedResolver_" .. ply:SteamID( ) )
 		end
 	end )
-end )
+end
 
 local function initPlayer( ply )
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
@@ -281,7 +281,14 @@ local function initPlayer( ply )
 		end
 	end )
 
-	Pointshop2.ModuleItemsLoadedPromise:Then( function( )
+	Pointshop2.OutfitsLoadedPromise:Then( function( )
+		controller:SendInitialOutfitPackage( ply )
+	end )
+	Pointshop2.SettingsLoadedPromise:Then( function( )
+		controller:SendInitialSettingsPackage( ply )
+	end )
+	Pointshop2.ModuleItemsLoadedPromise
+	:Then( function( )
 		controller:sendDynamicInfo( ply )
 		return ply.dynamicsReceivedPromise
 	end )
@@ -314,25 +321,49 @@ local function reloadAllPlayers( )
 end
 
 hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function( ply )
+	if ply._initHandled then
+		KLogf( 5, "[PS2] Skipping init of player %s, loaded by bootstrapper", ply:Nick( ) )
+		return
+	end
+
 	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
+	ply._initHandled = true
+
 	timer.Simple( 1, function( )
 		if not IsValid( ply ) then
 			KLogf( 4, "[PS2] Loading a player failed, possible disconnect" )
 			return
 		end
 		initPlayer( ply )
+		dp("InitTimer", ply)
 	end )
-	ply._initHandled = true
 end )
-Pointshop2.BootstrappedPromise:Then( function() 
+
+Pointshop2.BootstrappedPromise:Then( function()
 	for k, ply in pairs( player.GetAll( ) ) do
 		if ply._initHandled then return end
-		
-		initPlayer( ply )
+
 		ply._initHandled = true
+		KLogf( 5, "[PS2] Bootstrapping player %s, modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
+
+		timer.Simple( 1, function( )
+			if not IsValid( ply ) then
+				return
+			end
+
+			initPlayer( ply )
+		end )
+
+		if not ply.fullyLoadedPromise or getPromiseState( ply.fullyLoadedPromise ) != "pending" then
+			enforceValidPromise( ply )
+		end
 	end
 end )
+
+hook.Add( "PlayerInitialSpawn", "Pointshop2:EnforceValidPromise", enforceValidPromise )
+
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
+	dp("onReloaded")
 	for k, v in pairs(player.GetAll()) do
 		v._initHandled = false
 	end
@@ -581,6 +612,12 @@ function Pointshop2Controller:moduleItemsChanged( outfitsChanged )
 		return self:loadOutfits( )
 	end )
 	:Then( function( )
+		if outfitsChanged then
+			for k, v in pairs(player.GetAll()) do
+				Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( v )
+			end
+		end
+
 		return self:loadDynamicInfo( )
 	end )
 	:Done( function( )
