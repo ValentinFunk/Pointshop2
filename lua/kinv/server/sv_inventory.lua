@@ -41,6 +41,8 @@ function Inventory:addItem( item )
 		return item:save( )
 	end )
 	:Then( function( item )
+		KInventory.ITEMS[item.id] = item
+
 		--reflect changes in cached inventory
 		if self.Items then
 			table.insert( self.Items, item )
