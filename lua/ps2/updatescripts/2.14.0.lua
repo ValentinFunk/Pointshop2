@@ -12,6 +12,7 @@ end )
     if DB.CONNECTED_TO_MYSQL then
         return DB.DoQuery([[
             UPDATE kinv_items SET itempersistence_id = IF(CAST(SUBSTRING(itemclass, 18) AS SIGNED) = 0, NULL, CAST(SUBSTRING(itemclass, 18) AS SIGNED))
+            WHERE itemclass REGEXP "^KInventory\\.Items\\.[0-9]+$"
         ]])
     end
 end )
