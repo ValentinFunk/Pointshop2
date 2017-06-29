@@ -28,12 +28,13 @@ return DB.ConnectionPromise
 	end )
 	:Then( function( tableExists )
 		if tableExists then
-			return DB.FieldExistsInTable( "ps2_adventcalendaruses", "year" )
+			return DB.FieldExistsInTable( "ps2_adventcalendaruses", "year" ):Then(function (exists)
+				return not exists
+			end)
 		end
 		return false
 	end )
-	:Then( function( fieldExists )
-		local shouldUpdate = !fieldExists
+	:Then( function( shouldUpdate )
 		KLogf( 2, "[INFO] We are on %s and %s to update", DB.CONNECTED_TO_MYSQL and "MySQL" or "SQLite", shouldUpdate and "need" or "not need" )
 		if shouldUpdate then
 			return addYearField()
