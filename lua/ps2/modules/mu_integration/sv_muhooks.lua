@@ -65,3 +65,10 @@ hook.Add("PlayerDeath", "PS2_PlayerDeath", function(victim, inflictor, attacker)
 	end
 
 end)
+
+local function onlyMurderer(ply) 
+	if not ply:GetMurderer() then
+		return false
+	end
+end
+hook.Add( "PS2_WeaponShouldSpawn", "OnlyMurderer", onlyMurderer )
