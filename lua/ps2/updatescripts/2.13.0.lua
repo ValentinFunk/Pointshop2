@@ -15,6 +15,7 @@ end
 
 local function migrateInventoryIdSQLite( DB )
     local res = sql.Query([[
+        PRAGMA foreign_keys = OFF;
         BEGIN;
         CREATE TABLE `new_kinv_items` (
             `itemclass` VARCHAR(255) NOT NULL, 
@@ -38,11 +39,10 @@ local function migrateInventoryIdSQLite( DB )
             SELECT itemclass, data, inventory_id, id,
                 CASE WHEN CAST(substr(itemclass, 18) AS NUMERIC) = 0 THEN NULL ELSE CAST(substr(itemclass, 18) AS NUMERIC) END AS itempersistence_id
             FROM kinv_items;
-        PRAGMA foreign_keys = OFF;
         DROP TABLE kinv_items;
-        PRAGMA foreign_keys = ON;
         ALTER TABLE new_kinv_items RENAME TO kinv_items;
         COMMIT;
+        PRAGMA foreign_keys = ON;
     ]])
 
     if res == false then
