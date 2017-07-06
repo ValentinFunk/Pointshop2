@@ -30,7 +30,7 @@ function Pointshop2Controller:importItemsFromFile( filename )
 	local exportTable = LibK.luadata.ReadFile( filename )
 	return self:importItems( exportTable )
 	:Then( function( )
-		return self:moduleItemsChanged( )
+		return self:moduleItemsChanged( true )
 	end )
 end
 
@@ -86,7 +86,7 @@ function Pointshop2Controller:importCategoriesFromFile( filename )
 	local importTable = LibK.luadata.ReadFile( filename )
 	return self:importCategoryOrganization( importTable )
 	:Done( function( )
-		return self:moduleItemsChanged( )
+		return self:moduleItemsChanged( true )
 	end )
 end
 
@@ -224,7 +224,7 @@ function Pointshop2Controller:installDefaults( )
 		return self:importCategoryOrganization( Pointshop2.DefaultCategories )
 	end )
 	:Done( function( )
-		return self:moduleItemsChanged( )
+		return self:moduleItemsChanged( true )
 	end )
 end
 

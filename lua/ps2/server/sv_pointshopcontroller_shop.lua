@@ -424,6 +424,6 @@ function Pointshop2Controller:installDlcPack( ply, name )
 		return self:importCategoryOrganization( pack.categories )
 	end )
 	:Done( function( )
-		return self:moduleItemsChanged( )
+		return self:moduleItemsChanged( true )
 	end )
 end

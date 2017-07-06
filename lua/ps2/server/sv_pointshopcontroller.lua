@@ -364,9 +364,11 @@ hook.Add( "PlayerInitialSpawn", "Pointshop2:EnforceValidPromise", enforceValidPr
 
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
 	dp("onReloaded")
-	for k, v in pairs(player.GetAll()) do
-		v._initHandled = false
-	end
+	Pointshop2.BootstrappedPromise:Then( function()
+		for k, v in pairs(player.GetAll()) do
+			initPlayer( v )
+		end
+	end )
 end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )
@@ -592,7 +594,9 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 		if isUpdate then
 			return self:updateItemPersistence( saveTable )
 		else
-			return self:moduleItemsChanged( )
+			local itemClass = Pointshop2.GetItemClassByName( saved.baseClass )
+			local outfitsChanged = class == KInventory.Items.base_hat or subclassOf( KInventory.Items.base_hat, itemClass )
+			return self:moduleItemsChanged( outfitsChanged )
 		end
 	end, function( errid, err )
 		self:reportError( "Pointshop2View", ply, "Error saving item", errid, err )
