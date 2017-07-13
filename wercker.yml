@@ -2,6 +2,9 @@ box: node:7
 build:
   steps:
     - npm-install
+deploy:
+  steps:
+    - npm-install
     - script:
       name: update version
       code: |
