@@ -106,6 +106,10 @@ function PANEL:Init( )
 		end
 	end )
 	:Fail( function( err )
+		if not IsValid( self ) then
+			return
+		end
+
 		local label = vgui.Create( "DLabel", self.panels )
 		label:SetText( "Failed to load the DLC List. Possible reason: " .. err .. "." )
 		label:SetFont( self:GetSkin( ).fontName )
