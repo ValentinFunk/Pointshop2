@@ -654,6 +654,8 @@ function Pointshop2View:displayInformation( infoStr, duration )
 		notification.duration = duration
 	end
 	LocalPlayer( ).notificationPanel:addNotification( notification )
+
+	return notification
 end
 
 function Pointshop2View:displayError( infoStr, duration )
@@ -666,6 +668,8 @@ function Pointshop2View:displayError( infoStr, duration )
 		notification.duration = duration
 	end
 	LocalPlayer( ).notificationPanel:addNotification( notification )
+
+	return notification
 end
 
 function Pointshop2View:updateRankRestrictions( itemClassNames, validRanks )

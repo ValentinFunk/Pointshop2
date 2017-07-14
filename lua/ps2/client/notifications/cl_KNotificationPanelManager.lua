@@ -129,6 +129,14 @@ function PANEL:Think( )
 	self:SetTall( y )
 end
 
+function PANEL:ForceSlideOut( notificationPanel )
+	if notificationPanel.slideOutStart and CurTime() >= notificationPanel.slideOutStart then
+		return
+	end
+
+	notificationPanel.slideOutStart = CurTime()
+end
+
 Derma_Hook( PANEL, "Paint", "Paint", "InnerPanel" )
 
 derma.DefineControl( "KNotificationManagerPanel", "Logic for drawing notifications", PANEL, "DPanel" )
