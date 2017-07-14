@@ -572,9 +572,8 @@ function Pointshop2Controller:updateItemPersistence( saveTable )
 						self:startView( "Pointshop2View", "updateItemPersistence", v, persistentItem )
 				end)
 			end
-		else
-			self:startView( "Pointshop2View", "updateItemPersistence", player.GetAll(), persistentItem )
 		end
+		self:startView( "Pointshop2View", "updateItemPersistence", player.GetAll(), persistentItem )
 	end )
 end
 
