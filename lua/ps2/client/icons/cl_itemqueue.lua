@@ -6,23 +6,30 @@ local queue = Pointshop2.IconQueue
 local promises  = Pointshop2.IconPromises
 
 local function getIconUID( itemClass )
-	return "ps2/" .. itemClass.UUID:lower()
+	return "ps2/2" .. itemClass.UUID:lower()
 end
+Pointshop2.GetIconPath = getIconUID
 
 local function getIconPath( itemClass )
 	return string.format( "spawnicons/%s_256.png", getIconUID(itemClass) )
 end
 
-function Pointshop2.RequestIcon( itemClass )
+function Pointshop2.RequestIcon( itemClass, forceRender )
 	local iconID  = getIconUID( itemClass )
 	local pending = promises[iconID]
 	if pending then
-		return pending
+		if getPromiseState(pending) == "pending" then
+			return pending
+		end
+
+		if not forceRender then
+			return pending
+		end
 	end
 
 	-- Check if the icon exists
 	local path = getIconPath( itemClass )
-	if file.Exists( "materials/" .. path, "GAME" ) then
+	if file.Exists( "materials/" .. path, "GAME" ) and not forceRender then
 		return Promise.Resolve(Material( path ))
 	end
 
@@ -93,6 +100,7 @@ do
 			icon:GetTexture( "$basetexture" ):Download()
 
 			pending:Resolve(icon)
+			hook.Run( "PS2_ItemIconChanged", model, icon )
 		end
 
 		if !pending then

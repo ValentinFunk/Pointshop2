@@ -26,11 +26,20 @@ end
 
 function PANEL:SetItemClass( itemClass )
 	DPointshopItemIcon.SetItemClass( self, itemClass )
-    Pointshop2.RequestIcon(itemClass, self):Then(function(icon)
+    Pointshop2.RequestIcon(itemClass):Then(function(icon)
         if IsValid(self) then
             self.image:SetMaterial(icon)
         end
     end)
+
+	-- Listen if the icons get regenerated
+	hook.Add("PS2_ItemIconChanged", self, function( uid, icon ) 
+		if Pointshop2.GetIconPath( itemClass ) == uid then
+			if IsValid(self) then
+				self.image:SetMaterial(icon)
+			end
+		end
+	end )
 end
 
 function PANEL:SetItem( item )

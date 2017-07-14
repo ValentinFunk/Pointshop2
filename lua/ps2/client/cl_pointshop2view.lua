@@ -287,7 +287,12 @@ function Pointshop2View:updateItemPersistence( itemPersistence )
 	end
 
 	-- Update class (KInventory.Items[id])
-	Pointshop2.LoadPersistentItem( itemPersistence )
+	local itemClass = Pointshop2.LoadPersistentItem( itemPersistence )
+
+	-- Regenerate item
+	if LibK.DermaInherits( itemClass:GetPointshopIconControl( ), "DCsgoItemIcon" ) then
+		Pointshop2.RequestIcon( itemClass, true )
+	end
 
 	-- Update Shop
 	timer.Simple( 0.1, function( )
