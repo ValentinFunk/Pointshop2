@@ -62,11 +62,7 @@ local function loadItem( filepath, filename )
 	setfenv( func, environment ) -- _G for func now becomes environment
 	func( )
 
-	if KInventory.Mixins[className] then
-		for _, mixin in pairs( KInventory.Mixins[className] ) do
-			KInventory.Items[className]:include( mixin )
-		end
-	end
+	KInventory.ApplyMixins(className)
 
 	--lastly give the class it's className. Internal classname can be accessed with .name
 	KInventory.Items[className].static.className = className
