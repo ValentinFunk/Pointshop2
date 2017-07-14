@@ -420,6 +420,19 @@ function Pointshop2View:getNoSaleCategory( )
 	}
 end
 
+function Pointshop2View:RegenerateIcons( )
+	for _, itemClass in pairs( Pointshop2:GetRegisteredItems( ) ) do
+		if not derma.Controls[itemClass:GetPointshopIconControl()] then
+			print(itemClass:GetPointshopIconControl())
+			continue
+		end
+
+	 	if LibK.DermaInherits( itemClass:GetPointshopIconControl(), "DCsgoItemIcon" ) then
+			Pointshop2.RequestIcon( itemClass, true )
+		end
+	end
+end
+
 function Pointshop2View:getUncategorizedItems( )
 	local uncategorized = {}
 	for _, itemClass in pairs( Pointshop2:GetRegisteredItems( ) ) do

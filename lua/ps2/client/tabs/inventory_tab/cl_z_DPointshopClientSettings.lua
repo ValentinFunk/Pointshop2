@@ -39,6 +39,30 @@ function PANEL:Init( )
 		Pointshop2.ClientSettings.LoadSettings( )
 		Derma_Message( "Your settings have been saved. Some settings may require a reconnect to apply." )
 	end
+
+	self.infoPanel = vgui.Create( "DInfoPanel", self.scroll )
+	self.infoPanel:Dock( TOP )
+	self.infoPanel:SetInfo( "Regenerate Icons",
+[[If you have trouble with icons you can regenerate all shop icons here.
+
+]] )
+	self.infoPanel:DockMargin( 0, 10, 0, 0 )
+
+	self.buttonBar2 = vgui.Create( "DIconLayout", self.scroll )
+	self.buttonBar2:SetBorder( 0 )
+	self.buttonBar2:SetSpaceX( 5 )
+	self.buttonBar2:DockMargin( 0, 5, 0, 0 )
+	self.buttonBar2:Dock( TOP )
+
+	self.newItemsButton = vgui.Create( "DButton", self.buttonBar2 )
+	self.newItemsButton:SetText( "Regenerate Icons" )
+	self.newItemsButton:PerformLayout( )
+	self.newItemsButton:Paint( 10, 10 )
+	self.newItemsButton:SizeToContents()
+	self.newItemsButton:SetTall( 25 )
+	function self.newItemsButton.DoClick( )
+		Pointshop2View:getInstance():RegenerateIcons( )
+	end
 end
 
 function PANEL:Paint( )

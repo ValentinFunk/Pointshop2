@@ -101,6 +101,7 @@ function Pointshop2.LoadPersistentItem( persistentItem )
 	baseClass.generateFromPersistence( KInventory.Items[className], persistentItem )
 
 	KLogf( 4, "    -> Loaded persistent item %s", className )
+	return KInventory.Items[className]
 end
 
 --Get all item classes that were dynamically created from mysql
