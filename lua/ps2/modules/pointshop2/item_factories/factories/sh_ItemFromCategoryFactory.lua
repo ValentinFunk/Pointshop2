@@ -52,9 +52,9 @@ function ItemFromCategoryFactory:GetChanceTable( )
 		local weight = 1
 		if self.settings["BasicSettings.WeightedRandom"] then
 			if itemClass.Price.points then
-				weight = itemClass.Price.points
+				weight = math.max(itemClass.Price.points, 1)
 			elseif itemClass.Price.premiumPoints then
-				weight = itemClass.Price.premiumPoints * 10
+				weight = math.max(itemClass.Price.premiumPoints * 10, 1)
 			end
 			weight = ( 1 / weight ) * 100
 		end
