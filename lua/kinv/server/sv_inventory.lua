@@ -2,38 +2,39 @@ local Inventory = KInventory.Inventory
 local Item = KInventory.Item
 
 function Inventory:loadItems( )
-	local def = Deferred( )
 	if not self.id then
-		def:Reject( 1, "Inventory without ID given to loadItems()" )
-		return
+		GLib.Error( "Inventory without ID given to loadItems()" )
 	end
 	
 	self.Items = {}
-	Item.findAllByInventory_id( self.id )
+	return Item.findAllByInventory_id( self.id )
 	:Then( function( items )
 		for k, item in pairs( items ) do
 			item.owner = self:getOwner()
 			table.insert( self.Items, item )
 		end
 	end )
-	:Done( function( )
-		def:Resolve( self )
-	end )
-	:Fail( function( errid, error )
-		def:Reject( 0, "Error loading items: child returned " .. error .. "(" .. errid .. ")" )
-	end )
-	
-	return def:Promise( )
 end
 
-function Inventory:addItem( item )
-	local def = Deferred( )
+function Inventory:notifyItemAdded( item )
+	KInventory.ITEMS[item.id] = item
+
+	--reflect changes in cached inventory
+	if self.Items then
+		table.insert( self.Items, item )
+	end
 	
-	DATABASES[Inventory.DB].DoQuery( "SELECT COUNT(*) as numItems FROM " .. Inventory.model.tableName .. " WHERE ownerId =" .. self.ownerId )
+	item.owner = self:getOwner()
+	
+	--Network change
+	InventoryController:getInstance( ):itemAdded( self, item )
+end
+
+function Inventory:addItem( item )	
+	return DATABASES[Inventory.DB].DoQuery( "SELECT COUNT(*) as numItems FROM " .. Inventory.model.tableName .. " WHERE ownerId =" .. self.ownerId )
 	:Then( function( data )
 		if data[1].numItems + 1 > self.numSlots then
-			local def = Deferred( )
-			def:Reject( 1, "No space in inventory" )
+			return Promise.Reject( "No space in inventory" )
 		end
 
 		--Save in DB
@@ -41,57 +42,44 @@ function Inventory:addItem( item )
 		return item:save( )
 	end )
 	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
-
-		--reflect changes in cached inventory
-		if self.Items then
-			table.insert( self.Items, item )
-		end
-		
-		item.owner = self:getOwner()
-		
-		--Network change
-		InventoryController:getInstance( ):itemAdded( self, item )
-		
-		def:Resolve( self, item )
-	end, function( errid, err )
-		def:Reject( errid, err )
+		PrintTable(item)
+		self:notifyItemAdded( item )
 	end )
-	
-	return def:Promise( )
+end
+
+/*
+	Notify the inv that an item was removed externally
+*/
+function Inventory:notifyItemRemoved(itemId)
+	local itemKey = false
+	for k, v in pairs( self.Items ) do
+		if v.id == itemId then
+			itemKey = k
+		end
+	end
+	if not itemKey then
+		LibK.GLib.Error("Inventory:notifyItemRemoved - Item not in inventory")
+	end
+
+	table.remove( self.Items, itemKey )
+
+	--Network change
+	InventoryController:getInstance( ):itemRemoved( self, itemId )
 end
 
 /*
 	Unlink from this inventory, does NOT remove the item from the db
 */
 function Inventory:removeItem( item )
-	local def = Deferred( )
-	print( "Inventory:removeItem( " .. tostring( item ) .. ")" )
-	
-	local itemKey = false
-	for k, v in pairs( self.Items ) do
-		if v.id == item.id then
-			itemKey = k
-		end
-	end
-	if not itemKey then
-		def:Reject( -1, "Item " .. item.id .. " is not part of the Inventory" )
-		return def:Promise( )
-	end
+	KLogf( 4, "Inventory:removeItem( " .. tostring( item ) .. ")" )
 	
 	--Save in DB
 	item.inventory_id = nil
-	item:save( )
+	return item:save( )
 	:Then( function( item )
-		table.remove( self.Items, itemKey )
-		
-		--Network change
-		InventoryController:getInstance( ):itemRemoved( self, item )
-		
-		def:Resolve( self, item )
-	end, 
-	function( errid, err )
-		def:Reject( 0, "Error saving item: " .. err .. "(" .. errid .. ")" )
+		self:notifyItemRemoved(item.id)
+		return item
+	end, function( err )
+		return Promise.Reject("Error saving item: " .. err )
 	end )
-	return def:Promise( )
 end

@@ -221,6 +221,8 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
 			return slot:removeItem( item ):Then( function( )
 				self:startView( "Pointshop2View", "slotChanged", ply, slot )
 			end )
+		else
+			return Promise.Reject("Pointshop2Controller:removeItemFromPlayer - Item not in slot or inventory")
 		end
 	end )
 	:Then( function( )

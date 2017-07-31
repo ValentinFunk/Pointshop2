@@ -16,10 +16,13 @@ function InventoryController:itemAdded( inv, item )
 	end
 end
 
-function InventoryController:itemRemoved( inv, item )
+function InventoryController:itemRemoved( inv, itemId )
 	local owner = inv:getOwner( )
+
 	if IsValid( owner ) then
-		self:startView( "InventoryView", "itemRemoved", owner, inv.id, item.id )
+		self:startView( "InventoryView", "itemRemoved", owner, inv.id, itemId )
+	else
+		LibK.GLib.Error("InventoryController:itemRemoved - Invalid owner!")
 	end
 end
 
