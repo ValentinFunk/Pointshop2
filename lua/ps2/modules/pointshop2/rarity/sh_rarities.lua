@@ -59,13 +59,29 @@ function Pointshop2.GetRarityInfoFromName(name)
 end
 
 -- Returns rarity information for a chance in % (e.g. 0.1 for 10%)
-function Pointshop2.GetRarityInfoFromNormalized(absoluteChance)
+function Pointshop2.GetRarityInfoFromNormalized(normalizedChance)
 	local maxRarity = 0
 	for i = #Pointshop2.RaritiesNormalized.Rarities, 1, -1 do
 		rarity = Pointshop2.RaritiesNormalized.Rarities[i]
 		maxRarity = maxRarity + rarity.chance
-		if absoluteChance <= maxRarity then
+		if normalizedChance <= maxRarity then
 			return rarity
+		end
+	end
+end
+
+-- Returns rarity information for a chance in absolute values
+function Pointshop2.GetRarityInfoFromAbsolute(absoluteChance)
+	local maxRarity = 0
+	for i = #Pointshop2.Rarities, 1, -1 do
+		rarityObject = Pointshop2.Rarities[i]
+		maxRarity = maxRarity + rarityObject.chance
+		if absoluteChance <= maxRarity then
+			return {
+				name = rarityObject.name,
+				chance = rarityObject.chance,
+				color = Pointshop2.RarityColorMap[rarityObject.chance]
+			}
 		end
 	end
 end
