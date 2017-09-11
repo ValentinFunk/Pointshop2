@@ -312,7 +312,6 @@ function Pointshop2View:loadDynamics( versionHash )
 		end
 
 		local startTime = SysTime( )
-		local dynamicsDecoded = LibK.von.deserialize( data )[1]
 		local dynamicsDecoded = util.JSONToTable( data )[1]
 		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
