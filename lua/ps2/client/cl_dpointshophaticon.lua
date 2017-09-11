@@ -14,8 +14,12 @@ end
 function PANEL:SetItemClass( itemClass )
 	self.BaseClass.SetItemClass( self, itemClass )
 	
-	if itemClass.iconInfo.inv.useMaterialIcon then
-		self.image:SetImage( itemClass.iconInfo.inv.iconMaterial )
+	if itemClass.iconInfo.shop.useMaterialIcon then
+		if Material(itemClass.iconInfo.shop.iconMaterial) then
+			self.image:SetImage( itemClass.iconInfo.shop.iconMaterial )
+		else
+			LibK.GLib.Error("Invalid Material :" .. tostring(itemClass.iconInfo.shop.iconMaterial) .. " for item " .. self:GetPrintName())
+		end
 	end
 end
 

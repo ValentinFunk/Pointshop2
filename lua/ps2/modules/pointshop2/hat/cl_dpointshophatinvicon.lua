@@ -16,7 +16,11 @@ function PANEL:SetItem( item )
 		self.image:Dock( FILL )
 		self.image:SetSize( 64, 64 )
 		self.image:SetMouseInputEnabled( false )
-		self.image:SetImage( item.class.iconInfo.inv.iconMaterial )
+		if Material(item.class.iconInfo.inv.iconMaterial) then
+			self.image:SetImage( item.class.iconInfo.inv.iconMaterial )
+		else
+			LibK.GLib.Error("Invalid Material :" .. tostring(item.class.iconInfo.inv.iconMaterial) .. " for item " .. self:GetPrintName())
+		end
 	else
 		local model = Pointshop2:GetPreviewModel()
 		self.image:ApplyModelInfo( model )
@@ -35,8 +39,8 @@ function PANEL:OnDeselected( )
 end
 
 function PANEL:Paint( w, h )
-	surface.SetDrawColor( Color( 255, 0, 0 ) )
-	surface.DrawRect( 0, 0, w, h )
+	--surface.SetDrawColor( Color( 255, 0, 0 ) )
+	--surface.DrawRect( 0, 0, w, h )
 end
 
 vgui.Register( "DPointshopHatInvIcon", PANEL, "DPointshopInventoryItemIcon" )
