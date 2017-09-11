@@ -9,7 +9,7 @@ function Pointshop2Controller:loadSettings( )
 
 	return WhenAllFinished( moduleInitPromises )
 	:Then( function( )
-		local data = LibK.von.serialize( { Pointshop2.Settings.Shared } )
+		local data = util.TableToJSON( { Pointshop2.Settings.Shared } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "settings", data )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Settings package loaded, version " .. resource:GetVersionHash( ) )
@@ -52,7 +52,7 @@ GLib.Transfers.RegisterRequestHandler( "Pointshop2.Settings", function( userId, 
 	end
 
 	local outBuffer = GLib.StringOutBuffer( )
-	outBuffer:LongString( LibK.von.serialize( settings ) )
+	outBuffer:LongString( util.TableToJSON( settings ) )
 	return true, outBuffer:GetString( )
 end )
 
@@ -91,7 +91,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 		end
 	end
 
-	local newSettings = LibK.von.deserialize( serializedData )
+	local newSettings = util.JSONToTable( serializedData )
 	Pointshop2.StoredSetting.findAllByPlugin( modName )
 	:Then( function( stored )
 		local promises = {}
@@ -101,7 +101,7 @@ GLib.Transfers.RegisterHandler( "Pointshop2.SettingsUpdate", function( userId, d
 			for k, storedSetting in pairs( stored ) do
 				if storedSetting.path == settingPath then
 					--Need to compare them as serialized versions, might be tables or other data structures
-					if LibK.von.serialize( {settingValue} ) != LibK.von.serialize( {storedSetting.value} ) then
+					if util.TableToJSON( {settingValue} ) != util.TableToJSON( {storedSetting.value} ) then
 						needsUpdate = true
 					end
 					settingToUpdate = storedSetting

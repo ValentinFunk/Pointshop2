@@ -191,7 +191,7 @@ function Pointshop2.RequestSettings( moduleName )
 		local inBuffer = GLib.StringInBuffer( transfer:GetData( ) )
 		local serializedData = inBuffer:LongString( )
 
-		local data = LibK.von.deserialize( serializedData )
+		local data = util.JSONToTable( serializedData )
 		def:Resolve( data )
 	end )
 	transfer:AddEventListener( "RequestRejected", function( )

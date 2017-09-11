@@ -313,6 +313,7 @@ function Pointshop2View:loadDynamics( versionHash )
 
 		local startTime = SysTime( )
 		local dynamicsDecoded = LibK.von.deserialize( data )[1]
+		local dynamicsDecoded = util.JSONToTable( data )[1]
 		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
 		self.dynamicsDecoded = dynamicsDecoded
@@ -522,7 +523,7 @@ function Pointshop2View:loadOutfits( versionHash )
 			KLogf( 2, "[PS2][ERROR] Couldn't load outfits resouce!" )
 			return
 		end
-		Pointshop2.Outfits = LibK.von.deserialize( data )[1]
+		Pointshop2.Outfits = util.JSONToTable( data )[1]
 		KLogf( 5, "[PS2] Decoded %i outfits from resource (version %s)", #Pointshop2.Outfits, versionHash )
 		self:controllerAction( "outfitsReceived" )
 
@@ -558,7 +559,7 @@ function Pointshop2View:loadSettings( versionHash )
 			KLogf( 2, "[PS2][ERROR] Couldn't load settings resouce!" )
 			return
 		end
-		Pointshop2.Settings.Shared = LibK.von.deserialize( data )[1]
+		Pointshop2.Settings.Shared = util.JSONToTable( data )[1]
 		KLogf( 5, "[PS2] Decoded settings from resource (version %s)", versionHash )
 
 		resolveIfWaiting( Pointshop2View:getInstance( ).clPromises.SettingsReceived )
@@ -573,7 +574,7 @@ function Pointshop2View:saveSettings( mod, realm, settingsTbl )
 	local outBuffer = GLib.StringOutBuffer( )
 	outBuffer:String( mod.Name )
 	outBuffer:String( realm )
-	outBuffer:LongString( LibK.von.serialize( settingsTbl ) )
+	outBuffer:LongString( util.TableToJSON( settingsTbl ) )
 
 	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )
 

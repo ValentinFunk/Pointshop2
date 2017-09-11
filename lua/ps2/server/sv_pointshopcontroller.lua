@@ -204,7 +204,7 @@ function Pointshop2Controller:loadDynamicInfo( )
 			generateNetTable( itemProperties )
 		}
 
-		local data = LibK.von.serialize( { tblData } )
+		local data = util.TableToJSON( { tblData } )
 		local resource = LibK.GLib.Resources.RegisterData( "Pointshop2", "dynamics", data )
 		resource:GetCompressedData( ) --Force compression now
 		KLogf( 4, "[Pointshop2] Dynamics package loaded, version %s, %i item mappings, %i categories, %i items", resource:GetVersionHash(), table.Count( itemMappings ), table.Count( categories ), table.Count( itemProperties ) )
