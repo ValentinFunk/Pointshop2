@@ -33,6 +33,7 @@ function PANEL:addNotification( panel )
 	table.insert( self.notificationsWaiting, panel )
 	panel:SetVisible( false )
 	panel:SetWide( self:GetWide( ) )
+	return panel
 end
 
 function PANEL:fadeIn( )
