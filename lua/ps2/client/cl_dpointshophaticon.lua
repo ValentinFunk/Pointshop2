@@ -12,14 +12,16 @@ function PANEL:PerformLayout()
 end
 
 function PANEL:SetItemClass( itemClass )
-	self.BaseClass.SetItemClass( self, itemClass )
-	
 	if itemClass.iconInfo.shop.useMaterialIcon then
+		DPointshopItemIcon.SetItemClass( self, itemClass )
 		if Material(itemClass.iconInfo.shop.iconMaterial) then
 			self.image:SetImage( itemClass.iconInfo.shop.iconMaterial )
 		else
 			LibK.GLib.Error("Invalid Material :" .. tostring(itemClass.iconInfo.shop.iconMaterial) .. " for item " .. self:GetPrintName())
 		end
+	else
+		-- Delegate to DCsgoItemIcon
+		self.BaseClass.SetItemClass( self, itemClass )
 	end
 end
 
