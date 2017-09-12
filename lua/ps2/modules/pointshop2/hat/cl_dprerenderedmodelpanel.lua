@@ -122,12 +122,10 @@ function PANEL:PaintActual( w, h )
 		end
 
 		pac.FlashlightDisable( true )
-		pac.ForceRendering( true )
 			pac.RenderOverride( self.Entity, "opaque" )
 			pac.RenderOverride( self.Entity, "translucent", true )
 			self.Entity:DrawModel( )
 			pac.RenderOverride( self.Entity, "translucent", true )
-		pac.ForceRendering( false )
 		pac.FlashlightDisable( false )
 
 		cam.IgnoreZ( false )

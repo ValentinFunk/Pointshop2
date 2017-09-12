@@ -193,12 +193,10 @@ function PANEL:Paint( w, h )
 		end
 		
 		--pac.HookEntityRender( self.Entity, self.pacOutfit )
-		pac.ForceRendering( true )
 			pac.RenderOverride( self.Entity, "opaque" )
 			pac.RenderOverride( self.Entity, "translucent", false )
 			self.Entity:DrawModel( )
 			pac.RenderOverride( self.Entity, "translucent", false )
-		pac.ForceRendering( false )
 		--pac.UnhookEntityRender( self.Entity, self.pacOutfit )
 		
 		cam.IgnoreZ( false )

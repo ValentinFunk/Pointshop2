@@ -65,13 +65,11 @@ local function preStart3d( self, ignorePreview )
 end
 
 local function preDrawModel( self )
-	pac.ForceRendering(true)
 	pac.RenderOverride(self.Entity, "opaque")
 end
 
 local function postDrawModel( self )
 	pac.RenderOverride(self.Entity, "translucent", true)
-	pac.ForceRendering(false)
 
 	for k, v in pairs( self.Entity.pac_outfits or {} ) do
 		pac.UnhookEntityRender( self.Entity, v )

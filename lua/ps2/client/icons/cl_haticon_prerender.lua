@@ -41,12 +41,10 @@ local function PaintHatIcon(itemClass)
 		end
 
 		pac.FlashlightDisable( true )
-		pac.ForceRendering( true )
 			pac.RenderOverride( entity, "opaque" )
 			pac.RenderOverride( entity, "translucent", true )
 			entity:DrawModel( )
 			pac.RenderOverride( entity, "translucent", true )
-		pac.ForceRendering( false )
 		pac.FlashlightDisable( false )
 
 		cam.IgnoreZ( false )
