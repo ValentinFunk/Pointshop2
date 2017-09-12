@@ -239,7 +239,16 @@ function Pointshop2Controller:adminRemoveItem(ply, itemId)
 		return Promise.Reject("Invalid Item")
 	end
 
-	return self:removeItemFromPlayer(ply, item)
+	local owner = item:GetOwner( )
+	if not IsValid(owner) then
+		KLogf(4, "Removing item from offline player...")
+		return WhenAllFinished{
+			Pointshop2.EquipmentSlot.removeWhere{itemId = itemId},
+			KInventory.Item.removeWhere{id = itemId}
+		}
+	else
+		return self:removeItemFromPlayer(ply, item)
+	end
 end
 
 function Pointshop2Controller:unequipItem( ply, slotName )
