@@ -43,11 +43,11 @@ function Pointshop2.ResetDatabase( )
 	return WhenAllFinished( promises )
 end
 
-/*
+--[[
 	This function tries to find and fix database errors.
 	Only use it in extreme cases and ALWAYS do a backup!
 	The function doesn't consider Lua defined items and detects them as DB errors, be very careful with that!
-*/
+]]--
 function Pointshop2.FixDatabase( )
 	Promise.Resolve( )
 	-- 1: Find all itemPersistences without a valid parent base persistence
@@ -66,11 +66,11 @@ function Pointshop2.FixDatabase( )
 						table.insert( promises, item:remove( ) )
 					end
 				end
-				return WhenAllFinished( promises )
+				return WhenAllFinished( promises, { noUnpack = true } )
 			end )
 			table.insert( promises, promise )
 		end
-		return WhenAllFinished( promises )
+		return WhenAllFinished( promises, { noUnpack = true } )
 	end )
 
 	-- 1.1: Find all hats with broken settings
@@ -85,7 +85,7 @@ function Pointshop2.FixDatabase( )
 				table.insert( promises, Pointshop2.ItemPersistence.removeWhere{ id = item.ItemPersistence.id } )
 			end
 		end
-		return WhenAllFinished( promises )
+		return WhenAllFinished( promises, { noUnpack = true } )
 	end )
 
 	-- 2: Find all items that don't have a valid class (base persistence)
@@ -101,7 +101,7 @@ function Pointshop2.FixDatabase( )
 				table.insert( promises, v:remove( ) )
 			end
 		end
-		return WhenAllFinished( promises )
+		return WhenAllFinished( promises, { noUnpack = true } )
 	end )
 
 	-- 3: Find all item mappings that don't have a valid class (base persistence)
@@ -120,7 +120,7 @@ function Pointshop2.FixDatabase( )
 			end )
 			table.insert( promises, promise )
 		end
-		return WhenAllFinished( promises )
+		return WhenAllFinished( promises, { noUnpack = true } )
 	end )
 
 	-- 4: Remove settings wrongfully in the DB
