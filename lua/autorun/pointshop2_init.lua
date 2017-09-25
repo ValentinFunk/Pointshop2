@@ -21,11 +21,11 @@ addCsLuaRecursive( "ps2/modules" )
 LibK.AddCSLuaDir( "kinv/items" )
 
 LibK.InitializeAddon{
-  addonName = "Pointshop2",             --Name of the addon
-  author = "Kamshak",                   --Name of the author
-  luaroot = "ps2",                      --Folder that contains the client/shared/server structure relative to the lua folder,
+	addonName = "Pointshop2",             --Name of the addon
+	author = "Kamshak",                   --Name of the author
+	luaroot = "ps2",                      --Folder that contains the client/shared/server structure relative to the lua folder,
 	loadAfterGamemode = false,
-	version = "2.14.0",
+	version = "2.19.0",
 	requires = { "KInventory" }
 }
 

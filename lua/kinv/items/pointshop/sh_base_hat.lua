@@ -7,6 +7,7 @@ ITEM.category = "Hats"
 ITEM.color = ""
 
 function ITEM:initialize( )
+	ITEM.super.initialize( self )
 	self.attached = false
 end
 

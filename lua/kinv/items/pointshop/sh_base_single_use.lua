@@ -1,9 +1,6 @@
 ITEM.PrintName = "Single Use Item Base"
 ITEM.baseClass = "base_pointshop_item"
 
-function ITEM:initialize( )
-end
-
 --CLIENTSIDE: When use button is clicked
 function ITEM:UseButtonClicked( )
 	self:ServerRPC( "InternalOnUse" )

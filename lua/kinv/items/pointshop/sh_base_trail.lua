@@ -6,9 +6,6 @@ ITEM.material = ""
 ITEM.category = "Trails"
 ITEM.color = ""
 
-function ITEM:initialize( )
-end
-
 function ITEM:AttachTrail( )
 	if SERVER then
 		if hook.Run( "PS2_VisualsShouldShow", self:GetOwner( ) ) == false then
