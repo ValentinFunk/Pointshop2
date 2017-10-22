@@ -60,10 +60,20 @@ function PANEL:Init( )
 		pnl.buyBtn = vgui.Create( "DButton", pnl )
 		pnl.buyBtn:SetText( "Buy Now" )
 		function pnl.buyBtn:DoClick( )
-			Pointshop2View:getInstance( ):startBuyItem( itemDesc.itemClass, type )
+			pnl.buyBtn._purchasing = true
+			pnl.buyBtn:SetDisabled( true )
+			pnl.buyBtn:SetText( "Buying..." )
+			Pointshop2View:getInstance( ):startBuyItem( itemDesc.itemClass, type ):Always( function() 
+				if not IsValid(pnl.buyBtn) then return end
+				pnl.buyBtn:SetDisabled( false )
+				pnl.buyBtn:SetText( "Buy Now" )
+				pnl.buyBtn._purchasing = false
+			end )
 		end
 
 		function pnl.buyBtn:Think( )
+			if pnl.buyBtn._purchasing then return end
+			
 			pnl.buyBtn:SetDisabled( false )
 			pnl.buyBtn:SetText( "Buy Now" )
 

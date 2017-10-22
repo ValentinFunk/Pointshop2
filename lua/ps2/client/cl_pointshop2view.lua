@@ -220,7 +220,7 @@ function Pointshop2View:slotChanged( slot )
 end
 
 function Pointshop2View:startBuyItem( itemClass, currencyType )
-	self:controllerTransaction( "buyItem", itemClass.className, currencyType )
+	return self:controllerTransaction( "buyItem", itemClass.className, currencyType )
 	:Fail( function( err )
 		self:displayError( "Error buying the item: " .. err )
 	end )

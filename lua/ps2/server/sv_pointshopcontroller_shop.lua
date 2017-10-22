@@ -24,37 +24,65 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 end
 
 function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, price, suppressNotify )
-	--[[
-		Wrap everything into a blocking transaction to make sure we don't get duplicate stuff
-		if mysql takes a little longer to respond and prevent any lua from queueing querys in
-		between.
-		TODO: look into alternative methods of locking the database as this is a bit performance heavy because it blocks the game thread,
-	]]--
-	LibK.SetBlocking( true )
+    local item = itemClass:new( )
+    local price = itemClass.Price
+    local currencyType, amount
+    if price.points then
+        currencyType = "points"
+        amount = price.points
+    elseif price.premiumPoints then
+        currencyType = "premiumPoints"
+        amount = price.premiumPoints
+    else
+        currencyType = "points"
+        amount = 0
+    end
+    item.purchaseData = purchaseData or {
+        time = os.time(),
+        amount = amount,
+        currency = currencyType,
+        origin = "LUA"
+    }
+    item.inventory_id = ply.PS2_Inventory.id
+	item:preSave()
 
-	return Pointshop2.DB.DoQuery( "BEGIN" )
-	:Then( function( )
-		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] - price
-		return ply.PS2_Wallet:save( )
-	end )
-	:Then( function( )
-		return self:easyAddItem( ply, itemClass.className, {
-			time = os.time(),
-			amount = price,
-			currency = currencyType,
-			origin = "SHOP"
-		}, suppressNotify )
-	end )
-	:Then( function( item )
-		Pointshop2.DB.DoQuery( "COMMIT" )
-		LibK.SetBlocking( false )
-
-		self:sendWallet( ply )
-		return item
-	end, function( errid, err )
-		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		LibK.SetBlocking( false )
-	end )
+    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s", currencyType, currencyType, Pointshop2.DB.SQLStr(amount))
+	return Promise.Resolve():Then(function()
+        if Pointshop2.DB.CONNECTED_TO_MYSQL then
+            local transaction = LibK.TransactionMysql:new(Pointshop2.DB)
+            transaction:begin()
+            transaction:add(item:getSaveSql()) -- Create Item
+            transaction:add(takePointsSql) -- Take Points
+            return transaction:commit():Then(function()
+                return Pointshop2.DB.DoQuery("SELECT LAST_INSERT_ID() as id")
+            end ):Then(function(id)
+                item.id = id[1].id
+                return item
+            end):Then(Promise.Resolve, function(err)
+                LibK.GLib.Error("Pointshop2Controller:internalBuyItem - Error running sql " + tostring(err))
+                return Pointshop2.DB.DoQuery("ROLLBACK"):Then( function()
+                    return Promise.Reject( "Error!" )
+                end )
+            end )
+        else
+            sql.Begin()
+            Pointshop2.DB.DoQuery(takePointsSql):Then(function()
+                return item:save()
+            end):Then(function()
+                sql.Commit()
+            end, function(err)
+                sql.Query("ROLLBACK")
+                return Promise.Reject(err)
+            end)
+            return Promise.Resolve(item)
+        end
+    end):Then(function(item)
+        ply.PS2_Inventory:notifyItemAdded(item)
+        item:OnPurchased( )
+        self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
+        self:sendWallet( ply )
+        return item
+    end)
 end
 
 function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
@@ -128,18 +156,6 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 end
 
 function Pointshop2Controller:sellItem( ply, itemId )
-	local transactionDef = Deferred( )
-
-	LibK.SetBlocking( true )
-	Pointshop2.DB.DoQuery( "BEGIN" )
-	:Fail( function( errid, err )
-		KLogf( 2, "Error starting transaction: %s", err )
-
-		transactionDef:Reject( 0, "A Technical error occured(1), your sale was not carried out." )
-		return transactionDef:Promise()
-	end )
-
-
 	local item = KInventory.ITEMS[itemId]
 	if not item then
 		KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), itemId )
@@ -163,28 +179,27 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		end
 	end
 
-	local def
-	if ply.PS2_Inventory:containsItem( item ) then
-		def = ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
-	elseif slot then
-		def = slot:removeItem( item ):Then( function( )
-			self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		end )
-	end
-
-	def:Then( function( )
+	LibK.SetBlocking( true )
+	Pointshop2.DB.DoQuery( "BEGIN" )
+	return Promise.Resolve():Then(function()
+		if ply.PS2_Inventory:containsItem( item ) then
+			return ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
+		elseif slot then
+			return slot:removeItem( item ):Then( function( )
+				self:startView( "Pointshop2View", "slotChanged", ply, slot )
+			end )
+		end
+	end):Then( function( )
 		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 		item:OnHolster( )
 		item:OnSold( )
 		local amount, currencyType = item:GetSellPrice( )
 		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] + amount
 		return ply.PS2_Wallet:save( )
-	end )
-	:Then( function( )
+	end ):Then( function( )
 		KInventory.ITEMS[item.id] = nil
 		return item:remove( ) --remove the actual db entry
-	end )
-	:Then( function( )
+	end ):Then( function( )
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
 		hook.Run( "PS2_SoldItem", ply )
 
@@ -192,16 +207,11 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		LibK.SetBlocking( false )
 		self:sendWallet( ply )
 
-		transactionDef:Resolve( )
 	end, function( errid, err )
 		KLogf( 2, "Error selling item: %s", err )
 		Pointshop2.DB.DoQuery( "ROLLBACK" )
 		LibK.SetBlocking( false )
-
-		transactionDef:Reject( errid, "A technical error occured (2), your sale was not carried out." )
 	end )
-
-	return transactionDef:Promise( )
 end
 
 --Remove Item, clear inventory references etc.
