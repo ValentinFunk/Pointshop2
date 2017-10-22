@@ -228,7 +228,9 @@ function Pointshop2Controller:sendDynamicInfo( ply )
 end
 
 function Pointshop2Controller:dynamicsReceived( ply )
-	ply.dynamicsReceivedPromise:Resolve( )
+	if getPromiseState( ply.dynamicsReceivedPromise ) == "pending" then
+		ply.dynamicsReceivedPromise:Resolve( )
+	end
 end
 
 --[[
