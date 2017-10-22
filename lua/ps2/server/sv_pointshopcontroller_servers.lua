@@ -70,33 +70,24 @@ function Pointshop2Controller:migrateServer( ply, serverId )
 	end )
 end
 
+-- Update the base ps2_itempsersistences table ranks and reload the item class.
 function Pointshop2Controller:updateServerRestrictions( ply, itemClassNames, serverIds )
 	local saveTbl = {}
 	for k, v in pairs( itemClassNames ) do
 		saveTbl[k]= tonumber(v)
 	end
 	local saveStr = table.concat( saveTbl, "," )
-
-	return Pointshop2.ItemPersistence.getDbEntries( "WHERE id IN (" .. saveStr .. ")" )
+  
+	local dbEntries = Pointshop2.ItemPersistence.getDbEntries( "WHERE id IN (" .. saveStr .. ")" )
 	:Then( function( itemPersistences )
-		local promises = {}
-		for k, itemClassName in pairs( itemClassNames ) do
-			local persistence
-			for _, v in pairs( itemPersistences ) do
-				if tonumber( v.id ) == tonumber( itemClassName ) then
-					persistence = v
-				end
-			end
-			if not persistence then
-				return Promise.Reject( "Invalid Item Class " .. itemClassName )
-			end
+		return Promise.Map( itemPersistences, function( persistence )
+			-- Update the ranks
 			persistence.servers = serverIds
-			table.insert( promises, persistence:save( ) )
-		end
-		--Could optimize this to single query but cba
-		return WhenAllFinished( promises )
+			return persistence:save ()
+		end )
 	end )
-	:Then( function( )
-		return self:moduleItemsChanged( )
+	:Then( function( persistences )
+		local persistenceIds = LibK._.map( persistences, function( p ) return tostring( p.id ) end )
+		self:notifyItemsChanged( persistenceIds )
 	end )
 end

@@ -1,3 +1,4 @@
+-- Update the base ps2_itempsersistences table ranks and reload the item class.
 function Pointshop2Controller:updateRankRestrictions( ply, itemClassNames, ranks )
   local saveTbl = {}
 	for k, v in pairs( itemClassNames ) do
@@ -5,33 +6,17 @@ function Pointshop2Controller:updateRankRestrictions( ply, itemClassNames, ranks
 	end
 	local saveStr = table.concat( saveTbl, "," )
 
-	return Pointshop2.ItemPersistence.getDbEntries( "WHERE id IN (" .. saveStr .. ")" )
+	local dbEntries = Pointshop2.ItemPersistence.getDbEntries( "WHERE id IN (" .. saveStr .. ")" )
 	:Then( function( itemPersistences )
-		local promises = {}
-
-    -- Apply changes
-		for k, itemClassName in pairs( itemClassNames ) do
-      -- Find persistence object from result set
-			local persistence
-			for _, v in pairs( itemPersistences ) do
-				if tonumber( v.id ) == tonumber( itemClassName ) then
-					persistence = v
-				end
-			end
-
-      -- Check that user didn't pass an invalid class name
-			if not persistence then
-				return Promise.Reject( "Invalid Item Class " .. itemClassName )
-			end
-
-      -- Update the ranks
+		return Promise.Map( itemPersistences, function( persistence )
+			-- Update the ranks
 			persistence.ranks = ranks
-			table.insert( promises, persistence:save( ) )
-		end
-
-		return WhenAllFinished( promises )
+			return persistence:save ()
+		end )
 	end )
-	:Then( function( )
-		return self:moduleItemsChanged( )
+	:Then( function( persistences )
+		PrintTable(persistences)
+		local persistenceIds = LibK._.map( persistences, function( p ) return tostring( p.id ) end )
+		self:notifyItemsChanged( persistenceIds )
 	end )
 end

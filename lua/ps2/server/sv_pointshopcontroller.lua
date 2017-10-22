@@ -535,45 +535,52 @@ function Pointshop2Controller:loadModuleItems( )
 	return WhenAllFinished( promises )
 end
 
-function Pointshop2Controller:updateItemPersistence( saveTable )
-	local class = Pointshop2.GetItemClassByName( saveTable.baseClass )
-	local outfitsChanged = saveTable.baseClass == "base_hat" and saveTable.outfitsChanged
-
-	return class.getPersistence( ).findByItemPersistenceId( saveTable.persistenceId )
-	:Then( function( persistentItem )
-		-- Update cached copy for new players
-		for k, v in pairs( self.cachedPersistentItems ) do
-			if v.itemPersistenceId == saveTable.persistenceId then
-				self.cachedPersistentItems[k] = persistentItem
-			end
+-- Reloads a changed item/perseistence from the database and propagates the changes
+function Pointshop2Controller:notifyItemsChanged( itemClassNames, outfitsChanged )
+	local outfitsLoadedPromise
+	if outfitsChanged then
+		for k, v in pairs( player.GetAll( ) ) do
+			v.outfitsReceivedPromise = Deferred( )
 		end
-
-		-- Update KInventory.Items entry
-		Pointshop2.LoadPersistentItem( persistentItem )
-
-		-- If outfits have changed reload & resend outfits
-		if outfitsChanged then
-			for k, v in pairs( player.GetAll( ) ) do
-				v.outfitsReceivedPromise = Deferred( )
+		
+		outfitsLoadedPromise = self:loadOutfits( ):Then(function()
+			for k, v in pairs(player.GetAll()) do
+				Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( v )
 			end
+		end)
+	end
 
-			return self:loadOutfits( ):Then( function( )
-				return persistentItem
+	return Promise.Map( itemClassNames, function( itemClassName )
+		local class = Pointshop2.GetItemClassByName( itemClassName )
+		return class.getPersistence( ).findByItemPersistenceId( itemClassName )
+		:Then( function( updatedPersistence )
+			-- Update cached copy for new players
+			for k, v in pairs( self.cachedPersistentItems ) do
+				if v.itemPersistenceId == updatedPersistence.itemPersistenceId then
+					self.cachedPersistentItems[k] = updatedPersistence
+				end
+			end
+	
+			-- Update KInventory.Items entry
+			Pointshop2.LoadPersistentItem( updatedPersistence )
+
+			return updatedPersistence
+		end )
+	end ):Then( function( updatedPersistences) 
+		-- If outfits have changed wait until outfits have been reloaded
+		if outfitsChanged then
+			return outfitsLoadedPromise:Then( function( )
+				-- Send info to players as soon as they received the outfits change
+				return Promise.Map( player.GetAll( ), function( ply ) 
+					return ply.outfitsReceivedPromise:Then( function()
+						self:startView( "Pointshop2View", "updateItemPersistences", ply, updatedPersistences )
+					end )
+				end )
 			end )
 		end
 
-		return persistentItem
-	end )
-	:Then( function( persistentItem )
-		-- Send info to players as soon as they received the outfits change
-		if outfitsChanged then
-			for k, v in pairs( player.GetAll( ) ) do
-				v.outfitsReceivedPromise:Done(function( )
-						self:startView( "Pointshop2View", "updateItemPersistence", v, persistentItem )
-				end)
-			end
-		end
-		self:startView( "Pointshop2View", "updateItemPersistence", player.GetAll(), persistentItem )
+		-- send straight away if no outfit changes
+		self:startView( "Pointshop2View", "updateItemPersistences", player.GetAll(), updatedPersistences )
 	end )
 end
 
@@ -591,7 +598,8 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 		KLogf( 4, "[Pointshop2] Saved item %s", saveTable.name )
 		-- Use shortcut path for updates, do a full reload on newly created items
 		if isUpdate then
-			return self:updateItemPersistence( saveTable )
+			local outfitsChanged = saveTable.baseClass == "base_hat" and saveTable.outfitsChanged
+			return self:notifyItemsChanged( { tostring( saveTable.persistenceId ) }, outfitsChanged )
 		else
 			local itemClass = Pointshop2.GetItemClassByName( saved.baseClass )
 			local outfitsChanged = class == KInventory.Items.base_hat or subclassOf( KInventory.Items.base_hat, itemClass )
@@ -603,22 +611,25 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 end
 
 function Pointshop2Controller:moduleItemsChanged( outfitsChanged )
-	for k, v in pairs( player.GetAll( ) ) do
-		v.outfitsReceivedPromise = Deferred( )
+	local outfitsLoadedPromise
+	if outfitsChanged then
+		for k, v in pairs( player.GetAll( ) ) do
+			v.outfitsReceivedPromise = Deferred( )
+		end
+		
+		outfitsLoadedPromise = self:loadOutfits( ):Then(function()
+			for k, v in pairs(player.GetAll()) do
+				Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( v )
+			end
+		end)
 	end
 
 	return self:loadModuleItems( )
 	:Then( function( )
-		if outfitsChanged == false then
-			return Promise.Resolve( )
-		end
-		return self:loadOutfits( )
-	end )
-	:Then( function( )
 		if outfitsChanged then
-			for k, v in pairs(player.GetAll()) do
-				Pointshop2Controller:getInstance( ):SendInitialOutfitPackage( v )
-			end
+			return outfitsLoadedPromise:Then( function()
+				return self:loadDynamicInfo( )
+			end )
 		end
 
 		return self:loadDynamicInfo( )

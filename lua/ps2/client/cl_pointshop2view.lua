@@ -273,25 +273,29 @@ end
 /*
 	Called when a shop item (item persistence) has been updated
 */
-function Pointshop2View:updateItemPersistence( itemPersistence )
+function Pointshop2View:updateItemPersistences( itemPersistences )
 	if not self.itemProperties then
 		KLogf(3, "[WARN] Player received item update but items weren't loaded yet")
 		return
 	end
 
-	-- Update persistence object cache
-	for k, v in pairs( self.itemProperties ) do
-		if v.itemPersistenceId == itemPersistence.itemPersistenceId then
-			self.itemProperties[k] = itemPersistence
+	for _, itemPersistence in pairs( itemPersistences ) do
+		-- Update persistence object cache
+		for k, v in pairs( self.itemProperties ) do
+			if v.itemPersistenceId == itemPersistence.itemPersistenceId then
+				self.itemProperties[k] = itemPersistence
+			end
 		end
-	end
+		
+		-- Update class (KInventory.Items[id])
+		local itemClass = Pointshop2.LoadPersistentItem( itemPersistence )
+	
+		-- Regenerate item
+		if LibK.DermaInherits( itemClass:GetPointshopIconControl( ), "DCsgoItemIcon" ) then
+			Pointshop2.RequestIcon( itemClass, true )
+		end
 
-	-- Update class (KInventory.Items[id])
-	local itemClass = Pointshop2.LoadPersistentItem( itemPersistence )
-
-	-- Regenerate item
-	if LibK.DermaInherits( itemClass:GetPointshopIconControl( ), "DCsgoItemIcon" ) then
-		Pointshop2.RequestIcon( itemClass, true )
+		KLogf( 5, "[Pointshop 2] Reloaded item %s", itemPersistence.ItemPersistence.name )
 	end
 
 	-- Update Shop
@@ -300,7 +304,6 @@ function Pointshop2View:updateItemPersistence( itemPersistence )
 		hook.Call( "PS2_DynamicItemsUpdated" )
 		KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 	end )
-	KLogf( 5, "[Pointshop 2] Reloaded item %s", itemPersistence.ItemPersistence.name )
 end
 
 function Pointshop2View:loadDynamics( versionHash )
@@ -326,7 +329,7 @@ function Pointshop2View:loadDynamics( versionHash )
 		self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
 
 		--Inform server
-		timer.Create( "CheckFullyLoaded", 0.1, 0, function()
+		timer.Create( "CheckValidPlayerId", 0.1, 0, function()
 			local loaded = true
 			for k, v in pairs( player.GetAll( ) ) do
 				if v == LocalPlayer( ) && v:GetNWInt("KPlayerId", -1) == -1 then
@@ -334,7 +337,7 @@ function Pointshop2View:loadDynamics( versionHash )
 				end
 			end
 			if loaded then
-				timer.Destroy( "CheckFullyLoaded" )
+				timer.Destroy( "CheckValidPlayerId" )
 				self:controllerAction( "dynamicsReceived" )
 			end
 		end )
