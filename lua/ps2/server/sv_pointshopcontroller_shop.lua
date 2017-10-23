@@ -46,7 +46,7 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
     item.inventory_id = ply.PS2_Inventory.id
 	item:preSave()
 
-    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s", currencyType, currencyType, Pointshop2.DB.SQLStr(amount))
+    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE ownerId = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(amount), ply.kPlayerId)
 	return Promise.Resolve():Then(function()
         if Pointshop2.DB.CONNECTED_TO_MYSQL then
             local transaction = LibK.TransactionMysql:new(Pointshop2.DB)
