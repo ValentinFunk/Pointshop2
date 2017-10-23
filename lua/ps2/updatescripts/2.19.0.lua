@@ -29,6 +29,10 @@ end )
 
     return DB.DoQuery("SELECT id, data FROM kinv_items")
         :Then( function(data)
+            if not data or #data == 0 then
+                return
+            end
+            
             -- Update data in chunks of 50 items
             local splitted = LibK.splitTable( data, 50 )
             local promises = { }
