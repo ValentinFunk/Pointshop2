@@ -261,8 +261,14 @@ function PANEL:Validate( saveTable )
 		return false, "Please create at least one outfit"
 	end
 
-	if saveTable.useMaterialIcon and #saveTable.iconMaterial == 0 then
+	local shopIcon, invIcon = saveTable.iconInfo.shop, saveTable.iconInfo.inv
+
+	if shopIcon.useMaterialIcon and #shopIcon.iconMaterial == 0 then
 		return false, "Please supply a material path"
+	end
+
+	if shopIcon.useMaterialIcon and Material(shopIcon.iconMaterial):GetName() == '___error' then
+		return false, "Material " .. tostring(shopIcon.iconMaterial) .. " was not found. Please use e.g. pointshop2/small43.png (not materials/pointshop2/small43.png)"
 	end
 
 	if table.Count( saveTable.validSlots ) == 0 then
