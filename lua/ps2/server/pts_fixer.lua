@@ -44,20 +44,28 @@ local function setPointsGlobal(ply, cmd, args)
     end
 
     local currencyType, amount = args[1], args[2]
-    if not table.HasValue({"points", "premiumPoints"}, currencyType) then
-        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 1 (currencyType). Valid: points, premiumPoints. Given: " .. currencyType)
+    
+    if not currencyType then
+        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 1 (curencyType). Allowed: points, premiumPoints\n")
         print("Usage: ps2_setwallet_all [points|premiumPoints] [amount]")
         print("       Sets all wallets points or premiumPoints to the amount specified.")
         return
     end
 
     if not amount then
-        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 2 (amount).")
+        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 2 (amount).\n")
         print("Usage: ps2_setwallet_all [points|premiumPoints] [amount]")
         print("       Sets all wallets points or premiumPoints to the amount specified.")
         return
     end
 
+    if not table.HasValue({"points", "premiumPoints"}, currencyType) then
+        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 1 (currencyType). Valid: points, premiumPoints. Given: " .. currencyType .. "\n")
+        print("Usage: ps2_setwallet_all [points|premiumPoints] [amount]")
+        print("       Sets all wallets points or premiumPoints to the amount specified.")
+        return
+    end
+    
     print("[FIXPTS] -> Setting all wallet's " .. currencyType .. " to " .. amount)
     Pointshop2.DB.ConnectionPromise:Then(function()
         print('[FIXPTS] -> Connected to database')
@@ -74,8 +82,9 @@ local function updatePoints(ply, cmd, args)
     end
 
     local currencyType, amount = args[1], args[2]
-    if not table.HasValue({"points", "premiumPoints"}, currencyType) then
-        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 1 (currencyType). Valid: points, premiumPoints. Given: " .. currencyType)
+    if not currencyType or not table.HasValue({"points", "premiumPoints"}, currencyType) then
+        currencyType = tostring(currencyType)
+        MsgC(Color(255, 0, 0), "ERROR: Invalid argument 1 (currencyType). Valid: points, premiumPoints. Given: " .. currencyType .. "\n")
         print("Usage: ps2_updatewallet_all [points|premiumPoints] [amount]")
         print("       Adds the specified amount of points/premiumPoints to all player's wallets. Negative numbers take points away.")
         return
