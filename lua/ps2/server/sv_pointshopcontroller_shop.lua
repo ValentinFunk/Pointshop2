@@ -25,28 +25,16 @@ end
 
 function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, price, suppressNotify )
     local item = itemClass:new( )
-    local price = itemClass.Price
-    local currencyType, amount
-    if price.points then
-        currencyType = "points"
-        amount = price.points
-    elseif price.premiumPoints then
-        currencyType = "premiumPoints"
-        amount = price.premiumPoints
-    else
-        currencyType = "points"
-        amount = 0
-    end
-    item.purchaseData = purchaseData or {
+    item.purchaseData = {
         time = os.time(),
-        amount = amount,
+        amount = price,
         currency = currencyType,
         origin = "LUA"
     }
     item.inventory_id = ply.PS2_Inventory.id
 	item:preSave()
 
-    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE ownerId = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(amount), ply.kPlayerId)
+    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE ownerId = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(price), ply.kPlayerId)
 	return Promise.Resolve():Then(function()
         if Pointshop2.DB.CONNECTED_TO_MYSQL then
             local transaction = LibK.TransactionMysql:new(Pointshop2.DB)
