@@ -26,7 +26,7 @@ function PANEL:Paint()
 end
 
 function PANEL:SizeToContents()
-	self:SetTall( self:GetNumLines( ) * self.textHeight * 1.2 )
+	self:SetTall( math.max(self:GetNumLines( ) * self.textHeight * 1.2 + 5, self.textHeight * 1.2 * 2 ) )
 
 	if self.maxHeight then
 		if self:GetTall( ) > self.maxHeight then
