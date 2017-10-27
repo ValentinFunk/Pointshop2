@@ -1,4 +1,9 @@
-local function fixPts()
+local function fixPts(ply, cmd, args)
+    if IsValid(ply) then
+        ply:ChatPrint("Please run this command via rcon/server console")
+        return
+    end
+
     if not Pointshop2 or not Pointshop2.DB or not Pointshop2.DB.ConnectionPromise then
         MsgC(Color(255, 0, 0), "ERROR: Pointshop2 is not loaded yet. Please rerun.")
         return
@@ -38,6 +43,11 @@ end
 concommand.Add("ps2_fixpoints", fixPts)
 
 local function setPointsGlobal(ply, cmd, args)
+    if IsValid(ply) then
+        ply:ChatPrint("Please run this command via rcon/server console")
+        return
+    end
+
     if not Pointshop2 or not Pointshop2.DB or not Pointshop2.DB.ConnectionPromise then
         MsgC(Color(255, 0, 0), "ERROR: Pointshop2 is not loaded yet. Please rerun.")
         return
@@ -76,6 +86,11 @@ concommand.Add("ps2_setwallet_all", setPointsGlobal)
 
 
 local function updatePoints(ply, cmd, args)
+    if IsValid(ply) then
+        ply:ChatPrint("Please run this command via rcon/server console")
+        return
+    end
+    
     if not Pointshop2 or not Pointshop2.DB or not Pointshop2.DB.ConnectionPromise then
         MsgC(Color(255, 0, 0), "ERROR: Pointshop2 is not loaded yet. Please rerun.")
         return
