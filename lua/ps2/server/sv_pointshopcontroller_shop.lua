@@ -35,13 +35,14 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
 	item:preSave()
 
     local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE ownerId = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(price), ply.kPlayerId)
-	return Promise.Resolve():Then(function()
+	return Promise.Resolve()
+	:Then(function()
         if Pointshop2.DB.CONNECTED_TO_MYSQL then
             local transaction = LibK.TransactionMysql:new(Pointshop2.DB)
             transaction:begin()
             transaction:add(item:getSaveSql()) -- Create Item
             transaction:add(takePointsSql) -- Take Points
-            return transaction:commit():Then(function()
+			return transaction:commit():Then(function()
                 return Pointshop2.DB.DoQuery("SELECT LAST_INSERT_ID() as id")
             end ):Then(function(id)
                 item.id = id[1].id
@@ -54,17 +55,18 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
             end )
         else
             sql.Begin()
-            Pointshop2.DB.DoQuery(takePointsSql):Then(function()
+            return Pointshop2.DB.DoQuery(takePointsSql):Then(function()
                 return item:save()
             end):Then(function()
-                sql.Commit()
+				sql.Commit()
+				return Promise.Resolve(item)
             end, function(err)
                 sql.Query("ROLLBACK")
                 return Promise.Reject(err)
             end)
-            return Promise.Resolve(item)
         end
-    end):Then(function(item)
+	end):Then(function(item)
+		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] - price
         ply.PS2_Inventory:notifyItemAdded(item)
         item:OnPurchased( )
         self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
