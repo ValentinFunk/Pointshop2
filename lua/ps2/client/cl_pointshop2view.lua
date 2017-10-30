@@ -596,7 +596,7 @@ function Pointshop2View:serverSettingsSaved( modName, err )
 end
 
 function Pointshop2View:sendPoints( ply, points )
-	self:controllerAction( "sendPoints", ply, points )
+	return self:controllerTransaction( "sendPoints", ply, points )
 end
 
 function Pointshop2View:resetToDefaults( )

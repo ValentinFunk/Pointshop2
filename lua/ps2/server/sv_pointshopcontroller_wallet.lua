@@ -34,7 +34,7 @@ function Pointshop2Controller:broadcastWalletChanges( wallet )
 end
 
 function Pointshop2Controller:sendWallet( ply )
-	Pointshop2.Wallet.findByOwnerId( ply.kPlayerId )
+	return Pointshop2.Wallet.findByOwnerId( ply.kPlayerId )
 	:Then( function( wallet )
 		if not wallet then
 			local wallet = Pointshop2.Wallet:new( )

@@ -47,7 +47,9 @@ function PANEL:Init( )
 	self.wang:DockMargin( 5, 7, 5, 0 )
 	self.wang:SetDisabled( true )
 	function self.wang.OnValueChanged( )
-		self:SetPoints( math.Clamp( self.wang:GetValue( ), 0, LocalPlayer().PS2_Wallet.points ) )
+		local clamped = math.Clamp( self.wang:GetValue( ), 0, tonumber(LocalPlayer().PS2_Wallet.points) )
+		print(clamped,self.wang:GetValue( ), 0, tonumber(LocalPlayer().PS2_Wallet.points) )
+		self:SetPoints( clamped )
 	end	
 	function self.wang.OnKeyCodeTyped( pnl, code )
 		if code == KEY_ENTER then
@@ -92,10 +94,10 @@ function PANEL:Init( )
 		self:InvalidateLayout( )
 	end
 	function self.confirmTop:Paint( w, h )
-		surface.SetDrawColor( color_black )
-		--surface.DrawRect( 0, 0, w, h )
+		-- surface.SetDrawColor( color_black )
+		-- surface.DrawRect( 0, 0, w, h )
 		if self.parsed then
-			self.parsed:Draw( 0, 0, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM )
+			self.parsed:Draw( 0, 0 )
 		end
 	end
 	function self.confirmTop:PerformLayout( )
@@ -113,8 +115,12 @@ function PANEL:Init( )
 	self.sendBtn:SetDisabled( true )
 	self.sendBtn:DockMargin( 0, 5, 0, 5 )
 	function self.sendBtn.DoClick( )
-		Pointshop2View:getInstance( ):sendPoints( self.selectedPly, self.points )
-		self:Remove( )
+		self.sendBtn:SetDisabled( true )
+		self.sending = true
+		self.sendBtn:SetText( "Sending..." )
+		Pointshop2View:getInstance( ):sendPoints( self.selectedPly, self.points ):Always(function()
+			self:Remove( )
+		end)
 	end
 end
 
@@ -145,6 +151,8 @@ function PANEL:SetPoints( points )
 end
 
 function PANEL:OnChange( )
+	if self.sending then return end
+	
 	self.wang:SetDisabled( not IsValid( self.selectedPly ) )
 	
 	if self.points > 0 and IsValid( self.selectedPly ) then
@@ -153,11 +161,5 @@ function PANEL:OnChange( )
 		self.sendBtn:SetDisabled( true )
 	end
 end	
-
-function PANEL:PerformLayout( )
-	DFrame.PerformLayout( self )
-	
-	
-end
 
 vgui.Register( "DPointshopGivePointsFrame", PANEL, "DFrame" )
