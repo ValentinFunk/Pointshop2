@@ -68,50 +68,26 @@ end
 
 function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newValue )
 	if not table.HasValue( { "points", "premiumPoints" }, currencyType ) then
-		local def = Deferred( )
-		def:Reject( 0, "Invalid currency type " .. currencyType )
-		return def:Promise( )
+		return Promise.Reject( 1, "Invalid currency type " .. currencyType )
 	end
 
 	if not LibK.isProperNumber( newValue ) then
 		return Promise.Reject( 0, "Improper number passed" )
 	end
 
-	local walletPromise = Deferred( )
-	local walletFound = false
-	local shouldBlock = Pointshop2.GetSetting( "Pointshop 2", "AdvancedSettings.ShouldBlock" )
-	for k, v in pairs( player.GetAll( ) ) do
-		if v.kPlayerId == kPlayerId then
-			if v.PS2_Wallet then
-				walletPromise:Resolve( v.PS2_Wallet )
-				walletFound = true
+	return Promise.Resolve():Then(function()
+		for k, v in pairs( player.GetAll( ) ) do
+			if v.kPlayerId == kPlayerId then
+				if v.PS2_Wallet then
+					return v.PS2_Wallet
+				end
 			end
 		end
-	end
 
-	if not walletFound then
-		Pointshop2.Wallet.findByOwnerId( kPlayerId )
-		:Done( function( wallet )
-			walletPromise:Resolve( wallet )
-		end )
-		:Fail( function( errid, err )
-			walletPromise:Reject( errid, err )
-		end )
-	end
-
-	if walletFound and shouldBlock then --no need to block if player is offline
-		Pointshop2.DB:SetBlocking( true ) --don't want player to sell/buy stuff during our update
-	end
-
-	newValue = tonumber( newValue )
-	return walletPromise:Then( function( wallet )
+		return Pointshop2.Wallet.findByOwnerId( kPlayerId )
+	end):Then( function( wallet )
 		wallet[currencyType] = newValue
 		return wallet:save( )
-	end )
-	:Always( function( )
-		if walletFound and shouldBlock then
-			Pointshop2.DB:SetBlocking( false )
-		end
 	end )
 end
 
