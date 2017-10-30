@@ -190,8 +190,9 @@ end
 function Pointshop2Controller:loadDynamicInfo( )
 	LibK.GLib.Resources.Resources["Pointshop2/dynamics"] = nil --Force resource reset
 	self.dynamicsResource = nil
-	return WhenAllFinished{ Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ),
-							loadOrCreateCategoryTree( )
+	return WhenAllFinished{ 
+		Pointshop2.ItemMapping.getDbEntries( "WHERE 1" ),
+		loadOrCreateCategoryTree( )
 	}
 	:Then( function( itemMappings, categories )
 		local itemProperties = self.cachedPersistentItems
@@ -289,13 +290,13 @@ local function initPlayer( ply )
 	Pointshop2.SettingsLoadedPromise:Then( function( )
 		controller:SendInitialSettingsPackage( ply )
 	end )
-	Pointshop2.ModuleItemsLoadedPromise
-	:Then( function( )
+	Pointshop2.ModuleItemsLoadedPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
-		return ply.dynamicsReceivedPromise
-	end )
-	:Done( function( )
-		controller:sendWallet( ply )
+		return WhenAllFinished{
+			ply.dynamicsReceivedPromise,
+			controller:sendWallet( ply )
+		}
+	end ):Done( function( )
 		--TODO: Make a proper promise/transaction for this
 		timer.Simple( 2, function( )
 			WhenAllFinished{ controller:initializeInventory( ply ),
@@ -685,44 +686,47 @@ Pointshop2.SettingsLoadedPromise:Done( function( )
 end )
 
 function Pointshop2Controller:sendPoints( ply, targetPly, points )
-	points = math.floor( points )
+	points = tonumber(math.floor( points ))
 
 	if points < 0 then
 		KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
 		return
 	end
 
-	if points > ply.PS2_Wallet.points then
+	if points > tonumber(ply.PS2_Wallet.points) then
 		KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
 		return
 	end
 
 	if not LibK.isProperNumber( points ) then
-	KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
+		KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
 		return
 	end
 
 	if not IsValid( targetPly ) then
 		--This could legitimately happen
-		KLogf( 4, "Player %s tried to send points to an invalid player!", ply:Nick( ) )
+		KLogf( 2, "Player %s tried to send points to an invalid player!", ply:Nick( ) )
 		return
 	end
 
 	if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SendPointsEnabled" ) == false then
-		KLogf( 3, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
+		KLogf( 2, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
 		return
 	end
 
-	self:updatePlayerWallet( ply.kPlayerId, "points", ply.PS2_Wallet.points - points )
-	:Done( function( wallet )
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), wallet )
-	end )
-
-	self:updatePlayerWallet( targetPly.kPlayerId, "points", targetPly.PS2_Wallet.points + points )
-	:Done( function( wallet )
-		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( targetPly ), wallet )
-	end )
-
+	local transaction = Pointshop2.DB.Transaction()
+	transaction:begin()
+	transaction:add(Format("UPDATE ps2_wallet SET points = points + %i WHERE id = %i", points, targetPly.PS2_Wallet.id))
+	transaction:add(Format("UPDATE ps2_wallet SET points = points - %i WHERE id = %i", points, ply.PS2_Wallet.id))
+	return transaction:commit():Then(function()
+		ply.PS2_Wallet.points = ply.PS2_Wallet.points - points
+		targetPly.PS2_Wallet.points = targetPly.PS2_Wallet.points + points
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), ply.PS2_Wallet )
+		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( targetPly ), targetPly.PS2_Wallet )
+	end, function(err)
+		Pointshop2.DB.DoQuery("ROLLBACK")
+		return Promise.Reject(err)
+	end)
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
 end
 
