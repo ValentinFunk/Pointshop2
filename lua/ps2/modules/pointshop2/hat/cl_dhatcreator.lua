@@ -261,6 +261,10 @@ function PANEL:Validate( saveTable )
 		return false, "Please create at least one outfit"
 	end
 
+	if not saveTable.outfits[Pointshop2.HatPersistence.ALL_MODELS] then
+		return false, "Please add a base outfit"
+	end
+
 	local shopIcon, invIcon = saveTable.iconInfo.shop, saveTable.iconInfo.inv
 
 	if shopIcon.useMaterialIcon and #shopIcon.iconMaterial == 0 then

@@ -15,6 +15,14 @@ local directionalLight = {
 }
 local function PaintHatIcon(itemClass)
 	local outfit = itemClass.getOutfitForModel(plyModel)
+	if not outfit then
+		surface.SetDrawColor(255, 0, 0)
+		surface.DrawRect(0, 0, 512, 512)
+		draw.SimpleText( "Mising Outfit", "PS2_LargeHeading", 256, 256, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+		Pointshop2View:getInstance():displayError( "Item " .. itemClass:GetPrintName() .. " has no base outfit! Please add one. (tell an admin)" )
+		PrintTable(itemClass)
+		return
+	end
 	pac.SetupENT( entity )
 	entity:AttachPACPart(outfit)
     entity:FrameAdvance( 100 )
