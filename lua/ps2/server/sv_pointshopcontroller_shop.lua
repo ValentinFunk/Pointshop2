@@ -20,7 +20,7 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 		return Promise.Reject( "You are not the correct rank to buy this item" )
 	end
 
-	return Promise.Resolve( )
+	return self:sendWallet( ply ) -- Reload wallet from DB before carrying out purchase
 end
 
 function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, price, suppressNotify )
@@ -34,7 +34,7 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
     item.inventory_id = ply.PS2_Inventory.id
 	item:preSave()
 
-    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE ownerId = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(price), ply.kPlayerId)
+    local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE id = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(price), ply.PS2_Wallet.id)
 	return Promise.Resolve()
 	:Then(function()
         if Pointshop2.DB.CONNECTED_TO_MYSQL then
@@ -66,11 +66,10 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
             end)
         end
 	end):Then(function(item)
-		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] - price
+        self:sendWallet( ply )
         ply.PS2_Inventory:notifyItemAdded(item)
         item:OnPurchased( )
         self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
-        self:sendWallet( ply )
         return item
     end)
 end
