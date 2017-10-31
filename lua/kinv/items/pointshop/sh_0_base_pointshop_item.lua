@@ -66,11 +66,6 @@ end
 function ITEM:OnPurchased( )
 end
 
--- [TODO add to editor] -> Done for Hat
-function ITEM:CanBeEquipedInSlot( slotName )
-	return false
-end
-
 function ITEM:OnSold( )
 
 end
