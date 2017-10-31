@@ -20,6 +20,11 @@ Pointshop2.ClientSettings.SettingsTable = {
 			tooltip = "Disables all Pointshop2 ingame visuals (trails, hats, pets etc.)",
 			value = false
 		},
+		AutoconfirmSale = {
+			label = "Autoconfirm selling items",
+			tooltip = "Disables the confirmation when selling an item",
+			value = false
+		}
 	}, 
 }
 

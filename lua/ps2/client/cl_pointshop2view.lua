@@ -227,13 +227,26 @@ function Pointshop2View:startBuyItem( itemClass, currencyType )
 end
 
 function Pointshop2View:startSellItem( item )
-	self:controllerTransaction( "sellItem", item.id )
-	:Done( function( )
-		--TODO: Sound
-		--Reset selection
-		hook.Run( "PS2_InvItemIconSelected" )
-	end )
-	:Fail( function( err )
+	local def = Deferred()
+	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.AutoconfirmSale" ) then
+		def:Resolve( true )
+	else
+		Derma_Query( "Are you sure you want to sell " .. item:GetPrintName() .. "?", "Selling an item", "Yes", function()
+			def:Resolve( true )
+		end, "No", function()
+			def:Resolve( false )
+		end )
+	end
+
+	return def:Promise( ):Then( function( confirmed )
+		if confirmed then
+			return self:controllerTransaction( "sellItem", item.id ):Done( function( )
+				--TODO: Sound
+				--Reset selection
+				hook.Run( "PS2_InvItemIconSelected" )
+			end )
+		end
+	end ):Fail( function( err )
 		self:displayError( "Error selling the item: " .. err )
 	end )
 end
