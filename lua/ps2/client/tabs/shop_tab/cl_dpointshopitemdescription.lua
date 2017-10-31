@@ -266,7 +266,7 @@ function PANEL:SetItem( item, noButtons )
 	self.description:SetText( item:GetDescription( ) )
 
 	self.buttonsPanel:Reset( )
-	if item:CanBeSold( ) and not noButtons then --todo
+	if item:CanBeSold( ) and not noButtons then
 		self.buttonsPanel:AddSellButton( item )
 	end
 
