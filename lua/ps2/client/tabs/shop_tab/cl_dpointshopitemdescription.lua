@@ -112,6 +112,10 @@ function PANEL:Init( )
 	function self.buttonsPanel:AddSellButton( item )
 		self.sellBtn = vgui.Create( "DButton", self )
 		function self.sellBtn:Think( )
+			if self:GetDisabled() then
+				return
+			end
+			
 			local price, currencyType = item:GetSellPrice( )
 			if currencyType == "points" then
 				self:SetText( "Sell Item (" .. price .. " points)" )
@@ -121,7 +125,13 @@ function PANEL:Init( )
 		end
 		self.sellBtn:Dock( TOP )
 		function self.sellBtn:DoClick( )
-			Pointshop2View:getInstance( ):startSellItem( itemDesc.item )
+			self:SetDisabled( true )
+			self:SetText( "Selling..." )
+			Pointshop2View:getInstance( ):startSellItem( itemDesc.item ):Always(function()
+				if IsValid(self) then
+					self:SetDisabled(false)
+				end
+			end)
 		end
 	end
 
