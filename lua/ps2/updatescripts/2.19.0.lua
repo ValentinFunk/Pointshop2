@@ -39,7 +39,7 @@ end )
             for k, chunk in pairs(splitted) do
                 local dataObjects = {}
                 for _, item in pairs(chunk) do
-                    local decoded = util.JSONToTable(item.data)
+                    local decoded = util.JSONToTable(item.data) or {}
                     if decoded['ItemPersistence'] or decoded['Inventory'] then
                         decoded['ItemPersistence'] = nil
                         decoded['Inventory'] = nil
