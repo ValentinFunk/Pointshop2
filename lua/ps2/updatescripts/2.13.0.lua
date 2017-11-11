@@ -64,15 +64,19 @@ end )
         return
     end
 
-    if DB.CONNECTED_TO_MYSQL then
-        if (mysqloo.VERSION != "9" || !mysqloo.MINOR_VERSION || tonumber(mysqloo.MINOR_VERSION) < 3) then
-            return Promise.Reject( 400, "Please update MysqlOO to a version >= 9.3: http://bit.ly/MysqlOO")
-        end
+    return DB.FieldExistsInTable( "ps2_itempersistence", "itempersistence_id" ):Then(function(exists)
+        if exists then return end
 
-        return migrateInventoryIdMySql( DB )
-    else
-        return migrateInventoryIdSQLite( DB )
-    end
+        if DB.CONNECTED_TO_MYSQL then
+            if (mysqloo.VERSION != "9" || !mysqloo.MINOR_VERSION || tonumber(mysqloo.MINOR_VERSION) < 3) then
+                return Promise.Reject( 400, "Please update MysqlOO to a version >= 9.3: http://bit.ly/MysqlOO")
+            end
+    
+            return migrateInventoryIdMySql( DB )
+        else
+            return migrateInventoryIdSQLite( DB )
+        end
+    end)
 end )
 :Then( function() end, function( errid, err )
     KLogf( 2, "[ERROR] Error during update: %i, %s.", errid, err )
