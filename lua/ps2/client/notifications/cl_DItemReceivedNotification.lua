@@ -22,7 +22,10 @@ function PANEL:SetItem( item )
 	self.infoPnl:Dock( TOP )
 	self.infoPnl.Paint = function( ) end
 	function self.infoPnl:PerformLayout( )
-		self.desc:DockMargin( self.icon:GetWide() + 10, 5, 0, 5 )
+		if IsValid(self.desc) then 
+			self.desc:DockMargin( self.icon:GetWide() + 10, 5, 0, 5 )
+		end
+		
 		self:SizeToChildren( false, true )
 	end
 
