@@ -4,7 +4,8 @@
 
 local plyModel = hook.Run( "PS2_GetPreviewModel" ) or "models/player/alyx.mdl"
 local entity = ClientsideModel( plyModel, RENDER_GROUP_OPAQUE_ENTITY )
-pac.SetupENT( entity )
+entity.Owner = LocalPlayer()
+pac.SetupENT( entity, "Owner" )
 entity:SetNoDraw(true)
 entity:SetIK( false )
 local colAmbientLight = Color( 50, 50, 50 )
@@ -23,7 +24,7 @@ local function PaintHatIcon(itemClass)
 		PrintTable(itemClass)
 		return
 	end
-	pac.SetupENT( entity )
+	pac.SetupENT( entity, "Owner" )
 	entity:AttachPACPart(outfit)
     entity:FrameAdvance( 100 )
 

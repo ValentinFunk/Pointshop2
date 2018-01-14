@@ -36,7 +36,7 @@ if CLIENT then
 		local outfit, id = self:getOutfitForModel( ply:GetModel() )
 		self.outfit = outfit
 		self.model = ply:GetModel()
-		ply:AttachPACPart( outfit )
+		ply:AttachPACPart( outfit, ply )
 		self.attached = true
 	end
 

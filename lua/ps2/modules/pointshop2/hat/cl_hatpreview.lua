@@ -32,7 +32,8 @@ local function validateOutfitList( previewPanel, ignorePreview )
 			previewPanel.Entity:AttachPACPart( outfit )
 			timer.Simple(0, function( )
 				if not previewPanel.Entity.AttachPACPart then
-					pac.SetupENT( previewPanel.Entity ) --why u do dis?
+					previewPanel.Entity.Owner = LocalPlayer()	
+					pac.SetupENT( previewPanel.Entity, "Owner" ) --why u do dis?
 				end
 				previewPanel.Entity:AttachPACPart( outfit )
 			end )
@@ -54,7 +55,8 @@ end )
 local function preStart3d( self, ignorePreview )
 	if not self.Entity.FindPACPart then
 		--print( "Setting ent up for PAC", self.Entity )
-		pac.SetupENT( self.Entity )
+		self.Entity.Owner = LocalPlayer()	
+		pac.SetupENT( self.Entity, "Owner" )
 	end
 
 	validateOutfitList( self, ignorePreview )
