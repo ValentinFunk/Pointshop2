@@ -111,12 +111,12 @@ end
 function PANEL:PerformLayout( )
 	local ActiveTab = self:GetActiveTab()
 	local Padding = self:GetPadding()
-	if not ActiveTab then
+	if not IsValid(ActiveTab) then
 		return
 	end
 
 	self.buttons:PerformLayout( )
-
+	
 	ActiveTab:InvalidateLayout( true )
 	local ActivePanel = ActiveTab:GetPanel()
 
