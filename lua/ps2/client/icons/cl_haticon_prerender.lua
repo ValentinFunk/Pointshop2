@@ -29,8 +29,8 @@ local function PaintHatIcon(itemClass)
 
 
 	local viewInfo = itemClass.iconInfo.shop.iconViewInfo
-	for i = 1, 100 do
-		pac.Think()
+	for i = 1, 100 do		
+		if pac.Think then pac.Think() end
 	end
 	
 	cam.Start3D( viewInfo.origin, viewInfo.angles, viewInfo.fov - 20, 0, 0, 512, 512, 5, 4096 )

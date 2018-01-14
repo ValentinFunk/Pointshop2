@@ -174,7 +174,7 @@ function PANEL:Paint( w, h )
 	self.result = result
 	
 	pace.HUDPaint() --Update View pos (movement is done here )
-	pac.Think()
+	if pac.Think then pac.Think() end
 	pac.ShowEntityParts( self.Entity )
 	local x, y = self:LocalToScreen( 0, 0 )
 	cam.Start3D( pos, ang, fov, x, y, w, h, 5, 4096 )

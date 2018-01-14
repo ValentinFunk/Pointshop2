@@ -105,7 +105,7 @@ function PANEL:PaintActual( w, h )
 		return
 	end
 
-	pac.Think()
+	if pac.Think then pac.Think() end
 	cam.Start3D( self.viewInfo.origin, self.viewInfo.angles, self.viewInfo.fov - 20, 0, 0, 256, 256, 5, 4096 )
 		cam.IgnoreZ( true )
 		render.SuppressEngineLighting( true )
