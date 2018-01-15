@@ -44,6 +44,7 @@ end
 function Pointshop2.AddItemHook( name, itemClass )
 	if itemClass.name == "DummyClass" then return end
 
+	-- TODO: PERF: Batch hooks by name
 	if SERVER then
 		hook.Add( name, "PS2Hook_" .. name .. itemClass.name, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
@@ -53,7 +54,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 						eqItem.owner = ply
 						if instanceOf( itemClass, eqItem ) then
 							if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-								break
+								continue
 							end
 							eqItem[name]( eqItem, ... )
 						end
@@ -68,7 +69,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 					eqItem.owner = ply
 					if instanceOf( itemClass, eqItem ) then
 						if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-							break
+							continue
 						end
 						eqItem[name]( eqItem, ... )
 					end
