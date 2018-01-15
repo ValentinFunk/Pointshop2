@@ -186,9 +186,9 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] + amount
 		return ply.PS2_Wallet:save( )
 	end ):Then( function( )
-		KInventory.ITEMS[item.id] = nil
-		return item:remove( ) --remove the actual db entry
-	end ):Then( function( )
+		return item.id, item:remove( ) --remove the actual db entry
+	end ):Then( function( itemId )
+		KInventory.ITEMS[itemId] = nil
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
 		hook.Run( "PS2_SoldItem", ply )
 
@@ -212,6 +212,7 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
 		end
 	end
 
+	local itemId = item.id
 	return Promise.Resolve( )
 	:Then( function( )
 		if ply.PS2_Inventory:containsItem( item ) then
@@ -227,9 +228,10 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
 	:Then( function( )
 		item:OnHolster( )
 		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
-		KInventory.ITEMS[item.id] = nil
 		return item:remove( ) --remove the actual db entry
-	end )
+	end ):Then(function()
+		KInventory.ITEMS[itemId] = nil
+	end)
 end
 
 function Pointshop2Controller:adminRemoveItem(ply, itemId)
