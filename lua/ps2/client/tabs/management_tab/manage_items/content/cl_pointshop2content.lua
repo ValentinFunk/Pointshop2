@@ -139,7 +139,44 @@ function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, ri
 		node.DoRightClick = function( self )
 			local menu = DermaMenu()
 			menu:SetSkin( self:GetSkin( ).Name )
-			local btn =menu:AddOption( "Edit", function()
+			local subMenu = menu:AddSubMenu( "Create Item Here")
+			subMenu:SetDisabled(not self.categoryInfo)
+			
+			for k, mod in pairs( Pointshop2.Modules ) do
+				if not mod.Blueprints or #mod.Blueprints == 0 then
+					continue
+				end
+
+				for _, itemInfo in pairs( mod.Blueprints ) do
+					local iconButton = subMenu:AddOption( itemInfo.label, function() 
+						self:InternalDoClick();
+						if not self.categoryInfo then
+							Derma_Message('Please press the save button before adding items.', 'Error')
+							return
+						end
+
+						local creator = vgui.Create( itemInfo.creator )
+						creator:MakePopup( )
+						creator:SetItemBase( itemInfo.base )
+						creator:SetSkin( Pointshop2.Config.DermaSkin )
+						creator:InvalidateLayout( true )
+						creator:Center( )
+						creator:SetTargetCategoryId( self.categoryInfo.self.id )
+					end)
+					iconButton:SetTooltip( itemInfo.tooltip )
+					iconButton:SetImage( itemInfo.icon )
+					iconButton.m_Image:SetMaterial( Material( itemInfo.icon, "noclamp smooth" ) )
+					iconButton.m_Image:SetSize( 16, 16 )
+				end
+				subMenu:AddSpacer()
+			end
+			subMenu:SetSkin( self:GetSkin( ).Name )
+			-- subMenu:SetImage( "pointshop2/wizard.png" )
+			-- subMenu.m_Image:SetSize( 16, 16 )
+
+			menu:AddSpacer()
+
+			local btn = menu:AddOption( "Edit", function()
 				self:InternalDoClick();
 				hook.Run( "PS2_OpenToolbox" )
 				hook.Run( "PS2_ToolboxFocus" )

@@ -594,11 +594,23 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 		return self:reportError( "Pointshop2View", ply, "Error saving item", 1, "Invalid Baseclass " .. saveTable.baseClass )
 	end
 
+	local targetCategoryId = saveTable.targetCategoryId
+	saveTable.targetCategoryId = nil --delete key
+
 	--If persistenceId != nil update existing
 	local isUpdate = saveTable.persistenceId != nil
 	class.getPersistence( ).createOrUpdateFromSaveTable( saveTable, isUpdate )
+	:Then(function(saved)
+		if targetCategoryId then
+			local mapping = Pointshop2.ItemMapping:new()
+			mapping.categoryId = targetCategoryId
+			mapping.itemClass = tostring(saved.itemPersistenceId)
+			return mapping:save():Then(function() return saved end)
+		end
+		return saved
+	end)
 	:Then( function( saved )
-		KLogf( 4, "[Pointshop2] Saved item %s", saveTable.name )
+		KLogf( 4, "[Pointshop2] Saved item %s category %s", saveTable.name, targetCategoryId or 'none' )
 		-- Use shortcut path for updates, do a full reload on newly created items
 		if isUpdate then
 			local outfitsChanged = saveTable.baseClass == "base_hat" and saveTable.outfitsChanged
@@ -608,7 +620,7 @@ function Pointshop2Controller:saveModuleItem( ply, saveTable )
 			local outfitsChanged = class == KInventory.Items.base_hat or subclassOf( KInventory.Items.base_hat, itemClass )
 			return self:moduleItemsChanged( outfitsChanged )
 		end
-	end, function( errid, err )
+	end):Fail(function( errid, err )
 		self:reportError( "Pointshop2View", ply, "Error saving item", errid, err )
 	end )
 end

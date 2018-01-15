@@ -75,12 +75,17 @@ function PANEL:OnCompleted( )
 		self.stepsPanel:GoToStep( stepNum )
 		return Derma_Message( err, "Error" )
 	end
+	saveTable.targetCategoryId = self.targetCategoryId
 	Pointshop2View:getInstance( ):createPointshopItem( saveTable )
 	self:Close( )
 	
 	if not self.persistenceId then
 		Derma_Message( "The item has been created. To put it up for sale go to Manage Items and move it from uncategorized items into a category", "Information" )
 	end
+end
+
+function PANEL:SetTargetCategoryId( categoryId )
+	self.targetCategoryId = categoryId
 end
 
 function PANEL:SetItemBase( itembase )

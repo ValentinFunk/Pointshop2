@@ -189,6 +189,7 @@ function PANEL:SaveItem( saveTable )
 	saveTable.baseClass = self.itembase
 	
 	saveTable.persistenceId = self.persistenceId
+	saveTable.targetCategoryId = self.targetCategoryId
 end
 
 /*
@@ -203,6 +204,10 @@ function PANEL:EditItem( persistence, itemClass )
 	self.descriptionBox:SetText( persistence.description )
 	self.normalPrice:SetPrice( persistence.price )
 	self.pricePremium:SetPrice( persistence.pricePremium )
+end
+
+function PANEL:SetTargetCategoryId( categoryId )
+	self.targetCategoryId = categoryId
 end
 
 vgui.Register( "DItemCreator", PANEL, "DFrame" )
