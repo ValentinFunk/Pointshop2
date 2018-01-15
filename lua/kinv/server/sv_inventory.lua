@@ -17,6 +17,10 @@ function Inventory:loadItems( )
 end
 
 function Inventory:notifyItemAdded( item )
+	if not item then
+		error('Notified NULL item added')
+	end
+
 	KInventory.ITEMS[item.id] = item
 
 	--reflect changes in cached inventory
