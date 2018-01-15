@@ -31,6 +31,10 @@ local function validateOutfitList( previewPanel, ignorePreview )
 		if not previewPanel.Entity.attachedOutfits[id] then
 			previewPanel.Entity:AttachPACPart( outfit )
 			timer.Simple(0, function( )
+				if not IsValid(previewPanel.Entity) then
+					return 
+				end
+				
 				if not previewPanel.Entity.AttachPACPart then
 					previewPanel.Entity.Owner = LocalPlayer()	
 					pac.SetupENT( previewPanel.Entity, "Owner" ) --why u do dis?
