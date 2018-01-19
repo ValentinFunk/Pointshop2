@@ -37,21 +37,15 @@ function Pointshop2.GetItemClassByPrintName( name )
 	return itemClass
 end
 
-/*
-	The hook specified in name is called for every item that is equipped by a player.
-	Arguments are passed unmodified and unfiltered.
-*/
-function Pointshop2.AddItemHook( name, itemClass )
-	if itemClass.name == "DummyClass" then return end
-
-	-- TODO: PERF: Batch hooks by name
+local function addHook(hookName)
 	if SERVER then
-		hook.Add( name, "PS2Hook_" .. name .. itemClass.name, function( ... )
+		hook.Add( hookName, "PS2Hook_" .. hookName, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
 				for _, slot in pairs( ply.PS2_Slots or {} ) do
 					if slot.itemId and KInventory.ITEMS[slot.itemId] then
 						local eqItem = KInventory.ITEMS[slot.itemId]
 						eqItem.owner = ply
+						for k, v 
 						if instanceOf( itemClass, eqItem ) then
 							if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
 								continue
@@ -63,7 +57,7 @@ function Pointshop2.AddItemHook( name, itemClass )
 			end
 		end )
 	else
-		hook.Add( name, "PS2_Hook_" .. name .. itemClass.name, function( ... )
+		hook.Add( hookName, "PS2_Hook_" .. hookName, function( ... )
 			for _, ply in pairs( player.GetAll( ) ) do
 				for k, eqItem in pairs( ply.PS2_EquippedItems or {} ) do
 					eqItem.owner = ply
@@ -77,6 +71,59 @@ function Pointshop2.AddItemHook( name, itemClass )
 			end
 		end )
 	end
+end
+
+local ITEM_HOOK_LOOKUP = {
+	hookName = {
+		item1,
+		item2,
+		item3
+	}
+}
+
+-- Called when the item is equipped
+function Pointshop2.ActivateItemHooks(item)
+	local class = item.class
+	local hookNames = {}
+	do
+		local registeredHooks = class.static._registeredHooks or {}
+		for hookName, _ in registeredHooks do
+			ITEM_HOOK_LOOKUP[hookName] = ITEM_HOOK_LOOKUP[hookName] or {}
+			if not table.HasValue(ITEM_HOOK_LOOKUP[hookName], item) then
+				table.insert(ITEM_HOOK_LOOKUP[hookName], item)
+			end
+		end
+		class = item.class.super
+	while class end
+end
+
+function Pointshop2.DeactivateItemHooks(item)
+	local class = item.class
+	for hookName, tbl in pairs(ITEM_HOOK_LOOKUP) do
+		ITEM_HOOK_LOOKUP[hookName] = LibK._.filter(tbl, function(_item) 
+			return _item != item
+		end)
+	end
+end
+
+local function handleHook(hookName, ...)
+	for k, item in ipairs(ITEM_HOOK_LOOKUP[hookName]) do
+		item[hookName](item, ...)
+	end
+end
+
+/*
+	The hook specified in name is called for every item that is equipped by a player.
+	Arguments are passed unmodified and unfiltered.
+*/
+Pointshop2.ITEM_HOOK_REGISTRY = { }
+function Pointshop2.AddItemHook( name, itemClass )
+	if itemClass.name == "DummyClass" then return end
+
+	itemClass.static._registeredHooks[name] = true
+	hook.Add(name, "PS2_ItemHooks_" .. name, function(...)
+		handleHook(name, ...)
+	end)
 end
 
 function Pointshop2.LoadPersistentItem( persistentItem )

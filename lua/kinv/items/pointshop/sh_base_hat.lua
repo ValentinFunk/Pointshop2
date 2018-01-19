@@ -138,7 +138,7 @@ function ITEM:OnEquip( )
 	self:AttachOutfit( )
 end
 
-function ITEM:OnHolster( ply )
+function ITEM:OnHolster( )
 	if SERVER then
 		return
 	end
