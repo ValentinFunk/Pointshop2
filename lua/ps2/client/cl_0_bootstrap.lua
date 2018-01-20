@@ -4,7 +4,11 @@
     and mixins and makes them available in KInventory.Items.
 ]]--
 KInventory.loadAllItems( )
-hook.Add( "OnReloaded", "PS2_ReloadItems", KInventory.loadAllItems )
+hook.Add( "OnReloaded", "PS2_ReloadItems", function()
+    if LibK.Debug then
+        KInventory.loadAllItems()
+    end
+end )
 
 --[[
     # Load Modules
@@ -15,6 +19,8 @@ LibK.InitPostEntityPromise:Then( function( )
     hook.Run( "PS2_ModulesLoaded" )
 end )
 hook.Add( "OnReloaded", "PS2_ReloadModules", function()
-    Pointshop2.LoadModules()
-    hook.Run( "PS2_ModulesLoaded" )
+    if LibK.Debug then
+        Pointshop2.LoadModules()
+        hook.Run( "PS2_ModulesLoaded" )
+    end
 end )

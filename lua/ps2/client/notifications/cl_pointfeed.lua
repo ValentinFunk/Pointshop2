@@ -15,5 +15,7 @@ hook.Add( "InitPostEntity", "AddPointFeed", function( )
 end )
 
 hook.Add( "OnReloaded", "AddPointFeed", function( )
-	createPointFeed( )
+	if LibK.Debug then
+		createPointFeed( )
+	end
 end )

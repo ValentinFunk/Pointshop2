@@ -369,11 +369,13 @@ hook.Add( "PlayerInitialSpawn", "Pointshop2:EnforceValidPromise", enforceValidPr
 
 hook.Add( "OnReloaded", "Pointshop2Controller:sendDynamicInfo", function( )
 	dp("onReloaded")
-	Pointshop2.BootstrappedPromise:Then( function()
-		for k, v in pairs(player.GetAll()) do
-			initPlayer( v )
-		end
-	end )
+	if LibK.Debug then
+		Pointshop2.BootstrappedPromise:Then( function()
+			for k, v in pairs(player.GetAll()) do
+				initPlayer( v )
+			end
+		end )
+	end
 end )
 
 local function performSafeCategoryUpdate( categoryItemsTable )

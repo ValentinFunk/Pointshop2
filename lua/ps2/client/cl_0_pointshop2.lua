@@ -121,6 +121,7 @@ concommand.Add( "pointshop2_reload", function( )
 		timer.Simple( 2, function( )
 			CompileString( "Pointshop2View:getInstance():toggleMenu( )", "chink" )( )
 		end )
+		hook.Remove( "OnReloaded", "openWhenReady" )
 	end )
 end )
 
@@ -174,7 +175,9 @@ hook.Add( "InitPostEntity", "InitNotifications", function( )
 end )
 
 hook.Add( "OnReloaded", "InitNotifications", function( )
-	InitNotificationsPanel( )
+	if LibK.Debug then
+		InitNotificationsPanel( )
+	end
 end )
 
 hook.Remove("InitPostEntity", "pace_autoload_parts") -- Disable PAC autoload
