@@ -39,6 +39,7 @@ function PANEL:GenerateChanceControl( line )
 	pnl:DockPadding( 10, 3, 10, 3 )
 
 	pnl.dropdown = vgui.Create( "DComboBox", pnl )
+	pnl.dropdown:SetSortItems( false )
 	for k, v in ipairs( Pointshop2.Rarities ) do
 		pnl.dropdown:AddChoice( v.name, v.chance )
 	end
@@ -136,6 +137,15 @@ function PANEL:AddFactory( factoryClass, settings, chance )
 	instance.settings = settings
 
 	local line = self.itemTable:AddLine( instance:GetShortDesc( ) )
+	function line:GetSortValue( colId )
+		if colId == 2 then
+			return self.Columns[colId]:GetChanceAmount()
+		elseif colId == 3 then
+			return 0
+		else
+			return self.Columns[colId].Value
+		end
+	end
 	line.Columns[2] = self:GenerateChanceControl( line )
 	line.Columns[3] = self:GenerateActionsControl( line )
 	if chance then
