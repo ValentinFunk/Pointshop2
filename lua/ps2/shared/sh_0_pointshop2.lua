@@ -1,7 +1,7 @@
 Pointshop2 = KInventory --mean hack to share databases, Pointshop2 = {}
 
 --[[
-	Pointshop2 Main file, last modifed on 06.07.2014, Revision {{ user_id }}
+	Pointshop2 Main file, last modifed on 19.01.2018, Revision {{ user_id }}
 --]]
 
 --Find all registered items that use the pointshop base
@@ -37,78 +37,41 @@ function Pointshop2.GetItemClassByPrintName( name )
 	return itemClass
 end
 
-local function addHook(hookName)
-	if SERVER then
-		hook.Add( hookName, "PS2Hook_" .. hookName, function( ... )
-			for _, ply in pairs( player.GetAll( ) ) do
-				for _, slot in pairs( ply.PS2_Slots or {} ) do
-					if slot.itemId and KInventory.ITEMS[slot.itemId] then
-						local eqItem = KInventory.ITEMS[slot.itemId]
-						eqItem.owner = ply
-						for k, v 
-						if instanceOf( itemClass, eqItem ) then
-							if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-								continue
-							end
-							eqItem[name]( eqItem, ... )
-						end
-					end
-				end
-			end
-		end )
-	else
-		hook.Add( hookName, "PS2_Hook_" .. hookName, function( ... )
-			for _, ply in pairs( player.GetAll( ) ) do
-				for k, eqItem in pairs( ply.PS2_EquippedItems or {} ) do
-					eqItem.owner = ply
-					if instanceOf( itemClass, eqItem ) then
-						if not eqItem.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-							continue
-						end
-						eqItem[name]( eqItem, ... )
-					end
-				end
-			end
-		end )
-	end
-end
-
-local ITEM_HOOK_LOOKUP = {
+--[[
 	hookName = {
 		item1,
 		item2,
 		item3
 	}
-}
+]]--
+Pointshop2.ITEM_HOOK_LOOKUP = {}
+local ITEM_HOOK_LOOKUP = Pointshop2.ITEM_HOOK_LOOKUP
 
 -- Called when the item is equipped
 function Pointshop2.ActivateItemHooks(item)
+	dp("ActivateItemHooks", item)
 	local class = item.class
 	local hookNames = {}
-	do
+	repeat
 		local registeredHooks = class.static._registeredHooks or {}
-		for hookName, _ in registeredHooks do
+		for hookName, _ in pairs(registeredHooks) do
 			ITEM_HOOK_LOOKUP[hookName] = ITEM_HOOK_LOOKUP[hookName] or {}
 			if not table.HasValue(ITEM_HOOK_LOOKUP[hookName], item) then
 				table.insert(ITEM_HOOK_LOOKUP[hookName], item)
+				print(hookName, item)
 			end
 		end
-		class = item.class.super
-	while class end
+		class = class.super
+	until class == Object	
 end
 
 function Pointshop2.DeactivateItemHooks(item)
+	dp("DeactivateItemHooks", item)
 	local class = item.class
 	for hookName, tbl in pairs(ITEM_HOOK_LOOKUP) do
 		ITEM_HOOK_LOOKUP[hookName] = LibK._.filter(tbl, function(_item) 
 			return _item != item
 		end)
-	end
-end
-
-local function handleHook(hookName, ...)
-	for k, item in ipairs(ITEM_HOOK_LOOKUP[hookName]) do
-		item[hookName](item, ...)
 	end
 end
 
@@ -120,9 +83,14 @@ Pointshop2.ITEM_HOOK_REGISTRY = { }
 function Pointshop2.AddItemHook( name, itemClass )
 	if itemClass.name == "DummyClass" then return end
 
+	itemClass.static._registeredHooks = itemClass.static._registeredHooks or {}
 	itemClass.static._registeredHooks[name] = true
 	hook.Add(name, "PS2_ItemHooks_" .. name, function(...)
-		handleHook(name, ...)
+		for k, item in ipairs(ITEM_HOOK_LOOKUP[name] or {}) do
+			if item[name] then
+				item[name](item, ...)
+			end
+		end
 	end)
 end
 

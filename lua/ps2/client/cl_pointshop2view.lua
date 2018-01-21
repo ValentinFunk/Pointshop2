@@ -518,6 +518,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	print(item, Pointshop2.ITEMS[item.id])
 	Pointshop2.ITEMS[item.id] = item
 
+	Pointshop2.ActivateItemHooks(item)
 	hook.Run( "PS2_ItemEquipped", ply, item )
 end
 
@@ -527,8 +528,9 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 		if ply.PS2_EquippedItems then
 			ply.PS2_EquippedItems[itemId] = nil
 		end
+		hook.Run( "PS2_ItemUnequipped", ply, Pointshop2.ITEMS[itemId] )
+		Pointshop2.DeactivateItemHooks(Pointshop2.ITEMS[itemId])
 	end
-	hook.Run( "PS2_ItemUnequipped", ply, item )
 end
 
 function Pointshop2View:loadOutfits( versionHash )

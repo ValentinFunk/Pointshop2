@@ -23,6 +23,29 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 	return self:sendWallet( ply ) -- Reload wallet from DB before carrying out purchase
 end
 
+LibK.GLib.PlayerMonitor:AddEventListener("PlayerDisconnected", "PS2_PlayerDisconnected", function (_, ply, userId)
+	if not ply.PS2_Inventory or not ply.PS2_Inventory:getItems() then
+		KLogf(4, "Player %s: Left before inventory has been loaded")
+	else
+		for k, item in pairs(ply.PS2_Inventory:getItems()) do
+			KInventory.ITEMS[item.id] = nil
+			Pointshop2.LogCacheEvent('REMOVE', 'PlayerDisconnected (Inv)', item.id)
+		end
+	end
+
+	if not ply.PS2_Slots then
+		KLogf(4, "Player %s: Left before slots were planned")
+	else
+		for k, slot in pairs(ply.PS2_Slots) do
+			if slot.Item then
+				Pointshop2.DeactivateItemHooks(slot.Item)
+				KInventory.ITEMS[slot.Item.id] = nil
+				Pointshop2.LogCacheEvent('REMOVE', 'PlayerDisconnected (Slots)', slot.Item.id)
+			end
+		end
+	end
+end)
+
 function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, price, suppressNotify )
     local item = itemClass:new( )
     item.purchaseData = {
@@ -366,6 +389,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		ply.PS2_Inventory:addItem( oldItem )
 		:Then( function( )
 			moveOldItemDef:Resolve( )
+			Pointshop2.DeactivateItemHooks( oldItem )
 			oldItem:OnHolster( ply )
 			self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, oldItem.id )
 			slot.Item = nil
@@ -398,6 +422,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		slot.Item = item
 		slot.itemId = item.id
 
+		Pointshop2.ActivateItemHooks( item )
 		--Delay to next frame to clear stack
 		timer.Simple( 0, function( )
 			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
