@@ -1,5 +1,4 @@
 KInventory.ITEMS = {}
-setmetatable(KInventory.ITEMS, { __mode = 'v' }) --weak table, allow collection if not referenced anywhere else
 
 local Item = class( "KInventory.Item" )
 KInventory.Item = Item
@@ -40,8 +39,6 @@ Item.static.model = {
 Item:include( DatabaseModel )
 
 function Item:postLoad( )
-	local def = Deferred( )
-
 	--i know this is disgusting :( a possible alternative would be no relationships
 	local cached = KInventory.ITEMS[self.id]
 	if cached then
@@ -50,8 +47,10 @@ function Item:postLoad( )
 				cached[k] = self
 			end
 		end
+		Pointshop2.LogCacheEvent('ITEM_MODIFY', 'Item:postLoad', self.id)
 	else
 		KInventory.ITEMS[self.id] = self
+		Pointshop2.LogCacheEvent('ADD', 'Item:postLoad', self.id)
 	end
 
 
@@ -60,8 +59,7 @@ function Item:postLoad( )
 		self.owner = inv:getOwner( )
 	end
 
-	def:Resolve( )
-	return def:Promise( )
+	return Promise.Resolve()
 end
 
 function Item:getWeight( )

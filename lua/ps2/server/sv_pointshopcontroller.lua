@@ -119,7 +119,14 @@ function Pointshop2Controller:initializeSlots( ply )
 		for _, slot in pairs( ply.PS2_Slots ) do
 			if not slot.itemId then continue end
 
-			local item = slot.Item or KInventory.ITEMS[slot.itemId]
+			if not slot.Item then
+				KLogf( 2, "[WARN-01] Invalid item %s from player %s slot %s slot.Item is missing", slot.itemId, ply:Nick( ), slot.slotName )
+				return Promise.Reject(1, 'Failed to load slots')
+			end
+
+			KInventory.ITEMS[slot.itemId] = slot.Item
+
+			local item = KInventory.ITEMS[slot.itemId]
 			if not item then
 				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
 				continue
@@ -295,7 +302,7 @@ local function initPlayer( ply )
 	Pointshop2.ModuleItemsLoadedPromise:Then( function( )
 		controller:sendDynamicInfo( ply )
 		return WhenAllFinished{
-			ply.dynamicsReceivedPromise,
+			ply.dynamicsReceivedPromise:Promise(),
 			controller:sendWallet( ply )
 		}
 	end ):Done( function( )
@@ -304,8 +311,7 @@ local function initPlayer( ply )
 			WhenAllFinished{ controller:initializeInventory( ply ),
 				controller:initializeSlots( ply ),
 				ply.outfitsReceivedPromise
-			}
-			:Done( function( )
+			}:Done( function( )
 				controller:sendActiveEquipmentTo( ply )
 				hook.Run("PS2_PlayerFullyLoaded", ply)
 			end )
@@ -339,8 +345,8 @@ hook.Add( "LibK_PlayerInitialSpawn", "Pointshop2Controller:initPlayer", function
 			KLogf( 4, "[PS2] Loading a player failed, possible disconnect" )
 			return
 		end
+
 		initPlayer( ply )
-		dp("InitTimer", ply)
 	end )
 end )
 

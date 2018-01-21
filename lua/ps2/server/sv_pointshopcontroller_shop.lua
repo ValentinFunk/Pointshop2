@@ -153,7 +153,6 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 			currency = currencyType,
 			origin = "LUA"
 		}
-		return item:save( )
 	end )
 	:Then( function( item )
 		return ply.PS2_Inventory:addItem( item )
@@ -213,6 +212,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		return item.id, item:remove( ) --remove the actual db entry
 	end ):Then( function( itemId )
 		KInventory.ITEMS[itemId] = nil
+		Pointshop2.LogCacheEvent('REMOVE', 'SellItem', item.id)
 		KLogf( 4, "Player %s sold an item", ply:Nick( ) )
 		hook.Run( "PS2_SoldItem", ply )
 
@@ -255,6 +255,7 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
 		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 		return item:remove( ) --remove the actual db entry
 	end ):Then(function()
+		Pointshop2.LogCacheEvent('REMOVE', 'removeItemFromPlayer', itemId)
 		KInventory.ITEMS[itemId] = nil
 	end)
 end

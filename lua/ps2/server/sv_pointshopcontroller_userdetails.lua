@@ -169,8 +169,6 @@ function Pointshop2Controller:adminGiveItem( adminPly, kPlayerId, itemClassName 
 		return item:save( )
 	end )
 	:Then( function( item )
-		KInventory.ITEMS[item.id] = item
-
 		if IsValid( ply ) then
 			return WhenAllFinished{ ply.outfitsReceivedPromise:Promise( ), ply.dynamicsReceivedPromise:Promise( ) }
 			:Then( function( )

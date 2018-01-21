@@ -193,3 +193,7 @@ function Pointshop2.BroadcastInfo( text )
 		v:PS2_DisplayInformation( text )
 	end
 end
+
+function Pointshop2.LogCacheEvent( action, source, itemId, other )
+	file.Append('CacheLog.txt', util.TableToJSON({ action = action, source = source, itemId = itemId, other = other}) .. '\n')
+end

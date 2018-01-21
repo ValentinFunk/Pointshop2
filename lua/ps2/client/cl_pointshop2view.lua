@@ -5,9 +5,9 @@ Pointshop2View:include( BaseView )
 LibK.InitPostEntityPromise:Done( function( )
 	for k, ply in pairs( player.GetAll( ) ) do
 		ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
-		ply.PS2_Slots = {}
+		ply.PS2_Slots = ply.PS2_Slots or {}
 	end
-	LocalPlayer().PS2_Inventory = {}
+	LocalPlayer().PS2_Inventory = LocalPlayer().PS2_Inventory or {}
 
 	timer.Simple( 0.5, function( )
 		Pointshop2View:getInstance( ) --Create the view
@@ -201,7 +201,7 @@ function Pointshop2View:receiveSlots( slots )
 	for k, v in pairs( slots ) do
 		if v.Item then
 			LocalPlayer().PS2_Slots[v.slotName] = v.Item
-			KInventory.Items[v.Item.id] = v.Item
+			KInventory.ITEMS[v.Item.id] = v.Item
 		end
 		hook.Run( "PS2_SlotChanged", v )
 	end

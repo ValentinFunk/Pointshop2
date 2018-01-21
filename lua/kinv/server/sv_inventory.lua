@@ -21,7 +21,12 @@ function Inventory:notifyItemAdded( item )
 		error('Notified NULL item added')
 	end
 
-	KInventory.ITEMS[item.id] = item
+	if not KInventory.ITEMS[item.id] then
+		KInventory.ITEMS[item.id] = item
+		Pointshop2.LogCacheEvent('ADD', 'Inventory:addItem', item.id)
+	else
+		Pointshop2.LogCacheEvent('IGNORE', 'Inventory:addItem', item.id, KInventory.ITEMS[item.id].id)
+	end
 
 	--reflect changes in cached inventory
 	if self.Items then
@@ -34,7 +39,7 @@ function Inventory:notifyItemAdded( item )
 	InventoryController:getInstance( ):itemAdded( self, item )
 end
 
-function Inventory:addItem( item )	
+function Inventory:addItem( item )
 	return DATABASES[Inventory.DB].DoQuery( "SELECT COUNT(*) as numItems FROM " .. Inventory.model.tableName .. " WHERE ownerId =" .. self.ownerId )
 	:Then( function( data )
 		if data[1].numItems + 1 > self.numSlots then
@@ -46,7 +51,6 @@ function Inventory:addItem( item )
 		return item:save( )
 	end )
 	:Then( function( item )
-		PrintTable(item)
 		self:notifyItemAdded( item )
 	end )
 end
