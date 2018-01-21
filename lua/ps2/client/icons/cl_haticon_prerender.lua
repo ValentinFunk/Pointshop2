@@ -4,7 +4,7 @@
 
 local plyModel = hook.Run( "PS2_GetPreviewModel" ) or "models/player/alyx.mdl"
 local entity = ClientsideModel( plyModel, RENDER_GROUP_OPAQUE_ENTITY )
-entity.Owner = LocalPlayer()
+entity.Owner = entity
 pac.SetupENT( entity, "Owner" )
 entity:SetNoDraw(true)
 entity:SetIK( false )
@@ -25,8 +25,13 @@ local function PaintHatIcon(itemClass)
 		return
 	end
 	pac.SetupENT( entity, "Owner" )
-	entity:AttachPACPart(outfit)
-    entity:FrameAdvance( 100 )
+	entity.Owner = entity
+	entity:AttachPACPart( outfit )
+	entity:FrameAdvance( 100 )
+	pac.ShowEntityParts( entity )
+	for k, v in pairs( entity.pac_outfits or {} ) do
+		pac.HookEntityRender( entity, v )
+	end
 
 
 	local viewInfo = itemClass.iconInfo.shop.iconViewInfo
@@ -61,6 +66,10 @@ local function PaintHatIcon(itemClass)
 	cam.End3D( )
 
 	entity:RemovePACPart(outfit)
+	pac.HideEntityParts( entity )
+	for k, v in pairs( entity.pac_outfits or {} ) do
+		pac.UnhookEntityRender( entity, v )
+	end
 end
 
 
