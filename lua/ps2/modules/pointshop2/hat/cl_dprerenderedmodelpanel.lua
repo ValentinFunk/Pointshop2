@@ -28,7 +28,7 @@ end
 
 function PANEL:SetModel( mdl )
 	DModelPanel.SetModel( self, mdl )
-	self.Entity.Owner = LocalPlayer()	
+	self.Entity.Owner = self.Entity	
 	pac.SetupENT( self.Entity, "Owner" )
 	if self.pacOutfit then
 		self.Entity:AttachPACPart( self.pacOutfit )

@@ -59,7 +59,7 @@ end )
 local function preStart3d( self, ignorePreview )
 	if not self.Entity.FindPACPart then
 		--print( "Setting ent up for PAC", self.Entity )
-		self.Entity.Owner = LocalPlayer()	
+		self.Entity.Owner = self.Entity
 		pac.SetupENT( self.Entity, "Owner" )
 	end
 
@@ -71,7 +71,8 @@ local function preStart3d( self, ignorePreview )
 end
 
 local function preDrawModel( self )
-	pac.RenderOverride(self.Entity, "opaque")
+	pac.ShowEntityParts( self.Entity )
+	pac.RenderOverride( self.Entity, "opaque" )
 end
 
 local function postDrawModel( self )
