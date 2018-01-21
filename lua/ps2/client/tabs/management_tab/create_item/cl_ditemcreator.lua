@@ -80,6 +80,25 @@ function PANEL:Init( )
 		function panel:IsEnabled( )
 			return self.checkBox:GetValue( )
 		end
+
+		panel:SetMouseInputEnabled(true)
+		local checkboxRealDoClick = panel.checkBox.DoClick
+		function panel.OnMousePressed( _panel, mcode )
+			if mcode == MOUSE_LEFT then
+				checkboxRealDoClick(panel.checkBox)
+				panel.wang:RequestFocus()
+				if panel.wang:GetValue() == 0 then
+					panel.wang:SetText("")
+				end
+			end
+		end
+		panel.checkBox.DoClick = function()
+			checkboxRealDoClick(panel.checkBox)
+			panel.wang:RequestFocus()
+			if panel.wang:GetValue() == 0 then
+				panel.wang:SetText("")
+			end
+		end
 		
 		return panel
 	end
