@@ -58,3 +58,9 @@ hook.Add( "PS2_ClientSettingsUpdated", "UpdatePACConvars", function( )
 		end
 	end
 end )
+
+hook.Add("OnReloaded", "reloadsettingsclient", function()
+	if LibK.Debug then
+		Pointshop2.ClientSettings.LoadSettings( )		
+	end
+end)

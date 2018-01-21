@@ -30,7 +30,7 @@ function InventoryView:itemAdded( inventoryId, item )
 		PrintTable(KInventory.ITEMS[item.id])*/
 	end
 
-	local item = KInventory.ITEMS[item.id] or item
+	local item = KInventory.ITEMS[item.id] or item -- this is for unequipping
 	KInventory.ITEMS[item.id] = item
 
 	if not self.inventories[inventoryId] then
@@ -43,7 +43,8 @@ function InventoryView:itemRemoved( inventoryId, itemId )
 	if not self.inventories[inventoryId] then
 		error( "Cannot remove item from inventory " .. inventoryId .. ": not cached on the client" )
 	end
-
+	
+	KInventory.ITEMS[itemId] = nil
 	self.inventories[inventoryId]:removeItemById( itemId )
 	if self.inventoryPanels[inventoryId] then
 		self.inventoryPanels[inventoryId]:itemRemoved( itemId )
