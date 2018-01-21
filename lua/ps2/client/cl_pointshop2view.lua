@@ -30,7 +30,8 @@ function Pointshop2View:initialize( )
 		InventoryReceived = Deferred( ),
 		OutfitsReceived = Deferred( ),
 		SettingsReceived = Deferred( ),
-		DynamicsReceived = Deferred( )
+		DynamicsReceived = Deferred( ),
+		SlotsReceived = Deferred( )
 	}
 
 	local promises = {}
@@ -207,6 +208,7 @@ function Pointshop2View:receiveSlots( slots )
 	end
 
 	KLogf( 5, "[PS2] Received slots, %i slots", #slots )
+	resolveIfWaiting( self.clPromises.SlotsReceived )
 end
 
 function Pointshop2View:slotChanged( slot )
