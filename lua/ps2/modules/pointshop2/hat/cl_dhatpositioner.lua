@@ -85,9 +85,9 @@ function PANEL:Init( )
 	save.m_Image:SetSize( 16, 16 )
 	function save.DoClick( )
 		local partTable = {}
-		for key, part in pairs(pac.GetParts(true)) do
-			if not part:HasParent() then
-				table.insert(partTable, part:ToTable())
+		for key, part in pairs(pac.GetLocalParts()) do
+			if not part:HasParent() and part.show_in_editor ~= false then
+				table.insert(partTable, part:ToSaveTable())
 			end
 		end
 		if self:OnSave( partTable ) then
