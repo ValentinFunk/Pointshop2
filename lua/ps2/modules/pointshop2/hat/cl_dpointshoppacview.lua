@@ -64,13 +64,18 @@ end
 local oldT, oldV2S, oldS2V, oldGMP, oldPaceOpenMenu
 local oldGuiMousePos = gui.MousePos
 
-GAMEMODE.hookRestore = {
+GAMEMODE.hookRestore = GAMEMODE.hookRestore or {
 	--oldT = pace.mctrl.GetTarget,
 	oldV2S = pace.mctrl.VecToScreen,
 	oldS2V = pace.mctrl.ScreenToVec,
 	oldGuiMousePos = gui.MousePos,
 	oldGMP = pace.mctrl.GetMousePos,
-	oldPaceOpenMenu = pace.OnOpenMenu
+	oldPaceOpenMenu = pace.OnOpenMenu,
+	oldAddRegisteredPartsToMenu = pace.AddRegisteredPartsToMenu,
+	oldIsInBasicMode = pace.IsInBasicMode,
+	oldBasicParts = pace.BasicParts,
+	oldBasicProps = pace.BasicProperties,
+	oldAddRegisteredPartsToMenu = pace.AddRegisteredPartsToMenu
 }
 
 local function hookPac( panel )
@@ -80,9 +85,9 @@ local function hookPac( panel )
 	--	return outfit
 	--end
 	
-	local pnl = vgui.GetControlTable( "pace_editor" )
-	pnl.Base = "DPanel"
-	pace.RegisterPanel(pnl)
+	--local pnl = vgui.GetControlTable( "pace_editor" )
+	-- pnl.Base = "DPanel"
+	-- pace.RegisterPanel(pnl)
 	
 	function pace.mctrl.VecToScreen( vec )
 		local x, y, vis = W2S(
@@ -114,6 +119,63 @@ local function hookPac( panel )
 	function pace.OnOpenMenu()
 		panel:OnOpenMenu( )
 	end
+
+	function pace.select.VecToScreen(vec)
+		local pos = pace.mctrl.VecToScreen(vec)
+		return { x = pos.x, y = pos.y }
+	end
+	
+	function pace.select.GetMousePos()
+		return pace.mctrl.GetMousePos()
+	end
+
+	pace.BasicParts = {
+		model = true,
+		light = true,
+		sprite = true,
+		bone = true
+	}
+	
+	function pace.AddRegisteredPartsToMenu(menu)
+		local partsToShow = {}
+		
+		for class_name, part in pairs(pac.GetRegisteredParts()) do
+			print (class_name, pace.BasicParts[class_name])
+			if pace.BasicParts[class_name] then
+				partsToShow[class_name] = part
+			end
+		end
+
+		table.sort(partsToShow)
+
+		for class_name, part in pairs(partsToShow) do
+			local newMenuEntry = menu:AddOption(L(class_name), function()
+				pace.Call("CreatePart", class_name)
+			end)
+
+			if part.Icon then
+				newMenuEntry:SetImage(part.Icon)
+			end
+		end
+	end
+	
+	pace.IsInBasicMode = function() return true end 
+	pace.BasicProperties = {
+		Position = true,
+		Scale = true,
+		Model = true,
+		Angles = true,
+		Size = true,
+		Alpha = true,
+		Color = true,
+		Skin = true,
+		Material = true,
+		Name = true,
+		Hide = true,
+		SpritePath = true,
+		Brightness = true,
+		Bone = true,
+	}
 end
 
 local function unHookPac( )
@@ -122,6 +184,17 @@ local function unHookPac( )
 	pace.mctrl.ScreenToVec = GAMEMODE.hookRestore.oldS2V
 	pace.mctrl.GetMousePos = GAMEMODE.hookRestore.oldGMP
 	pace.OnOpenMenu = GAMEMODE.hookRestore.oldPaceOpenMenu
+	pace.IsInBasicMode = GAMEMODE.hookRestore.oldIsInBasicMode
+	pace.BasicParts = GAMEMODE.hookRestore.oldBasicParts
+	pace.BasicProperties = GAMEMODE.hookRestore.oldBasicProps
+
+	function pace.select.VecToScreen(vec)
+		return vec:ToScreen()
+	end
+	
+	function pace.select.GetMousePos()
+		return gui.MousePos()
+	end
 	
 	local pnl = vgui.GetControlTable( "pace_editor" )
 	pnl.Base = "DFrame"
@@ -132,15 +205,21 @@ function PANEL:Init( )
 	self:SetMouseInputEnabled( true )
 	Pointshop2.EditorWin = self
 	
-	--self.dbg = vgui.Create( "DLabel", self )
---	self.dbg:Dock( TOP )
+	self.dbg = vgui.Create( "DLabel", self )
+	self.dbg:Dock( TOP )
+	self.dbg:DockMargin( 5, 5, 5, 5 )
+	self.dbg:SetText("Movement: WASD, Space, Shift" ..
+					 "\nLooking: Mouse (Click + Drag)" ..
+					 "\nUse the tree in the left to add parts. Click on '...' next to model in the panel below to pick a model." ..
+					 "\nWhen done, select a nice view and click 'Use as Icon View', then save.")
+	self.dbg:SizeToContents()
 	
 	hook.Add( "pace_OnPartSelected", self, self.Pace_OnPartSelected )
 	
 	RunConsoleCommand( "pac_in_editor", 1 )
 	
-	timer.Simple( 1, function( ) include( "pac3/core/client/drawing.lua" ) end ) --idk
 	self:InvalidateLayout( )
+	self:SetAnimated( false )
 end
 
 function PANEL:Pace_OnPartSelected( part )
@@ -148,7 +227,7 @@ function PANEL:Pace_OnPartSelected( part )
 	local root = part:GetRootPart( )
 	root:SetOwner( self.Entity )
 	--root:SetOwnerName( "persist " .. pac.CalcEntityCRC(self.Entity) )
-	--pac.HookEntityRender(self.Entity, part)		
+	-- pac.HookEntityRender(self.Entity, part)		
 end
 
 function PANEL:Paint( w, h )
@@ -157,8 +236,22 @@ function PANEL:Paint( w, h )
 	--pace.current_part:Think( )
 
 	if not IsValid( self.Entity ) then return end
-	
-	--self.dbg:SetText( pace.current_part:IsValid( ) and ( tostring( pace.current_part:GetOwner() ) .. " - " .. tostring( self.Entity ) ) or "No Part" )
+	self.Entity:ResetSequence(self.Entity:LookupSequence("reference"))
+
+	--[[ self.dbg:SetText( 
+		"pace.current_part:GetOwner(true): " .. (pace.current_part:IsValid( ) and ( tostring( pace.current_part:GetOwner( true ) ) .. " - " .. tostring( self.Entity ) ) or "No Part")
+		.. "\n" .. "pace.ViewEntity: " .. (tostring(pace:GetViewEntity()))
+		.. "\n" .. "pace.ViewEntity:GetPos: " .. (tostring(pace:GetViewEntity():GetPos()))
+		.. "\n" .. "pace.CurrentPart.self: " .. (pace.current_part.ClassName)
+		.. "\n" .. "RootPart: " .. tostring(pace.current_part:GetRootPart():GetDrawPosition())
+		.. "\n" .. "pace.current_part.cached_pos" .. (tostring(pace.current_part.cached_pos))
+		.. "\n" .. "pace.current_part.GetDrawPosition" .. (tostring(pace.current_part:GetDrawPosition(nil, true)))
+		.. "\n" .. "mctrl.GetTargetPos" .. (tostring(pace.mctrl.GetTargetPos() or "no pos"))
+		.. "\n" .. "mctrl.target" .. (tostring(pace.mctrl.target))
+		.. "\n" .. "current_part:IsHidden" .. (tostring(pace.current_part:IsHidden()))
+	)
+	self.dbg:SizeToContents()
+	]]--
 
 	local PrevMins, PrevMaxs = self.Entity:GetRenderBounds()
 	self:SetLookAt((PrevMaxs + PrevMins) / 2 + Vector( 0, 0, 10 ) )
@@ -168,16 +261,23 @@ function PANEL:Paint( w, h )
 	local fov = 45
 
 	pace.Focused = true
+	pace.HUDPaint() --Update View pos (movement is done here)
+	surface.SetDrawColor(color_white)
+	pace.select.HUDPaint( )
 	local result = pace.CalcView( LocalPlayer( ), pos, ang, fov )
 	
 	pos, ang, fov =  result.origin, result.angles, result.fov
 	self.result = result
-	
-	pace.HUDPaint() --Update View pos (movement is done here )
-	if pac.Think then pac.Think() end
+
 	pac.ShowEntityParts( self.Entity )
+	pac.HookEntityRender( self.Entity, pace.current_part )
+	
+	pac.FrameNumber = pac.FrameNumber - 100
+
+	if pac.Think then pac.Think() end
+	
 	local x, y = self:LocalToScreen( 0, 0 )
-	cam.Start3D( pos, ang, fov, x, y, w, h, 5, 4096 )
+	cam.Start3D( pos, ang, fov, x, y, w, h, 0.1, 4096 )
 		cam.IgnoreZ( true )
 		render.SuppressEngineLighting( true )
 		render.SetLightingOrigin( self.Entity:GetPos() )
@@ -204,6 +304,7 @@ function PANEL:Paint( w, h )
 	cam.End3D( )
 
 	pace.mctrl.HUDPaint( )
+	pace.select.HUDPaint( )
 
 	if not self.hooked then
 		hookPac( self )
@@ -224,10 +325,12 @@ end
 
 function PANEL:OnMousePressed( mc )
 	pace.GUIMousePressed( mc )
+	pace.select.GUIMousePressed( mc )
 end
 
 function PANEL:OnMouseReleased( mc )
 	pace.GUIMouseReleased( mc )
+	pace.select.GUIMouseReleased( mc )
 end
 
 function PANEL:OnOpenMenu( )

@@ -85,7 +85,7 @@ function PANEL:Init( )
 	save.m_Image:SetSize( 16, 16 )
 	function save.DoClick( )
 		local partTable = {}
-		for key, part in pairs(pac.GetLocalParts()) do
+		for key, part in pairs(pac.GetParts and pac.GetParts() or pac.GetLocalParts()) do
 			if not part:HasParent() and part.show_in_editor ~= false then
 				table.insert(partTable, part:ToSaveTable())
 			end
@@ -125,9 +125,8 @@ function PANEL:NewEmptyOutfit( )
 	timer.Simple(0.01, function()
 		if not pace.Editor:IsValid() then return end
 	
-		if table.Count(pac.GetParts(true)) == 0 then
-			pace.Call("CreatePart", "group", L"Pointshop Item", L"add parts to me!")
-		end	
+		pace.ClearParts()
+		pace.Call("CreatePart", "model", "click me to change model")
 			
 		pace.TrySelectPart()
 		pace.ResetView( )
@@ -138,13 +137,17 @@ function PANEL:LoadOutfit( outfitPart )
 	timer.Simple( 0.01, function( )
 		if not pace.Editor:IsValid() then return end
 		
-		pace.LoadPartsFromTable( outfitPart )
+		pace.LoadPartsFromTable( outfitPart, true )
+		pace.ResetView( )
 	end )
 end
 
 function PANEL:ImportPacOutfit( )
-	timer.Simple(0.01, function()
-		pace.LoadParts(nil, true)
+	timer.Simple(0.1, function()
+		local override_part = pac.CreatePart("group")
+		override_part:SetOwner(self.modelPanel.Entity)
+		pace.LoadParts(nil, true, override_part)
+		pace.SetViewPart(override_part, true)
 	end )
 end
 

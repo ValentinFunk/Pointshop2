@@ -12,10 +12,10 @@ local PANEL = {}
 function PANEL:Paint( )
 end
 
-local function createHatPositioner( parentPanel )
+local function createHatPositioner( parentPanel, model )
 	local f = vgui.Create( "DHatPositioner" )
 	function f.OnSave( _self, outfit )
-		return parentPanel:OutfitSaved( outfit )
+		return parentPanel:OutfitSaved( outfit, model )
 	end
 	function f.OnSaveIconViewInfo( _self, viewInfo )
 		return parentPanel:IconViewInfoSaved( viewInfo )
@@ -33,24 +33,22 @@ function PANEL:Init( )
 	openBtn:SetImage( "pointshop2/pencil54.png" )
 	openBtn.m_Image:SetSize( 16, 16 )
 	function openBtn.DoClick( )
-		self.currentModel = Pointshop2.HatPersistence.ALL_MODELS
-
 		local menu = DermaMenu( )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 		if self.baseOutfit then
 			menu:AddOption( "Edit Outfit", function( )
-				local f = createHatPositioner( self )
+				local f = createHatPositioner( self, Pointshop2.HatPersistence.ALL_MODELS )
 				f:LoadOutfit( self.baseOutfit )
 			end )
 			menu:AddSpacer( )
 		end
 
 		menu:AddOption( "Create new Outfit", function( )
-			local f = createHatPositioner( self )
+			local f = createHatPositioner( self, Pointshop2.HatPersistence.ALL_MODELS )
 			f:NewEmptyOutfit( )
 		end )
 		menu:AddOption( "Import existing PAC Outfit", function( )
-			local f = createHatPositioner( self )
+			local f = createHatPositioner( self, Pointshop2.HatPersistence.ALL_MODELS )
 			f:ImportPacOutfit( )
 		end )
 		menu:Open( )
@@ -79,9 +77,8 @@ function PANEL:Init( )
 		local function requestModel( clone, overrideMdlPath )
 			local modelPath = overrideMdlPath
 			local function openEditor( )
-				self.currentModel = modelPath
 				local line = self.listView:AddLine( modelPath, "No", "" )
-				local f = createHatPositioner( self )
+				local f = createHatPositioner( self, modelPath )
 				if modelPath == Pointshop2.HatPersistence.ALL_CSS_MODELS then
 					line.model = "models/player/t_guerilla.mdl"
 				elseif modelPath == Pointshop2.HatPersistence.ALL_MODELS then
@@ -140,7 +137,7 @@ function PANEL:Init( )
 		--No Duplicates
 		for k, v in pairs( listView:GetLines( ) ) do
 			if v.Columns[1]:GetText( ) == model then
-				return
+				return v.Columns[1]
 			end
 		end
 
@@ -149,24 +146,14 @@ function PANEL:Init( )
 		button.Value = 0
 		button:SetText( "Open Editor" )
 		function button.DoClick( )
-			local f = vgui.Create( "DHatPositioner" )
-			f:Center( )
-			function f.OnSave( _self, outfit )
-				return self:OutfitSaved( outfit )
-			end
-			if model == Pointshop2.HatPersistence.ALL_CSS_MODELS then
-				line.model = "models/player/t_guerilla.mdl"
-			elseif model == Pointshop2.HatPersistence.ALL_MODELS then
-				line.model = "models/player/kliener.mdl"
-			else
-				line.model = model
-			end
-			self.currentModel = line.model
-			f:SetModel( line.model )
+			local f = createHatPositioner( self, model )
+			f:SetModel(model == Pointshop2.HatPersistence.ALL_CSS_MODELS and "models/player/t_guerilla.mdl" or model)
 			if line.outfit then
 				f:LoadOutfit( line.outfit )
+			elseif self.baseOutfit then 
+				f:LoadOutfit( self.baseOutfit )
 			else
-				f:NewEmptyOutfit( )
+				f:NewEmptyOutfit()
 			end
 		end
 		line.Columns[3] = button
@@ -235,18 +222,19 @@ function PANEL:IconViewInfoSaved( viewInfo )
 	self.invIconEditor:SetViewInfo( viewInfo )
 end
 
-function PANEL:OutfitSaved( outfit )
-	pace.Backup( outfit, os.time( ) .. self.currentModel ) --Just to be save
+function PANEL:OutfitSaved( outfit, model )
+	print("saved,", outfit, model)
+	pace.Backup( outfit, os.time( ) .. model ) --Just to be save
 	self.outfitsChanged = true
 
-	if self.currentModel == Pointshop2.HatPersistence.ALL_MODELS then
+	if model == Pointshop2.HatPersistence.ALL_MODELS then
 		self.baseOutfit = outfit
 		self.shopIconEditor:SetPacOutfit( outfit )
 		self.invIconEditor:SetPacOutfit( outfit )
 		self.addBtn:SetDisabled( false )
 	else
 		for k, v in pairs( self.listView:GetLines( ) ) do
-			if v.Columns[1]:GetText( ) == self.currentModel then
+			if v.Columns[1]:GetText( ) == model then
 				v.Columns[2]:SetText( "Yes" )
 				v.outfit = outfit
 			end
@@ -306,6 +294,8 @@ function PANEL:SaveItem( saveTable )
 			table.insert( saveTable.validSlots, slotName )
 		end
 	end
+
+	PrintTable(saveTable)
 end
 
 function PANEL:EditItem( persistence, itemClass )

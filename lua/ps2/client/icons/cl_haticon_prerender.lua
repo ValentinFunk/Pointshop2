@@ -2,8 +2,8 @@
     Provides a renderer for Hat Icons.
 ]]--
 
-local plyModel = hook.Run( "PS2_GetPreviewModel" ) or "models/player/alyx.mdl"
-local entity = ClientsideModel( plyModel, RENDER_GROUP_OPAQUE_ENTITY )
+local plyModel = hook.Run( "PS2_GetPreviewModel" ) and hook.Run( "PS2_GetPreviewModel" ).model or "models/player/alyx.mdl"
+local entity = ClientsideModel( plyModel, RENDERGROUP_OTHER )
 entity.Owner = entity
 pac.SetupENT( entity, "Owner" )
 entity:SetNoDraw(true)
@@ -14,6 +14,12 @@ local directionalLight = {
 	[BOX_TOP] = Color(255, 255, 255),
 	[BOX_FRONT] = Color(255, 255, 255)
 }
+local iSeq = entity:LookupSequence( "walk_all" )
+if ( iSeq <= 0 ) then iSeq = entity:LookupSequence( "WalkUnarmed_all" ) end
+if ( iSeq <= 0 ) then iSeq = entity:LookupSequence( "walk_all_moderate" ) end
+
+if ( iSeq > 0 ) then entity:ResetSequence( iSeq ) end
+entity:FrameAdvance( 1 )
 local function PaintHatIcon(itemClass)
 	local outfit = itemClass.getOutfitForModel(plyModel)
 	if not outfit then
@@ -27,7 +33,7 @@ local function PaintHatIcon(itemClass)
 	pac.SetupENT( entity, "Owner" )
 	entity.Owner = entity
 	entity:AttachPACPart( outfit )
-	entity:FrameAdvance( 100 )
+	entity:FrameAdvance( 1 )
 	pac.ShowEntityParts( entity )
 	for k, v in pairs( entity.pac_outfits or {} ) do
 		pac.HookEntityRender( entity, v )
