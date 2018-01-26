@@ -8,6 +8,15 @@ function PANEL:Init( )
 	Derma_Hook( self.leftPanel, "Paint", "Paint", "InventoryBackground" )
 
 	local slotsPerRow = 4
+	if ScrW() > 870 then
+		slotsPerRow = 5
+	end
+	if ScrW() > 1000 then
+		slotsPerRow = 6
+	end
+	if ScrW() > 1265 then
+		slotsPerRow = 8
+	end
 	local containerWidth = 64 * slotsPerRow + ( slotsPerRow - 1 ) * 5 + 2 * 8
 	self.leftPanel:SetWide( containerWidth  )
 	self.leftPanel:DockPadding( 8, 8, 8, 8 )
@@ -106,11 +115,13 @@ function PANEL:Init( )
 
 	self.topContainer = vgui.Create( "DPanel", self.rightPanel )
 	self.topContainer:Dock( TOP )
-	self.topContainer:SetTall( 400 )
+	self.topContainer:SetTall( 360 )
 	self.topContainer.Paint = function( ) end
 
 	self.slotsScroll = vgui.Create( "DScrollPanel", self.topContainer )
-	self.slotsScroll.wantedWidth = 3 * 64 + 3 * 8
+
+	local widthGeneral = 3 * 64 + 3 * 8
+	self.slotsScroll.wantedWidth = widthGeneral
 	self.slotsScroll:SetWide( self.slotsScroll.wantedWidth )
 	self.slotsScroll:DockMargin( 8, 0, 8, 0 )
 	self.slotsScroll:Dock( LEFT )
