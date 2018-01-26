@@ -33,21 +33,28 @@ function PANEL:SetTrails( files )
 	end
 	
 	for k, v in pairs( materials ) do
+		local mat = Material( v )
+		if not mat then continue end
+
 		local btn = self.layout:Add( "DImageButton" )
 		btn:SetSize( 64, 64 )
 		btn:SetImage( v )
-		btn.NormalMat = Material( v )
-		btn.ScrollingTexture = CreateMaterial( "PS2_MatScrollingTrail" .. v, "UnlitGeneric", {
-			["$basetexture"] = Material( v ):GetTexture( "$basetexture" ):GetName( ),
-			["$translucent"] = 1,
-			Proxies = {
-				TextureScroll = {
-					textureScrollVar = "$basetexturetransform",
-					textureScrollRate = "0.8",
-					textureScrollAngle = "90",
+		btn.NormalMat = mat
+		if mat:GetTexture( "$basetexture" ) then
+			btn.ScrollingTexture = CreateMaterial( "PS2_MatScrollingTrail" .. v, "UnlitGeneric", {
+				["$basetexture"] = mat:GetTexture( "$basetexture" ):GetName( ),
+				["$translucent"] = 1,
+				Proxies = {
+					TextureScroll = {
+						textureScrollVar = "$basetexturetransform",
+						textureScrollRate = "0.8",
+						textureScrollAngle = "90",
+					}
 				}
-			}
-		} )
+			} )
+		else
+			btn.ScrollingTexture = mat
+		end
 		function btn:Think( )
 			if self.Hovered then
 				self.m_Image:SetMaterial( self.ScrollingTexture )
