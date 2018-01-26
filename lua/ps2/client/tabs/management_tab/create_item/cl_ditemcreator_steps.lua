@@ -79,7 +79,7 @@ function PANEL:OnCompleted( )
 	Pointshop2View:getInstance( ):createPointshopItem( saveTable )
 	self:Close( )
 	
-	if not self.persistenceId then
+	if not self.persistenceId and not self.targetCategoryId then
 		Derma_Message( "The item has been created. To put it up for sale go to Manage Items and move it from uncategorized items into a category", "Information" )
 	end
 end

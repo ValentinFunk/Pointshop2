@@ -123,7 +123,7 @@ function PANEL:Init( )
 		Pointshop2View:getInstance( ):createPointshopItem( saveTable )
 		frame:Close( )
 		
-		if not frame.persistenceId then
+		if not frame.persistenceId and not frame.targetCategoryId then
 			Derma_Message( "The item has been created. To put it up for sale go to Manage Items and move it from uncategorized items into a category", "Information" )
 		end
 	end
