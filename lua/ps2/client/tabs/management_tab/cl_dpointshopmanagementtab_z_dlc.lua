@@ -75,7 +75,7 @@ function PANEL:Init( )
 			modPanel.label = vgui.Create( "DLabel", modPanel )
 			modPanel.label:DockMargin( 0, -5, 0, 8 )
 			modPanel.label:SetFont( self:GetSkin( ).fontName )
-			modPanel.label:SetText( ( realm == "Official" and "Official DLC for Pointshop 2. Click on the icons to open the scriptfodder page. Guranteed support." or "Pointshop 2 Addons created by third-party developers. Support provided by the respective authors." ) )
+			modPanel.label:SetText( ( realm == "Official" and "Official DLC for Pointshop 2. Click on the icons to open the gmodstore page. Guranteed support." or "Pointshop 2 Addons created by third-party developers. Support provided by the respective authors." ) )
 			modPanel.label:SizeToContents( )
 			modPanel.label:Dock( TOP )
 
