@@ -65,23 +65,32 @@ end
 
 vgui.Register( "DInventory", PANEL, "DPanel" )
 
-/*
+local isEnabled = false
+hook.Add( "PS2_ClientSettingsUpdated", "UpdatePACConvars", function( )
+	isEnabled = Pointshop2.ClientSettings.GetSetting( "BasicSettings.HoverPanelEnabled" )
+end )
 
 local hoverPanel, lastHoverItem
+
 hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 	if ( dragndrop.m_Dragging != nil ) then return end
+	if not isEnabled then
+		return
+	end
 
 	local hoverItem = vgui.GetHoveredPanel( )
 	if not IsValid( hoverItem ) then
 		if IsValid( hoverPanel ) then
-			hoverPanel:Remove( )
+			-- hoverPanel:Remove( )
 		end
 		return
 	end
 
 	if hoverItem != lastHoverItem then
-		if IsValid( hoverPanel ) then
-			hoverPanel:Remove( )
+		if IsValid( hoverPanel ) and hoverItem and hoverItem.stackPanel then
+			local stackPanel = hoverItem.stackPanel
+			hoverPanel:SetItem( stackPanel.items[1] )
+			-- hoverPanel:Remove( )
 		end
 	end
 	lastHoverItem = hoverItem
@@ -89,7 +98,8 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 	if hoverItem.stackPanel then
 		local stackPanel = hoverItem.stackPanel
 		if not IsValid( hoverPanel ) then
-			hoverPanel = stackPanel.items[1]:getHoverPanel( )
+			hoverPanel = vgui.Create("DItemDescriptionPanel")
+			hoverPanel:SetSize(300, 300)
 			hoverPanel:SetPaintedManually( true )
 			hoverPanel:SetTargetPanel( stackPanel )
 			hoverPanel:SetItem( stackPanel.items[1] )
@@ -116,4 +126,4 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 		hoverPanel:SetPaintedManually( true )
 		DisableClipping( false )
 	end
-end ) */
+end )

@@ -426,6 +426,66 @@ function SKIN:PaintButtonUp( panel, w, h )
 	end
 end
 
+function SKIN:PaintItemDescriptionPanel( panel, w, h )
+	local color_bright, color_darken = self.ButtonColor, self.InnerPanel
+	local function l2s(tbl) 
+		local x, y = tbl.x, tbl.y
+		return { x = x, y = y }
+	end
+
+	--Fill
+	surface.SetDrawColor( color_darken.r, color_darken.g, color_darken.b, 250 )
+	if panel.targetPanel then
+		local targetXScreen, targetYScreen = panel.targetPanel:LocalToScreen( 0, 0 )
+		local targetX, targetY = panel:ScreenToLocal( targetXScreen, targetYScreen )
+		
+		local targetW, targetH = panel.targetPanel:GetSize( )
+		local targetCenterX = targetX + targetW / 2
+		local fillVertices = {}
+		table.insert( fillVertices, { x = targetCenterX + 10, y = 10 } )
+		table.insert( fillVertices, { x = targetCenterX, y = 0 } ) --top
+		table.insert( fillVertices, { x = targetCenterX - 10, y = 10 } )
+		table.insert( fillVertices, { x = targetCenterX + 10, y = 10 } )
+		fillVertices = table.reverse( fillVertices )
+		
+		draw.NoTexture( )
+		surface.DrawPoly( fillVertices )
+	end
+	
+	surface.DrawRect( 0, 10, w, h - 10 )
+	
+	--Outline
+	local vertices = {}
+	table.insert( vertices, { x = 0, y = 10 } )
+	table.insert( vertices, { x = 0, y = h } )
+	table.insert( vertices, { x = w, y = h } )
+	table.insert( vertices, { x = w, y = 10 } )
+	
+	if panel.targetPanel then
+		local targetXScreen, targetYScreen = panel.targetPanel:LocalToScreen( 0, 0 )
+		local targetX, targetY = panel:ScreenToLocal( targetXScreen, targetYScreen )
+		local targetW, targetH = panel.targetPanel:GetSize( )
+		local targetCenterX = targetX + targetW / 2
+		table.insert( vertices, { x = targetCenterX + 10, y = 10 } )
+		table.insert( vertices, { x = targetCenterX, y = 0 } ) --top
+		table.insert( vertices, { x = targetCenterX - 10, y = 10 } )
+	end
+	
+	
+	surface.SetDrawColor( color_bright )
+	table.insert( vertices, { x = 0, y = 10 } )
+	local lastVert
+	for k, vert in pairs( vertices ) do
+		if k > 1 then 
+			surface.DrawLine( lastVert.x, lastVert.y, vert.x, vert.y ) 
+		end
+		lastVert = vert
+	end
+end
+
+function SKIN:LayoutItemDescriptionPanel( panel )
+
+end
 
 
 derma.DefineSkin( SKIN.Name, "Poinsthop2 Default", SKIN )

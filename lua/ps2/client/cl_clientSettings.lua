@@ -24,6 +24,11 @@ Pointshop2.ClientSettings.SettingsTable = {
 			label = "Autoconfirm selling items",
 			tooltip = "Disables the confirmation when selling an item",
 			value = false
+		},
+		HoverPanelEnabled = {
+			label = "Show hover panel",
+			tooltip = "Displays information in inventory on hover",
+			value = false
 		}
 	}, 
 }

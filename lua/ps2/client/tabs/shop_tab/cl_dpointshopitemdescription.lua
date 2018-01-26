@@ -23,10 +23,10 @@ function PANEL:Init( )
 
 	self.buttonsPanel = vgui.Create( "DPanel", self )
 	self.buttonsPanel:Dock( TOP )
-	self.buttonsPanel:DockMargin( 0, 8, 0, 0 )
+	self.buttonsPanel:DockMargin( 0, 0, 0, 0 )
 	Derma_Hook( self.buttonsPanel, "Paint", "Paint", "InnerPanelBright" )
-	self.buttonsPanel:SetTall( 100 )
-	self.buttonsPanel:DockPadding( 5, 5, 5, 5 )
+	self.buttonsPanel:SetTall( 0 )
+	self.buttonsPanel:DockPadding( 0, 0, 0, 0 )
 	function self.buttonsPanel:PerformLayout( )
 		self:SizeToChildren( false, true )
 	end
@@ -97,6 +97,7 @@ function PANEL:Init( )
 			v:Remove( )
 		end
 		self:InvalidateLayout( )
+		self:SetTall(0)
 	end
 
 	function self.buttonsPanel:AddBuyButtons( priceInfo )
@@ -205,6 +206,14 @@ function PANEL:UpdateServerRestrictions( servers )
 	self.restrictionsPanel:SetTall( 100 )
 	self.restrictionsPanel:DockPadding( 5, 5, 5, 5 )
 	function self.restrictionsPanel:PerformLayout( )
+		if #self:GetChildren() == 0 then
+			self:SetTall(0)
+			self:DockMargin( 0, 0, 0, 0 )
+			self:DockPadding( 0, 0, 0, 0 )
+		else
+			self:DockPadding( 5, 5, 5, 5 )
+			self:DockMargin( 0, 8, 0, 0 )
+		end
 		self:SizeToChildren( false, true )
 	end
 
@@ -284,9 +293,17 @@ function PANEL:SetItem( item, noButtons )
 end
 
 function PANEL:PerformLayout( )
+	if #self.buttonsPanel:GetChildren() > 0 then
+		self.buttonsPanel:DockMargin( 0, 0, 0, 0 )
+		self.buttonsPanel:DockPadding( 5, 5, 5, 5 )
+	else
+		self.buttonsPanel:DockMargin( 0, 0, 0, 0 )
+		self.buttonsPanel:DockPadding( 0, 0, 0, 0 )
+		self.buttonsPanel:SetTall(0)
+	end
 	self:SizeToChildren( false, true )
 end
 
-Derma_Hook( PANEL, "Paint", "Paint", "PointshopItemDescription" )
+Derma_Hook( PANEL, "Paint", "Paint", "InnerPanel" )
 
 derma.DefineControl( "DPointshopItemDescription", "", PANEL, "DPanel" )
