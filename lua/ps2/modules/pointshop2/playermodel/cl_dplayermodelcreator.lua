@@ -18,6 +18,7 @@ function PANEL:Init( )
 		local window = vgui.Create( "DPlayerModelSelector" )
 		window:Center( )
 		window:MakePopup( )
+		window:DoModal()
 		function window:OnChange( )
 			frame.manualEntry.IgnoreChange = true
 			frame.manualEntry:SetText( window.selectedModel )

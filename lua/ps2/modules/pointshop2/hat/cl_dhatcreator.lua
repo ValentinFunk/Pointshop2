@@ -21,6 +21,7 @@ local function createHatPositioner( parentPanel, model )
 		return parentPanel:IconViewInfoSaved( viewInfo )
 	end
 	f:Center( )
+	f:DoModal()
 	timer.Simple(0.5, function() pace.ResetView( ) end)
 	return f
 end
