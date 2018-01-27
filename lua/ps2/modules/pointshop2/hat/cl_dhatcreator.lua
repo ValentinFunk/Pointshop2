@@ -21,6 +21,7 @@ local function createHatPositioner( parentPanel, model )
 		return parentPanel:IconViewInfoSaved( viewInfo )
 	end
 	f:Center( )
+	timer.Simple(0.5, function() pace.ResetView( ) end)
 	return f
 end
 
@@ -163,6 +164,17 @@ function PANEL:Init( )
 	function self.listView:PerformLayout( )
 		DListView.PerformLayout( self )
 		self:SetTall( math.Clamp( 100, 50, #self:GetLines( ) * 20 + 20 ) )
+	end
+
+	function self.listView:OnRowRightClick( id, line )
+		local menu = DermaMenu()
+		menu:SetSkin( Pointshop2.Config.DermaSkin )
+
+		menu:AddOption( "Remove", function( )
+			self:RemoveLine( id )
+		end )
+
+		menu:Open( )
 	end
 
 
