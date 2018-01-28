@@ -120,12 +120,12 @@ local function hookPac( panel )
 		panel:OnOpenMenu( )
 	end
 
-	function pace.select.VecToScreen(vec)
+	function pace.selectControl.VecToScreen(vec)
 		local pos = pace.mctrl.VecToScreen(vec)
 		return { x = pos.x, y = pos.y }
 	end
 	
-	function pace.select.GetMousePos()
+	function pace.selectControl.GetMousePos()
 		return pace.mctrl.GetMousePos()
 	end
 
@@ -188,11 +188,11 @@ local function unHookPac( )
 	pace.BasicParts = GAMEMODE.hookRestore.oldBasicParts
 	pace.BasicProperties = GAMEMODE.hookRestore.oldBasicProps
 
-	function pace.select.VecToScreen(vec)
+	function pace.selectControl.VecToScreen(vec)
 		return vec:ToScreen()
 	end
 	
-	function pace.select.GetMousePos()
+	function pace.selectControl.GetMousePos()
 		return gui.MousePos()
 	end
 	
@@ -263,7 +263,8 @@ function PANEL:Paint( w, h )
 	pace.Focused = true
 	pace.HUDPaint() --Update View pos (movement is done here)
 	surface.SetDrawColor(color_white)
-	pace.select.HUDPaint( )
+	pace.selectControl.HUDPaint( )
+	
 	local result = pace.CalcView( LocalPlayer( ), pos, ang, fov )
 	
 	pos, ang, fov =  result.origin, result.angles, result.fov
@@ -304,7 +305,7 @@ function PANEL:Paint( w, h )
 	cam.End3D( )
 
 	pace.mctrl.HUDPaint( )
-	pace.select.HUDPaint( )
+	pace.selectControl.HUDPaint( )
 
 	if not self.hooked then
 		hookPac( self )
@@ -325,12 +326,12 @@ end
 
 function PANEL:OnMousePressed( mc )
 	pace.GUIMousePressed( mc )
-	pace.select.GUIMousePressed( mc )
+	pace.selectControl.GUIMousePressed( mc )
 end
 
 function PANEL:OnMouseReleased( mc )
 	pace.GUIMouseReleased( mc )
-	pace.select.GUIMouseReleased( mc )
+	pace.selectControl.GUIMouseReleased( mc )
 end
 
 function PANEL:OnOpenMenu( )
