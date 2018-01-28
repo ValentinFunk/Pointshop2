@@ -1,5 +1,14 @@
 local PANEL = {}
 
+local draw_localplayer = nil
+if draw_localplayer == nil then
+	hook.Add("ShouldDrawLocalPlayer", "pac_draw_2d_entity", function()
+		if draw_localplayer == true then
+			return true
+		end
+	end)
+end
+
 function PANEL:Init( )
 	self.dirty = true
 end
@@ -13,11 +22,16 @@ function PANEL:SetPacOutfit( outfit )
 
 	self.pacOutfit = outfit
 	if not self.pacOutfit then
+		error()
 		return debug.Trace()
 	end
-	if IsValid( self.Entity ) then
-		self.Entity:AttachPACPart( self.pacOutfit )
+
+	self.Entity:AttachPACPart( self.pacOutfit )
+
+	for k, v in pairs( self.Entity.pac_outfits or {} ) do
+		pac.HookEntityRender( self.Entity, v )
 	end
+
 	self:MarkDirty( )
 end
 
@@ -28,8 +42,8 @@ end
 
 function PANEL:SetModel( mdl )
 	DModelPanel.SetModel( self, mdl )
-	self.Entity.Owner = self.Entity	
 	pac.SetupENT( self.Entity, "Owner" )
+	self.Entity.Owner = self.Entity	
 	if self.pacOutfit then
 		self.Entity:AttachPACPart( self.pacOutfit )
 	end
@@ -50,6 +64,7 @@ function PANEL:ApplyModelInfo( modelInfo )
 end
 
 function PANEL:Paint( w, h )
+	-- self:PaintActual( w, h )
 	if not self.rt then
 		local uid = "PS2RT_PreRender" .. math.random( 0, 1000000000 ) --not the cleanest but should work
 		self.rt = GetRenderTarget( uid, 256, 256 )
@@ -65,11 +80,16 @@ function PANEL:Paint( w, h )
 		return
 	end
 
-	local oldRt = render.GetRenderTarget( )
-	render.SetRenderTarget( self.rt )
+	render.PushRenderTarget(self.rt, 0, 0, 256, 256)
+		local oldW, oldH = ScrW(), ScrH()
+		local x,y = 0, 0 -- self:LocalToScreen(0, 0)
 		render.Clear( 47, 47, 47, 255, true, true )
-		self:PaintActual( w, h )
-	render.SetRenderTarget( oldRt )
+		-- render.SetViewPort(x, y, w, h)
+		-- cam.Start2D()
+		self:PaintActual( 256, 256 )
+		-- cam.End2D()
+		-- render.SetViewPort( 0, 0, oldW, oldH )
+	render.PopRenderTarget()
 
 	self.mat:SetTexture( "$basetexture", self.rt )
 
@@ -91,6 +111,7 @@ end
 function PANEL:PaintCached( w, h )
 	render.PushFilterMin( TEXFILTER.ANISOTROPIC );
 	render.PushFilterMag( TEXFILTER.ANISOTROPIC );
+		surface.SetDrawColor( color_white )
 		surface.SetMaterial( self.mat )
 		surface.DrawTexturedRectUV( 0, 0, w, h, 0, 0, w / 128, h / 128 )
 	render.PopFilterMag( )
@@ -101,13 +122,13 @@ function PANEL:PaintActual( w, h )
 	if not IsValid( self.Entity ) or
 	   not self.pacOutfit or
 	   not self.viewInfo then
-		--surface.SetDrawColor( 255, 0, 255, 100 )
-		--surface.DrawRect( 0, 0, w, h )
 		return
 	end
 
+	pac.FrameNumber = pac.FrameNumber + 100
 	if pac.Think then pac.Think() end
-	cam.Start3D( self.viewInfo.origin, self.viewInfo.angles, self.viewInfo.fov - 20, 0, 0, 256, 256, 5, 4096 )
+	
+	cam.Start3D( self.viewInfo.origin, self.viewInfo.angles, self.viewInfo.fov - 20, 0, 0, w, h, 5, 4096 )
 		cam.IgnoreZ( true )
 		render.SuppressEngineLighting( true )
 		render.SetLightingOrigin( self.Entity:GetPos() )
@@ -122,12 +143,14 @@ function PANEL:PaintActual( w, h )
 			end
 		end
 
+		draw_localplayer = true
 		pac.FlashlightDisable( true )
 			pac.RenderOverride( self.Entity, "opaque" )
 			pac.RenderOverride( self.Entity, "translucent", true )
 			self.Entity:DrawModel( )
 			pac.RenderOverride( self.Entity, "translucent", true )
 		pac.FlashlightDisable( false )
+		draw_localplayer = false
 
 		cam.IgnoreZ( false )
 		render.SuppressEngineLighting( false )
