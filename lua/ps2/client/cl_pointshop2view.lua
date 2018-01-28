@@ -259,7 +259,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	self.itemCategories = itemCategories
 	self.itemProperties = itemProperties
 
-	Pointshop2View:getInstance( ).clPromises.SettingsReceived:Done( function()
+	return Pointshop2View:getInstance( ).clPromises.SettingsReceived:Then( function()
 		--Load persistent items
 		local startTime = SysTime( )
 		for k, v in pairs( self.itemProperties ) do
@@ -341,9 +341,10 @@ function Pointshop2View:loadDynamics( versionHash )
 		LibK.processNetTable( dynamicsDecoded[3] )
 
 		--Pass to view
-		self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
+		local dynamicsHandled = self:receiveDynamicProperties( dynamicsDecoded[1], dynamicsDecoded[2], dynamicsDecoded[3] )
 
 		--Inform server
+		local kPlayerIdValid = Deferred()
 		timer.Create( "CheckValidPlayerId", 0.1, 0, function()
 			local loaded = true
 			for k, v in pairs( player.GetAll( ) ) do
@@ -352,10 +353,17 @@ function Pointshop2View:loadDynamics( versionHash )
 				end
 			end
 			if loaded then
+				kPlayerIdValid:Resolve( )
 				timer.Destroy( "CheckValidPlayerId" )
-				self:controllerAction( "dynamicsReceived" )
 			end
 		end )
+		WhenAllFinished{
+			kPlayerIdValid:Promise(),
+			dynamicsHandled
+		}:Then(function()
+			self:controllerAction( "dynamicsReceived" )
+			KLogf(5, "[Pointshop 2] Dynamics loaded, ready to receive server calls")
+		end)
 	end )
 end
 
