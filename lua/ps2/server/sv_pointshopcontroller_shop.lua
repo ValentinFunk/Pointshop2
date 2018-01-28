@@ -26,6 +26,7 @@ end
 LibK.GLib.PlayerMonitor:AddEventListener("PlayerDisconnected", "PS2_PlayerDisconnected", function (_, ply, userId)
 	if not ply.PS2_Inventory or not ply.PS2_Inventory:getItems() then
 		KLogf(4, "Player %s: Left before inventory has been loaded", ply:Nick())
+		ply.fullyLoadedPromise:Reject('Disconnected')
 	else
 		for k, item in pairs(ply.PS2_Inventory:getItems()) do
 			KInventory.ITEMS[item.id] = nil
