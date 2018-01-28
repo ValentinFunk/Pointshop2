@@ -23,15 +23,18 @@ function PANEL:Init( )
 	/* Player Info */
 	self.generalInfo = self:AddCategory( "Player Info" )
 	self.generalInfo:SetTall( 64 + 10 )
-
-	self.generalInfo.avatar = vgui.Create( "AvatarImage", self.generalInfo )
+	
+	local splitPanel = vgui.Create( "DSplitPanel", self.generalInfo )
+	splitPanel:Dock( FILL )
+	
+	self.generalInfo.avatar = vgui.Create( "AvatarImage", splitPanel.left )
 	self.generalInfo.avatar:SetPos( 5, 5 )
 	self.generalInfo.avatar:SetSteamID( "BOT", 64 )
 	self.generalInfo.avatar:SetSize( 64, 64 )
 	self.generalInfo.avatar:Dock( LEFT )
 	self.generalInfo.avatar:DockMargin( 0, 0, 10, 0 )
 
-	self.generalInfo.infoPanel = vgui.Create( "DPanel", self.generalInfo )
+	self.generalInfo.infoPanel = vgui.Create( "DPanel", splitPanel.left )
 	self.generalInfo.infoPanel:Dock( FILL )
 	self.generalInfo.infoPanel.Paint = function( ) end
 	function self.generalInfo.infoPanel:AddLabel( name )
@@ -50,22 +53,14 @@ function PANEL:Init( )
 	self.generalInfo.infoPanel.lastConnected = self.generalInfo.infoPanel:AddLabel( "Last Connected" )
 
 	/* Wallet */
-	self.walletInfo = self:AddCategory( "Player Wallet" )
-	function self.walletInfo:PerformLayout( )
-		local w = self:GetWide( ) / #self:GetChildren( )
-		w = w - 5 * ( #self:GetChildren( ) - 1 )
-		for k, v in pairs( self:GetChildren( ) ) do
-			v:SetWide( w )
-		end
-	end
-	self.walletInfo:SetTall( 70 )
+	self.walletInfo = splitPanel.right
 
 	local frame = self
 	function self.walletInfo:AddCurrencyPanel( name, label, value, icon )
 		local pnl = vgui.Create( "DPanel", self )
 		self[name .. "Panel"] = pnl
-		pnl:Dock( LEFT )
-		pnl:DockPadding( 5, 5, 5, 5 )
+		pnl:Dock( TOP )
+		pnl:DockPadding( 5, 0, 5, 5 )
 		pnl.Paint = function( ) end
 
 		pnl.displayPnl = vgui.Create( "DPanel", pnl )
@@ -83,22 +78,24 @@ function PANEL:Init( )
 		pnl.label:SetFont( self:GetSkin( ).fontName )
 		pnl.label:Dock( FILL )
 
-		pnl.changeButton = vgui.Create( "DButton", pnl )
-		pnl.changeButton:SetText( "Edit" )
+		pnl.changeButton = vgui.Create( "DButton", pnl.displayPnl )
+		pnl.changeButton:SetText( "" )
 		pnl.changeButton:SetImage( "pointshop2/pencil54.png" )
 		pnl.changeButton.m_Image:SetSize( 16, 16 )
-		pnl.changeButton:DockMargin( 0, 5, 0, 0 )
-		pnl.changeButton:Dock( TOP )
+		pnl.changeButton:DockMargin( 2, 2, 2, 2 )
+		pnl.changeButton:Dock( RIGHT )
+		pnl.changeButton:SetWide( 20 )
+		pnl.changeButton:SetTall( 20 )
 		function pnl.changeButton:DoClick( )
 			Derma_StringRequest( "Input",
 				"Please enter the new amount of " .. label,
 				tostring( pnl.label:GetText( ) ),
 				function( newValue )
-					if not tonumber( newValue ) then
-						Derma_Message( "Please enter a number", "Error" )
+					if not tonumber( newValue ) or tonumber( newValue ) > 2000000000 then
+						Derma_Message( "Please enter a number <= 2,000,000,000", "Error" )
 						return
 					end
-					frame:ChangePlayerWallet( name, newValue )
+					frame:ChangePlayerWallet( name, tonumber( newValue ) )
 				end
 			)
 		end
@@ -107,11 +104,33 @@ function PANEL:Init( )
 			self.label:SetText( val )
 		end
 
+		pnl:InvalidateLayout( true )
+		pnl:SizeToChildren( false, true )
+
 		return pnl
 	end
 	self.pointsPanel = self.walletInfo:AddCurrencyPanel( "points", "Points", 0, "pointshop2/dollar103_small.png" )
 	self.premiumPointsPanel = self.walletInfo:AddCurrencyPanel( "premiumPoints", "Premium Points", 0, "pointshop2/donation_small.png" )
 	hook.Add( "PS2_WalletChanged", self, self.PlayerWalletChanged )
+
+	self.slotsCategory, self.slotsCategoryPnl = self:AddCategory( "Player Slots" )
+	local slotsScroll = vgui.Create( "DScrollPanel", self.slotsCategory )
+	slotsScroll:DockMargin( 8, 0, 8, 0 )
+	slotsScroll:Dock( TOP )
+	slotsScroll:SetTall( 64 + 32 )
+	Derma_Hook( slotsScroll, "Paint", "Paint", "InnerPanelBright" )
+	
+	self.slotsLayout = vgui.Create( "DIconLayout", slotsScroll )
+	self.slotsLayout:Dock( TOP )
+	self.slotsLayout:DockMargin( 0, 0, 0, 0 )
+	self.slotsLayout:SetSpaceX( 5 )
+	self.slotsLayout:SetSpaceY( 5 )
+	self.slotsLayout:SetBorder( 5, 5, 5, 5 )
+	self.slotsLayout.Paint = function() end
+	hook.Add( "PS2_OnSettingsUpdate", self, function()
+		self:RefreshInventory( )
+	end )
+
 
 	self.invCategory, self.invCategoryPnl = self:AddCategory( "Player Inventory" )
 	local scroll = vgui.Create( "DScrollPanel", self.invCategory )
@@ -151,7 +170,7 @@ function PANEL:Init( )
 	self.invButtonPanel.refreshButton:SetImage( "pointshop2/actualize.png" )
 	self.invButtonPanel.refreshButton.m_Image:SetSize( 16, 16 )
 	self.invButtonPanel.refreshButton:Dock( RIGHT )
-	self.invButtonPanel.refreshButton:SetText( "Refresh Inventory" )
+	self.invButtonPanel.refreshButton:SetText( "Refresh Data" )
 	self.invButtonPanel:DockMargin( 5, 0, 0, 0 )
 	function self.invButtonPanel.refreshButton.DoClick( )
 		self:RefreshInventory( )
@@ -226,6 +245,82 @@ function PANEL:SetPlayerData( playerData )
 	else
 		self.pointsPanel:SetValue( playerData.wallet.points )
 		self.premiumPointsPanel:SetValue( playerData.wallet.premiumPoints )
+	end
+
+	-- Clear slot panel
+	for k,v in pairs(self.slotsLayout:GetChildren()) do v:Remove() end
+
+	-- Create slots
+	for k, v in pairs(Pointshop2.EquipmentSlots) do
+		local slotName = v.name
+		local slotsPanel = self.slotsLayout:Add("DPanel")
+		slotsPanel:DockPadding( 5, 5, 5, 5 )
+		slotsPanel:SetWide( 80 )
+		Derma_Hook( slotsPanel, "Paint", "Paint", "InnerPanel" )
+		slotsPanel.itemHolder = vgui.Create("DPanel", slotsPanel)
+		slotsPanel.itemHolder:SetSize(64, 64)
+		slotsPanel.itemHolder:Dock(TOP)
+		slotsPanel.itemHolder.Paint = function() end
+
+		slotsPanel.label = vgui.Create("DLabel", slotsPanel)
+		slotsPanel.label:Dock( TOP )
+		slotsPanel.label:SetText( slotName )
+		slotsPanel.label:SizeToContents()
+		slotsPanel.label:SetContentAlignment( 5 )
+
+		function slotsPanel:SetSlot(slotInstance)
+			if IsValid(self.itemHolder.itemIcon) then
+				self.itemHolder.itemIcon:Remove()
+			end
+
+			if slotInstance.Item then
+				self.itemHolder.itemIcon = slotInstance.Item:getNewInventoryIcon()
+				self.itemHolder.itemIcon:SetParent(self.itemHolder)
+				self.itemHolder.itemIcon:Dock( FILL )
+			end
+		end
+
+		self.slotsLayout[slotName] = slotsPanel
+		slotsPanel:InvalidateLayout( true )
+		slotsPanel:SizeToChildren( false, true )
+	end
+
+	-- Add equipped items
+	for k,v in pairs(self.playerData.slots) do
+		if not IsValid(self.slotsLayout[v.slotName]) then
+			PrintTable(self.playerData.slots)
+			PrintTable(Pointshop2.EquipmentSlots)
+			KLogf( 2, "A slot with name %s was found in the database, however that slot is unknown ingame.", v.slotName )
+			LocalPlayer():PS2_DisplayError( "ERROR: Slot in database that is not in game. Please check the console" )
+			continue
+		end
+
+		self.slotsLayout[v.slotName]:SetSlot( v )
+		if v.Item then
+			local pnl = self.slotsLayout[v.slotName]
+			pnl.itemHolder:SetMouseInputEnabled( false )
+			function pnl.OnMousePressed(icon, mcode)
+				if mcode != MOUSE_RIGHT then
+					return
+				end
+				local menu = DermaMenu()
+				menu:SetSkin( Pointshop2.Config.DermaSkin )
+				menu:AddOption( "Remove", function()
+					self:NotifyLoading( true )
+					self.inventoryPanel:SetDisabled(true)
+					icon.itemHolder:Remove()
+					Pointshop2View:getInstance():adminRemoveItem(ply, v.Item.id)
+					:Fail( function( err )
+						Pointshop2View:getInstance():displayError("Error removing item: " .. err)
+					end )
+					:Always( function( )
+						self:RefreshInventory( )
+						self.inventoryPanel:SetDisabled(false)
+					end )
+				end )
+				menu:Open()
+			end
+		end
 	end
 
 	-- Clear Inv panel

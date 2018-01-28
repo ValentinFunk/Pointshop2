@@ -126,7 +126,7 @@ function PANEL:NewEmptyOutfit( )
 		if not pace.Editor:IsValid() then return end
 	
 		pace.ClearParts()
-		pace.Call("CreatePart", "model", "click me to change model")
+		pace.Call("CreatePart", "model", "model part")
 			
 		pace.TrySelectPart()
 		pace.ResetView( )

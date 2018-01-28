@@ -37,33 +37,72 @@ function Pointshop2Controller:searchPlayers( ply, subject, attribute )
 	end )
 end
 
-function Pointshop2Controller:getUserDetails( ply, kPlayerId )
-	local def = Deferred( )
+local function fetchSlotsFromDatabase( kPlayerId )
+	return Pointshop2.EquipmentSlot.findAllByOwnerId( kPlayerId )
+		:Then( function( slotRows )
+			local slots = {}
+			for _, slotRow in pairs( slotRows ) do
+				slots[slot.id] = slot
+			end
+			return slots
+		end )
+end
 
-	WhenAllFinished{ LibK.Player.findById( kPlayerId ),
-					 Pointshop2.Wallet.findByOwnerId( kPlayerId ),
-					 KInventory.Inventory.findByOwnerId( kPlayerId )
-	}:Then( function( dbPlayer, wallet, inventory )
+local function fetchInventoryFromDatabase( kPlayerId )
+	return KInventory.Inventory.findByOwnerId( kPlayerId )
+		:Then( function( inv )
+			return inv:loadItems( )
+		end )
+end
+
+function Pointshop2Controller:getUserDetails( adminPly, kPlayerId )
+	-- Since we want to avoid overwriting the item cache we make sure to only
+	-- load items/slots if they are not already loaded for a player.
+	local inventoryPromise = Promise.Resolve():Then(function()
+		for k, v in pairs(player.GetAll()) do
+			if v.kPlayerId == kPlayerId then
+				return v.fullyLoadedPromise:Then( function( )
+					return v.PS2_Inventory
+				end, function() 
+					-- Player might disconnect before loading has finished
+					return fetchInventoryFromDatabase( kPlayerId )
+				end )
+			end
+		end
+		return fetchInventoryFromDatabase( kPlayerId )
+	end)
+
+	local slotsPromise = Promise.Resolve():Then(function()
+		for k, v in pairs(player.GetAll()) do
+			if v.kPlayerId == kPlayerId then
+				return v.fullyLoadedPromise:Then( function( )
+					return v.PS2_Slots
+				end, function() 
+					-- Player might disconnect before loading has finished
+					return fetchSlotsFromDatabase( kPlayerId )
+				end )
+			end
+		end
+		return fetchSlotsFromDatabase( kPlayerId )
+	end)
+
+	return WhenAllFinished{ 
+		LibK.Player.findById( kPlayerId ),
+		Pointshop2.Wallet.findByOwnerId( kPlayerId ),
+		inventoryPromise,
+		slotsPromise
+	}:Then( function( dbPlayer, wallet, inventory, slots )
 		dbPlayer.wallet = wallet
 		dbPlayer.inventory = inventory
+		dbPlayer.slots = slots
 		if not wallet or not inventory then
 			local def = Deferred( )
 			def:Reject( 1, "Player is not a Pointshop2 User" )
 			return def:Promise( )
 		end
-		return inventory:loadItems( )
-		:Then( function( )
-			return dbPlayer
-		end )
-	end )
-	:Done( function( plyInfo )
-		def:Resolve( plyInfo )
-	end )
-	:Fail( function( errid, err )
-		def:Reject( errid, err )
-	end )
 
-	return def:Promise( )
+		return dbPlayer
+	end )
 end
 
 function Pointshop2Controller:updatePlayerWallet( kPlayerId, currencyType, newValue )
