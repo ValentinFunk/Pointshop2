@@ -128,9 +128,10 @@ function PANEL:Init( )
 	self.slotsLayout:SetBorder( 5, 5, 5, 5 )
 	self.slotsLayout.Paint = function() end
 	hook.Add( "PS2_OnSettingsUpdate", self, function()
-		self:RefreshInventory( )
+		if self.playerData then
+			self:RefreshInventory( )
+		end
 	end )
-
 
 	self.invCategory, self.invCategoryPnl = self:AddCategory( "Player Inventory" )
 	local scroll = vgui.Create( "DScrollPanel", self.invCategory )
