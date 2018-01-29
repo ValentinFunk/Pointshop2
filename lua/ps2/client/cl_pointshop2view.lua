@@ -604,7 +604,7 @@ function Pointshop2View:saveSettings( mod, realm, settingsTbl )
 	outBuffer:LongString( util.TableToJSON( settingsTbl ) )
 
 	GLib.Transfers.Send( GLib.GetServerId( ), "Pointshop2.SettingsUpdate", outBuffer:GetString( ) )
-
+	hook.Run( "PS2_SettingsSavingStart" )
 	return self.settingsPromises[mod.Name]:Promise( )
 end
 
@@ -618,6 +618,7 @@ function Pointshop2View:serverSettingsSaved( modName, err )
 			self.settingsPromises[modName]:Resolve( )
 		end
 	end
+	hook.Run("PS2_ServerSettingsSaved")
 end
 
 function Pointshop2View:sendPoints( ply, points )
