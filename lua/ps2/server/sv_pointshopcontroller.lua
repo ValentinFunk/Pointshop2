@@ -138,7 +138,9 @@ function Pointshop2Controller:initializeSlots( ply )
 				print( "Error in 3" )
 			end
 
-			Pointshop2.ActivateItemHooks( item )
+			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+				Pointshop2.ActivateItemHooks( item )
+			end
 
 			--Delay to next frame to clear stack
 			timer.Simple( 0, function( )

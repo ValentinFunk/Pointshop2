@@ -528,8 +528,10 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	print(item, Pointshop2.ITEMS[item.id])
 	Pointshop2.ITEMS[item.id] = item
 
-	Pointshop2.ActivateItemHooks(item)
-	hook.Run( "PS2_ItemEquipped", ply, item )
+	if item.class:IsValidForServer( Pointshop2.GetCurrentServerId() ) then
+		Pointshop2.ActivateItemHooks(item)
+		hook.Run( "PS2_ItemEquipped", ply, item )
+	end
 end
 
 function Pointshop2View:playerUnequipItem( ply, itemId )
