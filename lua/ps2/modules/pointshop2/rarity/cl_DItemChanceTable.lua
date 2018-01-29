@@ -24,6 +24,7 @@ function PANEL:Init( )
 	function self.addBtn.DoClick( )
 		local frame = vgui.Create( "DItemFactoryConfigurationFrame" )
 		frame:MakePopup( )
+		frame:DoModal()
 		frame:Center( )
 		function frame.OnFinish( frame, class, settings )
 			if not settings then return end
@@ -115,6 +116,7 @@ function PANEL:GenerateActionsControl( line )
 		end
 		frame:MakePopup( )
 		frame:Center( )
+		frame:DoModal()
 	end
 	pnl.edit:Dock( LEFT )
 

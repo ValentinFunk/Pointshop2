@@ -29,13 +29,17 @@ end
 function PANEL:Init( )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 
+	hook.Add("CloseDermaMenus", self, function()
+		self:DoModal(true)
+	end)
+
 	local openBtn = vgui.Create( "DButton", self )
 	openBtn:SetText( "Open Editor" )
 	openBtn:SetWide( 120 )
 	openBtn:SetImage( "pointshop2/pencil54.png" )
 	openBtn.m_Image:SetSize( 16, 16 )
 	function openBtn.DoClick( )
-		local menu = DermaMenu( )
+		local menu = DermaMenu( false, self )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 		if self.baseOutfit then
 			menu:AddOption( "Edit Outfit", function( )
@@ -53,8 +57,12 @@ function PANEL:Init( )
 			local f = createHatPositioner( self, Pointshop2.HatPersistence.ALL_MODELS )
 			f:ImportPacOutfit( )
 		end )
-		menu:Open( )
-		menu:MakePopup( )
+
+		--menu.MakePopup = function() end
+		local x, y = openBtn:LocalToScreen( 0, openBtn:GetTall() )
+		menu:SetMinimumWidth( openBtn:GetWide() )
+		menu:Open( x, y, false, self )
+		menu:DoModal()
 	end
 
 	local desc = vgui.Create( "DLabel", self )
@@ -73,7 +81,7 @@ function PANEL:Init( )
 	self.addBtn:Dock( LEFT )
 	self.addBtn:SetDisabled( true )
 	function self.addBtn.DoClick( )
-		local menu = DermaMenu( )
+		local menu = DermaMenu( nil, self )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 
 		local function requestModel( clone, overrideMdlPath )
@@ -123,6 +131,7 @@ function PANEL:Init( )
 			requestModel( false, Pointshop2.HatPersistence.ALL_CSS_MODELS )
 		end )
 
+		self:DoModal(false)
 		menu:Open( )
 		menu:MakePopup( )
 	end
@@ -168,14 +177,16 @@ function PANEL:Init( )
 	end
 
 	function self.listView:OnRowRightClick( id, line )
-		local menu = DermaMenu()
+		local menu = DermaMenu( nil, self)
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 
 		menu:AddOption( "Remove", function( )
 			self:RemoveLine( id )
 		end )
 
-		menu:Open( )
+		local x, y = line:LocalToScreen( 0, line:GetTall() )
+		menu:SetMinimumWidth( line:GetWide() )
+		menu:Open( x, y, false, self )
 	end
 
 
