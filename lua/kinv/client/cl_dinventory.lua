@@ -66,11 +66,11 @@ end
 vgui.Register( "DInventory", PANEL, "DPanel" )
 
 local isEnabled = false
-hook.Add( "PS2_ClientSettingsUpdated", "UpdatePACConvars", function( )
+hook.Add( "PS2_ClientSettingsUpdated", "UpdateHoverPanel", function( )
 	isEnabled = Pointshop2.ClientSettings.GetSetting( "BasicSettings.HoverPanelEnabled" )
 end )
 
-local hoverPanel, lastHoverItem
+local hoverPanel, lastHoverItem, hoverStart
 
 hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 	if ( dragndrop.m_Dragging != nil ) then return end
@@ -80,6 +80,7 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 
 	local hoverItem = vgui.GetHoveredPanel( )
 	if not IsValid( hoverItem ) then
+		hoverStart = RealTime()
 		if IsValid( hoverPanel ) then
 			-- hoverPanel:Remove( )
 		end
@@ -87,6 +88,7 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 	end
 
 	if hoverItem != lastHoverItem then
+		hoverStart = RealTime()
 		if IsValid( hoverPanel ) and hoverItem and hoverItem.stackPanel then
 			local stackPanel = hoverItem.stackPanel
 			hoverPanel:SetItem( stackPanel.items[1] )
@@ -94,6 +96,9 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 		end
 	end
 	lastHoverItem = hoverItem
+	if RealTime() < hoverStart + 0.3 then
+		return
+	end
 
 	if hoverItem.stackPanel then
 		local stackPanel = hoverItem.stackPanel
