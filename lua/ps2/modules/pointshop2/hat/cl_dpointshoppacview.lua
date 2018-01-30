@@ -335,7 +335,7 @@ function PANEL:OnMouseReleased( mc )
 end
 
 function PANEL:OnOpenMenu( )
-	local menu = DermaMenu()
+	local menu = DermaMenuHack(self)
 	menu:SetPos(gui.MousePos())
 	
 		menu:AddOption(L"Save for PAC", function() pace.SaveParts() end)
@@ -348,10 +348,10 @@ function PANEL:OnOpenMenu( )
 		
 	--menu:AddSpacer()
 		
-		menu:AddOption(L"PAC3 Help", function() pace.ShowWiki() end)
+		menu:AddOption(L"PAC3 Help", function()  gui.OpenURL(pace.WikiURL) end)
+		menu:AddOption("Cancel", function() CloseDermaMenus() end)
 		
-	menu:Open()
-	menu:MakePopup()
+	menu:OpenForModal()
 end
 
 vgui.Register( "DPointshopPacView", PANEL, "DModelPanel" )
