@@ -136,6 +136,7 @@ hook.Add( "PostDrawOpaqueRenderables", "UnhookPac", function( )
 		LocalPlayer( ).lastSpecTarget = ply
 		if IsValid( ply ) then
 			ply.partsHidden = ply.partsHidden or {}
+			pac.HideEntityParts( ply )
 			for k, v in pairs( ply.pac_parts or {} ) do
 				table.insert( ply.partsHidden, k )
 				pac.UnhookEntityRender( ply, k )
