@@ -16,6 +16,11 @@ function ITEM:AttachTrail( )
 		if (ply.IsSpec and ply:IsSpec()) then
 			return
 		end
+
+		if not ply:Alive( ) then
+			return
+		end
+
 		self.trailEnt = util.SpriteTrail( ply, 0, self.color, false, 15, 1, 4, 0.125, self.material .. ".vmt" )
 		timer.Simple( 1, function( )
 			self:ClientRPC( "TrailAdded", self.trailEnt )
