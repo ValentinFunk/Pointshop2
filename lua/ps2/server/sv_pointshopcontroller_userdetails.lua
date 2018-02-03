@@ -42,7 +42,7 @@ local function fetchSlotsFromDatabase( kPlayerId )
 		:Then( function( slotRows )
 			local slots = {}
 			for _, slotRow in pairs( slotRows ) do
-				slots[slot.id] = slot
+				slots[slotRow.id] = slotRow
 			end
 			return slots
 		end )
@@ -51,7 +51,9 @@ end
 local function fetchInventoryFromDatabase( kPlayerId )
 	return KInventory.Inventory.findByOwnerId( kPlayerId )
 		:Then( function( inv )
-			return inv:loadItems( )
+			return inv:loadItems( ):Then( function( )
+				return inv
+			end )
 		end )
 end
 
@@ -95,6 +97,7 @@ function Pointshop2Controller:getUserDetails( adminPly, kPlayerId )
 		dbPlayer.wallet = wallet
 		dbPlayer.inventory = inventory
 		dbPlayer.slots = slots
+		print(dbPlayer, wallet, inventory, slots)
 		if not wallet or not inventory then
 			local def = Deferred( )
 			def:Reject( 1, "Player is not a Pointshop2 User" )
