@@ -39,7 +39,7 @@ function PANEL:GenerateChanceControl( line )
 	local pnl = vgui.Create( "DPanel", line )
 	pnl:DockPadding( 10, 3, 10, 3 )
 
-	pnl.dropdown = vgui.Create( "DComboBox", pnl )
+	pnl.dropdown = vgui.Create( "DComboBoxHack", pnl )
 	pnl.dropdown:SetSortItems( false )
 	for k, v in ipairs( Pointshop2.Rarities ) do
 		pnl.dropdown:AddChoice( v.name, v.chance )
