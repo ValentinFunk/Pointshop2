@@ -22,8 +22,9 @@ function PANEL:Init( )
 	self.saveButton:PerformLayout( )
 	self.saveButton:Paint( 10, 10 )
 	function self.saveButton.DoClick( )
-		self:DoSave( )
-		self:Close( )
+		if self:DoSave( ) != false then
+			self:Close( )
+		end
 	end
 end
 

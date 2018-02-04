@@ -263,7 +263,28 @@ function PANEL:SetData( data )
 	end
 end
 
+function PANEL:Verify( settings )
+	if settings["PointsOverTime.Delay"] < 1 then
+		return false, "Delay has to be greater than 1"
+	end
+
+	if settings["PointsOverTime.Points"] > 20000000 then
+		return false, "Points amount is too large"
+	end
+
+	if settings["PointsOverTime.Points"] < 0 then
+		return false, "Points amount need to be >0"
+	end
+
+	return true
+end
+
 function PANEL:Save( )
+	local success, err = self:Verify( self.data )
+	if not success then
+		Derma_Message( err, "Can't save settings" )
+		return
+	end
 	Pointshop2View:getInstance( ):saveSettings( self.mod, "Server", self.data )
 	self:Remove( )
 end
