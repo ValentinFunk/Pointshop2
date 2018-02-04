@@ -55,20 +55,21 @@ function PANEL:CreateNumberSetting( settingsPath, settingInfo )
 end
 
 function PANEL:CreateTextentrySetting( settingsPath, settingInfo )
-	local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
-	
-	panel.textEntry = vgui.Create( "DTextEntry", panel )
-	panel.textEntry:Dock( RIGHT )
-	function panel.textEntry.OnValueChanged( wang, val )
-		self.listener:OnValueChanged( settingsPath, val )
-	end
-	
-	function panel.SetValue( panel, val )
-		panel.textEntry:SetValue( val )
-		self.listener:OnValueChanged( settingsPath, val )
-	end
-	
-	return panel
+    local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
+    
+    panel.textEntry = vgui.Create( "DTextEntry", panel )
+    panel.textEntry:Dock( RIGHT )
+    panel.textEntry:SetUpdateOnType( true )
+    function panel.textEntry.OnValueChange( wang, val )
+        self.listener:OnValueChanged( settingsPath, val )
+    end
+    
+    function panel.SetValue( panel, val )
+        panel.textEntry:SetValue( val )
+        self.listener:OnValueChanged( settingsPath, val )
+    end
+    
+    return panel
 end
 
 function PANEL:CreateCheckboxSetting( settingsPath, settingInfo )
