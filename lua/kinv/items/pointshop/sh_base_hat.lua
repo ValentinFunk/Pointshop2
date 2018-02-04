@@ -114,7 +114,7 @@ function ITEM:OnEquip( )
 	end
 
 	local ply = self:GetOwner()
-	if not self:GetOwner() then
+	if not IsValid( ply ) then
 		timer.Simple( 1, function()
 			if IsValid( self:GetOwner( ) ) then
 				self:OnEquip( )
