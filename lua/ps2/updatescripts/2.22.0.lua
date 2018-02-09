@@ -2,6 +2,7 @@ local function sqliteUseAutoincrement( DB )
     local res = sql.Query([[
         PRAGMA foreign_keys = OFF;
         BEGIN;
+        DROP TABLE IF EXISTS new_kinv_items;
         CREATE TABLE `new_kinv_items` (
             `itemclass` VARCHAR(255) NOT NULL, 
             `data` MEDIUMTEXT, 
@@ -19,7 +20,7 @@ local function sqliteUseAutoincrement( DB )
                 ON DELETE CASCADE 
                 ON UPDATE SET NULL
         );
-        INSERT INTO new_kinv_items SELECT * FROM kinv_items;
+        INSERT INTO new_kinv_items SELECT `itemclass`, `data`, `inventory_id`, `id`, `itempersistence_id` FROM kinv_items;
         DROP TABLE kinv_items;
         ALTER TABLE new_kinv_items RENAME TO kinv_items;
         COMMIT;
