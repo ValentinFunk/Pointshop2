@@ -116,6 +116,7 @@ function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, ri
 				local panel = vgui.Create( itemClass:GetConfiguredIconControl( ) )
 				self.PropPanel:Add( panel )
 				panel:SetItemClass( itemClass )
+				panel.isAdminPnl = true
 
 				if noEdit then
 					panel.noEditMode = true
@@ -414,6 +415,7 @@ Categories and organization of items are saved, but the categories will not appe
 
 		for _, itemClass in pairs(  Pointshop2View:getInstance( ):getUncategorizedItems( ) ) do
 			local panel = vgui.Create( itemClass:GetConfiguredIconControl( ) )
+			panel.isAdminPnl = true
 			self.PropPanel:Add( panel )
 			panel:SetItemClass( itemClass )
 			addEditMenu( panel, itemClass )
