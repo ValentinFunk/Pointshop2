@@ -275,7 +275,7 @@ function Pointshop2Controller:adminRemoveItem(ply, itemId)
 			KInventory.Item.removeWhere{id = itemId}
 		}
 	else
-		return self:removeItemFromPlayer(ply, item)
+		return self:removeItemFromPlayer(owner, item)
 	end
 end
 
