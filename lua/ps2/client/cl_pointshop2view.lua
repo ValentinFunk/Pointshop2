@@ -53,11 +53,11 @@ local function notifyError()
 		return
 	end
 
-	if LocalPlayer():IsAdmin() and not pac then
+	if LocalPlayer():IsAdmin() and ( not pac or not pace ) then
 		Pointshop2View:getInstance():displayError( "[CRITICAL][ADMIN ONLY] PAC3 is not installed correctly. Expect errors! Please install PAC3 from GitHub: bit.ly/getpac3", 1000 )
 	end
 
-	if LocalPlayer():IsAdmin() and not pac.FlashlightDisable then
+	if LocalPlayer():IsAdmin() and ( not pac.FlashlightDisable or not pace.selectControl ) then
 		Pointshop2View:getInstance():displayError( "[CRITICAL][ADMIN ONLY] Your PAC3 version is outdated and will cause errors. Please download the newest PAC version from GitHub: bit.ly/getpac3.", 1000 )
 	end
 end
