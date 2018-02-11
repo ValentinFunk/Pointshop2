@@ -135,15 +135,14 @@ function Pointshop2.HidePacOnSpectate( )
 		local ply = LocalPlayer( ):GetObserverTarget( )
 		LocalPlayer( ).lastSpecTarget = ply
 		if IsValid( ply ) then
-			pac.ToggleIgnoreEntity( ply, false, "ps2_spectate_firstperson" )
+			pac.ToggleIgnoreEntity( ply, true, "ps2_spectate_firstperson" )
 		end
-	end
-
-	if IsValid( LocalPlayer( ).lastSpecTarget )
-		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE
-	then
-		pac.ToggleIgnoreEntity( ply, true, "ps2_spectate_firstperson" )
-		LocalPlayer( ).lastSpecTarget = nil
+	else 
+		local ply = LocalPlayer( ).lastSpecTarget
+		if IsValid( ply ) then
+			pac.ToggleIgnoreEntity( ply, false, "ps2_spectate_firstperson" )
+			LocalPlayer( ).lastSpecTarget = nil
+		end
 	end
 end
 hook.Add( "Think", "PS2_HidePacOnSpectate", Pointshop2.HidePacOnSpectate )

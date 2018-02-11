@@ -1,6 +1,6 @@
 {
   "name": "Pointshop2",
-  "version": "0.0.0-development",
+  "version": "2.22.0",
   "main": "index.js",
   "repository": "git@github.com:Kamshak/Pointshop2.git",
   "author": "Valentin Funk <funk.valentin@gmail.com>",
@@ -23,7 +23,7 @@
     "upload": "scriptfodder-publish --version-from-package --relative-to=dist",
     "sf-release": "semantic-sf-release pre && semantic-sf-release genlog && npm run build && npm run upload && semantic-sf-release post",
     "local-pkg": "npm run build && yarn scriptfodder-publish -- --version-from-package --relative-to=dist --zip-only && shx rm -rf dist",
-    "local-release": "semantic-sf-release pre --debug=false && semantic-sf-release genlog --debug=false && npm run build && npm run upload && semantic-sf-release post --debug=false"    
+    "local-release": "semantic-sf-release pre --debug=false && semantic-sf-release genlog --debug=false && npm run build && npm run upload && semantic-sf-release post --debug=false"
   },
   "publishConfig": {
     "access": "restricted"
