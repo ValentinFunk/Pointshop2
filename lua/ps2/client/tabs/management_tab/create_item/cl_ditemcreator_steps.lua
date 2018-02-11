@@ -64,7 +64,6 @@ function PANEL:Init( )
 	self:InvalidateLayout( true )
 	timer.Simple( 0.05, function() 
 		self:Center( )
-		self:DoModal()
 	end )
 end
 

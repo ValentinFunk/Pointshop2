@@ -10,6 +10,9 @@ function PANEL:OnMousePressed( )
 	creator:SetSkin( Pointshop2.Config.DermaSkin )
 	creator:InvalidateLayout( true )
 	creator:Center( )
+	if not self.itemInfo.noModal then
+		creator:DoModal()
+	end
 end
 
 function PANEL:SetItemInfo( itemInfo )

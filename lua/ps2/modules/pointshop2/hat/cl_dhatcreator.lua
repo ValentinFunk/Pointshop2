@@ -21,7 +21,6 @@ local function createHatPositioner( parentPanel, model )
 		return parentPanel:IconViewInfoSaved( viewInfo )
 	end
 	f:Center( )
-	f:DoModal()
 	timer.Simple(0.5, function() pace.ResetView( ) end)
 	return f
 end
@@ -35,7 +34,7 @@ function PANEL:Init( )
 	openBtn:SetImage( "pointshop2/pencil54.png" )
 	openBtn.m_Image:SetSize( 16, 16 )
 	function openBtn.DoClick( )
-		local menu = DermaMenuHack( self )
+		local menu = DermaMenu( self )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 		if self.baseOutfit then
 			menu:AddOption( "Edit Outfit", function( )
@@ -56,7 +55,7 @@ function PANEL:Init( )
 
 		local x, y = openBtn:LocalToScreen( 0, openBtn:GetTall() )
 		menu:SetMinimumWidth( openBtn:GetWide() )
-		menu:OpenForModal( x, y )
+		menu:Open( x, y )
 	end
 
 	local desc = vgui.Create( "DLabel", self )
@@ -76,7 +75,7 @@ function PANEL:Init( )
 	self.addBtn:Dock( LEFT )
 	self.addBtn:SetDisabled( true )
 	function self.addBtn.DoClick( )
-		local menu = DermaMenuHack( self )
+		local menu = DermaMenu( self )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 
 		local function requestModel( clone, overrideMdlPath )
@@ -126,7 +125,7 @@ function PANEL:Init( )
 			requestModel( false, Pointshop2.HatPersistence.ALL_CSS_MODELS )
 		end )
 
-		menu:OpenForModal()
+		menu:Open()
 	end
 
 	local pnl = self:addFormItem( "Model Specific Outfit", self.addBtn )
@@ -170,14 +169,14 @@ function PANEL:Init( )
 	end
 
 	function self.listView:OnRowRightClick( id, line )
-		local menu = DermaMenuHack( self )
+		local menu = DermaMenu( self )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 
 		menu:AddOption( "Remove", function( )
 			self:RemoveLine( id )
 		end )
 
-		menu:OpenForModal()
+		menu:Open()
 	end
 
 

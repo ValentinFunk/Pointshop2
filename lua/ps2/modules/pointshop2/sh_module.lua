@@ -24,6 +24,7 @@ MODULE.Blueprints = {
 		label = "Accessory/Hat",
 		base = "base_hat",
 		icon = "pointshop2/fedora.png",
+		noModal = true,
 		creator = "DHatCreator"
 	},
 }
