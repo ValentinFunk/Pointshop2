@@ -1,6 +1,6 @@
 local hoverPanel, lastHoveredPanel, hoverStart
 
-hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
+hook.Add( "DrawOverlay", "KInvItemInfoPaintAdmin", function( )
 	if ( dragndrop.m_Dragging != nil ) then return end
 	
 	local hoveredPanel = vgui.GetHoveredPanel( )

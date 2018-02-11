@@ -97,7 +97,6 @@ function Pointshop2Controller:getUserDetails( adminPly, kPlayerId )
 		dbPlayer.wallet = wallet
 		dbPlayer.inventory = inventory
 		dbPlayer.slots = slots
-		print(dbPlayer, wallet, inventory, slots)
 		if not wallet or not inventory then
 			local def = Deferred( )
 			def:Reject( 1, "Player is not a Pointshop2 User" )

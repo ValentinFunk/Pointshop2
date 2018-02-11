@@ -129,31 +129,20 @@ concommand.Add( "pointshop2_toggle", function()
 	Pointshop2View:getInstance( ):toggleMenu( )
 end )
 
--- Hide PAC Parts on First Person spectated player
-hook.Add( "PostDrawOpaqueRenderables", "UnhookPac", function( )
+-- Hide 1st person spectated player's parts
+function Pointshop2.HidePacOnSpectate( )
 	if LocalPlayer( ):GetObserverMode() == OBS_MODE_IN_EYE then
 		local ply = LocalPlayer( ):GetObserverTarget( )
 		LocalPlayer( ).lastSpecTarget = ply
 		if IsValid( ply ) then
-			ply.partsHidden = ply.partsHidden or {}
-			pac.HideEntityParts( ply )
-			for k, v in pairs( ply.pac_parts or {} ) do
-				table.insert( ply.partsHidden, k )
-				pac.UnhookEntityRender( ply, k )
-			end
+			pac.ToggleIgnoreEntity( ply, false, "ps2_spectate_firstperson" )
 		end
 	end
-end )
 
--- Unhide parts when player is not spectated anymore
-function Pointshop2.HidePacOnSpectate( )
 	if IsValid( LocalPlayer( ).lastSpecTarget )
 		and LocalPlayer( ):GetObserverMode() != OBS_MODE_IN_EYE
 	then
-		pac.ShowEntityParts( LocalPlayer( ).lastSpecTarget )
-		for k, v in pairs( LocalPlayer( ).lastSpecTarget.partsHidden or {} ) do
-			pac.HookEntityRender( LocalPlayer( ).lastSpecTarget, v )
-		end
+		pac.ToggleIgnoreEntity( ply, true, "ps2_spectate_firstperson" )
 		LocalPlayer( ).lastSpecTarget = nil
 	end
 end
