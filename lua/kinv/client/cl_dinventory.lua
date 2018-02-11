@@ -81,7 +81,6 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 		return
 	end
 
-	print(hoveredPanel, IsValid(hoveredPanel) and hoveredPanel.item or "not valid")
 	if not IsValid( hoveredPanel ) then
 		hoverStart = RealTime()
 		if IsValid( hoverPanel ) then
