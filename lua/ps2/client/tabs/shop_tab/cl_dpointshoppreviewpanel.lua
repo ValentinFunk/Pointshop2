@@ -78,8 +78,7 @@ function PANEL:Paint( w, h )
 	hook.Call( "PS2_PreviewPanelPaint_PreStart3D", GAMEMODE, self )
 	
 	local w, h = self:GetSize()
-	cam.Start3D( self.vCamPos, ang, self.fFOV, x, y, w, h, 5, self.FarZ )
-	cam.IgnoreZ( true )
+	cam.Start3D( self.vCamPos * 1.1, ang, self.fFOV, x, y, w, h, 5, self.FarZ )
 	
 	render.SuppressEngineLighting( true )
 	render.SetLightingOrigin( self.Entity:GetPos() )
