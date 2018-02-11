@@ -2,11 +2,7 @@ local function sqliteUseAutoincrement( DB )
     local res = sql.Query([[
         PRAGMA foreign_keys = OFF;
         BEGIN;
-<<<<<<< HEAD
         DROP TABLE IF EXISTS new_kinv_items;
-=======
-        DROP TABLE new_kinv_items;
->>>>>>> 0e5b19bcc8069c617602c1ef48185735b0b286c5
         CREATE TABLE `new_kinv_items` (
             `itemclass` VARCHAR(255) NOT NULL, 
             `data` MEDIUMTEXT, 

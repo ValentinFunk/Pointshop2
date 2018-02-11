@@ -133,7 +133,7 @@ function Pointshop2.FixDatabase( )
 
 	-- 5: Remove Inventory assocs wrongfully in the DB
 	:Then( function()
-		return KInventory.Item.getAll( )
+		return KInventory.Item.getAll( 0 )
 	end )
 	:Then( function(items)
 		return Promise.Map(items, function( item )
