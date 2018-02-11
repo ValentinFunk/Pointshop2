@@ -70,16 +70,19 @@ hook.Add( "PS2_ClientSettingsUpdated", "UpdateHoverPanel", function( )
 	isEnabled = Pointshop2.ClientSettings.GetSetting( "BasicSettings.HoverPanelEnabled" )
 end )
 
-local hoverPanel, lastHoverItem, hoverStart
+local hoverPanel, lastHoveredPanel, hoverStart
 
 hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 	if ( dragndrop.m_Dragging != nil ) then return end
-	if not isEnabled then
+	
+	local hoveredPanel = vgui.GetHoveredPanel( )
+	local forceHover = IsValid(hoveredPanel) and hoveredPanel.alwaysShowHoverPanel
+	if not isEnabled and not forceHover then
 		return
 	end
 
-	local hoverItem = vgui.GetHoveredPanel( )
-	if not IsValid( hoverItem ) then
+	print(hoveredPanel, IsValid(hoveredPanel) and hoveredPanel.item or "not valid")
+	if not IsValid( hoveredPanel ) then
 		hoverStart = RealTime()
 		if IsValid( hoverPanel ) then
 			-- hoverPanel:Remove( )
@@ -87,31 +90,29 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 		return
 	end
 
-	if hoverItem != lastHoverItem then
+	if hoveredPanel != lastHoveredPanel then
 		hoverStart = RealTime()
-		if IsValid( hoverPanel ) and hoverItem and hoverItem.stackPanel then
-			local stackPanel = hoverItem.stackPanel
-			hoverPanel:SetItem( stackPanel.items[1] )
+		if IsValid( hoverPanel ) and hoveredPanel and hoveredPanel.isInventoryIcon then
+			hoverPanel:SetItem( hoveredPanel.item )
 			-- hoverPanel:Remove( )
 		end
 	end
-	lastHoverItem = hoverItem
-	if RealTime() < hoverStart + 0.3 then
+	lastHoveredPanel = hoveredPanel
+	/*if RealTime() < hoverStart + 0.05 then
 		return
-	end
+	end*/
 
-	if hoverItem.stackPanel then
-		local stackPanel = hoverItem.stackPanel
+	if hoveredPanel.isInventoryIcon then
 		if not IsValid( hoverPanel ) then
 			hoverPanel = vgui.Create("DItemDescriptionPanel")
 			hoverPanel:SetSize(300, 300)
 			hoverPanel:SetPaintedManually( true )
-			hoverPanel:SetTargetPanel( stackPanel )
-			hoverPanel:SetItem( stackPanel.items[1] )
+			hoverPanel:SetTargetPanel( hoveredPanel )
+			hoverPanel:SetItem( hoveredPanel.item )
 		end
 
 		DisableClipping( true )
-		local itemBottomCenterX, itemBottomCenterY = stackPanel:LocalToScreen( stackPanel:GetWide( ) / 2, stackPanel:GetTall( ) )
+		local itemBottomCenterX, itemBottomCenterY = hoveredPanel:LocalToScreen( hoveredPanel:GetWide( ) / 2, hoveredPanel:GetTall( ) )
 		local paintPosX, paintPosY = itemBottomCenterX - hoverPanel:GetWide( ) / 2, itemBottomCenterY
 
 		paintPosX = math.Clamp( paintPosX, 0, ScrW( ) )
@@ -123,7 +124,7 @@ hook.Add( "DrawOverlay", "KInvItemInfoPaint", function( )
 			paintPosY = ScrH( ) - hoverPanel:GetTall( )
 			hoverPanel:SetTargetPanel( nil )
 		else
-			hoverPanel:SetTargetPanel( stackPanel )
+			hoverPanel:SetTargetPanel( hoveredPanel )
 		end
 
 		hoverPanel:SetPaintedManually( false )

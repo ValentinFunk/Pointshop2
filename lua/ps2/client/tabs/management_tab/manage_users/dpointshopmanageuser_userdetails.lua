@@ -118,6 +118,7 @@ function PANEL:Init( )
 	slotsScroll:DockMargin( 8, 0, 8, 0 )
 	slotsScroll:Dock( TOP )
 	slotsScroll:SetTall( 64 + 32 )
+	slotsScroll:GetCanvas():DockPadding( 0, 0, 0, 5 )
 	Derma_Hook( slotsScroll, "Paint", "Paint", "InnerPanelBright" )
 	
 	self.slotsLayout = vgui.Create( "DIconLayout", slotsScroll )
@@ -276,14 +277,17 @@ function PANEL:SetPlayerData( playerData )
 
 			if slotInstance.Item then
 				self.itemHolder.itemIcon = slotInstance.Item:getNewInventoryIcon()
+				self.itemHolder.itemIcon.alwaysShowHoverPanel = true
 				self.itemHolder.itemIcon:SetParent(self.itemHolder)
 				self.itemHolder.itemIcon:Dock( FILL )
 			end
 		end
 
 		self.slotsLayout[slotName] = slotsPanel
+		function slotsPanel:PerformLayout()
+			slotsPanel:SizeToChildren( false, true )
+		end
 		slotsPanel:InvalidateLayout( true )
-		slotsPanel:SizeToChildren( false, true )
 	end
 
 	-- Add equipped items
@@ -299,7 +303,6 @@ function PANEL:SetPlayerData( playerData )
 		self.slotsLayout[v.slotName]:SetSlot( v )
 		if v.Item then
 			local pnl = self.slotsLayout[v.slotName]
-			pnl.itemHolder:SetMouseInputEnabled( false )
 			function pnl.OnMousePressed(icon, mcode)
 				if mcode != MOUSE_RIGHT then
 					return
@@ -320,6 +323,12 @@ function PANEL:SetPlayerData( playerData )
 					end )
 				end )
 				menu:Open()
+			end
+			pnl.itemHolder.OnMousePressed = function(_self, mcode)
+				pnl:OnMousePressed(mcode)
+			end
+			pnl.itemHolder.itemIcon.OnMousePressed = function(_self, mcode)
+				pnl:OnMousePressed(mcode)
 			end
 		end
 	end
@@ -353,6 +362,7 @@ function PANEL:SetPlayerData( playerData )
 				menu:Open()
 			end
 			icon:SetParent(self.inventoryPanel)
+			icon.alwaysShowHoverPanel = true
 		end
 		self.inventoryPanel:Layout()
 	end

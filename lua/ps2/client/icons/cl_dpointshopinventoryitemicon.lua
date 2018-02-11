@@ -1,6 +1,7 @@
 local PANEL = {}
 
 function PANEL:Init( )
+	self.isInventoryIcon = true
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 
 	self:SetSize( 64, 64 )
