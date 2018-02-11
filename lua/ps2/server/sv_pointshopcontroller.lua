@@ -284,7 +284,7 @@ local function enforceValidPromise( ply )
 end
 
 local function initPlayer( ply )
-	KLogf( 5, "[PS2] Initializing player %s, modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
+	KLogf( 5, "[PS2] initPlayer(%s), modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
 	local controller = Pointshop2Controller:getInstance( )
 
 	Pointshop2.DatabaseConnectedPromise:Fail( function( err )

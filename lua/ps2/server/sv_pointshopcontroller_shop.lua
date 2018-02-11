@@ -35,7 +35,7 @@ LibK.GLib.PlayerMonitor:AddEventListener("PlayerDisconnected", "PS2_PlayerDiscon
 	end
 
 	if not ply.PS2_Slots then
-		KLogf(4, "Player %s: Left before slots were planned")
+		KLogf(4, "Player %s: Left before slots were planned", ply:Nick())
 	else
 		for k, slot in pairs(ply.PS2_Slots) do
 			if slot.Item then

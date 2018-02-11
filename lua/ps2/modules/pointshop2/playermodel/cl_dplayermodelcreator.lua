@@ -70,7 +70,9 @@ function PANEL:EditItem( persistence, itemClass )
 	self.bodygroups = persistence.bodygroups
 	for k, v in pairs( string.Explode( " ", persistence.bodygroups ) ) do
 		k, v = tonumber( k ), tonumber( v )
-		self.mdlPanel:BodyGroupChanged( k, v )
+		if k and v then
+			self.mdlPanel:BodyGroupChanged( k, v )
+		end
 	end
 end
 
