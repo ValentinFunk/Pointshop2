@@ -75,7 +75,7 @@ function Pointshop2.FixDatabase( )
 
 	-- 1.1: Find all hats with broken settings
 	:Then( function( )
-		return Pointshop2.HatPersistence.getAll( )
+		return Pointshop2.HatPersistence.getAll( 0 )
 	end )
 	:Then( function( persistentItems )
 		local promises = {}
@@ -106,21 +106,20 @@ function Pointshop2.FixDatabase( )
 
 	-- 3: Find all item mappings that don't have a valid class (base persistence)
 	:Then( function( )
-		return Pointshop2.ItemMapping.getAll( )
+		return Pointshop2.ItemMapping.getAll( 0 )
 	end )
 	:Then( function( itemMappings )
-		local promises = {}
-		for k, itemMapping in pairs( itemMappings ) do
-			local promise = Pointshop2.ItemPersistence.findById( itemMapping.itemClass )
-			:Then( function( persistence )
-				if not persistence then
-					KLogf( 2, "[PS2-FIX] Found invalid reference in mapping, class was %s", itemMapping.itemClass )
-					return itemMapping:remove( )
-				end
-			end )
-			table.insert( promises, promise )
-		end
-		return WhenAllFinished( promises, { noUnpack = true } )
+		return Promise.Map( itemMappings, function( itemMapping ) 
+			return Pointshop2.ItemPersistence.findById( itemMapping.itemClass )
+				:Then( function( persistence )
+					local isLuaDefined = KInventory.Items[itemMapping.itemClass] and KInventory.Items[itemMapping.itemClass].originFilePath != "Pointshop2_Generated"
+					if not persistence and not isLuaDefined then
+						KLogf( 2, "[PS2-FIX] Found invalid reference in mapping, class was %s", itemMapping.itemClass )
+						return itemMapping:remove( )
+					end
+					return Promise.Resolve()
+				end )
+		end )
 	end )
 
 	-- 4: Remove settings wrongfully in the DB
@@ -165,6 +164,37 @@ function Pointshop2.FixDatabase( )
 				end
 			end)
 		end
+	end )
+
+	-- 7: Remove slots in DB that have no lua counterpart
+	:Then( function()
+		local validSlotNames = LibK._(Pointshop2.EquipmentSlotLookup):chain()
+			:keys()
+			:map(function(key) return Pointshop2.DB.SQLStr(key) end)
+			:join(',')
+			:value()
+
+		if #validSlotNames == 0 then
+			-- Shouldn't happen but someone might do this?
+			return
+		end
+
+		KLogf( 2, "Removing invalid slots " .. validSlotNames)
+		return Pointshop2.EquipmentSlot.getDbEntries(Format("WHERE slotName NOT IN (%s)", validSlotNames), 0)
+			:Then(function(invalidSlots)
+				local itemsToRemove = LibK._(invalidSlots):chain()
+					:filter(function(slot) return slot.itemId end)
+					:map(function(slot) return slot.itemId end)
+					:join(',')
+					:value()
+				
+				
+				KLogf( 2, "Removing items from invalid slots " .. itemsToRemove)
+				return WhenAllFinished{
+					( #itemsToRemove > 0 ) and KInventory.Item.removeDbEntries("WHERE id IN (" .. itemsToRemove .. ")") or Promise.Resolve(),
+					Pointshop2.EquipmentSlot.removeDbEntries(Format("WHERE slotName NOT IN (%s)", validSlotNames))
+				}
+			end)
 	end )
 
 	:Done( function( )

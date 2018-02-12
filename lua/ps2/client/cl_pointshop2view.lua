@@ -110,31 +110,35 @@ function Pointshop2View:toggleMenu( )
 	end
 end
 
+function Pointshop2View:showRepairDatabase( message )
+	local notification = vgui.Create( "KNotificationPanel" )
+	notification:setText( message )
+	notification:setIcon( "icon16/exclamation.png" )
+	notification.sound = "kreport/electric_deny2.wav"
+	notification:SetSkin( Pointshop2.Config.DermaSkin )
+	notification.duration = 360
+
+	local btn = vgui.Create( "DButton", notification )
+	btn:SetText( "Repair Database" )
+	function btn.DoClick() 
+		self:controllerAction( "fixDatabase" )
+	end
+	btn:SizeToContents()
+	btn:Dock( TOP )
+	btn:DockMargin( 5, 5, 5, 5 )
+	btn:SetTall( 30 )
+	notification:SetMouseInputEnabled( true )
+	btn:SetMouseInputEnabled( true )
+
+	LocalPlayer( ).notificationPanel:addNotification( notification )
+end
+
 function Pointshop2View:HandleDecodeError( func, errClass )
 	KLogf( 1, "Error decoding call for %s, faulty class %s", func, errClass )
 	if not LocalPlayer():IsAdmin() then
 		self:displayError( "There was an error loading Pointshop 2 Data. Please tell an admin: Error calling " .. func .. " faulty class: " .. errClass )
 	else
-		local notification = vgui.Create( "KNotificationPanel" )
-		notification:setText( "[ADMIN ONLY] There was an error loading Pointshop 2 Data. The recommended step is to try repairing the database. The worst thing that can happen is that some items end up in uncategorized.\nIf you want to be 100% sure please take a database backup before running the repair!\n You need reset permissions to be able to perform this action." )
-		notification:setIcon( "icon16/exclamation.png" )
-		notification.sound = "kreport/electric_deny2.wav"
-		notification:SetSkin( Pointshop2.Config.DermaSkin )
-		notification.duration = 360
-
-		local btn = vgui.Create( "DButton", notification )
-		btn:SetText( "Repair Database" )
-		function btn.DoClick() 
-			self:controllerAction( "fixDatabase" )
-		end
-		btn:SizeToContents()
-		btn:Dock( TOP )
-		btn:DockMargin( 5, 5, 5, 5 )
-		btn:SetTall( 30 )
-		notification:SetMouseInputEnabled( true )
-		btn:SetMouseInputEnabled( true )
-
-		LocalPlayer( ).notificationPanel:addNotification( notification )
+		self:showRepairDatabase( "[ADMIN ONLY] There was an error loading Pointshop 2 Data. The recommended step is to try repairing the database. The worst thing that can happen is that some items end up in uncategorized.\nIf you want to be 100% sure please take a database backup before running the repair!\n You need reset permissions to be able to perform this action." )
 	end
 end
 
@@ -494,8 +498,9 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	end
 
 	if not IsValid( ply ) then
-		if isRetry > 0 then
+		if isRetry >= 10 then
 			KLogf( 4, "[PS2] Couldn't get it on retry D:" )
+			return
 		end
 		if isRetry < 10 then
 			KLogf( 4, "[PS2] Player equip on player that is not valid, trying again in 3s" )
@@ -506,10 +511,8 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		return
 	end
 
-	if ply == LocalPlayer( ) then
-		if KInventory.ITEMS[item.id] then
-			item = KInventory.ITEMS[item.id]
-		end
+	if KInventory.ITEMS[item.id] then
+		item = KInventory.ITEMS[item.id]
 	end
 
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
@@ -517,7 +520,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	item.owner = ply
 	if not IsValid( item:GetOwner() ) then
 		debug.Trace( )
-		print( "Error in 0" )
+		ErrorNoHalt( "Error in 0" )
 	end
 
 	--Delay to next frame to clear stack
@@ -525,7 +528,6 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		item:OnEquip( )
 	end )
 
-	print(item, Pointshop2.ITEMS[item.id])
 	Pointshop2.ITEMS[item.id] = item
 
 	if item.class:IsValidForServer( Pointshop2.GetCurrentServerId() ) then
