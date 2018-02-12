@@ -154,6 +154,7 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
 			currency = currencyType,
 			origin = "LUA"
 		}
+		return item
 	end )
 	:Then( function( item )
 		return ply.PS2_Inventory:addItem( item )
