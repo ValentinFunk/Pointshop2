@@ -296,7 +296,12 @@ function PANEL:SetPlayerData( playerData )
 			PrintTable(self.playerData.slots)
 			PrintTable(Pointshop2.EquipmentSlots)
 			KLogf( 2, "A slot with name %s was found in the database, however that slot is unknown ingame.", v.slotName )
-			LocalPlayer():PS2_DisplayError( "ERROR: Slot in database that is not in game. Please check the console" )
+			Pointshop2View:getInstance():showRepairDatabase( 
+Format([[ERROR: You have references to a slot %s in the database that does not exist in game.
+This can be fixed by repairing the database, however this will permanently delete the slot and items that are equipped in it for all players.
+If you believe the slot should be there please make sure that all of your DLC and Addons are uploaded correctly.
+Please contact support if you need more information.
+]], v.slotName))
 			continue
 		end
 
