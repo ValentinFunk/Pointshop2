@@ -58,7 +58,6 @@ function Pointshop2.ActivateItemHooks(item)
 			ITEM_HOOK_LOOKUP[hookName] = ITEM_HOOK_LOOKUP[hookName] or {}
 			if not table.HasValue(ITEM_HOOK_LOOKUP[hookName], item) then
 				table.insert(ITEM_HOOK_LOOKUP[hookName], item)
-				print(hookName, item)
 			end
 		end
 		class = class.super
@@ -80,16 +79,31 @@ end
 	Arguments are passed unmodified and unfiltered.
 */
 Pointshop2.ITEM_HOOK_REGISTRY = { }
-function Pointshop2.AddItemHook( name, itemClass )
+function Pointshop2.AddItemHook( hookName, itemClass )
 	if itemClass.name == "DummyClass" then return end
 
 	itemClass.static._registeredHooks = itemClass.static._registeredHooks or {}
-	itemClass.static._registeredHooks[name] = true
-	hook.Add(name, "PS2_ItemHooks_" .. name, function(...)
-		for k, item in ipairs(ITEM_HOOK_LOOKUP[name] or {}) do
-			if item[name] then
-				item[name](item, ...)
+	itemClass.static._registeredHooks[hookName] = true
+	hook.Add(hookName, "PS2_ItemHooks_" .. hookName, function(...)
+		local itemsForThisHook = ITEM_HOOK_LOOKUP[hookName] or {}
+		local toRemove = {}
+		for k, item in ipairs(itemsForThisHook) do
+			-- Owner of the item has disconnected, remove the item from the hook lookup
+			if not IsValid(item:GetOwner()) then
+				toRemove[item] = true
+				continue
 			end
+
+			if item[hookName] then
+				item[hookName](item, ...)
+			end
+		end
+
+		if #toRemove > 0 then
+			-- Remove items with invalid owners
+			ITEM_HOOK_LOOKUP[hookName] = LibK._.filter(itemsForThisHook, function(item) 
+				return not toRemove[item]
+			end)
 		end
 	end)
 end
