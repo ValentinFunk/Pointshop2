@@ -8,7 +8,7 @@ const request = require('request-promise')
 const { writeFileSync, readFileSync } = require('fs')
 const glob = require('glob')
 
-async function createRelease () {
+module.exports = async function createRelease () {
   rm('-rf', 'dist')
   mkdir(['dist', 'dist/pointshop2'])
 
@@ -47,4 +47,6 @@ Check Installation, Guide and Developer.pdf for more information.`)
   cp('.gmodignore', 'dist')
 }
 
-createRelease()
+if (require.main === 'module') {
+  createRelease()
+}
