@@ -1,20 +1,22 @@
+"use strict";
+
 const {
-    cp,
-    rm,
-    mkdir,
-    exec
+  cp,
+  rm,
+  mkdir,
+  exec
 } = require('shelljs')
 const request = require('request-promise')
 const { writeFileSync, readFileSync } = require('fs')
 const glob = require('glob')
 
-module.exports = async function createRelease () {
+module.exports = async function createRelease() {
   rm('-rf', 'dist')
   mkdir(['dist', 'dist/pointshop2'])
 
   const ignoreGlobs = readFileSync('.gmodignore', 'utf-8')
-        .split(/[\r\n]+/)
-        .filter(Boolean)
+    .split(/[\r\n]+/)
+    .filter(Boolean)
 
   const folders = glob.sync('**/', {
     ignore: ignoreGlobs
@@ -34,7 +36,7 @@ module.exports = async function createRelease () {
   })
   writeFileSync('dist/Installation, Guide and Developer.pdf', pdf)
   writeFileSync('dist/Don\'t forget to download PAC3.txt',
-`Please download PAC3 from https://github.com/CapsAdmin/pac3/ and install it as an addon. 
+    `Please download PAC3 from https://github.com/CapsAdmin/pac3/ and install it as an addon. 
 Check Installation, Guide and Developer.pdf for more information.`)
 
   const version = JSON.parse(readFileSync('package.json')).version
@@ -47,6 +49,17 @@ Check Installation, Guide and Developer.pdf for more information.`)
   cp('.gmodignore', 'dist')
 }
 
-if (require.main === 'module') {
-  createRelease()
+if (require.main === module) {
+  // module.exports()
+  function fib(n, cont = x => x) {
+    if (n <= 1) return cont(n);
+    return fib(
+      n - 2,
+      n2 => fib(
+        n - 1,
+        n1 => cont(n2 + n1)
+      )
+    );
+  }
+  console.log(fib(1000000))
 }
