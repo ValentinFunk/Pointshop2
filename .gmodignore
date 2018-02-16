@@ -18,3 +18,4 @@ changelog_footer_template.hbs
 wercker.yml
 bin/
 bin/*
+sync.ps1

@@ -50,16 +50,5 @@ Check Installation, Guide and Developer.pdf for more information.`)
 }
 
 if (require.main === module) {
-  // module.exports()
-  function fib(n, cont = x => x) {
-    if (n <= 1) return cont(n);
-    return fib(
-      n - 2,
-      n2 => fib(
-        n - 1,
-        n1 => cont(n2 + n1)
-      )
-    );
-  }
-  console.log(fib(1000000))
+  module.exports()
 }
