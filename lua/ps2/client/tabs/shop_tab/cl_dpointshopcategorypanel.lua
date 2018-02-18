@@ -8,7 +8,7 @@ function PANEL:Init( )
 	self.title:DockMargin( 8, 0, 5, 0 )
 	
 	self.layout = vgui.Create( "DTileLayout", self )
-	self.layout:Dock( FILL )
+	self.layout:Dock( TOP )
 	
 	self.layout:SetBaseSize( 16 )
 	self.layout:SetSpaceY( 5 )
@@ -27,6 +27,7 @@ function PANEL:AddItems( )
 			if IsValid( self ) and IsValid( self.layout ) then
 				local itemIcon = vgui.Create( itemClass:GetConfiguredIconControl( ), self.layout )
 				itemIcon:SetItemClass( itemClass )
+				itemIcon.drawPrices = true
 			end
 		--end )
 	end
@@ -84,10 +85,12 @@ end
 function PANEL:PerformLayout( )
 	if self.depth > 0 then
 		local w, h = self:GetParent( ):GetSize( )
-		self:SetSize( w, h )
+		self:SetWide( w )
 	end	
-	self.layout:PerformLayout( )
-	self.layout:SizeToChildren( false, true )
+	self.layout:PerformLayout( true )
+	-- self.layout:LayoutTiles()
+	-- print(self.layout:GetTall())
+	self:SizeToChildren( false, true )
 	local w, h = self:ChildrenSize();
 	self:SetHeight( h + 8 )
 end
@@ -96,3 +99,4 @@ function PANEL:Paint( w, h )
 end
 
 derma.DefineControl( "DPointshopCategoryPanel", "", PANEL, "DPanel" )
+print("hi")
