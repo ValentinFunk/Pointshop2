@@ -168,12 +168,14 @@ function PANEL:Init( )
 		self:SetTall( math.Clamp( 100, 50, #self:GetLines( ) * 20 + 20 ) )
 	end
 
+	local creator = self
 	function self.listView:OnRowRightClick( id, line )
 		local menu = DermaMenu( self )
 		menu:SetSkin( Pointshop2.Config.DermaSkin )
 
 		menu:AddOption( "Remove", function( )
 			self:RemoveLine( id )
+			creator.outfitsChanged = true
 		end )
 
 		menu:Open()
@@ -237,7 +239,6 @@ function PANEL:IconViewInfoSaved( viewInfo )
 end
 
 function PANEL:OutfitSaved( outfit, model )
-	print("saved,", outfit, model)
 	pace.Backup( outfit, os.time( ) .. model ) --Just to be save
 	self.outfitsChanged = true
 
@@ -308,8 +309,6 @@ function PANEL:SaveItem( saveTable )
 			table.insert( saveTable.validSlots, slotName )
 		end
 	end
-
-	PrintTable(saveTable)
 end
 
 function PANEL:EditItem( persistence, itemClass )
