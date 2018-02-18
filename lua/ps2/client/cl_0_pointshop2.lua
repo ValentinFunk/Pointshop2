@@ -132,16 +132,15 @@ end )
 -- Hide 1st person spectated player's parts
 function Pointshop2.HidePacOnSpectate( )
 	if LocalPlayer( ):GetObserverMode() == OBS_MODE_IN_EYE then
-		print("Pac Ignore")
 		local ply = LocalPlayer( ):GetObserverTarget( )
 		LocalPlayer( ).lastSpecTarget = ply
 		if IsValid( ply ) then
-			for k,v in pairs(ply.pac_outfits) do v:SetHide(true) end
+			for k,v in pairs(ply.pac_outfits or {}) do v:SetHide(true) end
 		end
 	else 
 		local ply = LocalPlayer( ).lastSpecTarget
 		if IsValid( ply ) then
-			for k,v in pairs(ply.pac_outfits) do v:SetHide(false) end
+			for k,v in pairs(ply.pac_outfits or {}) do v:SetHide(false) end
 			LocalPlayer( ).lastSpecTarget = nil
 		end
 	end
