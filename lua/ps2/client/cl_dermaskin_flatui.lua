@@ -113,21 +113,24 @@ function SKIN:LayoutCategoryPanelLevel1( panel )
 	panel.title:SetFont( self.BigTitleFont )
 	panel.title:SizeToContents( )
 	panel.title:SetColor( color_white )
-	panel.title:DockMargin( 0, 0, 0, 5 )
+	panel.title:DockMargin( 0, 8, 0, 16 )
 end
 function SKIN:PaintCategoryPanelLevel1( panel, w, h )
 end
 
 function SKIN:LayoutCategoryPanelLevel2( panel )
-	panel.title:SetFont( self.TabFont )
+	panel.title:SetFont( self.fontName )
 	panel.title:SetColor( color_white )
 	panel.title:SizeToContents( )
-	panel.title:DockMargin( 8, 5, 0, 0 )
-	panel.layout:DockMargin( 10, 8, 0, 8 )
+	panel.title:DockMargin( 0, 5, 0, 8 )
+	panel.layout:DockMargin( 2, 8, 0, 8 )
+	panel:DockPadding( 0, 0, 0, 8 )
+	panel:DockMargin( 0, 0, 0, 16 )
 end
 function SKIN:PaintCategoryPanelLevel2( panel, w, h )
 	surface.SetDrawColor( self.ButtonColor )
-	surface.DrawRect( 0, 0, w, h )
+	--surface.DrawRect( 0, 0, w, h )
+	panel.title:SetText(string.upper(panel.title:GetText()))
 end
 
 function SKIN:LayoutCategoryPanelLevel3( panel )
