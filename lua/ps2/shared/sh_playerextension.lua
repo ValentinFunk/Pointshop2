@@ -50,3 +50,51 @@ function Player:PS2_GetFirstItemOfClass( class )
 		end
 	end
 end
+
+function Player:PS2_CanAfford( itemClass )
+	local price = itemClass:GetBuyPrice()
+	local wallet = self:PS2_GetWallet()
+	if not wallet or not price then
+		return false
+	end
+
+	if price.points and wallet.points >= price.points then
+		 return true
+	end
+
+	if price.premiumPoints and wallet.premiumPoints >= price.premiumPoints then 
+		return true
+	end
+
+	return false
+end
+
+function Player:PS2_CanBuyItem( itemClass )
+	if itemClass.isBase then
+		return false, "You can not buy a base"
+	end
+
+	if not self:PS2_CanAfford( itemClass ) then
+		return false, "You cannot afford this item"
+	end
+
+	if not self:PS2_HasInventorySpace( 1 ) then
+		return false, "Your inventory is full"
+	end
+
+	if not itemClass:PassesRankCheck( self ) then
+		return false, "You are not the correct rank"
+	end
+
+	local tree
+	if SERVER then 
+		tree = Pointshop2Controller:getInstance().tree
+	else
+		tree = Pointshop2View:getInstance().categoryItemsTable
+	end
+	if table.HasValue( tree:getNotForSaleItemClassNames( ), itemClassName ) then
+		return false, "This item cannot be bought"
+	end
+
+	return true
+end

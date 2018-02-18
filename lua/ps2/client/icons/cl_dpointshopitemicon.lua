@@ -84,6 +84,13 @@ function PANEL:PaintOver(w, h)
 		return
 	end
 	self:DrawSelections()
+	if self.drawPrices then
+		if not self.itemClass then return end
+		if not LocalPlayer():PS2_CanBuyItem( self.itemClass ) then
+			surface.SetDrawColor( 255, 0, 0, 10 )
+			surface.DrawRect( 0, 0, w, h )
+		end
+	end
 end
 
 function PANEL:GetItemClass( )

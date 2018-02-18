@@ -4,20 +4,9 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 		return Promise.Reject( "Couldn't buy item, item " .. itemClassName .. " isn't valid" )
 	end
 
-	if itemClass.isBase then
-		return Promise.Reject( "You can not buy a base" )
-	end
-
-	if not ply:PS2_HasInventorySpace( 1 ) then
-		return Promise.Reject( "Inventory full" )
-	end
-
-	if table.HasValue( self.tree:getNotForSaleItemClassNames( ), itemClassName ) then
-		return Promise.Reject( "This item cannot be bought" )
-	end
-
-	if not itemClass:PassesRankCheck( ply ) then
-		return Promise.Reject( "You are not the correct rank to buy this item" )
+	local canBuy, message = ply:PS2_CanBuyItem( itemClass )
+	if not canBuy then
+		Promise.Reject( message )
 	end
 
 	return self:sendWallet( ply ) -- Reload wallet from DB before carrying out purchase
