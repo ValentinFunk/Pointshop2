@@ -2,6 +2,7 @@
     Provides a renderer for Hat Icons.
 ]]--
 
+hook.Run( "PS2_DoUpdatePreviewModel" )
 local plyModel = hook.Run( "PS2_GetPreviewModel" ) and hook.Run( "PS2_GetPreviewModel" ).model or "models/player/alyx.mdl"
 local entity = ClientsideModel( plyModel, RENDERGROUP_OTHER )
 entity.Owner = entity
