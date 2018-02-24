@@ -54,9 +54,10 @@ function Pointshop2Controller:canDoAction( ply, action )
 		def:Resolve( )
 	elseif action == "sendPoints" then
 		def:Resolve( )
-	else
-		def:Reject( 1, "Permission denied" )
 	end
+	
+	hook.Run( "PS2_canDoAction", def, ply, action )
+	
 	return def:Promise( )
 end
 
