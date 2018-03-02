@@ -3,13 +3,13 @@ local Player = FindMetaTable( "Player" )
 function Player:PS2_AddStandardPoints( points, message, small, suppressEvent )
 	if points == 0 then return end
 
-	local shouldSupress = points < 0
-	if suppressEvent == false then
-		shouldSupress = false
+	if suppressEvent == nil  then 
+		suppressEvent = points < 0
 	end
-	if not shouldSupress then
+
+	if not suppressEvent then
 		hook.Run( "PS2_PointsAwarded", self, points, "points" )
-		end
+	end
 
 	if Pointshop2.StandardPointsBatch:isInProgress( ) then
 		Pointshop2.StandardPointsBatch:addPoints( self, points )
