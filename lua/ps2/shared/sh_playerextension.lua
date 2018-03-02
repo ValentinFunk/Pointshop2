@@ -71,19 +71,19 @@ end
 
 function Player:PS2_CanBuyItem( itemClass )
 	if itemClass.isBase then
-		return false, "You can not buy a base"
+		return false, "You can not buy a base", "Invalid"
 	end
 
 	if not self:PS2_CanAfford( itemClass ) then
-		return false, "You cannot afford this item"
+		return false, "You cannot afford this item", "Can't afford"
 	end
 
 	if not self:PS2_HasInventorySpace( 1 ) then
-		return false, "Your inventory is full"
+		return false, "Your inventory is full", "Inventory full"
 	end
 
 	if not itemClass:PassesRankCheck( self ) then
-		return false, "You are not the correct rank"
+		return false, "You are not the correct rank", "Wrong Rank"
 	end
 
 	local tree
@@ -93,7 +93,7 @@ function Player:PS2_CanBuyItem( itemClass )
 		tree = Pointshop2View:getInstance().categoryItemsTable
 	end
 	if table.HasValue( tree:getNotForSaleItemClassNames( ), itemClassName ) then
-		return false, "This item cannot be bought"
+		return false, "This item cannot be bought", "Can't buy"
 	end
 
 	return true

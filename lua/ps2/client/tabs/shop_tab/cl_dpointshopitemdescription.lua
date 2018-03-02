@@ -77,15 +77,10 @@ function PANEL:Init( )
 			pnl.buyBtn:SetDisabled( false )
 			pnl.buyBtn:SetText( "Buy Now" )
 
-			local pts = tonumber( LocalPlayer( ).PS2_Wallet[type] )
-			if pts < price then
-				pnl.buyBtn:SetDisabled( true )
-				pnl.buyBtn:SetText( "Can't afford" )
-			end
-
-			if not itemDesc.itemClass:PassesRankCheck( LocalPlayer( ) ) then
+			local canBuy, long, short = LocalPlayer( ):PS2_CanBuyItem( itemDesc.itemClass )
+			if not canBuy then
 				self:SetDisabled( true )
-				self:SetText( "Wrong Rank")
+				self:SetText( short )
 			end
 		end
 

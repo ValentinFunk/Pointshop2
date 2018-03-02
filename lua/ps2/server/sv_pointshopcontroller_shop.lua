@@ -6,7 +6,7 @@ function Pointshop2Controller:isValidPurchase( ply, itemClassName )
 
 	local canBuy, message = ply:PS2_CanBuyItem( itemClass )
 	if not canBuy then
-		Promise.Reject( message )
+		return Promise.Reject( message )
 	end
 
 	return self:sendWallet( ply ) -- Reload wallet from DB before carrying out purchase
@@ -112,7 +112,7 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
 		return item
 	end, function( errid, err )
 		KLogf( 2, "Error saving item purchase: %s", err or errid )
-		return Promise.Reject( "A technical error occured (2), your purchase was not carried out. " .. ( err or errid or "" ) )
+		return Promise.Reject( "Cannot buy item: " .. ( err or errid or "" ) )
 	end )
 end
 
