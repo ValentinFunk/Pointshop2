@@ -371,4 +371,25 @@ function Pointshop2.PrintItemClasses()
 		:join("\n")
 		:value()
 	return str
+endend
+
+function Pointshop2.GenerateItemClass( className, baseClassName, moduleName )
+	if KInventory.Items[className] then
+		LibK.GLib.Error("Class " .. className .. " is already registered with Pointshop 2")
+	end
+
+	local baseClass = KInventory.Items[baseClassName]
+	if not baseClass then
+		LibK.GLib.Error("Class " .. baseClassName .. " is not registered with Pointshop 2")
+	end
+
+	local newClass = class( 'KInventory.Items' .. className, baseClass )
+	newClass.static.className = className
+	-- For the error hint when trying to edit it
+	newClass.static.originFilePath = LibK.GLib and LibK.GLib.Lua and ( LibK.GLib.Lua.StackTrace().RawFrames[2].source .. '(' .. moduleName .. ')' ) or moduleName
+	newClass.static.isBase = false
+	newClass.static.UUID = className
+	KInventory.Items[className] = newClass
+
+	return newClass
 end
