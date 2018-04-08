@@ -371,7 +371,7 @@ function Pointshop2.PrintItemClasses()
 		:join("\n")
 		:value()
 	return str
-endend
+end
 
 function Pointshop2.GenerateItemClass( className, baseClassName, moduleName )
 	if KInventory.Items[className] then
