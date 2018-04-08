@@ -166,6 +166,27 @@ function Pointshop2.GetPersistenceClassForItemClass( itemClass )
 	end
 end
 
+if SERVER then
+	function Pointshop2.GetSlotContainingItemId( ply, itemId )
+		local slot
+		for k, v in pairs( ply.PS2_Slots ) do
+			if v.itemId == itemId then
+				slot = v
+			end
+		end
+		return slot
+	end
+end
+if CLIENT then
+	function Pointshop2.GetSlotNameContainingItemId( itemId )
+		for slotName, item in pairs( ply.PS2_Slots ) do
+			if item.id == itemId then
+				return slotName
+			end
+		end
+	end
+end
+
 function Pointshop2.GetItemInSlot( ply, slotName )
 	if not ply.PS2_Slots then
 		return nil
@@ -283,7 +304,7 @@ if SERVER then
 			KLogf( 4, "Pointshop2.ItemServerRPC(%i, %s, %s) len %i", itemId, funcName, argsStr, len )
 		end
 
-		local item = Pointshop2.ITEMS[itemId]
+		local item = KInventory.ITEMS[itemId]
 		if not item then
 			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
 			return
@@ -321,7 +342,7 @@ else
 			KLogf( 4, "Pointshop2.ItemClientRPC(%i, %s, %s) len %i", itemId, funcName, argsStr, len )
 		end
 
-		local item = Pointshop2.ITEMS[itemId]
+		local item = KInventory.ITEMS[itemId]
 		if not item then
 			KLogf( 3, "[WARN] Received RPC for uncached item %i", itemId )
 			return
@@ -371,7 +392,7 @@ function Pointshop2.PrintItemClasses()
 		:join("\n")
 		:value()
 	return str
-endend
+end
 
 function Pointshop2.GenerateItemClass( className, baseClassName, moduleName )
 	if KInventory.Items[className] then

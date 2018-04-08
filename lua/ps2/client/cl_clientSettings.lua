@@ -52,8 +52,6 @@ function Pointshop2.ClientSettings.GetSetting( path )
 	return Pointshop2.ClientSettings.Settings[path]
 end
 
-Pointshop2.ClientSettings.LoadSettings( )
-
 hook.Add( "PS2_ClientSettingsUpdated", "UpdatePACConvars", function( )
 	RunConsoleCommand( "pac_draw_distance", Pointshop2.ClientSettings.GetSetting( "BasicSettings.DrawDistance" ) )
 	if IsValid( Pointshop2.Menu ) then

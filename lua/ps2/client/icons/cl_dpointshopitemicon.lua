@@ -162,7 +162,6 @@ function PANEL:Select( )
 	end
 
 	self.Selected = true
-	self.item =  self.item and KInventory.ITEMS[self.item.id]
 	hook.Run( "PS2_ItemIconSelected", self, self.item or self.itemClass )
 	self:OnSelected( )
 end

@@ -59,31 +59,6 @@ if CLIENT then
 			end
 		end
 	end
-
-	hook.Add( "PS2_PopulateSlots", "AddDefaultSlots", function( slotsLayout )
-		for k, v in pairs( Pointshop2.EquipmentSlots ) do
-			local slot = slotsLayout:Add( "DPointshopEquipmentSlot" )
-			slot:SetSlotTable(v)
-			slot:SetLabel( v.name )
-			slot.CanHoldItem = function( self, item )
-				-- Handle swaps between two slots correctly
-				local itemInThisSlot = LocalPlayer().PS2_Slots[v.name]
-				local previousSlot = Pointshop2.FindSlotThatContains(item)
-				if itemInThisSlot and previousSlot then
-					-- calls slot's function directly to avoid infinite loops
-					if not Pointshop2.EquipmentSlotLookup[previousSlot]() then
-						return false
-					end
-				end
-
-				-- delegate to slot's function
-				return v.canHoldItem( item )
-			end
-			if LocalPlayer().PS2_Slots[v.name] then
-				slot:SetItem( LocalPlayer().PS2_Slots[v.name] )
-			end
-		end
-	end )
 else
 	function Pointshop2.FindSlotThatContains(ply, item)
 		for name, slot in pairs(ply.PS2_Slots) do

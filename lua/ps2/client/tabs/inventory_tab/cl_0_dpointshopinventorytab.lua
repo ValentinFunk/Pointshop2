@@ -7,6 +7,7 @@ end
 local PANEL = {}
 
 function PANEL:Init( )
+	self.panels = {}
 	for k, btnInfo in pairs( Pointshop2.InventoryPanels ) do
 		if btnInfo.shouldShow and not btnInfo.shouldShow() then
 			continue
@@ -14,7 +15,12 @@ function PANEL:Init( )
 		
 		local panel = vgui.Create( btnInfo.controlName )
 		self:addMenuEntry( btnInfo.label, btnInfo.icon, panel )
+		self.panels[btnInfo.label] = panel
 	end
+end
+
+function PANEL:GetPanel(name)
+	return self.panels[name]
 end
 
 Derma_Hook( PANEL, "Paint", "Paint", "PointshopInventoryTab" )

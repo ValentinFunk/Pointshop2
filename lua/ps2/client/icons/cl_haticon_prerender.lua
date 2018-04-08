@@ -121,7 +121,6 @@ local function PaintHatIcon(itemClass)
 			render.SuppressEngineLighting( false )
 		cam.End3D( )
 	else
-		print("petmdl", petModel )
 		entity:SetModel( petModel )
 
 		local camPos = Vector( 0, 30, 10 )

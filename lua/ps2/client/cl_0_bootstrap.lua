@@ -17,6 +17,7 @@ end )
 LibK.InitPostEntityPromise:Then( function( ) 
     Pointshop2.LoadModules()
     hook.Run( "PS2_ModulesLoaded" )
+    Pointshop2.ClientSettings.LoadSettings( )
 end )
 hook.Add( "OnReloaded", "PS2_ReloadModules", function()
     if LibK.Debug then

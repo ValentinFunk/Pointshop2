@@ -208,3 +208,6 @@ function ITEM:getCrashsafeIcon( )
 		return self:getIcon( )
 	end
 end
+
+function ITEM:OnRemove( )
+end

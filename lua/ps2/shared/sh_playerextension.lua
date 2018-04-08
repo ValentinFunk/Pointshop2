@@ -17,15 +17,22 @@ function Player:PS2_HasItemEquipped( item )
 	end
 end
 
+if SERVER then
+	function Player:PS2_GetSlot( name )
+		for k, slot in pairs( self.PS2_Slots or {} ) do
+			if slot.slotName == name then
+				return slot
+			end
+		end
+	end
+end
+
 function Player:PS2_GetItemInSlot( name )
 	if CLIENT then
 		return self.PS2_Slots and self.PS2_Slots[name]
 	else
-		for k, slot in pairs( self.PS2_Slots or {} ) do
-			if slot.slotName == name then
-				return slot.Item
-			end
-		end
+		local slot = self:PS2_GetSlot( name )
+		return slot and slot.Item
 	end
 end
 

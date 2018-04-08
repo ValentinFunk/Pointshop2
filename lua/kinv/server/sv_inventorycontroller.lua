@@ -9,18 +9,31 @@ function InventoryController:canDoAction( ply, action )
 	return def:Promise( )
 end
 
-function InventoryController:itemAdded( inv, item )
+/*
+	Network that an item was added to the inv.
+	supply { doSend = false } as args if the player has the item already and it was just
+	moved (e.g. slot -> inv or between inventories).
+*/
+function InventoryController:itemAdded( inv, item, args )
+	args = args or { doSend = true }
+
 	local owner = inv:getOwner( )
 	if IsValid( owner ) and owner:IsPlayer( ) then
-		self:startView( "InventoryView", "itemAdded", owner, inv.id, item )
+		if args.doSend then
+			self:startView( "InventoryView", "itemAdded", owner, inv.id, item.id, item )
+		else
+			self:startView( "InventoryView", "itemAdded", owner, inv.id, item.id, nil )
+		end
 	end
 end
 
-function InventoryController:itemRemoved( inv, itemId )
+function InventoryController:itemRemoved( inv, itemId, opts )
+	opts = opts or { resetSelection = true }
+
 	local owner = inv:getOwner( )
 
 	if IsValid( owner ) then
-		self:startView( "InventoryView", "itemRemoved", owner, inv.id, itemId )
+		self:startView( "InventoryView", "itemRemoved", owner, inv.id, itemId, opts.resetSelection )
 	else
 		LibK.GLib.Error("InventoryController:itemRemoved - Invalid owner!")
 	end

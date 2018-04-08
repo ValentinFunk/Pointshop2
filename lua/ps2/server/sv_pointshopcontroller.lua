@@ -3,61 +3,56 @@ Pointshop2Controller:include( BaseController )
 
 --Override for access controll
 --returns a promise, resolved if user can do it, rejected with error if he cant
+local permissions = {
+	["pointshop2 manageitems"] = {
+		"saveCategoryOrganization", 
+		"removeItem", "removeItems",
+		"updateServerRestrictions", "updateRankRestrictions",
+		"requestMaterials"
+	},
+	["pointshop2 manageservers"] = {
+		"adminGetServers",
+		"migrateServer",
+		"removeServer",
+	},
+	["pointshop2 reset"] = {
+		"resetToDefaults", "installDefaults", "fixDatabase", "installDlcPack",
+	},
+	["pointshop2 createitems"] = {
+		"saveModuleItem"
+	},
+	["pointshop2 manageusers"] = {
+		"searchPlayers", "getUserDetails", "adminChangeWallet", "adminGiveItem", "adminRemoveItem"
+	},
+	["Everyone"] = {
+		"buyItem", "sellItem",
+		"equipItem","unequipItem",
+		"sendPoints",
+		"outfitsReceived", "dynamicsReceived"
+	}
+}
+
+-- Inverse and flatten so we get a table in the format permissions["buyItem"] = "Everyone"
+local permissionLookup = LibK._( permissions ):chain()
+	:entries()
+	:reduce( {}, function( memo, entry )
+		for k, funcName in pairs( entry[2] ) do
+			memo[funcName] = entry[1]
+		end
+		return memo
+	end ):value()
+
 function Pointshop2Controller:canDoAction( ply, action )
-	local def = Deferred( )
-	if action == "saveCategoryOrganization" or
-	   action == "removeItem" or
-	   action == "removeItems" or
-	   action == "updateServerRestrictions" or
-	   action == "updateRankRestrictions" or
-	   action == "requestMaterials"
-	then
-		if PermissionInterface.query( ply, "pointshop2 manageitems" ) then
-			def:Resolve( )
-		else
-			def:Reject( 1, "Permission Denied" )
-		end
-	elseif action == "adminGetServers" or action == "migrateServer" or action == "removeServer" then
-		if PermissionInterface.query( ply, "pointshop2 manageservers" ) then
-			def:Resolve( )
-		else
-			def:Reject( 1, "Permission Denied" )
-		end
-	elseif action == "resetToDefaults" or action == "installDefaults" or action == "fixDatabase" or action == "installDlcPack" then
-		if PermissionInterface.query( ply, "pointshop2 reset" ) then
-			def:Resolve( )
-		else
-			def:Reject( 1, "Permission Denied" )
-		end
-	elseif action == "saveModuleItem" then
-		if PermissionInterface.query( ply, "pointshop2 createitems" ) then
-			def:Resolve( )
-		else
-			def:Reject( 1, "Permission Denied" )
-		end
-	elseif action == "outfitsReceived" or action == "dynamicsReceived" then
-		def:Resolve( )
-	elseif action == "searchPlayers" or
-		   action == "getUserDetails" or
-		   action == "adminChangeWallet" or
-		   action == "adminGiveItem" or
-			 action == "adminRemoveItem"
-	then
-		if PermissionInterface.query( ply, "pointshop2 manageusers" ) then
-			def:Resolve( )
-		else
-			def:Reject( 1, "Permission Denied" )
-		end
-	elseif action == "buyItem" or action == "sellItem" then
-		def:Resolve( )
-	elseif action == "equipItem" or action == "unequipItem" then
-		def:Resolve( )
-	elseif action == "sendPoints" then
-		def:Resolve( )
-	else
-		def:Reject( 1, "Permission denied" )
+	local requiredPermission = permissionLookup[action]
+	if not requiredPermission then
+		return Promise.Reject( 1, "Unknown Action " .. action )
 	end
-	return def:Promise( )
+	if requiredPermission == "Everyone" then
+		return Promise.Resolve( )
+	end
+	
+	local hasPermission = PermissionInterface.query( ply, requiredPermission )
+	return hasPermission and Promise.Resolve() or Promise.Reject( 1, "Permission Denied" )
 end
 
 function Pointshop2Controller:initializeInventory( ply )
@@ -102,6 +97,27 @@ function Pointshop2Controller:initializeInventory( ply )
 	end )
 end
 
+
+function Pointshop2Controller:handleItemEquip( ply, item, slotName )
+	item.owner = ply
+
+	-- To save networking we send the item only to the players that need it.
+	-- The equipping player already has it in inv, so we send it to all but him
+	-- he gets sent the itemId only.
+	local broadcastTargets = LibK._.filter( player.GetAll( ), function( p ) return p != ply end )
+	self:startViewWhenValid( "Pointshop2View", "playerEquipItem", broadcastTargets, ply.kPlayerId, item )
+	self:startViewWhenValid( "Pointshop2View", "localPlayerEquipItem", ply, item.id, slotName )
+	
+	if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+		Pointshop2.ActivateItemHooks( item )
+		item:OnEquip( )
+	end
+end
+
+function Pointshop2Controller:handleItemUnequip( ply, item, slotName )
+	
+end
+
 /*
 	After joining initialize all slots for the player
 	and equip Items he has in them
@@ -110,51 +126,37 @@ function Pointshop2Controller:initializeSlots( ply )
 	return Pointshop2.EquipmentSlot.findAllByOwnerId( ply.kPlayerId )
 	:Then( function( slots )
 		ply.PS2_Slots = {}
+		local netSlots = {}
 		for _, slot in pairs( slots ) do
 			ply.PS2_Slots[slot.id] = slot
 			KLogf( 5, "[PS2] Loaded slot %i for player %s", _, ply:Nick( ) )
+
+			if slot.Item then
+				netSlots[slot.slotName] = slot.Item
+			end
 		end
-		self:startView( "Pointshop2View", "receiveSlots", ply, slots )
+		self:startView( "Pointshop2View", "receiveSlots", ply, netSlots )
 
 		for _, slot in pairs( ply.PS2_Slots ) do
 			if not slot.itemId then continue end
 
-			if not slot.Item then
-				KLogf( 2, "[WARN-01] Invalid item %s from player %s slot %s slot.Item is missing", slot.itemId, ply:Nick( ), slot.slotName )
-				return Promise.Reject(1, 'Failed to load slots')
-			end
-
-			KInventory.ITEMS[slot.itemId] = slot.Item
-
-			local item = KInventory.ITEMS[slot.itemId]
+			local item = slot.Item
 			if not item then
-				KLogf( 2, "[WARN-01] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
-				continue
+				LibK.GLib.Error( "Invalid item %s from player %s slot %s slot.Item is missing", slot.itemId, ply:Nick( ), slot.slotName )
 			end
-
 			item.owner = ply
-			if not IsValid( item:GetOwner() ) then
-				debug.Trace( )
-				print( "Error in 3" )
-			end
-
-			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-				Pointshop2.ActivateItemHooks( item )
-			end
+			KInventory.ITEMS[slot.itemId] = item
 
 			--Delay to next frame to clear stack
 			timer.Simple( 0, function( )
-				if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-					self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
-					item:OnEquip( )
-				end
+				self:handleItemEquip( ply, item, slot.slotName )
 			end )
 		end
 	end )
 end
 
 function Pointshop2Controller:startViewWhenValid( view, action, plyOrPlys, ... )
-	local args = {...}
+	local args = { ... }
 
 	if type( plyOrPlys ) != "table" then
 		plyOrPlys = { plyOrPlys }
@@ -246,16 +248,18 @@ function Pointshop2Controller:dynamicsReceived( ply )
 end
 
 --[[
-	Send equipped items of players to "late" joiners
+	Send other player's active equipment to "late" joiners
 ]]--
 function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 	for _, ply in pairs( player.GetAll( ) ) do
+		-- Own slots are sent separately
 		if ply == plyToSendTo then
-			continue --handled in the slot-sender
+			continue
 		end
 
+		-- This player too is loading
 		if not ply.PS2_Slots then
-			continue --handled in the slot-sender
+			continue
 		end
 
 		for _, slot in pairs( ply.PS2_Slots ) do
@@ -266,6 +270,7 @@ function Pointshop2Controller:sendActiveEquipmentTo( plyToSendTo )
 				KLogf( 2, "[WARN] Uncached item %s from player %s slot %s", slot.itemId, ply:Nick( ), slot.slotName )
 				continue
 			end
+
 			self:startViewWhenValid( "Pointshop2View", "playerEquipItem", plyToSendTo, ply.kPlayerId, item )
 		end
 	end
@@ -775,7 +780,7 @@ function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 		return def:Promise( )
 	end
 
-	return removeSingleItem( itemClass )
+	return removeSingleItem( itemClass, refund )
 	:Then( function( )
 		return self:moduleItemsChanged( )
 	end )

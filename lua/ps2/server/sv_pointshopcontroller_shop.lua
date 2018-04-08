@@ -80,7 +80,7 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
         end
 	end):Then(function(item)
         self:sendWallet( ply )
-        ply.PS2_Inventory:notifyItemAdded(item)
+        ply.PS2_Inventory:notifyItemAdded( item )
         item:OnPurchased( )
         self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
         return item
@@ -174,16 +174,10 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		return transactionDef:Promise( )
 	end
 
-	local slot
-	for k, v in pairs( ply.PS2_Slots ) do
-		if v.itemId == item.id then
-			slot = v
-		end
-	end
-
 	LibK.SetBlocking( true )
 	Pointshop2.DB.DoQuery( "BEGIN" )
 	return Promise.Resolve():Then(function()
+		local slot = Pointshop2.GetSlotContainingItemId( ply, item.id )
 		if ply.PS2_Inventory:containsItem( item ) then
 			return ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
 		elseif slot then
@@ -220,30 +214,25 @@ end
 
 --Remove Item, clear inventory references etc.
 function Pointshop2Controller:removeItemFromPlayer( ply, item )
-	local slot
-	for k, v in pairs( ply.PS2_Slots ) do
-		if v.itemId == item.id then
-			slot = v
-		end
-	end
-
 	local itemId = item.id
 	return Promise.Resolve( )
 	:Then( function( )
+		local slot = Pointshop2.GetSlotContainingItemId( ply, item.id )
 		if ply.PS2_Inventory:containsItem( item ) then
 			return ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
 		elseif slot then
 			return slot:removeItem( item ):Then( function( )
-				self:startView( "Pointshop2View", "slotChanged", ply, slot )
+				item:OnHolster( )
+				Pointshop2.DeactivateItemHooks( item )
+				hook.Run( "PS2_ItemRemovedFromSlot", slotName )
+				self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 			end )
 		else
 			return Promise.Reject("Pointshop2Controller:removeItemFromPlayer - Item not in slot or inventory")
 		end
 	end )
 	:Then( function( )
-		item:OnHolster( )
-		Pointshop2.DeactivateItemHooks(item)
-		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
+		item:OnRemove( )
 		return item:remove( ) --remove the actual db entry
 	end ):Then(function()
 		Pointshop2.LogCacheEvent('REMOVE', 'removeItemFromPlayer', itemId)
@@ -296,30 +285,25 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 		return
 	end
 
-	LibK.SetBlocking( true )
-	Pointshop2.DB.DoQuery( "BEGIN" )
+	item.inventory_id = ply.PS2_Inventory.id
+	slot.itemId = nil
+	slot.Item = nil
+	
+	local transaction = Pointshop2.DB.Transaction()
+	transaction:begin()
+	transaction:add(item:getSaveSql())
+	transaction:add(slot:getSaveSql())
 
-	return ply.PS2_Inventory:addItem( item )
-	:Then( function( )
-		slot.itemId = nil
-		slot.Item = nil
-		return slot:save( )
-	end )
-	:Then( function( updatedSlot )
-		item:OnHolster( )
-		Pointshop2.DeactivateItemHooks(item)
+	return transaction:commit( ):Then( function( )
+		Pointshop2.DeactivateItemHooks( item )
+		item:OnHolster( ply )
 		hook.Run( "PS2_UnEquipItem", ply, item.id )
+		ply.PS2_Inventory:notifyItemAdded( item, { doSend = false } )
 
 		self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
-		self:startView( "Pointshop2View", "slotChanged", ply, updatedSlot )
-
-		Pointshop2.DB.DoQuery( "COMMIT" )
-		LibK.SetBlocking( false )
-	end, function( errid, err )
-		self:reportError( "Pointshop2View", ply, "Error unequipping item", errid, err )
-
-		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		LibK.SetBlocking( false )
+	end, function( err ) 
+		KLogf( 1, "UnequipItem - Error running sql. Err: %s", tostring( err ) )
+		return Pointshop2.DB.DoQuery("ROLLBACK")
 	end )
 end
 
@@ -349,92 +333,77 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 		return
 	end
 
-	LibK.SetBlocking( true )
-	Pointshop2.DB.DoQuery( "BEGIN" )
-	local slot
-	local slotsused = 1
-	for k, v in pairs( ply.PS2_Slots ) do
-		if v.slotName == slotName then
-			slot = v
+
+	return Promise.Resolve():Then( function( ) 
+		-- Find or create slot entry in DB
+		local slot = ply:PS2_GetSlot( slotName )
+		if slot then
+			return slot
+		else
+			slot = Pointshop2.EquipmentSlot:new( )
+			slot.ownerId = ply.kPlayerId
+			slot.slotName = slotName
+			return slot:save( ):Then( function( slot ) 
+				ply.PS2_Slots[slot.id] = slot
+				return slot
+			end )
 		end
-		if v.itemId then
-			slotsused = slotsused + 1
-		end
-	end
+	end ):Then( function( slot )
+		-- Move the item that is in that slot atm back into the inventory
+		if slot.itemId then
+			local transaction = Pointshop2.DB.Transaction( )
+			transaction:begin( )
+			local oldItem = KInventory.ITEMS[slot.itemId]
+			if not oldItem then
+				KLogf( 2, "[ERROR] Unsynced item %i in slot %s", slot.itemId, slot.slotName )
+			end
 
-	if not slot then
-		slot = Pointshop2.EquipmentSlot:new( )
-		slot.ownerId = ply.kPlayerId
-		slot.slotName = slotName
-		slot:save( )
-		ply.PS2_Slots[slot.id] = slot
-	end
-
-
-	local moveOldItemDef = Deferred( )
-	if slot.itemId then
-		local oldItem = KInventory.ITEMS[slot.itemId]
-		if not oldItem then
-			KLogf( 2, "[ERROR] Unsynced item %i in slot %s", slot.itemId, slot.slotName )
-		end
-
-		ply.PS2_Inventory:addItem( oldItem )
-		:Then( function( )
-			moveOldItemDef:Resolve( )
-			Pointshop2.DeactivateItemHooks( oldItem )
-			oldItem:OnHolster( ply )
-			self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, oldItem.id )
-			slot.Item = nil
+			oldItem.inventory_id = ply.PS2_Inventory.id
 			slot.itemId = nil
-			hook.Run( "PS2_SlotChanged", ply, slot, nil )
-		end, function( errid, err )
-			moveOldItemDef:Reject( errid, err )
-		end )
-	else
-		moveOldItemDef:Resolve( )
-	end
+			slot.Item = nil
+			transaction:add( oldItem:getSaveSql( ) )
+			transaction:add( slot:getSaveSql( ) )
 
-	moveOldItemDef:Then( function( )
+			return transaction:commit( ):Then( function( )
+				Pointshop2.DeactivateItemHooks( oldItem )
+				ply.PS2_Inventory:notifyItemAdded( oldItem, { doSend = false } )
+				oldItem:OnHolster( ply )
+				self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, oldItem.id )
+			end ):Then( function( )
+				return slot
+			end, function( err ) 
+				transaction:rollback( )
+				return Promise.Reject( 'Moving the old item failed ' .. err )
+			end )
+		end
+
+		return slot
+	end ):Then( function( slot )
+		-- Move the new item into the slot
 		slot.itemId = item.id
 		slot.Item = item
-		self:startView( "Pointshop2View", "slotChanged", ply, slot )
-		hook.Run( "PS2_SlotChanged", ply, slot, item )
-		return slot:save( )
+		item.inventory_id = nil
+		local transaction = Pointshop2.DB.Transaction( )
+		transaction:begin( )
+		transaction:add( slot:getSaveSql( ) )
+		transaction:add( item:getSaveSql( ) )
+		return transaction:commit( ):Then( function( ) 
+			return slot
+		end ):Fail( function( err ) 
+			transaction:rollback( )
+		end )
 	end )
 	:Then( function( slot )
-		return ply.PS2_Inventory:removeItem( item ) --unlink from inventory
-	end )
-	:Done( function( )
 		item.owner = ply
-		if not IsValid( item:GetOwner() ) then
-			debug.Trace( )
-			print( "Error in 0" )
-		end
-
-		slot.Item = item
-		slot.itemId = item.id
-
-		if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-			Pointshop2.ActivateItemHooks( item )
-		end
-
-		--Delay to next frame to clear stack
+		
+		-- Delay to next frame to clear stack
 		timer.Simple( 0, function( )
-			if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-				item:OnEquip(  )
-				hook.Run( "PS2_EquipItem", ply, item.id, slotsused )
-				self:startView( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
-			end
+			self:handleItemEquip( ply, item, slot.slotName )
+			ply.PS2_Inventory:notifyItemRemoved( item.id, { resetSelection = false } )
 		end )
-
-		Pointshop2.DB.DoQuery( "COMMIT" )
-		LibK.SetBlocking( false )
 	end )
 	:Fail( function( errid, err )
 		self:reportError( "Pointshop2View", ply, "Error equipping item", errid, err )
-
-		Pointshop2.DB.DoQuery( "ROLLBACK" )
-		LibK.SetBlocking( false )
 	end )
 end
 

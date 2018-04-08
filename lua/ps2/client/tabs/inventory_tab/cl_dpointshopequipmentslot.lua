@@ -1,5 +1,4 @@
 local PANEL = {}
-local PANEL = { }
 
 function PANEL:Init( )
 	self:Receiver( "Items", self.DropAction_EquipmentItem )
@@ -60,29 +59,32 @@ function PANEL:Init( )
 	self.label:Dock( TOP )
 	self.label:SetContentAlignment( 5 )
 
-	hook.Add( "PS2_SlotChanged", self, function( self, slot )
-		if slot.slotName == self.slotName then
-			self.actualSlot:removeItem( )
-
-			if slot.Item then
-				local item = KInventory.ITEMS[slot.Item.id]
-				self.actualSlot:addItem( item )
-
-				local function remove( )
-					if IsValid( self.actualSlot.itemStack ) then
-						self.actualSlot.itemStack:Think( )
-					end
-					if IsValid( self.actualSlot.itemStack.icon ) then
-						self.actualSlot.itemStack.icon:Select( )
-					end
-				end
-
-				timer.Simple( 0.01, remove )
-				remove( )
-			end
-		end
-	end )
 	derma.SkinHook( "Layout", "PointshopEquipmentSlot", self )
+end
+
+function PANEL:SelectItem( )
+	if IsValid( self.actualSlot.itemStack ) then
+		self.actualSlot.itemStack:Think( )
+	end
+	if IsValid( self.actualSlot.itemStack.icon ) then
+		self.actualSlot.itemStack.icon:Select( )
+	end
+end
+
+function PANEL:Clear( )
+	self.actualSlot:removeItem( )
+end
+
+function PANEL:SetEquippedItem( item, opts )
+	opts = opts or { doSelect = true }
+
+	self:Clear( )
+	self.actualSlot:addItem( item )
+
+	if opts.doSelect then
+		self.actualSlot.itemStack:Think( ) -- Force icon creation
+		self.actualSlot.itemStack.icon:Select( ) -- Select the icon
+	end
 end
 
 function PANEL:SetSlotTable( slotTable )
@@ -96,10 +98,6 @@ end
 function PANEL:SetLabel( txt )
 	self.slotName = txt
 	self.label:SetText( txt )
-
-	for k, v in pairs(LocalPlayer().PS2_Slots) do
-		hook.Run("PS2_SlotChanged", {slotName = k, Item = v})
-	end
 end
 
 function PANEL:PerformLayout( )
@@ -114,11 +112,6 @@ function PANEL:GetItem( )
 	if IsValid( self.actualSlot.itemStack ) and self.actualSlot.itemStack.items then
 		return self.actualSlot.itemStack.items[1]
 	end
-end
-
-function PANEL:SetItem( item )
-	self.actualSlot:removeItem( )
-	self.actualSlot:addItem( item )
 end
 
 --Can item be equiped in this slot?

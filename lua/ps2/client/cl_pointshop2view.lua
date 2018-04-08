@@ -175,54 +175,29 @@ function Pointshop2View:receiveInventory( inventory )
 	resolveIfWaiting( self.clPromises.InventoryReceived )
 end
 
-function Pointshop2View:itemChanged( item )
-	local found
-	for k, v in pairs( LocalPlayer().PS2_Inventory.Items ) do
-		if v.id == item.id then
-			found = true
-			if item.inventory_id != LocalPlayer().PS2_Inventory.id then
-				--Item was removed
-				LocalPlayer().PS2_Inventory.Items[k] = item
-				hook.Run( "PS2_ItemRemoved", item )
-			else
-				--Item was updated
-				for _, v in pairs( item ) do
-					LocalPlayer().PS2_Inventory.Items[k][_] = v
-				end
-				hook.Run( "PS2_ItemUpdated", LocalPlayer().PS2_Inventory.Items[k] )
-				print( "Updated ", k )
-			end
-		end
-	end
-
-	if not found then
-		--Item was added
-		LocalPlayer().PS2_Inventory:addItem( item )
-	end
-end
-
 function Pointshop2View:receiveSlots( slots )
 	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
-	for k, v in pairs( slots ) do
-		if v.Item then
-			LocalPlayer().PS2_Slots[v.slotName] = v.Item
-			KInventory.ITEMS[v.Item.id] = v.Item
+	for slotName, item in pairs( slots ) do
+		if item then
+			KInventory.ITEMS[item.id] = item
+			LocalPlayer().PS2_Slots[slotName] = item
+			KLogf( 5, "[SLOT] Slot %s item %i", slotName, item.id )
 		end
-		hook.Run( "PS2_SlotChanged", v )
 	end
 
-	KLogf( 5, "[PS2] Received slots, %i slots", #slots )
+	KLogf( 5, "[PS2] Received slots, %i slots", table.Count( slots ) )
 	resolveIfWaiting( self.clPromises.SlotsReceived )
 end
 
-function Pointshop2View:slotChanged( slot )
-	slot.Item = slot.Item and KInventory.ITEMS[slot.Item.id]
-	LocalPlayer().PS2_Slots[slot.slotName] = slot.Item
-	hook.Run( "PS2_SlotChanged", slot )
-
-	if slot.Item then
-		self.SlotChanges[slot.Item.id] = true
+function Pointshop2View:itemAddedToSlot( slotName, itemId, item )
+	local item = item or KInventory.ITEMS[itemId]
+	if not item then
+		LibK.GLib.Error( "Invalid item added to slot message" )
 	end
+
+	LocalPlayer().PS2_Slots[slotName] = item
+
+	hook.Run( "PS2_ItemAddedToSlot", slotName, itemId )
 end
 
 function Pointshop2View:startBuyItem( itemClass, currencyType )
@@ -484,9 +459,35 @@ function Pointshop2View:createPointshopItem( saveTable )
 	self:controllerAction( "saveModuleItem", saveTable )
 end
 
-Pointshop2.ITEMS = {}
-//setmetatable( Pointshop2.ITEMS, { __mode = 'v' } ) --weak reference holder
+local function handleEquip( ply, item )
+	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
+	ply.PS2_EquippedItems[itemId] = item
 
+	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
+	ply.PS2_EquippedItems[itemId] = item
+	item.owner = ply
+end
+
+// Here only the itemId and slot name is sent since we already have the item cached
+function Pointshop2View:localPlayerEquipItem( itemId, slotName )
+	item = KInventory.ITEMS[itemId]
+	if not item then
+		LibK.GLib.Error( "Got equip for uncached item" )
+	end
+
+	ply.PS2_Slots[slotName] = item
+
+	--Delay to next frame to clear stack
+	timer.Simple( 0, function( )
+		item:OnEquip( ply )
+		if item.class:IsValidForServer( Pointshop2.GetCurrentServerId() ) then
+			Pointshop2.ActivateItemHooks(item)
+			hook.Run( "PS2_ItemEquipped", ply, item )
+		end
+	end )
+end
+
+// Here the full item is sent since we dont have it yet.
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	isRetry = isRetry or 0
 
@@ -505,45 +506,35 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		if isRetry < 10 then
 			KLogf( 4, "[PS2] Player equip on player that is not valid, trying again in 3s" )
 			timer.Simple( 3, function( )
-				self:playerEquipItem( kPlayerId, item, isRetry + 1 )
+				self:playerEquipItem( kPlayerId, itemId, item, slotName, isRetry + 1 )
 			end )
 		end
 		return
 	end
 
-	if KInventory.ITEMS[item.id] then
-		item = KInventory.ITEMS[item.id]
-	end
-
-	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
-	ply.PS2_EquippedItems[item.id] = item
-	item.owner = ply
-	if not IsValid( item:GetOwner() ) then
-		debug.Trace( )
-		ErrorNoHalt( "Error in 0" )
-	end
-
-	--Delay to next frame to clear stack
-	timer.Simple( 0, function( )
-		item:OnEquip( )
-	end )
-
-	Pointshop2.ITEMS[item.id] = item
-
-	if item.class:IsValidForServer( Pointshop2.GetCurrentServerId() ) then
-		Pointshop2.ActivateItemHooks(item)
-		hook.Run( "PS2_ItemEquipped", ply, item )
-	end
+	KInventory.ITEMS[item.id] = item
+	handleEquip( ply, item )
 end
 
 function Pointshop2View:playerUnequipItem( ply, itemId )
-	if Pointshop2.ITEMS[itemId] then
-		Pointshop2.ITEMS[itemId]:OnHolster( ply )
-		if ply.PS2_EquippedItems then
-			ply.PS2_EquippedItems[itemId] = nil
-		end
-		hook.Run( "PS2_ItemUnequipped", ply, Pointshop2.ITEMS[itemId] )
-		Pointshop2.DeactivateItemHooks(Pointshop2.ITEMS[itemId])
+	local item = KInventory.ITEMS[itemId]
+	if not item then
+		GLib.Error( 'Invalid itemId in playerUnequipItem' )
+	end
+
+	if ply == LocalPlayer() then
+		local slotName = Pointshop2.GetSlotNameContainingItemId( itemId )
+		local item = Pointshop2.GetItemInSlot( ply, slotName )
+		LocalPlayer().PS2_Slots[slotName] = nil
+		hook.Run( "PS2_ItemRemovedFromSlot", slotName )	
+	end
+
+	item:OnHolster( ply )
+	
+	Pointshop2.DeactivateItemHooks( item )
+
+	if ply.PS2_EquippedItems then
+		ply.PS2_EquippedItems[itemId] = nil
 	end
 end
 
@@ -711,7 +702,7 @@ end
 
 function Pointshop2View:displayError( infoStr, duration )
 	local notification = vgui.Create( "KNotificationPanel" )
-	notification:setText( infoStr )
+	notification:setText( infoStr or "<nil>" )
 	notification:setIcon( "icon16/exclamation.png" )
 	notification.sound = "kreport/electric_deny2.wav"
 	notification:SetSkin( "KReport" )

@@ -1,4 +1,5 @@
 KInventory.ITEMS = {}
+setmetatable(KInventory.ITEMS, { __mode = "v" })
 
 local Item = class( "KInventory.Item" )
 KInventory.Item = Item

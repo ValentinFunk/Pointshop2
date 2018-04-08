@@ -16,7 +16,9 @@ function Inventory:loadItems( )
 	end )
 end
 
-function Inventory:notifyItemAdded( item )
+function Inventory:notifyItemAdded( item, args )
+	args = args or { doSend = true }
+
 	if not item then
 		error('Notified NULL item added')
 	end
@@ -36,7 +38,7 @@ function Inventory:notifyItemAdded( item )
 	item.owner = self:getOwner()
 	
 	--Network change
-	InventoryController:getInstance( ):itemAdded( self, item )
+	InventoryController:getInstance( ):itemAdded( self, item, args )
 end
 
 function Inventory:addItem( item )
@@ -58,7 +60,9 @@ end
 /*
 	Notify the inv that an item was removed externally
 */
-function Inventory:notifyItemRemoved(itemId)
+function Inventory:notifyItemRemoved( itemId, opts )
+	opts = opts or { resetSelection = true }
+
 	local itemKey = false
 	for k, v in pairs( self.Items ) do
 		if v.id == itemId then
@@ -72,20 +76,21 @@ function Inventory:notifyItemRemoved(itemId)
 	table.remove( self.Items, itemKey )
 
 	--Network change
-	InventoryController:getInstance( ):itemRemoved( self, itemId )
+	InventoryController:getInstance( ):itemRemoved( self, itemId, opts )
 end
 
 /*
 	Unlink from this inventory, does NOT remove the item from the db
 */
-function Inventory:removeItem( item )
+function Inventory:removeItem( item, opts )
+	opts = opts or { resetSelection = true }
 	KLogf( 4, "Inventory:removeItem( " .. tostring( item ) .. ")" )
 	
 	--Save in DB
 	item.inventory_id = nil
 	return item:save( )
 	:Then( function( item )
-		self:notifyItemRemoved(item.id)
+		self:notifyItemRemoved( item.id, opts )
 		return item
 	end, function( err )
 		return Promise.Reject("Error saving item: " .. err )

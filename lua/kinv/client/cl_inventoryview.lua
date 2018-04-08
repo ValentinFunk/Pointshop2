@@ -23,31 +23,30 @@ function InventoryView:receiveInventory( inventory )
 	self.inventories[inventory.id] = inventory
 end
 
-function InventoryView:itemAdded( inventoryId, item )
-	if KInventory.ITEMS[item.id] then
-		/*ErrorNoHalt("Item " .. inventoryId .. "Exists")
-		PrintTable(item)
-		PrintTable(KInventory.ITEMS[item.id])*/
+function InventoryView:itemAdded( inventoryId, itemId, item )
+	item = item or KInventory.ITEMS[itemId]
+	if not item then
+		LibK.GLib.Error( "Received itemAdded for uncached item %s (%s)", tostring(itemId), type(itemId))
+	else
+		KInventory.ITEMS[itemId] = item
 	end
-
-	local item = KInventory.ITEMS[item.id] or item -- this is for unequipping
-	KInventory.ITEMS[item.id] = item
 
 	if not self.inventories[inventoryId] then
 		error( "Cannot add item to inventory " .. inventoryId .. ": inventory not cached on the client" )
 	end
 	self.inventories[inventoryId]:addItem( item )
+	hook.Run( "KInv_ItemAdded", self.inventories[inventoryId], item )
 end
 
-function InventoryView:itemRemoved( inventoryId, itemId )
+function InventoryView:itemRemoved( inventoryId, itemId, resetSelection )
 	if not self.inventories[inventoryId] then
 		error( "Cannot remove item from inventory " .. inventoryId .. ": not cached on the client" )
 	end
 	
-	KInventory.ITEMS[itemId] = nil
 	self.inventories[inventoryId]:removeItemById( itemId )
-	if self.inventoryPanels[inventoryId] then
-		self.inventoryPanels[inventoryId]:itemRemoved( itemId )
+	hook.Run( "KInv_ItemRemoved", self.inventories[inventoryId], itemId, resetSelection )
+	if IsValid( self.inventoryPanels[inventoryId] ) then
+		self.inventoryPanels[inventoryId]:itemRemoved( itemId, { resetSelection = resetSelection } )
 	end
 end
 

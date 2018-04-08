@@ -29,7 +29,7 @@ function ITEM:ApplyModel( )
 		return
 	end
 
-	if hook.Run( "PS2_PlayermodelShouldShow", ply ) == false then
+	if hook.Run( "PS2_PlayermodelShouldShow", ply, self ) == false then
 		return
 	end
 

@@ -110,7 +110,7 @@ function SetupCategoryNode( node, pnlContent, noEdit, rightClickNodeFunction, ri
 			for k, itemClassName in pairs( self.categoryInfo.items ) do
 				itemClass = Pointshop2.GetItemClassByName( itemClassName )
 				if not itemClass then
-					KLogf( 2, "[ERROR] Invalid item class %s detected, database corrupted?", itemClassName )
+					KLogf( 2, "[ERROR] Invalid item class %s in category %s detected, database corrupted?", itemClassName, self.categoryInfo.self.label )
 					continue
 				end
 				local panel = vgui.Create( itemClass:GetConfiguredIconControl( ) )

@@ -43,29 +43,18 @@ function PANEL:Init( )
 		self.invPanel:setItems( LocalPlayer( ).PS2_Inventory:getItems( ) )
 		self.invPanel:initSlots( LocalPlayer( ).PS2_Inventory:getNumSlots( ) )
 	end )
-	hook.Add( "PS2_ItemRemoved", self, function( self, item )
-		self.invPanel:itemRemoved( item.id )
-		hook.Run("PS2_InvUpdate")
-	end )
 	hook.Add( "KInv_ItemAdded", self, function( self, inventory, item )
 		if item.inventory_id == LocalPlayer( ).PS2_Inventory.id then
 			self.invPanel:itemAdded( item )
-
-			timer.Simple( 0, function( )
-				if item.icon and IsValid( item.icon ) then
-					item.icon:Select( )
-				end
-			end )
 		end
-		timer.Simple(0.1, function()
-		--	hook.Run("PS2_InvUpdate")
-		end)
 	end )
-	hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId )
+	hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId, resetSelection )
+		print("KInv_ItemRemoved", resetSelection and "Reset")
 		if inventory.id != LocalPlayer( ).PS2_Inventory.id then
 			return
 		end
-		if self.descPanel.item and self.descPanel.item.id == itemId then
+
+		if self.descPanel.item and self.descPanel.item.id == itemId and resetSelection then
 			self.descPanel:SelectionReset( )
 		end
 		self.invPanel:itemRemoved( itemId )
@@ -133,13 +122,7 @@ function PANEL:Init( )
 	self.slotsLayout:DockMargin( 7, 7, 7, 5 )
 	self.slotsLayout:SetSpaceX( 5 )
 	self.slotsLayout:SetSpaceY( 5 )
-	hook.Run( "PS2_PopulateSlots", self.slotsLayout )
-	hook.Add( "PS2_OnSettingsUpdate", self, function()
-		for k, v in pairs(self.slotsLayout:GetChildren()) do
-			v:Remove()
-		end
-		hook.Run( "PS2_PopulateSlots", self.slotsLayout )
-	end )
+	self:PopulateSlots( )
 
 	self.preview = vgui.Create( "DPointshopInventoryPreviewPanel", self.topContainer )
 	self.preview:DockMargin( 0, 0, 8, 0 )
@@ -156,6 +139,7 @@ function PANEL:Init( )
 
 	self.descPanel = vgui.Create( "DPointshopItemDescription", self.itemDescPanel )
 	self.descPanel:Dock( TOP )
+
 	hook.Add( "PS2_InvItemIconSelected", self, function( self, panel, item )
 		if not IsValid( panel ) or not item then
 			self.descPanel:SelectionReset( )
@@ -168,11 +152,60 @@ function PANEL:Init( )
 		end
 		self.descPanel:SetItem( item, false )
 	end )
-	hook.Add( "PS2_SlotChanged", self, function( self, slot )
-		if not slot.Item then
-			self.descPanel:SelectionReset( )
+
+	hook.Add( "PS2_ItemRemovedFromSlot", self, function( self, slotName )
+		self.descPanel:SelectionReset( )
+		local slotPanel = self.slotLookup[slotName]
+		if IsValid( slotPanel ) then
+			slotPanel:Clear( )
 		end
 	end )
+	hook.Add( "PS2_ItemAddedToSlot", self, function( self, slotName, item )
+		local slotPanel = self.slotLookup[slotName]
+		if IsValid( slotPanel ) and item then
+			slotPanel:SetEquippedItem( item )
+			slotPanel:SelectItem( )
+			timer.Simple(0.5, function()
+				slotPanel:SelectItem()
+			end)
+		end
+	end )
+	hook.Add( "PS2_OnSettingsUpdate", self, function()
+		for k, v in pairs(self.slotsLayout:GetChildren()) do
+			v:Remove()
+		end
+		self:PopulateSlots( )
+	end )
+end
+
+function PANEL:PopulateSlots( )
+	self.slotLookup = { }
+	for k, v in pairs( Pointshop2.EquipmentSlots ) do
+		local slot = self.slotsLayout:Add( "DPointshopEquipmentSlot" )
+		slot:SetSlotTable( v )
+		slot:SetLabel( v.name )
+		self.slotLookup[v.name] = slot
+		slot.CanHoldItem = function( self, item )
+			-- Handle swaps between two slots correctly
+			local itemInThisSlot = LocalPlayer().PS2_Slots[v.name]
+			local previousSlot = Pointshop2.FindSlotThatContains(item)
+			if itemInThisSlot and previousSlot then
+				-- calls slot's function directly to avoid infinite loops
+				local prevCanHoldItem = Pointshop2.EquipmentSlotLookup[previousSlot]
+				if not prevCanHoldItem() then
+					return false
+				end
+			end
+
+			-- delegate to slot's function
+			return v.canHoldItem( item )
+		end
+
+		local item = LocalPlayer( ):PS2_GetItemInSlot( v.name )
+		if item then
+			slot:SetEquippedItem( item, { doSelect = false } )
+		end
+	end
 end
 
 function PANEL:PerformLayout( )

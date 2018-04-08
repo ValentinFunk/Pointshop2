@@ -192,3 +192,30 @@ function Pointshop2.RequestSettings( moduleName )
 
 	return def:Promise( )
 end
+
+/*
+	Returns the panel of a top menu item (e.g. "Inventory", "Shop" )
+*/
+function Pointshop2.GetMenuTab( title )
+	if not IsValid( Pointshop2.Menu ) then
+		return
+	end
+
+	return Pointshop2.tabs[title]
+end
+
+/*
+	Returns an inventory sub panel (e.g. "Items", "My Settings")
+*/
+function Pointshop2.GetInventoryPanel( title )
+	if not IsValid( Pointshop2.Menu ) then
+		return
+	end
+
+	local invTab = Pointshop2.GetMenuTab( "Inventory" )
+	if not IsValid( invTab ) then
+		return
+	end
+
+	return invTab:GetPanel( title )
+end
