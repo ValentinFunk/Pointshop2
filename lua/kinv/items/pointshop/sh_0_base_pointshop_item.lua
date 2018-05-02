@@ -30,6 +30,11 @@ function ITEM:initialize(id)
 	--Fields that are JSON saved for each item
 	self.saveFields = self.saveFields or {}
 	table.insert(self.saveFields, "purchaseData" )
+
+	if self.className and not self.itempersistence_id and self._persistenceId != "STATIC" then
+		self.itempersistence_id = self.className
+		self:save()
+	end
 end
 
 function ITEM.static:GetBuyPrice( ply )

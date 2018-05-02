@@ -288,9 +288,10 @@ local function initPlayer( ply )
 	local controller = Pointshop2Controller:getInstance( )
 
 	Pointshop2.DatabaseConnectedPromise:Fail( function( err )
+		print("DB Faled", err)
 		if ply:IsAdmin( ) then
 			timer.Simple( 2, function( )
-				ply:PS2_DisplayError( "[CRITICAL][ADMIN ONLY] Your MySQL configuration is faulty. (" .. err .. "). Please fix these errors. Other parts of your server can be affected by errors if this is not fixed.", 1000 )
+				ply:PS2_DisplayError( "[CRITICAL][ADMIN ONLY] Your MySQL/Server configuration is faulty. (" .. err .. "). Please fix these errors. Other parts of your server can be affected by errors if this is not fixed.", 1000 )
 			end )
 		end
 	end )
