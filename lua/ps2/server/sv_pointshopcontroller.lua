@@ -756,28 +756,83 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
 end
 
+local function calculateRefundAmounts( itemsToRefund )
+	local refundsByPlayer = LibK._( itemsToRefund ):chain()
+	:groupBy( function( item )
+		return item.ownerId
+	end )
+	:mapValues( function( groupedByPlayer )
+		return LibK._.reduce( groupedByPlayer, { points = 0, premiumPoints = 0 }, function( accumulated, item )
+			local purchaseData = item.purchaseData
+			if purchaseData and purchaseData.currency and purchaseData.amount then
+				accumulated[purchaseData.currency] = accumulated[purchaseData.currency] + purchaseData.amount
+			end
+			return accumulated
+		end )
+	end ):value( )
+
+	return refundsByPlayer
+end
+
 local function removeSingleItem( itemClass, refund )
-	return Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.className }
-	:Then( function( )
-		return KInventory.Item.removeWhere{ itemclass = itemClass.name }
-	end )
-	:Then( function( )
-		if itemClass:getPersistence( ).customRemove then
-			return itemClass:getPersistence( ).customRemove( itemClass )
-		end
-		return Pointshop2.ItemPersistence.removeWhere{ id = itemClass.className }
-	end )
+	return Pointshop2.DB.DoQuery( Format( [[
+		SELECT item.id, item.data, COALESCE(inventories.ownerId, ps2_equipmentslot.ownerId) AS ownerId, ps2_equipmentslot.slotName
+		FROM kinv_items AS item
+		LEFT JOIN inventories ON inventories.id = item.inventory_id
+		LEFT JOIN ps2_equipmentslot ON ps2_equipmentslot.itemId = item.id
+		WHERE item.itemClass = %s
+	]], Pointshop2.DB.SQLStr( itemClass ) ) )
+		:Then( function( results )
+			results = results or {}
+			-- Deserialize purchaseData (this is usually done in LibK but we're querying manually)
+			results = LibK._.map( results, function( row ) 
+				row.purchaseData = util.JSONToTable( row.data ).purchaseData
+			end )
+
+			local refundPromise = Promise.Resolve()
+			if refund then
+				local refundsByPlayer = calculateRefundAmounts( refund )
+				-- Remove players that get refunded 0 points
+				local toRefund = LibK._( refundsByPlayer ):chain()
+					:entries( )
+					:filter( function( entry )
+						local ownerId, amountsToRefund = entry[0], entry[1]
+						return amountsToRefund.points != 0 or amountsToRefund.premiumPoints != 0
+					end )
+					:value( )
+				
+				-- Create a query for each player
+				refundPromise = Promise.Map( toRefund, function( entry )
+					local ownerId, amountsToRefund = entry[0], entry[1]
+					return Pointshop2.DB.DoQuery( Format( 
+						"UPDATE ps2_wallet SET points = points + %i, premiumPoints = premiumPoints + %i",
+						amountsToRefund.points,
+						amountsToRefund.premiumPoints
+					) )
+				end )
+			end
+
+			return WhenAllFinished{
+				Pointshop2.ItemMapping.removeWhere{ itemClass = itemClass.className },
+				KInventory.Item.removeWhere{ itemclass = itemClass.name },
+				refundPromise
+			}
+		end ):Then( function( )
+			if itemClass:getPersistence( ).customRemove then
+				return itemClass:getPersistence( ).customRemove( itemClass )
+			end
+
+			return Pointshop2.ItemPersistence.removeWhere{ id = itemClass.className }
+		end )
 end
 
 function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 	local itemClass = Pointshop2.GetItemClassByName( itemClassName )
 	if not itemClass then
-		local def = Deferred( )
-		def:Reject( "An item " .. itemClassName .. " doesn't exist!" )
-		return def:Promise( )
+		return Promise.Reject( "An item " .. itemClassName .. " doesn't exist!" )
 	end
 
-	return removeSingleItem( itemClass )
+	return removeSingleItem( itemClass, refund )
 	:Then( function( )
 		return self:moduleItemsChanged( )
 	end )
@@ -787,36 +842,24 @@ function Pointshop2Controller:removeItem( ply, itemClassName, refund )
 end
 
 function Pointshop2Controller:removeItems( ply, itemClassNames, refund )
-	local promises = {}
-	local removedClassNames = {}
-
-	for k, itemClassName in pairs( itemClassNames ) do
-		local promise = Promise.Resolve()
-		:Then( function( )
-			local itemClass = Pointshop2.GetItemClassByName( itemClassName )
-			if not itemClass then
-				return Promise.Reject( "An item " .. itemClassName .. " doesn't exist!" )
-			end
-			return itemClass
-		end )
-		:Then( function( itemClass )
-			return removeSingleItem( itemClass, refund )
-		end )
-		:Then( function( )
-			table.insert( removedClassNames, itemClassName )
-		end )
-		table.insert( promises, promise )
-	end
-
-	return WhenAllFinished( promises )
-	:Then( function( )
-		return self:moduleItemsChanged( )
+	local itemClassses = LibK._.map( itemClassNames, function( itemClassName ) 
+		local itemClass = Pointshop2.GetItemClassByName( itemClassName )
+		if not itemClass then
+			return Promise.Reject( "An item " .. itemClassName .. " doesn't exist!" )
+		end
+		return itemClass
 	end )
-	:Then( function( )
-		reloadAllPlayers( )
-	end )
-	:Then( function( )
-		return removedClassNames
+
+	return Promise.Map( itemClassses, function( itemClass )
+		local itemClassName = itemClass.className
+		return removeSingleItem( itemClass, refund ):Then( function( ) 
+			return itemClassName
+		end )
+	end ):Then( function( removedClassNames )
+		return self:moduleItemsChanged():Then( function( ) 
+			reloadAllPlayers( )
+			return removedClassNames
+		end )
 	end )
 end
 

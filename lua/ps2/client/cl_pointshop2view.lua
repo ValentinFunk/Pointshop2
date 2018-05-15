@@ -203,6 +203,21 @@ end
 
 function Pointshop2View:receiveSlots( slots )
 	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
+
+	for k, v in pairs(LocalPlayer().PS2_Slots) do
+		local slotFound
+		for k, slot in pairs( slots ) do
+			if slot.slotName === k then
+				slotFound = true
+				continue
+			end
+		end
+
+		if not slots[k] or not slots[k].Item then
+			LocalPlayer().PS2_Slots[k] = nil
+		end
+	end
+
 	for k, v in pairs( slots ) do
 		if v.Item then
 			LocalPlayer().PS2_Slots[v.slotName] = v.Item
