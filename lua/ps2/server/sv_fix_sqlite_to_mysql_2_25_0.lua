@@ -79,7 +79,7 @@ local function getPs2Models()
     return ps2Models
 end
 
-function FixSqliteError_2_25_0( ) 
+function FixSqliteError_2_25_0( force ) 
     local DB
 
     local function hasConstraint(name)
@@ -96,14 +96,14 @@ function FixSqliteError_2_25_0( )
     return Pointshop2.DatabaseConnectedPromise:Then( function( )
         DB = Pointshop2.DB
 
-        if not DB.CONNECTED_TO_MYSQL then
+        if not DB.CONNECTED_TO_MYSQL and not force then
             KLogf(4, "Don't need to fix constraints, database is SQLite")
             return Promise.Reject('No need to fix - on SQLite')
         end
     
         return hasConstraint('FK_789478012')
     end ):Then(function( hasItemPersistenceConstraint )
-        if hasItemPersistenceConstraint then
+        if hasItemPersistenceConstraint and not force then
            return Promise.Reject('No need to fix - constraint exists')
         end
 
@@ -113,7 +113,9 @@ function FixSqliteError_2_25_0( )
             return Promise.Reject('No need to fix - no database yet')
         end
 
-        MsgC( Color( 255, 0, 0 ), "[Pointshop2 - 2.25.0 Update] There is an issue with your database. Fixing it and changing map!\n" )
+        if not force then
+            MsgC( Color( 255, 0, 0 ), "[Pointshop2 - 2.25.0 Update] There is an issue with your database. Fixing it and changing map!\n" )
+        end
         local persistenceModels = Promise.Filter( getPs2Models( ), function( class )
             return class.model.belongsTo and class.model.belongsTo.ItemPersistence and DB.TableExists( class.model.tableName )
         end )
@@ -141,12 +143,17 @@ function FixSqliteError_2_25_0( )
             Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_outfithatpersistencemapping` s JOIN (SELECT s2.id FROM ps2_outfithatpersistencemapping s2 LEFT JOIN ps2_hatpersistence i ON i.id = s2.hatPersistenceId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id ]] )
         }
     end ):Then( function( )
+        -- This part converts to InnoDB and adds constraints. Not needed on SQLite
+        if not Pointshop2.DB.CONNECTED_TO_MYSQL then
+            return
+        end
+
         local modelsWithTable = Promise.Filter( getPs2Models( ), function( class )
             return DB.TableExists( class.model.tableName )
         end )
 
         -- Convert all tables to InnoDB then create constraints
-        return modelsWithTable:Map(function( class ) 
+        return modelsWithTable:Map(function( class )
             return Pointshop2.DB.DoQuery( Format( 'ALTER TABLE %s ENGINE=InnoDB;', class.model.tableName ) )
         end ):Then(function()
             -- Create constraints info for each model
@@ -163,16 +170,16 @@ function FixSqliteError_2_25_0( )
                 end )
             end )
         end)
-    end ):Then( function( )
-        MsgC( Color( 255, 0, 0 ), "[Pointshop2 - 2.25.0 Update] Patched the SQLite -> MySQL error! Update to 2.25.0 done, reloading map\n" )
-        RunConsoleCommand( "changelevel", game.GetMap() )
-    end, function( err )
-        if string.find( err, 'No need to fix' ) then
-            KLogf( 4, "[Pointshop2 - 2.25.0 Update] Don't need to fix: %s", err )
-            return Promise.Resolve( )
-        end
-
-        return Promise.Reject( err )
     end )
 end
-FixSqliteError_2_25_0()
+FixSqliteError_2_25_0( ):Then( function( )
+        MsgC( Color( 255, 0, 0 ), "[Pointshop2 - 2.25.0 Update] Patched the SQLite -> MySQL error! Update to 2.25.0 done, reloading map\n" )
+        RunConsoleCommand( "changelevel", game.GetMap() )
+end, function( err )
+    if string.find( err, 'No need to fix' ) then
+        KLogf( 4, "[Pointshop2 - 2.25.0 Update] Don't need to fix: %s", err )
+        return Promise.Resolve( )
+    end
+
+    return Promise.Reject( err ) 
+end )
