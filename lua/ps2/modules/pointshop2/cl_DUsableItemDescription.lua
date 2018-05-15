@@ -53,8 +53,8 @@ function PANEL:SetItem( item, noButtons )
 	end
 end
 
-function PANEL:SetItemClass( itemClass )
-	self.BaseClass.SetItemClass( self, itemClass )
+function PANEL:SetItemClass( itemClass, noBuyPanel )
+	self.BaseClass.SetItemClass( self, itemClass, noBuyPanel )
 	self:AddSingleUseInfo( )
 end
 
