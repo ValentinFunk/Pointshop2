@@ -6,7 +6,6 @@
 local function generateConstraintsQuery( class )
     local model = class.model
 
-    print("generate for", class.model.tableName)
     local queries = {}
     for name, info in pairs( model.belongsTo or {} ) do
         local onDelete = "RESTRICT"
@@ -28,21 +27,27 @@ local function generateConstraintsQuery( class )
             error( "Invalid class " .. info.class .. " for model " .. class.name .. ", constraint " .. name )
         end
 
-        table.insert( queries, Format( "ALTER TABLE `%s` ADD CONSTRAINT `%s` FOREIGN KEY (`%s`) REFERENCES `%s` (`%s`) ON DELETE %s ON UPDATE %s",
+        local constraintName = "FK_" .. util.CRC( class.name .. "_" .. name .. "_" .. info.class )
+        local createQuery = Format( "ALTER TABLE `%s` ADD CONSTRAINT `%s` FOREIGN KEY (`%s`) REFERENCES `%s` (`%s`) ON DELETE %s ON UPDATE %s",
             model.tableName,
-            "FK_" .. util.CRC( class.name .. "_" .. name .. "_" .. info.class ),
+            constraintName,
             info.foreignKey,
             foreignClass.model.tableName,
             foreignClass.model.overrideKey or "id",
             onDelete,
             onUpdate
-        ) )
+        )
+    
+        table.insert( queries, { 
+            query = createQuery,
+            name = constraintName
+        } )
     end
 
     if #queries == 0 then
-        return
+        return {}
     else
-        return table.concat( queries, ";" )
+        return queries
     end
 end
 
@@ -77,6 +82,17 @@ end
 function FixSqliteError_2_25_0( ) 
     local DB
 
+    local function hasConstraint(name)
+        return DB.DoQuery(Format([[
+            SELECT * FROM information_schema.TABLE_CONSTRAINTS 
+            WHERE information_schema.TABLE_CONSTRAINTS.CONSTRAINT_TYPE = 'FOREIGN KEY'
+            AND `TABLE_SCHEMA` = %s
+            AND CONSTRAINT_NAME= '%s'
+        ]], DB.SQLStr( LibK.SQL.Database ), name)):Then(function( result )
+            return result and result[1] and result[1].CONSTRAINT_NAME
+        end)
+    end
+
     return Pointshop2.DatabaseConnectedPromise:Then( function( )
         DB = Pointshop2.DB
 
@@ -85,15 +101,10 @@ function FixSqliteError_2_25_0( )
             return Promise.Reject('No need to fix - on SQLite')
         end
     
-        return DB.DoQuery(Format([[
-            SELECT * FROM information_schema.TABLE_CONSTRAINTS 
-            WHERE information_schema.TABLE_CONSTRAINTS.CONSTRAINT_TYPE = 'FOREIGN KEY'
-            AND `TABLE_SCHEMA` = %s
-            AND CONSTRAINT_NAME= 'FK_789478012'
-        ]], DB.SQLStr( LibK.SQL.Database )))
-    end ):Then(function( result )
-        if result and result[1] and result[1].CONSTRAINT_NAME then
-            return Promise.Reject('No need to fix - constraint exists')
+        return hasConstraint('FK_789478012')
+    end ):Then(function( hasItemPersistenceConstraint )
+        if hasItemPersistenceConstraint then
+           -- return Promise.Reject('No need to fix - constraint exists')
         end
 
         return DB.TableExists( 'kinv_items' )
@@ -108,6 +119,7 @@ function FixSqliteError_2_25_0( )
         end )
         return persistenceModels
     end ):Map( function( class )
+        -- Delete stray child persistences (hat, booster etc)
         return Pointshop2.DB.DoQuery( Format( [[
             SELECT childPersistence.id FROM %s AS childPersistence
             LEFT JOIN ps2_itempersistence as parentPersistence ON childPersistence.%s = parentPersistence.id
@@ -121,7 +133,13 @@ function FixSqliteError_2_25_0( )
             return Pointshop2.DB.DoQuery( Format( [[ DELETE FROM %s WHERE id IN (%s) ]], class.model.tableName, table.concat( ids, ',' ) ) )
         end )
     end ):Then( function() 
-        return Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_equipmentslot` s JOIN (SELECT s2.id FROM ps2_equipmentslot s2 LEFT JOIN kinv_items i ON i.id = s2.itemId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] )
+        return WhenAllFinished{
+            -- Delete stray items from equipment slots
+            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_equipmentslot` s JOIN (SELECT s2.id FROM ps2_equipmentslot s2 LEFT JOIN kinv_items i ON i.id = s2.itemId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] ),
+            -- Delete stray outfithatpersistencemappings
+            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_outfithatpersistencemapping` s JOIN (SELECT s2.id FROM ps2_outfithatpersistencemapping s2 LEFT JOIN ps2_outfits i ON i.id = s2.outfitId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] ),
+            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_outfithatpersistencemapping` s JOIN (SELECT s2.id FROM ps2_outfithatpersistencemapping s2 LEFT JOIN ps2_hatpersistence i ON i.id = s2.hatPersistenceId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id ]] )
+        }
     end ):Then( function( )
         local modelsWithTable = Promise.Filter( getPs2Models( ), function( class )
             return DB.TableExists( class.model.tableName )
@@ -131,9 +149,18 @@ function FixSqliteError_2_25_0( )
         return modelsWithTable:Map(function( class ) 
             return Pointshop2.DB.DoQuery( Format( 'ALTER TABLE %s ENGINE=InnoDB;', class.model.tableName ) )
         end ):Then(function()
+            -- Create constraints info for each model
             return modelsWithTable:Map( function( class ) 
-                local query = generateConstraintsQuery( class )
-                return query and Pointshop2.DB.DoQuery( query )
+                local queries = generateConstraintsQuery( class )
+
+                -- Only create constraints that do not exist yet
+                return Promise.Filter( queries, function( queryInfo ) 
+                    return hasConstraint( queryInfo.name ):Then( function( hasConstraint ) 
+                        return not hasConstraint 
+                    end )
+                end ):Map( function( queryInfo )
+                    return Pointshop2.DB.DoQuery( queryInfo.query )
+                end )
             end )
         end)
     end ):Then( function( )
