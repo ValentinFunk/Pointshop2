@@ -104,7 +104,7 @@ function FixSqliteError_2_25_0( )
         return hasConstraint('FK_789478012')
     end ):Then(function( hasItemPersistenceConstraint )
         if hasItemPersistenceConstraint then
-           -- return Promise.Reject('No need to fix - constraint exists')
+           return Promise.Reject('No need to fix - constraint exists')
         end
 
         return DB.TableExists( 'kinv_items' )
