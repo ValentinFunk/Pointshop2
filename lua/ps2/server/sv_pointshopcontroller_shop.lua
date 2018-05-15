@@ -170,8 +170,8 @@ function Pointshop2Controller:sellItem( ply, itemId )
 	end
 
 	if not Pointshop2.PlayerOwnsItem( ply, item ) then
-		transactionDef:Reject( 0, "Couldn't sell item: You don't own this item." )
-		return transactionDef:Promise( )
+		KLogf( 3, "[WARN] Player %s tried to sell item he doesn't own", ply:Nick(), itemId )
+		return Promise.Reject( 0, "Couldn't sell item: You don't own this item." )
 	end
 
 	local slot
@@ -197,8 +197,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
 		Pointshop2.DeactivateItemHooks(item)
 		item:OnSold( )
 		local amount, currencyType = item:GetSellPrice( )
-		ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] + amount
-		return ply.PS2_Wallet:save( )
+		return self:addToPlayerWallet( ply, currencyType, amount )
 	end ):Then( function( )
 		return item.id, item:remove( ) --remove the actual db entry
 	end ):Then( function( itemId )
