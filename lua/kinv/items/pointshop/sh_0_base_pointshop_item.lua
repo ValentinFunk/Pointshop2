@@ -31,9 +31,10 @@ function ITEM:initialize(id)
 	self.saveFields = self.saveFields or {}
 	table.insert(self.saveFields, "purchaseData" )
 
+
+	-- This is set here so that the transaction based savers generate it properly
 	if self.className and not self.itempersistence_id and self._persistenceId != "STATIC" then
 		self.itempersistence_id = self.className
-		self:save()
 	end
 end
 
