@@ -207,7 +207,7 @@ function Pointshop2View:receiveSlots( slots )
 	for k, v in pairs(LocalPlayer().PS2_Slots) do
 		local slotFound
 		for k, slot in pairs( slots ) do
-			if slot.slotName === k then
+			if slot.slotName == k then
 				slotFound = true
 				continue
 			end
