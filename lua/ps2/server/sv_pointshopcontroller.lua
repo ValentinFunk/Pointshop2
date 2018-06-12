@@ -757,6 +757,7 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return Promise.Reject(err)
 	end)
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
+	hook.Run( "PS2_SendPoints", ply, targetply, points )
 end
 
 local function removeSingleItem( itemClass, refund )
