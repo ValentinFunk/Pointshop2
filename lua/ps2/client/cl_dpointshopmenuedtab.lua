@@ -143,6 +143,18 @@ function PANEL:AddSheet( )
 	error( "pls dont" )
 end
 
+function PANEL:addMenuButton( label, material, doClick )
+	local btn = self.buttons:Add( "DPointshopMenuButton" )
+	btn:Setup( label, self, nil, material )
+	btn.DoClick = doClick
+	btn.extImg = btn:Add( "DCenteredImage" )
+	btn.extImg:SetMaterial( "pointshop2/external-link-symbol.png" )
+	btn.extImg:SetSize( 16, 16 )
+	btn.extImg:DockMargin( 0, 0, 8, 0 )
+	btn.extImg:Dock( RIGHT )
+	return btn
+end
+
 function PANEL:addMenuEntry( label, material, panel )
 	if not IsValid( panel ) then
 		error( "Invalid argument #3 given to addMenuEntry, expected Panel, got nil", 1 )
