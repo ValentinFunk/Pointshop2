@@ -742,7 +742,9 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		KLogf( 2, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
 		return
 	end
-
+	
+	hook.Run( "PS2_SendPoints", ply, targetply, points )
+	
 	local transaction = Pointshop2.DB.Transaction()
 	transaction:begin()
 	transaction:add(Format("UPDATE ps2_wallet SET points = points + %i WHERE id = %i", points, targetPly.PS2_Wallet.id))
@@ -757,7 +759,6 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return Promise.Reject(err)
 	end)
 	--TODO: Send the targetPlayer a nice notification, similar to iten added
-	hook.Run( "PS2_SendPoints", ply, targetply, points )
 end
 
 local function removeSingleItem( itemClass, refund )
