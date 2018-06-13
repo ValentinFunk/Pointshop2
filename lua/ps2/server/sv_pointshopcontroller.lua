@@ -743,8 +743,6 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return
 	end
 	
-	hook.Run( "PS2_SendPoints", ply, targetply, points )
-	
 	local transaction = Pointshop2.DB.Transaction()
 	transaction:begin()
 	transaction:add(Format("UPDATE ps2_wallet SET points = points + %i WHERE id = %i", points, targetPly.PS2_Wallet.id))
@@ -754,6 +752,7 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		targetPly.PS2_Wallet.points = targetPly.PS2_Wallet.points + points
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( ply ), ply.PS2_Wallet )
 		self:startView( "Pointshop2View", "walletChanged", self:getWalletChangeSubscribers( targetPly ), targetPly.PS2_Wallet )
+		hook.Run( "PS2_SendPoints", ply, targetply, points )
 	end, function(err)
 		Pointshop2.DB.DoQuery("ROLLBACK")
 		return Promise.Reject(err)
