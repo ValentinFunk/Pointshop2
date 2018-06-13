@@ -139,8 +139,8 @@ function FixSqliteError_2_25_0( force )
             -- Delete stray items from equipment slots
             Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_equipmentslot` s JOIN (SELECT s2.id FROM ps2_equipmentslot s2 LEFT JOIN kinv_items i ON i.id = s2.itemId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] ),
             -- Delete stray outfithatpersistencemappings
-            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_outfithatpersistencemapping` s JOIN (SELECT s2.id FROM ps2_outfithatpersistencemapping s2 LEFT JOIN ps2_outfits i ON i.id = s2.outfitId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] ),
-            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_outfithatpersistencemapping` s JOIN (SELECT s2.id FROM ps2_outfithatpersistencemapping s2 LEFT JOIN ps2_hatpersistence i ON i.id = s2.hatPersistenceId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id ]] )
+            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_OutfitHatPersistenceMapping` s JOIN (SELECT s2.id FROM ps2_OutfitHatPersistenceMapping s2 LEFT JOIN ps2_outfits i ON i.id = s2.outfitId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] ),
+            Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_OutfitHatPersistenceMapping` s JOIN (SELECT s2.id FROM ps2_OutfitHatPersistenceMapping s2 LEFT JOIN ps2_HatPersistence i ON i.id = s2.hatPersistenceId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id ]] )
         }
     end ):Then( function( )
         -- This part converts to InnoDB and adds constraints. Not needed on SQLite
