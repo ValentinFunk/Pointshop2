@@ -743,7 +743,7 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return
 	end
 	
-	hook.Run( "PS2_SendPoints", ply, targetply, points )
+	hook.Run( "PS2_SendPoints", ply, targetPly, points )
 	
 	local transaction = Pointshop2.DB.Transaction()
 	transaction:begin()
