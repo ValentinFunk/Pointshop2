@@ -149,15 +149,11 @@ function Pointshop2Controller:initializeSlots( ply )
 
 			--Delay to next frame to clear stack
 			timer.Simple( 0, function( )
-<<<<<<< HEAD
-				self:handleItemEquip( ply, item, slot.slotName )
-=======
 				item.Inventory = nil -- This fixes a bug where the inventory would be stored as saveField on the item
 				if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
 					self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
 					item:OnEquip( )
 				end
->>>>>>> fix_slot_remove
 			end )
 		end
 	end )
