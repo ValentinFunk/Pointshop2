@@ -1,8 +1,8 @@
 Pointshop2Controller = class( "Pointshop2Controller" )
 Pointshop2Controller:include( BaseController )
 
---Override for access controll
---returns a promise, resolved if user can do it, rejected with error if he cant
+-- Access Control:
+-- Map of ulx permission -> controller function
 local permissions = {
 	["pointshop2 manageitems"] = {
 		"saveCategoryOrganization", 
@@ -42,6 +42,7 @@ local permissionLookup = LibK._( permissions ):chain()
 		return memo
 	end ):value()
 
+-- Returns a promise, resolved if user can do it, rejected with error if he cant
 function Pointshop2Controller:canDoAction( ply, action )
 	local requiredPermission = permissionLookup[action]
 	if not requiredPermission then
