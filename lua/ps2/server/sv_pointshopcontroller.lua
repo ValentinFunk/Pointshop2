@@ -743,6 +743,11 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
 		return
 	end
 	
+<<<<<<< HEAD
+=======
+	hook.Run( "PS2_SendPoints", ply, targetPly, points )
+	
+>>>>>>> 8c84a42fd9a23de4fef00ca76d426ea4ebfdd975
 	local transaction = Pointshop2.DB.Transaction()
 	transaction:begin()
 	transaction:add(Format("UPDATE ps2_wallet SET points = points + %i WHERE id = %i", points, targetPly.PS2_Wallet.id))
