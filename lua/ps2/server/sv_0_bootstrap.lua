@@ -37,13 +37,13 @@ function Pointshop2.Bootstrap()
     ]]--
     Pointshop2.DatabaseConnectedPromise = wrapPromise( function()
         return Pointshop2.ModulesLoadedPromise
-        :Then( function( ) 
-            LibK.SetupDatabase( "Pointshop2", Pointshop2, nil, true )
-            Pointshop2.DBInitialize( ) -- After this function Pointshop2.DB is available
-            DATABASES["KInventory"] = Pointshop2.DB
+            :Then( function( ) 
+                LibK.SetupDatabase( "Pointshop2", Pointshop2, nil, true )
+                Pointshop2.DBInitialize( ) -- After this function Pointshop2.DB is available
+                DATABASES["KInventory"] = Pointshop2.DB
 
-            return Pointshop2.DB.ConnectionPromise
-        end )
+                return Pointshop2.DB.ConnectionPromise
+            end )
     end )
         
 	Pointshop2.DatabaseConnectedPromise

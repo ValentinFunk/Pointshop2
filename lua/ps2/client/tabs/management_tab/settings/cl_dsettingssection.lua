@@ -54,6 +54,33 @@ function PANEL:CreateNumberSetting( settingsPath, settingInfo )
 	return panel
 end
 
+function PANEL:CreateRadioSetting( settingsPath, settingInfo )
+	local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
+	
+	panel.radiobox = vgui.Create( "DRadioChoice", panel )
+	panel.radiobox:SetSkin( Pointshop2.Config.DermaSkin )
+	panel.radiobox:Dock( RIGHT )
+	panel.radiobox:SetWide( 200 )
+	for k, v in pairs( settingInfo.possibleValues ) do
+		panel.radiobox:AddOption( v )
+	end
+	function panel.radiobox:PerformLayout( )
+		self:SizeToChildren( true, true )
+		panel:SetTall( self:GetTall() )
+	end
+	function panel.radiobox.OnChange( _self )
+		local selected = panel.radiobox:GetSelectedOption( ):GetText( )
+		self.listener:OnValueChanged( settingsPath, selected )
+	end
+
+	function panel.SetValue( panel, val )
+		panel.radiobox:SelectChoiceByText( val )
+		self.listener:OnValueChanged( settingsPath, val )
+	end
+	
+	return panel
+end
+
 function PANEL:CreateTextentrySetting( settingsPath, settingInfo )
     local panel = self:CreateBaseSettingPanel( settingsPath, settingInfo )
     
@@ -122,6 +149,7 @@ function PANEL:AddSettingByType( settingsPath, settingInfo )
 		number = "CreateNumberSetting",
 		option = "CreateComboboxSetting",
 		string = "CreateTextentrySetting",
+		radio = "CreateRadioSetting"
 	}
 	
 	local valueType = settingInfo.type or type( settingInfo.value )

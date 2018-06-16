@@ -16,7 +16,7 @@ PointsFactory.Settings = {
 				"points",
 				"premiumPoints",
 			},
-			type = "option",
+			type = "radio",
 			label = "Currency Type",
 			tooltip = "Currency of the points given to the user"
 		},

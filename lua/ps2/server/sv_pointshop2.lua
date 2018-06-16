@@ -50,27 +50,9 @@ end
 ]]--
 function Pointshop2.FixDatabase( )
 	Promise.Resolve( )
-	-- 1: Find all itemPersistences without a valid parent base persistence
+	-- 1: Remove itemPersistences without a valid parent base persistence
 	:Then( function()
-		return Pointshop2Controller:getPersistenceModels( )
-	end )
-	:Then( function( persistences )
-		local promises = {}
-		for _, persistenceModel in pairs( persistences ) do
-			local promise = persistenceModel.getDbEntries( "WHERE 1" )
-			:Then( function( persistentItems )
-				local promises = {}
-				for _, item in pairs( persistentItems ) do
-					if not item.ItemPersistence then
-						KLogf( 2, "[PS2-FIX] Found item persistence with invalid parent persistence, removing it, class %s, id %i", persistenceModel.name, item.id )
-						table.insert( promises, item:remove( ) )
-					end
-				end
-				return WhenAllFinished( promises, { noUnpack = true } )
-			end )
-			table.insert( promises, promise )
-		end
-		return WhenAllFinished( promises, { noUnpack = true } )
+		return FixSqliteError_2_25_0( true )
 	end )
 
 	-- 1.1: Find all hats with broken settings
@@ -90,19 +72,85 @@ function Pointshop2.FixDatabase( )
 
 	-- 2: Find all items that don't have a valid class (base persistence)
 	:Then( function( )
-		return KInventory.Item.getAll( 0 ) --Don't resolve relationships
+		return Promise.Resolve()
+			:Then(function()
+				return Pointshop2.DB.DisableForeignKeyChecks( true )
+			end)
+			:Then(function()
+				-- Fix: make sure that itempersistence_id field matches the classname filed
+				if Pointshop2.DB.CONNECTED_TO_MYSQL then
+					return Pointshop2.DB.DoQuery([[
+						UPDATE kinv_items SET itempersistence_id = IF(CAST(SUBSTRING(itemclass, 18) AS SIGNED) = 0, NULL, CAST(SUBSTRING(itemclass, 18) AS SIGNED))
+						WHERE itemclass REGEXP "^KInventory\\.Items\\.[0-9]+$"
+					]])
+				else	
+					return Pointshop2.DB.DoQuery([[ 
+						UPDATE kinv_items SET itempersistence_id = CASE WHEN CAST(substr(itemclass, 18) AS NUMERIC) = 0 THEN NULL ELSE CAST(substr(itemclass, 18) AS NUMERIC) END
+					]])
+				end
+			end)
+			:Then( function( )
+				-- Now remove items with invalid persistences
+				if Pointshop2.DB.CONNECTED_TO_MYSQL then
+					return Pointshop2.DB.DoQuery([[
+						DELETE FROM kinv_items WHERE id IN (
+							SELECT items.id
+							FROM (SELECT * FROM kinv_items) items 
+							LEFT JOIN ps2_itempersistence persistences ON persistences.id = CAST(SUBSTRING(items.itemclass, 18) AS SIGNED)
+							WHERE items.itemclass REGEXP "^KInventory\\.Items\\.[0-9]+$" AND persistences.id IS NULL
+						)
+					]])
+				else
+					return Pointshop2.DB.DoQuery([[
+						DELETE FROM kinv_items WHERE id IN (
+							SELECT items.id
+							FROM (SELECT * FROM kinv_items) items 
+							LEFT JOIN ps2_itempersistence persistences ON persistences.id = CAST(substr(items.itemclass, 18) AS NUMERIC)
+							WHERE CAST(substr(items.itemclass, 18) AS NUMERIC) != 0 AND persistences.id IS NULL
+						)
+					]])
+				end
+				return Pointshop2.DB.DisableForeignKeyChecks( false )
+			end )
 	end )
-	:Then( function( items )
-		local promises = {}
-		for k, v in pairs( items ) do
-			if v._creationFailed then
-				PrintTable( v )
-				KLogf( 2, "[PS2-FIX] Found invalid item reference in inventory, removing item %i, class %s", v.id, v._className )
-				table.insert( promises, v:remove( ) )
+	
+	:Then( function()
+		-- Remove slots that have no valid item attached
+		return Pointshop2.DB.DoQuery( [[ DELETE s FROM `ps2_equipmentslot` s JOIN (SELECT s2.id FROM ps2_equipmentslot s2 LEFT JOIN kinv_items i ON i.id = s2.itemId WHERE i.id IS NULL) toDelete ON s.id = toDelete.id; ]] )
+	end )
+
+	:Then( function() 
+		-- Remove items from inventories that are lua defined, but the lua defined item doesn't exist
+		return Pointshop2.DB.DoQuery(Format(
+			"SELECT id, itemclass FROM kinv_items WHERE CAST(substr(itemclass, 18) AS %s) = 0",
+			Pointshop2.DB.CONNECTED_TO_MYSQL and "SIGNED" or "NUMERIC"
+		)):Then(function(results)
+			if not results or #results == 0 then 
+				return
 			end
-		end
-		return WhenAllFinished( promises, { noUnpack = true } )
+
+			local brokenOnes = LibK._.filter( results, function( row )
+				return _G[itemclass] != nil				
+			end )
+			return Promise.Map( brokenOnes, function( row )
+				return Pointshop2.DB.DoQuery( "DELETE FROM kinv_items WHERE id = " .. brokenOnes.id ) 
+			end )
+		end)
+	end ):Then( function( )
+		return Pointshop2Controller:getInstance():loadModuleItems()
 	end )
+		-- 	return KInventory.Item.getAll( 0 ) --Don't resolve relationships
+		-- end )
+		-- :Then( function( items )
+		-- 	local promises = {}
+		-- 	for k, v in pairs( items ) do
+		-- 		if v._creationFailed then
+		-- 			PrintTable( v )
+		-- 			KLogf( 2, "[PS2-FIX] Found invalid item reference in inventory, removing item %i, class %s", v.id, v._className )
+		-- 			table.insert( promises, v:remove( ) )
+		-- 		end
+		-- 	end
+		-- 	return WhenAllFinished( promises, { noUnpack = true } )
 
 	-- 3: Find all item mappings that don't have a valid class (base persistence)
 	:Then( function( )
@@ -179,7 +227,7 @@ function Pointshop2.FixDatabase( )
 			return
 		end
 
-		KLogf( 2, "Removing invalid slots " .. validSlotNames)
+		KLogf( 2, "Removing invalid slots. Valid slot names: " .. validSlotNames)
 		return Pointshop2.EquipmentSlot.getDbEntries(Format("WHERE slotName NOT IN (%s)", validSlotNames), 0)
 			:Then(function(invalidSlots)
 				local itemsToRemove = LibK._(invalidSlots):chain()
@@ -191,7 +239,12 @@ function Pointshop2.FixDatabase( )
 				
 				KLogf( 2, "Removing items from invalid slots " .. itemsToRemove)
 				return WhenAllFinished{
-					( #itemsToRemove > 0 ) and KInventory.Item.removeDbEntries("WHERE id IN (" .. itemsToRemove .. ")") or Promise.Resolve(),
+					( #itemsToRemove > 0 ) and Pointshop2.DB.DoQuery(Format([[
+						UPDATE kinv_items a, ps2_equipmentslot b
+							JOIN inventories c ON b.ownerId =  c.ownerId
+							SET a.inventory_id = c.id, b.itemId = NULL
+							WHERE b.slotName NOT IN (%s) AND b.itemId = a.id
+					]], validSlotNames)) or Promise.Resolve(),
 					Pointshop2.EquipmentSlot.removeDbEntries(Format("WHERE slotName NOT IN (%s)", validSlotNames))
 				}
 			end)

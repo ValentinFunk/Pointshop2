@@ -8,6 +8,7 @@ net.Receive( "PlayerUseItem", function( len, ply )
 	KInventory.Item.findById( itemId )
 	:Then( function( item )
 		if not item then
+			ply:Kick() -- People seem to exploit this msg to lagg servers
 			return KLogf( 3, "[WARN] Player %s tried to use unknown item %i", ply:Nick( ), itemId )
 		end
 		

@@ -177,11 +177,25 @@ end
 
 function Pointshop2View:receiveSlots( slots )
 	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
-	for slotName, item in pairs( slots ) do
-		if item then
-			KInventory.ITEMS[item.id] = item
-			LocalPlayer().PS2_Slots[slotName] = item
-			KLogf( 5, "[SLOT] Slot %s item %i", slotName, item.id )
+
+	for k, v in pairs(LocalPlayer().PS2_Slots) do
+		local slotFound
+		for k, slot in pairs( slots ) do
+			if slot.slotName == k then
+				slotFound = true
+				continue
+			end
+		end
+
+		if not slots[k] or not slots[k].Item then
+			LocalPlayer().PS2_Slots[k] = nil
+		end
+	end
+
+	for k, v in pairs( slots ) do
+		if v.Item then
+			LocalPlayer().PS2_Slots[v.slotName] = v.Item
+			KInventory.ITEMS[v.Item.id] = v.Item
 		end
 	end
 

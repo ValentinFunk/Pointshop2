@@ -39,6 +39,7 @@ Item.static.model = {
 }
 Item:include( DatabaseModel )
 
+
 function Item:postLoad( )
 	--i know this is disgusting :( a possible alternative would be no relationships
 	local cached = KInventory.ITEMS[self.id]

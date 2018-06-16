@@ -3,6 +3,14 @@ function Pointshop2:AddInventoryPanel( label, icon, controlName, shouldShow )
 	table.insert( Pointshop2.InventoryPanels, { label = label, icon = icon, controlName = controlName, shouldShow = shouldShow } )
 end
 
+function Pointshop2:AddInventoryButton( label, icon, onClickFn, shouldShow )
+	table.insert( Pointshop2.InventoryPanels, { 
+		label = label,
+		icon = icon,
+		onClickFn = onClickFn,
+		shouldShow = shouldShow 
+	} )
+end
 
 local PANEL = {}
 
@@ -13,9 +21,13 @@ function PANEL:Init( )
 			continue
 		end
 		
-		local panel = vgui.Create( btnInfo.controlName )
-		self:addMenuEntry( btnInfo.label, btnInfo.icon, panel )
-		self.panels[btnInfo.label] = panel
+		if btnInfo.controlName then
+			local panel = vgui.Create( btnInfo.controlName )
+			self:addMenuEntry( btnInfo.label, btnInfo.icon, panel )
+			self.panels[btnInfo.label] = panel
+		else
+			self:addMenuButton( btnInfo.label, btnInfo.icon, btnInfo.onClickFn )
+		end
 	end
 end
 

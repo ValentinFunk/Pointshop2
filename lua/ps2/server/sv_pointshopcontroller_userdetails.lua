@@ -143,7 +143,13 @@ function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount 
 	-- Player is online do standard stuff
 	for k, v in pairs( player.GetAll( ) ) do
 		if v:SteamID( ) == steamId and v.PS2_Wallet then
-			return self:addToPlayerWallet( v, currencyType, amount )
+			local batch = currencyType == 'points' and Pointshop2.StandardPointsBatch or Pointshop2.PremiumPointsBatch
+			if batch:isInProgress( ) then
+				batch:addPoints( self, points )
+				return Promise.Resolve( )
+			else
+				return self:addToPlayerWallet( v, currencyType, amount )
+			end
 		end
 	end
 
@@ -163,7 +169,7 @@ function Pointshop2Controller:addPointsBySteamId( steamId, currencyType, amount 
 	:Then( function( ply )
 		return WhenAllFinished{ Pointshop2.Wallet.findByOwnerId( ply.id ), Promise.Resolve( ply ) }
 	end )
-	:Then( function( wallet, kPlayer  )
+	:Then( function( wallet, kPlayer )
 		-- Player might not have a PS2 Wallet yet, create it if he does not
 		if not wallet then
 			local wallet = Pointshop2.Wallet:new( )
