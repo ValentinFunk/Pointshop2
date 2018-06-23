@@ -468,7 +468,11 @@ local function handleEquip( ply, item )
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
 	ply.PS2_EquippedItems[item.id] = item
 	item.owner = ply
-	item:OnEquip( ply )
+
+	if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
+		Pointshop2.ActivateItemHooks( item )
+		item:OnEquip( )
+	end
 end
 
 -- Here only the itemId and slot name is sent since we already have the item cached
@@ -521,14 +525,16 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 		for slotName, itemInSlot in pairs( ply.PS2_Slots ) do
 			if itemInSlot.id == itemId then
 				if itemInSlot != item then
+					dpt(itemInSlot)
+					dpt(item)
 					MsgC( Color(255, 0, 0), "Assertion Failure: Cached item does not match slot item\n" )
 					MsgC( Color(255, 0, 0), LibK.GLib.StackTrace (nil, 1) )
 				end
 				ply.PS2_Slots[slotName] = nil
+				hook.Run( "PS2_ItemRemovedFromSlot", slotName )	
 			end
 		end
 
-		hook.Run( "PS2_ItemRemovedFromSlot", slotName )	
 	end
 
 	item:OnHolster( ply )

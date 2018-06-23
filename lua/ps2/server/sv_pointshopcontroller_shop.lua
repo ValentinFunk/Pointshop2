@@ -170,8 +170,9 @@ function Pointshop2Controller:handleItemUnequip( item, ply )
             if slotObj.Item != item then
                 MsgC( Color(255, 0, 0), "Assertion Failure: Cached item does not match slot item\n" )
                 MsgC( Color(255, 0, 0), LibK.GLib.StackTrace (nil, 1) )
+                PrintTable(slotObj)
             end
-            ply.PS2_Slots[slot.id] = nil
+            ply.PS2_Slots[slotId] = nil
         end
     end
     self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
@@ -202,8 +203,9 @@ function Pointshop2Controller:sellItem( ply, itemId )
         if slot then
             local transaction = Pointshop2.DB.Transaction()
             transaction:begin()
-            transaction:add(Format("DELETE FROM ps2_equipmentslot WHERE id = %i", item.id))
-            transaction:add(Format("UPDATE ps2_wallet SET %s = %s + %i", currencyType, currencyType, amount))
+            transaction:add(Format("DELETE FROM ps2_equipmentslot WHERE id = %i", slot.id))
+            transaction:add(Format("DELETE FROM kinv_items WHERE id = %i", item.id))
+            transaction:add(Format("UPDATE ps2_wallet SET %s = %s + %i WHERE ownerId = %i", currencyType, currencyType, amount, ply.kPlayerId))
             return transaction:commit():Then(function()
                 self:handleItemUnequip( item, ply )
             end, function(err)
@@ -214,10 +216,10 @@ function Pointshop2Controller:sellItem( ply, itemId )
             local transaction = Pointshop2.DB.Transaction()
             transaction:begin()
             transaction:add(Format("DELETE FROM kinv_items WHERE id = %i", item.id))
-            transaction:add(Format("UPDATE ps2_wallet SET %s = %s + %i", currencyType, currencyType, amount))
+            transaction:add(Format("UPDATE ps2_wallet SET %s = %s + %i WHERE ownerId = %i", currencyType, currencyType, amount, ply.kPlayerId))
             return transaction:commit():Then(function()
                 ply.PS2_Inventory:notifyItemRemoved( itemId )
-            end, function(err)
+            end, function( err )
                 transaction:rollback()
                 LibK.GLib.Error(err)
             end )

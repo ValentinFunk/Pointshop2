@@ -101,6 +101,7 @@ end
 
 function Pointshop2Controller:handleItemEquip( ply, item, slotName )
 	item.owner = ply
+	item.Inventory = nil -- Fix for an issue where inv somehow ended up in DB
 
 	-- To save networking we send the item only to the players that need it.
 	-- The equipping player already has it in inv, so we send it to all but him
@@ -148,14 +149,7 @@ function Pointshop2Controller:initializeSlots( ply )
 			item.owner = ply
 			KInventory.ITEMS[slot.itemId] = item
 
-			--Delay to next frame to clear stack
-			timer.Simple( 0, function( )
-				item.Inventory = nil -- This fixes a bug where the inventory would be stored as saveField on the item
-				if item.class:IsValidForServer( Pointshop2.GetCurrentServerId( ) ) then
-					self:startViewWhenValid( "Pointshop2View", "playerEquipItem", player.GetAll( ), ply.kPlayerId, item )
-					item:OnEquip( )
-				end
-			end )
+			self:handleItemEquip( ply, item, slot.slotName )
 		end
 	end )
 end
