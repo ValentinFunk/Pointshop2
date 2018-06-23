@@ -23,9 +23,9 @@ function Pointshop2.GetItemClassByName( name )
 	return KInventory.Items[name]
 end
 
-/*
+--[[
 	Warning: convenience function to be used with care. Item names are NOT unique!
-*/
+]]--
 function Pointshop2.GetItemClassByPrintName( name )
 	local itemClass
 	for _, class in pairs( KInventory.Items ) do
@@ -68,18 +68,17 @@ function Pointshop2.ActivateItemHooks(item)
 end
 
 function Pointshop2.DeactivateItemHooks(item)
-	local class = item.class
-	for hookName, tbl in pairs(ITEM_HOOK_LOOKUP) do
-		ITEM_HOOK_LOOKUP[hookName] = LibK._.filter(tbl, function(_item) 
+	for hookName, tbl in pairs( ITEM_HOOK_LOOKUP ) do
+		ITEM_HOOK_LOOKUP[hookName] = LibK._.filter( tbl, function( _item )
 			return _item != item
-		end)
+		end )
 	end
 end
 
-/*
+--[[
 	The hook specified in name is called for every item that is equipped by a player.
 	Arguments are passed unmodified and unfiltered.
-*/
+]]--
 Pointshop2.ITEM_HOOK_REGISTRY = { }
 function Pointshop2.AddItemHook( hookName, itemClass )
 	if itemClass.name == "DummyClass" then return end
@@ -103,7 +102,7 @@ function Pointshop2.AddItemHook( hookName, itemClass )
 
 		if #toRemove > 0 then
 			-- Remove items with invalid owners
-			ITEM_HOOK_LOOKUP[hookName] = LibK._.filter(itemsForThisHook, function(item) 
+			ITEM_HOOK_LOOKUP[hookName] = LibK._.filter(itemsForThisHook, function(item)
 				return not toRemove[item]
 			end)
 		end
@@ -179,15 +178,6 @@ if SERVER then
 		return slot
 	end
 end
-if CLIENT then
-	function Pointshop2.GetSlotNameContainingItemId( itemId )
-		for slotName, item in pairs( ply.PS2_Slots ) do
-			if item.id == itemId then
-				return slotName
-			end
-		end
-	end
-end
 
 function Pointshop2.GetItemInSlot( ply, slotName )
 	if not ply.PS2_Slots then
@@ -198,7 +188,7 @@ function Pointshop2.GetItemInSlot( ply, slotName )
 		return ply.PS2_Slots[slotName]
 	end
 
-	for k, slot in pairs( ply.PS2_Slots ) do
+	for _, slot in pairs( ply.PS2_Slots ) do
 		if slot.itemId then
 			return KInventory.ITEMS[slot.itemId]
 		end
@@ -274,11 +264,11 @@ function Pointshop2.GetCategoryByName( name )
 	return category
 end
 
-/*
+--[[
 	Used to send RPCs on items to client:
 	Allows you to call client functions on items from the server with minimal effort.
 	Should only be called on items that are equipped!
-*/
+]]--
 if SERVER then
 	util.AddNetworkString( "PS2_ItemClientRPC" )
 	util.AddNetworkString( "PS2_ItemServerRPC" )
@@ -369,11 +359,11 @@ function Pointshop2.BuildTree( flatStructure, itemMappings )
 	return Pointshop2.CategoryTree:new( flatStructure, itemMappings )
 end
 
-/*
+--[[
 	Developer utility Function, prints item names and their classes:
 	1: Lamp Hat
 	2: SMG1
-*/
+]]--
 function Pointshop2.PrintItemClasses()
 	local str = LibK._(Pointshop2.GetRegisteredItems()):chain()
 		:map(function(item)
@@ -406,7 +396,7 @@ function Pointshop2.GenerateItemClass( className, baseClassName, moduleName )
 		LibK.GLib.Error("Class " .. baseClassName .. " is not registered with Pointshop 2")
 	end
 
-	local newClass = class( 'KInventory.Items' .. className, baseClass )
+	local newClass = class( "KInventory.Items" .. className, baseClass )
 	newClass.static.className = className
 	-- For the error hint when trying to edit it
 	newClass.static.originFilePath = LibK.GLib and LibK.GLib.Lua and ( LibK.GLib.Lua.StackTrace().RawFrames[2].source .. '(' .. moduleName .. ')' ) or moduleName

@@ -120,7 +120,7 @@ function Pointshop2View:showRepairDatabase( message )
 
 	local btn = vgui.Create( "DButton", notification )
 	btn:SetText( "Repair Database" )
-	function btn.DoClick() 
+	function btn.DoClick( )
 		self:controllerAction( "fixDatabase" )
 	end
 	btn:SizeToContents()
@@ -178,25 +178,16 @@ end
 function Pointshop2View:receiveSlots( slots )
 	LocalPlayer().PS2_Slots = LocalPlayer().PS2_Slots or {}
 
-	for k, v in pairs(LocalPlayer().PS2_Slots) do
-		local slotFound
-		for k, slot in pairs( slots ) do
-			if slot.slotName == k then
-				slotFound = true
-				continue
-			end
-		end
-
-		if not slots[k] or not slots[k].Item then
-			LocalPlayer().PS2_Slots[k] = nil
+	-- Handle removed slots
+	for slotName, item in pairs(LocalPlayer().PS2_Slots) do
+		if not slots[slotName] or not slots[slotName].Item then
+			LocalPlayer().PS2_Slots[slotName] = nil
 		end
 	end
 
-	for k, v in pairs( slots ) do
-		if v.Item then
-			LocalPlayer().PS2_Slots[v.slotName] = v.Item
-			KInventory.ITEMS[v.Item.id] = v.Item
-		end
+	for slotName, item in pairs( slots ) do
+		LocalPlayer().PS2_Slots[slotName] = item
+		KInventory.ITEMS[item.id] = item
 	end
 
 	KLogf( 5, "[PS2] Received slots, %i slots", table.Count( slots ) )
@@ -204,7 +195,7 @@ function Pointshop2View:receiveSlots( slots )
 end
 
 function Pointshop2View:itemAddedToSlot( slotName, itemId, item )
-	local item = item or KInventory.ITEMS[itemId]
+	item = item or KInventory.ITEMS[itemId]
 	if not item then
 		LibK.GLib.Error( "Invalid item added to slot message" )
 	end
@@ -255,12 +246,12 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 	return Pointshop2View:getInstance( ).clPromises.SettingsReceived:Then( function()
 		--Load persistent items
 		local startTime = SysTime( )
-		for k, v in pairs( self.itemProperties ) do
+		for _, v in pairs( self.itemProperties ) do
 			Pointshop2.LoadPersistentItem( v )
 		end
 		KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
-		local startTime = SysTime( )
+		startTime = SysTime( )
 		local tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
 		KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
@@ -269,9 +260,9 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		--Hacky, dunno why this is needed
 		--hook.Call( "PS2_DynamicItemsUpdated" )
 		timer.Simple( 0.1, function( )
-			local startTime = SysTime( )
+			local startTimeDynamics = SysTime( )
 			hook.Call( "PS2_DynamicItemsUpdated" )
-			KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+			KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTimeDynamics ) )
 		end )
 
 		resolveIfWaiting( self.clPromises.DynamicsReceived )
@@ -289,15 +280,15 @@ function Pointshop2View:updateItemPersistences( itemPersistences )
 
 	for _, itemPersistence in pairs( itemPersistences ) do
 		-- Update persistence object cache
-		for k, v in pairs( self.itemProperties ) do
+		for _, v in pairs( self.itemProperties ) do
 			if v.itemPersistenceId == itemPersistence.itemPersistenceId then
 				self.itemProperties[k] = itemPersistence
 			end
 		end
-		
+
 		-- Update class (KInventory.Items[id])
 		local itemClass = Pointshop2.LoadPersistentItem( itemPersistence )
-	
+
 		-- Regenerate item
 		if LibK.DermaInherits( itemClass:GetPointshopIconControl( ), "DCsgoItemIcon" ) then
 			Pointshop2.RequestIcon( itemClass, true )
@@ -327,7 +318,7 @@ function Pointshop2View:loadDynamics( versionHash )
 		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) )
 
 		self.dynamicsDecoded = dynamicsDecoded
-		
+
 		--Back to classes
 		LibK.processNetTable( dynamicsDecoded[1] )
 		LibK.processNetTable( dynamicsDecoded[2] )
@@ -340,14 +331,14 @@ function Pointshop2View:loadDynamics( versionHash )
 		local kPlayerIdValid = Deferred()
 		timer.Create( "CheckValidPlayerId", 0.1, 0, function()
 			local loaded = true
-			for k, v in pairs( player.GetAll( ) ) do
-				if v == LocalPlayer( ) && v:GetNWInt("KPlayerId", -1) == -1 then
+			for _, v in pairs( player.GetAll( ) ) do
+				if v == LocalPlayer( ) and v:GetNWInt( "KPlayerId", -1 ) == -1 then
 					loaded = false
 				end
 			end
 			if loaded then
 				kPlayerIdValid:Resolve( )
-				timer.Destroy( "CheckValidPlayerId" )
+				timer.Remove( "CheckValidPlayerId" )
 			end
 		end )
 		WhenAllFinished{
@@ -365,7 +356,7 @@ function Pointshop2View:getPersistenceForClass( itemClass )
 		return "STATIC"
 	end
 	local persistenceClass = Pointshop2.GetPersistenceClassForItemClass( itemClass )
-	for k, v in pairs( self.itemProperties ) do
+	for _, v in pairs( self.itemProperties ) do
 		if v.id == itemClass._persistenceId and instanceOf( persistenceClass, v ) then
 			return v
 		end
@@ -410,7 +401,7 @@ function Pointshop2View:getShopCategory( )
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
 
-	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
+	for _, v in pairs( self.categoryItemsTable.subcategories or {} ) do
 		if v.self.label == "Shop Categories" then
 			return v
 		end
@@ -427,15 +418,15 @@ function Pointshop2View:getNoSaleCategory( )
 		return KLogf( 2, "[PS2] Couldn't create items table: nothing received from server yet!" )
 	end
 
-	for k, v in pairs( self.categoryItemsTable.subcategories or {} ) do
+	for _, v in pairs( self.categoryItemsTable.subcategories or { } ) do
 		if v.self.label == "Not for sale Items" then
 			return v
 		end
 	end
 
 	return {
-		items = {},
-		subcategories = {}
+		items = { },
+		subcategories = { }
 	}
 end
 
@@ -475,38 +466,28 @@ end
 
 local function handleEquip( ply, item )
 	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
-	ply.PS2_EquippedItems[itemId] = item
-
-	ply.PS2_EquippedItems = ply.PS2_EquippedItems or {}
-	ply.PS2_EquippedItems[itemId] = item
+	ply.PS2_EquippedItems[item.id] = item
 	item.owner = ply
+	item:OnEquip( ply )
 end
 
-// Here only the itemId and slot name is sent since we already have the item cached
+-- Here only the itemId and slot name is sent since we already have the item cached
 function Pointshop2View:localPlayerEquipItem( itemId, slotName )
-	item = KInventory.ITEMS[itemId]
+	local item = KInventory.ITEMS[itemId]
 	if not item then
 		LibK.GLib.Error( "Got equip for uncached item" )
 	end
 
-	ply.PS2_Slots[slotName] = item
-
-	--Delay to next frame to clear stack
-	timer.Simple( 0, function( )
-		item:OnEquip( ply )
-		if item.class:IsValidForServer( Pointshop2.GetCurrentServerId() ) then
-			Pointshop2.ActivateItemHooks(item)
-			hook.Run( "PS2_ItemEquipped", ply, item )
-		end
-	end )
+	LocalPlayer( ).PS2_Slots[slotName] = item
+	handleEquip( LocalPlayer(), item )
 end
 
-// Here the full item is sent since we dont have it yet.
+-- Here the full item is sent since we dont have it yet.
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	isRetry = isRetry or 0
 
 	local ply
-	for k, v in pairs( player.GetAll( ) ) do
+	for _, v in pairs( player.GetAll( ) ) do
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
 			ply = v
 		end
@@ -533,18 +514,24 @@ end
 function Pointshop2View:playerUnequipItem( ply, itemId )
 	local item = KInventory.ITEMS[itemId]
 	if not item then
-		GLib.Error( 'Invalid itemId in playerUnequipItem' )
+		GLib.Error( "Invalid itemId in playerUnequipItem" )
 	end
 
 	if ply == LocalPlayer() then
-		local slotName = Pointshop2.GetSlotNameContainingItemId( itemId )
-		local item = Pointshop2.GetItemInSlot( ply, slotName )
-		LocalPlayer().PS2_Slots[slotName] = nil
+		for slotName, itemInSlot in pairs( ply.PS2_Slots ) do
+			if itemInSlot.id == itemId then
+				if itemInSlot != item then
+					MsgC( Color(255, 0, 0), "Assertion Failure: Cached item does not match slot item\n" )
+					MsgC( Color(255, 0, 0), LibK.GLib.StackTrace (nil, 1) )
+				end
+				ply.PS2_Slots[slotName] = nil
+			end
+		end
+
 		hook.Run( "PS2_ItemRemovedFromSlot", slotName )	
 	end
 
 	item:OnHolster( ply )
-	
 	Pointshop2.DeactivateItemHooks( item )
 
 	if ply.PS2_EquippedItems then
@@ -572,7 +559,7 @@ function Pointshop2View:searchPlayers( subject, attribute )
 end
 
 function Pointshop2View:getUserDetails( kPlayerId )
-	if not kPlayerId or not type( kPlayerId ) == "number" then
+	if not kPlayerId or type( kPlayerId ) != "number" then
 		error( "Invalid Call" )
 		debug.Trace( )
 		return
@@ -655,13 +642,13 @@ function Pointshop2View:removeItems( itemClasses, refund )
 	hook.Run( "PS2_PreReload" )
 
 	local classNames = {}
-	for k, v in pairs( itemClasses ) do
+	for _, v in pairs( itemClasses ) do
 		table.insert( classNames, v.className )
 	end
 
 	self:controllerTransaction( "removeItems", classNames, refund )
 	:Done( function( removedNames )
-		for k, className in pairs( removedNames ) do
+		for _, className in pairs( removedNames ) do
 			KInventory.Items[className] = nil
 		end
 	end )
