@@ -575,7 +575,7 @@ function Pointshop2Controller:notifyItemsChanged( itemClassNames, outfitsChanged
 		return class.getPersistence( ).findByItemPersistenceId( itemClassName )
 		:Then( function( updatedPersistence )
 			-- Update cached copy for new players
-			for k, v in pairs( self.cachedPersistentItems ) do
+			for k, v in pairs( self.cachedPersistentItems or {} ) do
 				if v.itemPersistenceId == updatedPersistence.itemPersistenceId then
 					self.cachedPersistentItems[k] = updatedPersistence
 				end
