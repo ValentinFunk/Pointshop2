@@ -164,7 +164,7 @@ end
 function Pointshop2Controller:handleItemUnequip( item, ply )
     Pointshop2.DeactivateItemHooks( item )
     item:OnHolster( ply )
-    hook.Run( "PS2_ItemRemovedFromSlot", slotName )
+    hook.Run( "PS2_ItemRemovedFromSlot", slotName, item )
     for slotId, slotObj in pairs( ply.PS2_Slots ) do
         if slotObj.itemId == item.id then
             if slotObj.Item != item then
@@ -408,7 +408,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
     end )
     :Then( function( slot )
         item.owner = ply
-        
+
         -- Delay to next frame to clear stack
         timer.Simple( 0, function( )
             self:handleItemEquip( ply, item, slot.slotName )

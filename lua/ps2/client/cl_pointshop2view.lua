@@ -280,7 +280,7 @@ function Pointshop2View:updateItemPersistences( itemPersistences )
 
 	for _, itemPersistence in pairs( itemPersistences ) do
 		-- Update persistence object cache
-		for _, v in pairs( self.itemProperties ) do
+		for k, v in pairs( self.itemProperties ) do
 			if v.itemPersistenceId == itemPersistence.itemPersistenceId then
 				self.itemProperties[k] = itemPersistence
 			end
@@ -531,7 +531,7 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 					MsgC( Color(255, 0, 0), LibK.GLib.StackTrace (nil, 1) )
 				end
 				ply.PS2_Slots[slotName] = nil
-				hook.Run( "PS2_ItemRemovedFromSlot", slotName )	
+				hook.Run( "PS2_ItemRemovedFromSlot", slotName, item )	
 			end
 		end
 

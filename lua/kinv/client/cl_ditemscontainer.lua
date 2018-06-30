@@ -162,14 +162,14 @@ function PANEL:itemAdded( item )
 	if not table.HasValue( self.itemsTbl, item ) then
 		table.insert( self.itemsTbl, item )
 	end
-	
+
 	--Check if we already have the item (predicted)
 	for k, slot in pairs( self:GetChildren( ) ) do
 		if slot:containsItem( item ) then
 			return true
 		end
 	end
-	
+
 	--Try to add to cached position
 	item.id = tonumber( item.id )
 	if self.itemPositions and self.itemPositions[item.id] then
@@ -181,7 +181,7 @@ function PANEL:itemAdded( item )
 			end
 		end
 	end
-	
+
 	--Find next free slot
 	for k, slot in pairs( self:GetChildren( ) ) do
 		if slot:addItem( item ) then

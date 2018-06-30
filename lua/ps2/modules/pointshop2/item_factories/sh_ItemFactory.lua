@@ -81,7 +81,8 @@ end
 			itemOrInfo = {
 				isInfoTable = true,
 				item = Pointshop2.GetItemClassByName( "base_points" ),
-				getIcon = function() return vgui.Create("MyIconControl") end
+				getIcon = function() return vgui.Create("MyIconControl") end,
+				PreloadIcon = function() return Promise.Resolve() end,
 				printName = self:GetShortDesc( ),
 				createItem = function(temporaryInstance)
 					return self:CreateItem(temporaryInstance)

@@ -1,6 +1,7 @@
 --Indicates that this item base is statically lua defined and not loaded from a
 --persistence. This means that it cannot be edited dynamically
 ITEM.static._persistenceId = "STATIC"
+ITEM.stackCount = 4
 
 ITEM.PrintName = "Pointshop Item Base"
 ITEM.Material = "materials/error"
@@ -208,11 +209,14 @@ function ITEM:getLowendInventoryIcon( )
 end
 
 function ITEM:getCrashsafeIcon( )
+	local icon
 	if Pointshop2.ClientSettings.GetSetting( "BasicSettings.LowendMode" ) then
-		return self:getLowendInventoryIcon( )
+		icon = self:getLowendInventoryIcon( )
 	else
-		return self:getIcon( )
+		icon = self:getIcon( )
 	end
+	self.icon = nil
+	return icon
 end
 
 function ITEM:OnRemove( )

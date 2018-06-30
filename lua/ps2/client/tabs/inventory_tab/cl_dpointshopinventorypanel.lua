@@ -54,6 +54,7 @@ function PANEL:Init( )
 			return
 		end
 
+		print( self.descPanel.item, self.descPanel.item.id, itemId )
 		if self.descPanel.item and self.descPanel.item.id == itemId and resetSelection then
 			self.descPanel:SelectionReset( )
 		end
@@ -153,21 +154,23 @@ function PANEL:Init( )
 		self.descPanel:SetItem( item, false )
 	end )
 
-	hook.Add( "PS2_ItemRemovedFromSlot", self, function( self, slotName )
-		self.descPanel:SelectionReset( )
+	hook.Add( "PS2_ItemRemovedFromSlot", self, function( self, slotName, item )
 		local slotPanel = self.slotLookup[slotName]
-		if IsValid( slotPanel ) then
+		if IsValid( slotPanel ) 
+			and IsValid( slotPanel.actualSlot )
+			and IsValid( slotPanel.actualSlot.itemStack )
+			and slotPanel.actualSlot.itemStack.items
+			and slotPanel.actualSlot.itemStack.items[1] 
+			and slotPanel.actualSlot.itemStack.items[1] == item
+		then
 			slotPanel:Clear( )
 		end
 	end )
 	hook.Add( "PS2_ItemAddedToSlot", self, function( self, slotName, item )
+		print("PS2_ItemAddedToSlot", slotName, item:GetPrintName())
 		local slotPanel = self.slotLookup[slotName]
 		if IsValid( slotPanel ) and item then
 			slotPanel:SetEquippedItem( item )
-			slotPanel:SelectItem( )
-			timer.Simple(0.5, function()
-				slotPanel:SelectItem()
-			end)
 		end
 	end )
 	hook.Add( "PS2_OnSettingsUpdate", self, function()

@@ -8,17 +8,25 @@ function PANEL:Init( )
 
 	self:SetMouseInputEnabled( false )
 
-	hook.Add( "PS2_InvItemIconSelected", self, function( self, itemIcon )
-		if itemIcon != self and self.Selected then
+	hook.Add( "PS2_InvItemIconSelected", self, function( _self, itemIcon, item )
+		local selected = self.Selected or ( self.stackPanel and self.stackPanel.Selected )
+		if itemIcon != self and selected then
 			self.Selected = false
+			self.stackPanel.Selected = false
 			self:OnDeselected( )
+		end
+	end )
+	hook.Add( "KInv_ItemsSplit", self, function( _self, info )
+		hook.Run( "PS2_InvItemIconSelected" )
+
+		if info.toSlot.itemStack.icon == self then
+			self:Select( )
 		end
 	end )
 end
 
 function PANEL:SetItem( item )
 	self.item = item
-	hook.Run( "PS2_InvItemIconSetItem", self, item )
 end
 
 function PANEL:DoRightClick()
@@ -30,23 +38,24 @@ function PANEL:PaintOver( w, h )
 		surface.SetDrawColor( Color( 150, 100, 100, 150 ) )
 		surface.DrawRect( 0, 0, w, h )
 	end
-	if self.Selected then
-		surface.SetDrawColor( self:GetSkin( ).Highlight )
-		surface.DrawOutlinedRect( 0, 0, w, h )
-	end
-	self:DrawSelections()
 end
 
 function PANEL:OnSelected( )
 end
 
 function PANEL:OnDeselected( )
-
 end
 
 function PANEL:Select( )
 	self.Selected = true
-	hook.Run( "PS2_InvItemIconSelected", self, self.item )
+	self.stackPanel.Selected = true
+
+	local item = self.item
+	if self.stackPanel then
+		item = self.stackPanel.items[1]
+	end
+
+	hook.Run( "PS2_InvItemIconSelected", self, item )
 	self:OnSelected( )
 end
 

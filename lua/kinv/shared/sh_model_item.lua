@@ -85,3 +85,7 @@ function Item:preSave()
 	end
 	return Promise.Resolve()
 end
+
+function Item:canStack(item)
+	return self.class.name == item.class.name
+end

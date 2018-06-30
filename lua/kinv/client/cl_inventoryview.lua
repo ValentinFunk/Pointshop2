@@ -42,7 +42,7 @@ function InventoryView:itemRemoved( inventoryId, itemId, resetSelection )
 	if not self.inventories[inventoryId] then
 		error( "Cannot remove item from inventory " .. inventoryId .. ": not cached on the client" )
 	end
-	
+
 	self.inventories[inventoryId]:removeItemById( itemId )
 	hook.Run( "KInv_ItemRemoved", self.inventories[inventoryId], itemId, resetSelection )
 	if IsValid( self.inventoryPanels[inventoryId] ) then

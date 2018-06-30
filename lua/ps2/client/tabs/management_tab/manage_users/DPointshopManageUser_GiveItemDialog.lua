@@ -14,8 +14,8 @@ function PANEL:Init( )
 	self.contentPanel:CallPopulateHook( "PS2_PopulateContent", true )
 	self.contentPanel:DockMargin( -3, 10, 0, 5 )
 	
-	hook.Add( "PS2_ItemIconSelected", self, function( self, panel, itemClass )
-		if not itemClass then 
+	hook.Add( "PS2_ItemIconSelected", self, function( _self, panel, itemClass )
+		if not itemClass then
 			return
 		end
 		self.lbl:SetText( "Selected Item: " .. itemClass.PrintName )

@@ -39,12 +39,16 @@ function PANEL:DropAction_Item( drops, bDoDrop, command, x, y )
 				continue
 			end
 
-            print(self)
-
 			local oldParent = v:GetParent( )
 
 			v = v:OnDrop( self )
-			self:DroppedOn( v )
+
+			if oldParent.OverrideItemDrop then
+				oldParent:OverrideItemDrop( v, self )
+			else
+				self:DroppedOn( v )
+			end
+
 			v.Hovered = false
 			self.Hovered = false
 
@@ -119,8 +123,8 @@ function PANEL:DroppedOn( panel )
 
 	local otherStack = panel
 
-	local didStack = false
 	--Stack all items from otherStack on myStack
+	local didStack = false
 	local item = otherStack:removeItem( ) --get an item
 	while item do
 		if not self:addItem( item ) then --try adding it
@@ -134,13 +138,25 @@ function PANEL:DroppedOn( panel )
 
 	--Swap Items
 	if not didStack then
-		local otherSlot = otherStack:GetParent( )
-		otherSlot.itemStack = self.itemStack
-		self.itemStack:SetParent( otherSlot )
+		if otherStack:GetParent().AcceptItems  then
+			-- Can't swap, ask the other item container to try and accept my items
+			otherStack:GetParent():AcceptItems( self.itemStack )
+			return
+		else
+			--swap
+			local otherSlot = otherStack:GetParent( )
+			otherSlot.itemStack = self.itemStack
+			self.itemStack:SetParent( otherSlot )
 
-		self.itemStack = otherStack
-		otherStack:SetParent( self )
-		otherSlot:OnModified( )
+			self.itemStack = otherStack
+			otherStack:SetParent( self )
+			otherSlot:OnModified( )
+		end
+	else
+		-- Select our stack to signify the change
+		otherStack.Selected = false
+		self.itemStack.Selected = true
+		-- self:OnModified( )
 	end
 end
 

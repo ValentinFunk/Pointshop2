@@ -58,6 +58,7 @@ end
 
 function ITEM:OnHolster( )
 	local ply = self:GetOwner( )
+	dp("on holster", ply)
 	timer.Simple( 0, function( )
 		hook.Run( "PlayerSetModel", ply )
 		hook.Run( "PS2_DoUpdatePreviewModel" )
