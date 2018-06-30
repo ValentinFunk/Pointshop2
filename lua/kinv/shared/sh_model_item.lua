@@ -46,7 +46,7 @@ function Item:postLoad( )
 	if cached then
 		for k, v in pairs( self ) do
 			if not cached[k] then
-				cached[k] = self
+				cached[k] = self[k]
 			end
 		end
 		Pointshop2.LogCacheEvent('ITEM_MODIFY', 'Item:postLoad', self.id)

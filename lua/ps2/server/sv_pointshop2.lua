@@ -278,5 +278,7 @@ function Pointshop2.BroadcastInfo( text )
 end
 
 function Pointshop2.LogCacheEvent( action, source, itemId, other )
-	file.Append('CacheLog.txt', util.TableToJSON({ action = action, source = source, itemId = itemId, other = other}) .. '\n')
+	if LibK.Debug then
+		file.Append('CacheLog.txt', util.TableToJSON({ action = action, source = source, itemId = itemId, other = other}) .. '\n')
+	end
 end
