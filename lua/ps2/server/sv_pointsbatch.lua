@@ -45,7 +45,7 @@ function PointsBatch:finish( )
 		end
 		return
 	end
-	
+
 	if table.Count( self.pointsChanges ) == 0 then
 		self.pointsChanges = nil
 		return
@@ -58,7 +58,7 @@ function PointsBatch:finish( )
 		if not IsValid( ply ) or not ply.kPlayerId then 
 			continue
 		end
-		
+
 		if not table.HasValue( ownerIds, ply.kPlayerId ) then
 			table.insert( ownerIds, tonumber( ply.kPlayerId ) )
 		end
@@ -66,19 +66,19 @@ function PointsBatch:finish( )
 	end
 	query = query .. table.concat( parts, " " )
 	query = query .. ' ELSE points END WHERE ownerId IN (' .. table.concat( ownerIds, ', ' ) .. ')'
-	
+
 	if #ownerIds == 0 then
 		self.pointsChanges = nil
 		return
 	end
-	
+
 	Pointshop2.DB.DoQuery( query )
 	:Done( function( )
 		for ply, points in pairs( self.pointsChanges ) do
 			if not ply.PS2_Wallet then
 				continue
 			end
-			
+
 			ply.PS2_Wallet[self.currencyType] = ply.PS2_Wallet[self.currencyType] + points
 			Pointshop2Controller:getInstance( ):broadcastWalletChanges( ply.PS2_Wallet )
 		end
