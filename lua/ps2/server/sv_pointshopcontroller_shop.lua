@@ -47,6 +47,7 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
     item.inventory_id = ply.PS2_Inventory.id
     item:preSave()
 
+    ply.PS2_Wallet[currencyType] = ply.PS2_Wallet[currencyType] - price
     local takePointsSql = Format("UPDATE ps2_wallet SET %s = %s - %s WHERE id = %i", currencyType, currencyType, Pointshop2.DB.SQLStr(price), ply.PS2_Wallet.id)
     return Promise.Resolve()
     :Then(function()
@@ -61,9 +62,14 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
                 item.id = id[1].id
                 return item
             end):Then(Promise.Resolve, function(err)
-                LibK.GLib.Error("Pointshop2Controller:internalBuyItem - Error running sql " + tostring(err))
+                if string.find( tostring(err), "Out of range value" ) then
+                    Pointshop2.DB.DoQuery("ROLLBACK")
+                    return Promise.Reject( "Not enough " .. currencyType )
+                end
+
+                LibK.GLib.Error("Pointshop2Controller:internalBuyItem - Error running sql " .. tostring(err))
                 return Pointshop2.DB.DoQuery("ROLLBACK"):Then( function()
-                    return Promise.Reject( "Error!" )
+                    return Promise.Reject( "Error buying item" )
                 end )
             end )
         else
@@ -84,7 +90,10 @@ function Pointshop2Controller:internalBuyItem( ply, itemClass, currencyType, pri
         item:OnPurchased( )
         self:startView( "Pointshop2View", "displayItemAddedNotify", ply, item )
         return item
-    end)
+    end, function(err)
+        self:sendWallet( ply )
+        return Promise.Reject(err)
+    end )
 end
 
 function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
@@ -112,7 +121,7 @@ function Pointshop2Controller:buyItem( ply, itemClassName, currencyType )
         return item
     end, function( errid, err )
         KLogf( 2, "Error saving item purchase: %s", err or errid )
-        return Promise.Reject( "Cannot buy item: " .. ( err or errid or "" ) )
+        return err
     end )
 end
 
@@ -157,8 +166,8 @@ function Pointshop2Controller:easyAddItem( ply, itemClassName, purchaseData, sup
     end )
 end
 
---[[ 
-    Whenever the DB has been updated to unequip an item 
+--[[
+    Whenever the DB has been updated to unequip an item
     this should be called to update the game state to reflect the change.
 ]]
 function Pointshop2Controller:handleItemUnequip( item, ply, slotName )
@@ -307,7 +316,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
     item.inventory_id = ply.PS2_Inventory.id
     slot.itemId = nil
     slot.Item = nil
-    
+
     local transaction = Pointshop2.DB.Transaction()
     transaction:begin()
     transaction:add(item:getSaveSql())
@@ -316,7 +325,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
     return transaction:commit( ):Then( function( )
         ply.PS2_Inventory:notifyItemAdded( item, { doSend = false } )
         self:handleItemUnequip( item, ply, slot.slotName )
-    end, function( err ) 
+    end, function( err )
         KLogf( 1, "UnequipItem - Error running sql. Err: %s", tostring( err ) )
         return Pointshop2.DB.DoQuery("ROLLBACK")
     end )
@@ -349,7 +358,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
     end
 
 
-    return Promise.Resolve():Then( function( ) 
+    return Promise.Resolve():Then( function( )
         -- Find or create slot entry in DB
         local slot = ply:PS2_GetSlot( slotName )
         if slot then
@@ -358,7 +367,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
             slot = Pointshop2.EquipmentSlot:new( )
             slot.ownerId = ply.kPlayerId
             slot.slotName = slotName
-            return slot:save( ):Then( function( slot ) 
+            return slot:save( ):Then( function( slot )
                 ply.PS2_Slots[slot.id] = slot
                 return slot
             end )
@@ -384,7 +393,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
                 self:handleItemUnequip( oldItem, ply, slot.slotName )
             end ):Then( function( )
                 return slot
-            end, function( err ) 
+            end, function( err )
                 transaction:rollback( )
                 return Promise.Reject( "Moving the old item failed " .. err )
             end )
@@ -400,9 +409,9 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
         transaction:begin( )
         transaction:add( slot:getSaveSql( ) )
         transaction:add( item:getSaveSql( ) )
-        return transaction:commit( ):Then( function( ) 
+        return transaction:commit( ):Then( function( )
             return slot
-        end ):Fail( function( err ) 
+        end ):Fail( function( err )
             transaction:rollback( )
         end )
     end )
