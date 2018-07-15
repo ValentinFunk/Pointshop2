@@ -19,7 +19,7 @@ local function addEditMenu( panel, itemClass )
 		menu:SetSkin( self:GetSkin( ).Name )
 
 		local btn = menu:AddOption( "Edit", function( )
-			local creatorControl = Pointshop2.GetCreatorControlForClass( itemClass )
+			local creatorControl, noModal = Pointshop2.GetCreatorControlForClass( itemClass )
 
 			local creator = vgui.Create( creatorControl )
 			creator:Center( )
@@ -27,6 +27,9 @@ local function addEditMenu( panel, itemClass )
 			creator:SetItemBase( itemClass.name )
 			creator:SetSkin( Pointshop2.Config.DermaSkin )
 			creator:EditItem( persistence, itemClass )
+			if not noModal then
+				creator:DoModal()
+			end
 		end )
 		btn:SetImage( "pointshop2/pencil54.png" )
 		btn.m_Image:SetSize( 16, 16 )

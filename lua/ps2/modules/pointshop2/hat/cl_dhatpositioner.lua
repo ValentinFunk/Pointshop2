@@ -2,7 +2,7 @@ local PANEL = {}
 local L = pace.LanguageString
 
 function PANEL:Init( )
-	self:SetSize( 1024, 768 )
+	self:SetSize( math.min(1024, ScrW()), math.min(768, ScrH()) )
 	self:SetSkin( Pointshop2.Config.DermaSkin )
 	
 	--[[local pnl = pace.CreatePanel( "properties", self )
