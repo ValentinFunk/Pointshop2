@@ -30,7 +30,7 @@ function PANEL:Init( )
 		local def = Deferred( )
 		http.Fetch( "https://static.pointshop2.com/dlc.lua", function( body, len, headers, code )
 			if code != 200 then
-				return def:Reject( 'HTTP Error - No internet or server is down' )
+				return def:Reject( "HTTP Error - No internet or server is down" )
 			end
 
 			local func = CompileString( body, "Pointshop 2", false )
@@ -76,7 +76,7 @@ function PANEL:Init( )
 			modPanel.label = vgui.Create( "DLabel", modPanel )
 			modPanel.label:DockMargin( 0, -5, 0, 8 )
 			modPanel.label:SetFont( self:GetSkin( ).fontName )
-			modPanel.label:SetText( ( realm == "Official" and "Official DLC for Pointshop 2. Click on the icons to open the gmodstore page. Guranteed support." or "Pointshop 2 Addons created by third-party developers. Support provided by the respective authors." ) )
+			modPanel.label:SetText( realm == "Official" and "Official DLC for Pointshop 2. Click on the icons to open the gmodstore page. Guranteed support." or "Pointshop 2 Addons created by third-party developers. Support provided by the respective authors." )
 			modPanel.label:SizeToContents( )
 			modPanel.label:Dock( TOP )
 
@@ -111,11 +111,11 @@ function PANEL:Init( )
 			return
 		end
 
-		local label = vgui.Create( "DLabel", self.panels )
-		label:SetText( "Failed to load the DLC List. Possible reason: " .. err .. "." )
-		label:SetFont( self:GetSkin( ).fontName )
-		label:SizeToContents( )
-		label:Dock( TOP )
+		local failLabel = vgui.Create( "DLabel", self.panels )
+		failLabel:SetText( "Failed to load the DLC List. Possible reason: " .. err .. "." )
+		failLabel:SetFont( self:GetSkin( ).fontName )
+		failLabel:SizeToContents( )
+		failLabel:Dock( TOP )
 	end )
 	derma.SkinHook( "Layout", "DPointshopManagementTab_DLC", self )
 end
