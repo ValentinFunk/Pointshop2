@@ -161,7 +161,7 @@ end
     Whenever the DB has been updated to unequip an item 
     this should be called to update the game state to reflect the change.
 ]]
-function Pointshop2Controller:handleItemUnequip( item, ply )
+function Pointshop2Controller:handleItemUnequip( item, ply, slotName )
     Pointshop2.DeactivateItemHooks( item )
     item:OnHolster( ply )
     hook.Run( "PS2_ItemRemovedFromSlot", slotName, item )
@@ -207,7 +207,7 @@ function Pointshop2Controller:sellItem( ply, itemId )
             transaction:add(Format("DELETE FROM kinv_items WHERE id = %i", item.id))
             transaction:add(Format("UPDATE ps2_wallet SET %s = %s + %i WHERE ownerId = %i", currencyType, currencyType, amount, ply.kPlayerId))
             return transaction:commit():Then(function()
-                self:handleItemUnequip( item, ply )
+                self:handleItemUnequip( item, ply, slot.slotName )
             end, function(err)
                 transaction:rollback()
                 LibK.GLib.Error(err)
@@ -244,7 +244,7 @@ function Pointshop2Controller:removeItemFromPlayer( ply, item )
             return ply.PS2_Inventory:removeItem( item ) --Unlink from inventory
         elseif slot then
             return slot:removeItem( item ):Then( function( )
-                self:handleItemUnequip( item, ply )
+                self:handleItemUnequip( item, ply, slot.slotName )
             end )
         else
             return Promise.Reject("Pointshop2Controller:removeItemFromPlayer - Item not in slot or inventory")
@@ -315,7 +315,7 @@ function Pointshop2Controller:unequipItem( ply, slotName )
 
     return transaction:commit( ):Then( function( )
         ply.PS2_Inventory:notifyItemAdded( item, { doSend = false } )
-        self:handleItemUnequip( item, ply )
+        self:handleItemUnequip( item, ply, slot.slotName )
     end, function( err ) 
         KLogf( 1, "UnequipItem - Error running sql. Err: %s", tostring( err ) )
         return Pointshop2.DB.DoQuery("ROLLBACK")
@@ -381,7 +381,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
 
             return transaction:commit( ):Then( function( )
                 ply.PS2_Inventory:notifyItemAdded( oldItem, { doSend = false } )
-                self:handleItemUnequip( oldItem, ply )
+                self:handleItemUnequip( oldItem, ply, slot.slotName )
             end ):Then( function( )
                 return slot
             end, function( err ) 

@@ -116,10 +116,6 @@ function Pointshop2Controller:handleItemEquip( ply, item, slotName )
 	end
 end
 
-function Pointshop2Controller:handleItemUnequip( ply, item, slotName )
-	
-end
-
 /*
 	After joining initialize all slots for the player
 	and equip Items he has in them
