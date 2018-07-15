@@ -188,13 +188,16 @@ function PANEL:RankInfoUpdated( rank, multiplier )
 			line = v
 		end
 	end
-
 	if not line then
 		line = self.tbl:AddLine( "", "", "" )
 	end
-	line.Columns[1]:SetText( rank.title )
-	line.Columns[2]:SetText( multiplier )
-	line.Columns[3]:SetText( multiplier * self.pointsPanel.control:GetValue( ) )
+
+	line:SetColumnText( 1, rank.title )
+	line:SetColumnText( 2, tonumber( multiplier ) )
+	line:SetSortValue( 2, tonumber( multiplier ) )
+	local value = multiplier * self.pointsPanel.control:GetValue( )
+	line:SetColumnText( 3, tonumber( value ) )
+	line:SetSortValue( 3, tonumber( value ) )
 
 	line.multiplier = multiplier
 	line.rank = rank
@@ -204,7 +207,9 @@ end
 
 function PANEL:OnPointsChanged( )
 	for k, line in pairs( self.tbl:GetLines( ) ) do
-		line.Columns[3]:SetText( line.multiplier * self.pointsPanel.control:GetValue( ) )
+		local value = line.multiplier * self.pointsPanel.control:GetValue( )
+		line:SetColumnText( 3, tonumber( value ) )
+		line:SetSortValue( 3, tonumber( value ) )
 	end
 end
 
