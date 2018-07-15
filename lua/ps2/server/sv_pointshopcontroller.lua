@@ -801,7 +801,7 @@ local function removeSingleItem( itemClass, refund )
 				local toRefund = LibK._( refundsByPlayer ):chain()
 					:entries( )
 					:filter( function( entry )
-						local ownerId, amountsToRefund = entry[0], entry[1]
+						local amountsToRefund = entry[1]
 						return amountsToRefund.points != 0 or amountsToRefund.premiumPoints != 0
 					end )
 					:value( )
@@ -810,9 +810,10 @@ local function removeSingleItem( itemClass, refund )
 				refundPromise = Promise.Map( toRefund, function( entry )
 					local ownerId, amountsToRefund = entry[0], entry[1]
 					return Pointshop2.DB.DoQuery( Format( 
-						"UPDATE ps2_wallet SET points = points + %i, premiumPoints = premiumPoints + %i",
+						"UPDATE ps2_wallet SET points = points + %i, premiumPoints = premiumPoints + %i WHERE ownerId = %i",
 						amountsToRefund.points,
-						amountsToRefund.premiumPoints
+						amountsToRefund.premiumPoints,
+						ownerId
 					) )
 				end )
 			end
