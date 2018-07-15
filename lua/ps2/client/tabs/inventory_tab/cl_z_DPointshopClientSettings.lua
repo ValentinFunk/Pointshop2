@@ -11,7 +11,7 @@ function PANEL:Init( )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
-	label:DockMargin( 0, 0, 0, 5 )
+	label:DockMargin( 0, 8, 0, 8 )
 	
 	self.scroll = vgui.Create( "DScrollPanel", self )
 	self.scroll:Dock( FILL )

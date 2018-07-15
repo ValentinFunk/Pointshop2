@@ -13,6 +13,7 @@ function PANEL:Init( )
 	label:SetText( "Select an item type" )
 	label:SetColor( color_white )
 	label:SetFont( self:GetSkin( ).TabFont )
+	label:DockMargin( 0, 8, 0, 8 )
 	label:SizeToContents( )
 	label:Dock( TOP )
 	

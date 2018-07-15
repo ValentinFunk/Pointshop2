@@ -31,6 +31,7 @@ function PANEL:Init( )
 	label:SetFont( self:GetSkin( ).TabFont )
 	label:SizeToContents( )
 	label:Dock( TOP )
+	label:DockMargin( 0, 8, 0, 8 )
 
 	self.panels = vgui.Create( "DPanel", scroll )
 	self.panels.Paint = function( a, w, h )
