@@ -71,6 +71,7 @@ function Inventory:notifyItemRemoved( itemId, opts )
 	end
 	if not itemKey then
 		LibK.GLib.Error("Inventory:notifyItemRemoved - Item not in inventory")
+		return
 	end
 
 	table.remove( self.Items, itemKey )

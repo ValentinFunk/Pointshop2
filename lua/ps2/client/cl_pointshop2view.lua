@@ -477,13 +477,19 @@ end
 
 -- Here only the itemId and slot name is sent since we already have the item cached
 function Pointshop2View:localPlayerEquipItem( itemId, slotName )
-	local item = KInventory.ITEMS[itemId]
-	if not item then
-		LibK.GLib.Error( "Got equip for uncached item" )
+	if getPromiseState( self.clPromises.SlotsReceived ) != "resolved" then
+		KLogf( 4, "Got equip information before Slots were received, deferring" )
 	end
 
-	LocalPlayer( ).PS2_Slots[slotName] = item
-	handleEquip( LocalPlayer(), item )
+	self.clPromises.SlotsReceived:Done( function( )
+		local item = KInventory.ITEMS[itemId]
+		if not item then
+			LibK.GLib.Error( "Got equip for uncached item" )
+		end
+
+		LocalPlayer( ).PS2_Slots[slotName] = item
+		handleEquip( LocalPlayer(), item )
+	end )
 end
 
 -- Here the full item is sent since we dont have it yet.
