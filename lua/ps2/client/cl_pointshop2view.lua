@@ -484,7 +484,7 @@ function Pointshop2View:localPlayerEquipItem( itemId, slotName )
 	self.clPromises.SlotsReceived:Done( function( )
 		local item = KInventory.ITEMS[itemId]
 		if not item then
-			LibK.GLib.Error( "Got equip for uncached item" )
+			GLib.Error( "Got equip for uncached item" )
 		end
 
 		LocalPlayer( ).PS2_Slots[slotName] = item
@@ -496,6 +496,11 @@ end
 function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	isRetry = isRetry or 0
 
+	-- Invalid
+	if not item then
+		GLib.Error( "Invalid item in playerEquipItem" )
+	end
+	
 	local ply
 	for _, v in pairs( player.GetAll( ) ) do
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
@@ -511,7 +516,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 		if isRetry < 10 then
 			KLogf( 4, "[PS2] Player equip on player that is not valid, trying again in 3s" )
 			timer.Simple( 3, function( )
-				self:playerEquipItem( kPlayerId, itemId, item, slotName, isRetry + 1 )
+				self:playerEquipItem( kPlayerId, item, isRetry + 1 )
 			end )
 		end
 		return
