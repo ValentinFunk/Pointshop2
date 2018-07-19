@@ -78,7 +78,7 @@ function Pointshop2View:toggleMenu( )
 	if self.fullyInitialized then
 		local startTime = SysTime( )
 		Pointshop2:ToggleMenu( )
-		KLogf( 5, "[Pointshop 2] Menu opened in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+		KLogf( 5, "[Pointshop 2] Menu opened in %s", GLib.FormatDuration( SysTime() - startTime ) )
 	else
 		self.loaderAttached = true
 
@@ -197,7 +197,7 @@ end
 function Pointshop2View:itemAddedToSlot( slotName, itemId, item )
 	item = item or KInventory.ITEMS[itemId]
 	if not item then
-		LibK.GLib.Error( "Invalid item added to slot message" )
+		GLib.Error( "Invalid item added to slot message" )
 	end
 
 	LocalPlayer().PS2_Slots[slotName] = item
@@ -249,11 +249,11 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		for _, v in pairs( self.itemProperties ) do
 			Pointshop2.LoadPersistentItem( v )
 		end
-		KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+		KLogf( 5, "[Pointshop 2] Persistent items loaded in %s", GLib.FormatDuration( SysTime() - startTime ) )
 
 		startTime = SysTime( )
 		local tree = Pointshop2.BuildTree( self.itemCategories, self.itemMappings )
-		KLogf( 5, "[Pointshop 2] Tree created in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+		KLogf( 5, "[Pointshop 2] Tree created in %s", GLib.FormatDuration( SysTime() - startTime ) )
 
 		self.categoryItemsTable = tree or {}
 
@@ -262,7 +262,7 @@ function Pointshop2View:receiveDynamicProperties( itemMappings, itemCategories, 
 		timer.Simple( 0.1, function( )
 			local startTimeDynamics = SysTime( )
 			hook.Call( "PS2_DynamicItemsUpdated" )
-			KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTimeDynamics ) )
+			KLogf( 5, "[Pointshop 2] Hook run in %s", GLib.FormatDuration( SysTime() - startTimeDynamics ) )
 		end )
 
 		resolveIfWaiting( self.clPromises.DynamicsReceived )
@@ -301,7 +301,7 @@ function Pointshop2View:updateItemPersistences( itemPersistences )
 	timer.Simple( 0.1, function( )
 		local startTime = SysTime( )
 		hook.Call( "PS2_DynamicItemsUpdated" )
-		KLogf( 5, "[Pointshop 2] Hook run in %s", LibK.GLib.FormatDuration( SysTime() - startTime ) )
+		KLogf( 5, "[Pointshop 2] Hook run in %s", GLib.FormatDuration( SysTime() - startTime ) )
 	end )
 end
 
@@ -315,7 +315,7 @@ function Pointshop2View:loadDynamics( versionHash )
 
 		local startTime = SysTime( )
 		local dynamicsDecoded = util.JSONToTable( data )[1]
-		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, LibK.GLib.FormatDuration( SysTime() - startTime ) )
+		KLogf( 5, "[PS2] Decoded dynamic info from resource (version %s) %s", versionHash, GLib.FormatDuration( SysTime() - startTime ) )
 
 		self.dynamicsDecoded = dynamicsDecoded
 
@@ -365,7 +365,7 @@ function Pointshop2View:getPersistenceForClass( itemClass )
 end
 
 function Pointshop2View:saveCategoryOrganization( categoryItemsTable )
-	LibK.GLib.Transfers.Send( 0, "Pointshop2.CategoryOrganization", util.TableToJSON( categoryItemsTable ) )
+	GLib.Transfers.Send( 0, "Pointshop2.CategoryOrganization", util.TableToJSON( categoryItemsTable ) )
 end
 
 function Pointshop2View:equipItem( item, slotName )
@@ -473,6 +473,8 @@ local function handleEquip( ply, item )
 		Pointshop2.ActivateItemHooks( item )
 		item:OnEquip( )
 	end
+	
+	hook.Run( "PS2_ItemEquipped", ply, item )
 end
 
 -- Here only the itemId and slot name is sent since we already have the item cached
@@ -539,7 +541,7 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 					dpt(itemInSlot)
 					dpt(item)
 					MsgC( Color(255, 0, 0), "Assertion Failure: Cached item does not match slot item\n" )
-					MsgC( Color(255, 0, 0), LibK.GLib.StackTrace (nil, 1) )
+					MsgC( Color(255, 0, 0), GLib.StackTrace (nil, 1) )
 				end
 				ply.PS2_Slots[slotName] = nil
 				hook.Run( "PS2_ItemRemovedFromSlot", slotName, item )	
@@ -554,11 +556,14 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 	if ply.PS2_EquippedItems then
 		ply.PS2_EquippedItems[itemId] = nil
 	end
+	
+	-- Hook
+	hook.Run( "PS2_ItemUnequipped", ply, item )
 end
 
 function Pointshop2View:loadOutfits( versionHash )
-	LibK.GLib.Resources.Resources["Pointshop2/outfits"] = nil --Force resource reset
-	LibK.GLib.Resources.Get( "Pointshop2", "outfits", versionHash, function( success, data )
+	GLib.Resources.Resources["Pointshop2/outfits"] = nil --Force resource reset
+	GLib.Resources.Get( "Pointshop2", "outfits", versionHash, function( success, data )
 		if not success then
 			KLogf( 2, "[PS2][ERROR] Couldn't load outfits resouce!" )
 			return
