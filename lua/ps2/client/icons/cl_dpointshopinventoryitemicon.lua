@@ -48,10 +48,10 @@ end
 
 function PANEL:Select( )
 	self.Selected = true
-	self.stackPanel.Selected = true
-
+	
 	local item = self.item
 	if self.stackPanel then
+		self.stackPanel.Selected = true
 		item = self.stackPanel.items[1]
 	end
 
