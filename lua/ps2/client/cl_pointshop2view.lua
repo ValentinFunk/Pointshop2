@@ -477,8 +477,8 @@ end
 
 -- Here only the itemId and slot name is sent since we already have the item cached
 function Pointshop2View:localPlayerEquipItem( itemId, slotName )
-	if getPromiseState( self.clPromises.SlotsReceived ) != "resolved" then
-		KLogf( 4, "Got equip information before Slots were received, deferring" )
+	if getPromiseState( self.clPromises.SlotsReceived ) != "done" then
+		KLogf( 4, "Got equip information before Slots were received, deferring %s", getPromiseState( self.clPromises.SlotsReceived ) )
 	end
 
 	self.clPromises.SlotsReceived:Done( function( )
@@ -537,7 +537,7 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 					MsgC( Color(255, 0, 0), LibK.GLib.StackTrace (nil, 1) )
 				end
 				ply.PS2_Slots[slotName] = nil
-				hook.Run( "PS2_ItemRemovedFromSlot", slotName, item )	
+				hook.Run( "PS2_ItemRemovedFromSlot", slotName, item )
 			end
 		end
 

@@ -313,16 +313,23 @@ function Pointshop2Controller:unequipItem( ply, slotName )
         return
     end
 
-    item.inventory_id = ply.PS2_Inventory.id
-    slot.itemId = nil
-    slot.Item = nil
+    ply._EquipLock = ply._EquipLock or Promise.Resolve()
+    if getPromiseState(ply._EquipLock) != "pending" then
+        ply._EquipLock = Promise.Resolve()
+    end
 
-    local transaction = Pointshop2.DB.Transaction()
-    transaction:begin()
-    transaction:add(item:getSaveSql())
-    transaction:add(slot:getSaveSql())
+    ply._EquipLock = ply._EquipLock:Then( function( )
+        item.inventory_id = ply.PS2_Inventory.id
+        slot.itemId = nil
+        slot.Item = nil
 
-    return transaction:commit( ):Then( function( )
+        local transaction = Pointshop2.DB.Transaction()
+        transaction:begin()
+        transaction:add(item:getSaveSql())
+        transaction:add(slot:getSaveSql())
+
+        return transaction:commit( )
+    end ):Then( function( )
         ply.PS2_Inventory:notifyItemAdded( item, { doSend = false } )
         self:handleItemUnequip( item, ply, slot.slotName )
     end, function( err )
@@ -352,13 +359,18 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
     end
 
     if not Pointshop2.IsItemValidForSlot( item, slotName ) then
-        KLogf( 3, "[Pointshop2][WARN] Player %s tried to equip item %i into slot %s (not valid for slot)", ply:Nick( ), itemId, slotName )
+        KLogf( 3, "[Pointshop2][WARN] Player %s tried to equip item %i into slot %s (not valid for slot)", ply:Nick( ), itemId, item, item:GetPrintName(), slotName )
         self:startView( "Pointshop2View", "displayError", ply, "Could not equip item: You can't put it into this slot." )
         return
     end
 
+    -- Make sure only one equip runs at a time
+    ply._EquipLock = ply._EquipLock or Promise.Resolve()
+    if getPromiseState(ply._EquipLock) != "pending" then
+        ply._EquipLock = Promise.Resolve()
+    end
 
-    return Promise.Resolve():Then( function( )
+    ply._EquipLock = ply._EquipLock:Then( function( )
         -- Find or create slot entry in DB
         local slot = ply:PS2_GetSlot( slotName )
         if slot then
@@ -368,6 +380,8 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
             slot.ownerId = ply.kPlayerId
             slot.slotName = slotName
             return slot:save( ):Then( function( slot )
+                KLogf(4, "Created slot" )
+                dpt(slot)
                 ply.PS2_Slots[slot.id] = slot
                 return slot
             end )
@@ -375,6 +389,10 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
     end ):Then( function( slot )
         -- Move the item that is in that slot atm back into the inventory
         if slot.itemId then
+            if slot.itemId == itemId then
+                return Promise.Reject( -1, "BAIL" )
+            end
+
             local transaction = Pointshop2.DB.Transaction( )
             transaction:begin( )
             local oldItem = KInventory.ITEMS[slot.itemId]
@@ -418,15 +436,18 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
     :Then( function( slot )
         item.owner = ply
 
-        -- Delay to next frame to clear stack
-        timer.Simple( 0, function( )
-            self:handleItemEquip( ply, item, slot.slotName )
-            ply.PS2_Inventory:notifyItemRemoved( item.id, { resetSelection = false } )
-        end )
+        self:handleItemEquip( ply, item, slot.slotName )
+        ply.PS2_Inventory:notifyItemRemoved( item.id, { resetSelection = false } )
     end )
-    :Fail( function( errid, err )
+    :Then( function() end, function( errid, err )
+        if errid == -1 then
+            return Promise.Resolve( )
+        end
+
         self:reportError( "Pointshop2View", ply, "Error equipping item", errid, err )
     end )
+
+    return ply._EquipLock
 end
 
 Pointshop2.DlcPacks = {}

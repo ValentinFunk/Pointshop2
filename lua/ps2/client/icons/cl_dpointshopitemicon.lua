@@ -33,7 +33,6 @@ function PANEL:Init( )
     --self.Label:SetFont( self:GetSkin( ).fontName )
 
     hook.Add( "PS2_ItemIconSelected", self, function( _self, itemIcon )
-    	print( "PS2_ItemIconSelected", itemIcon, self, self.Selected )
         if itemIcon != self and self.Selected then
             self.Selected = false
             self:OnDeselected( )
@@ -58,7 +57,7 @@ function PANEL:SetRarity(rarityInfo, hack)
         self:DockPadding( 1, 1, 1, 1 )
     end
 
-    -- Counting the perceptive luminance - human eye favors green color... 
+    -- Counting the perceptive luminance - human eye favors green color...
     local a = 1 - ( 0.299 * rc.r + 0.587 * rc.g + 0.114 * rc.b) / 255;
 
     if (a < 0.5) then
