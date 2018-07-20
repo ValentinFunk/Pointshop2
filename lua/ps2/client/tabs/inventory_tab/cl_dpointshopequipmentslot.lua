@@ -41,7 +41,7 @@ function PANEL:DropAction_EquipmentItem( drops, bDoDrop, command, x, y )
 	self:DroppedOn( dropPanel )
 
 	oldParent:OnModified( )
-	self:OnModified( )
+	-- self:OnModified( )
 end
 
 -- Called from item slots whenever the basic transfer will not work and a swap is needed
