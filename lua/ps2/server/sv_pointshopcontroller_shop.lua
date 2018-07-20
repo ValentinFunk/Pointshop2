@@ -359,7 +359,7 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
     end
 
     if not Pointshop2.IsItemValidForSlot( item, slotName ) then
-        KLogf( 3, "[Pointshop2][WARN] Player %s tried to equip item %i into slot %s (not valid for slot)", ply:Nick( ), itemId, item, item:GetPrintName(), slotName )
+        KLogf( 3, "[Pointshop2][WARN] Player %s tried to equip item %i into slot %s (not valid for slot)", ply:Nick( ), itemId, item:GetPrintName(), slotName )
         self:startView( "Pointshop2View", "displayError", ply, "Could not equip item: You can't put it into this slot." )
         return
     end
