@@ -69,6 +69,19 @@ function PANEL:Init( )
 	self.bottomPnl:DockPadding( 5, 5, 5, 5 )
 	Derma_Hook( self.bottomPnl, "Paint", "Paint", "InnerPanel" )
 
+    self.usageBar = vgui.Create( "DPanel", self.leftPanel )
+    self.usageBar:Dock( TOP )
+    self.usageBar:SetTall( 5 )
+	self.usageBar:DockMargin( 0, 0, 0, 8 )
+    function self.usageBar:Paint( w, h )
+        surface.SetDrawColor( self:GetSkin().InnerPanel )
+        surface.DrawRect( 0, 0, w, h )
+
+        local percUsed = table.Count( LocalPlayer().PS2_Inventory:getItems() ) / LocalPlayer().PS2_Inventory.numSlots
+        surface.SetDrawColor( self:GetSkin().Highlight )
+        surface.DrawRect( 0, 0, w * percUsed, h )
+    end
+
 	self.sendPointsBtn = vgui.Create( "DButton", self.bottomPnl )
 	self.sendPointsBtn:Dock( FILL )
 	self.sendPointsBtn:SetText( "Send Points" )
@@ -141,7 +154,7 @@ function PANEL:Init( )
 	self.descPanel = vgui.Create( "DPointshopItemDescription", self.itemDescPanel )
 	self.descPanel:Dock( TOP )
 
-	hook.Add( "PS2_InvItemIconSelected", self, function( self, panel, item )
+	hook.Add( "PS2_InvItemIconSelected", self, function( self, panel, item, stack )
 		if not IsValid( panel ) or not item then
 			self.descPanel:SelectionReset( )
 			return
@@ -151,16 +164,16 @@ function PANEL:Init( )
 			self.descPanel = vgui.Create( item.class:GetPointshopDescriptionControl( ), self.itemDescPanel )
 			self.descPanel:Dock( TOP )
 		end
-		self.descPanel:SetItem( item, false )
+		self.descPanel:SetItem( item, false, stack )
 	end )
 
 	hook.Add( "PS2_ItemRemovedFromSlot", self, function( self, slotName, item )
 		local slotPanel = self.slotLookup[slotName]
-		if IsValid( slotPanel ) 
+		if IsValid( slotPanel )
 			and IsValid( slotPanel.actualSlot )
 			and IsValid( slotPanel.actualSlot.itemStack )
 			and slotPanel.actualSlot.itemStack.items
-			and slotPanel.actualSlot.itemStack.items[1] 
+			and slotPanel.actualSlot.itemStack.items[1]
 			and slotPanel.actualSlot.itemStack.items[1] == item
 		then
 			slotPanel:Clear( )
