@@ -194,10 +194,10 @@ function PANEL:Think( )
 		end*/
 		if not IsValid( self.itemCountLabel ) then
 			self.itemCountLabel = vgui.Create( "DLabel", self )
-			self.itemCountLabel:DockMargin( 8, 5, 5, 5 )
+			self.itemCountLabel:DockMargin( 4, 0, 0, 1 )
 			self.itemCountLabel:Dock( BOTTOM )
 			self.itemCountLabel:SetContentAlignment( 6 )
-			self.itemCountLabel:SetColor( color_bright )
+			self.itemCountLabel:SetColor( color_white )
 			self.itemCountLabel:SetFont( self:GetSkin().ButtonFont )
 			function self.itemCountLabel.Think( )
 				if #self.items > 1 then
@@ -215,7 +215,7 @@ function PANEL:Think( )
 	end
 end
 
-function PANEL:PaintOver( ) 
+function PANEL:PaintOver( )
 	if self.itemCountLabel then
 		self.itemCountLabel:PaintManual()
 	end
