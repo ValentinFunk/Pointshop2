@@ -187,25 +187,28 @@ function Pointshop2Controller:handleItemUnequip( item, ply, slotName )
     self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 end
 
-function Pointshop2Controller:sellItem( ply, itemId )
-    local item = KInventory.ITEMS[itemId]
+local function isValidSale( ply, item )
     if not item then
-        KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), itemId )
+        KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), item.id )
         return Promise.Reject( 0, "Invalid Data" )
     end
 
     if not item:CanBeSold( ) then
-        KLogf( 3, "[WARN] Player %s tried to sell not sellable item %i", ply:Nick( ), itemId )
+        KLogf( 3, "[WARN] Player %s tried to sell not sellable item %i", ply:Nick( ), item.id )
         return Promise.Reject( 0, "Invalid Data" )
     end
 
     if not Pointshop2.PlayerOwnsItem( ply, item ) then
-        KLogf( 3, "[WARN] Player %s tried to sell item he doesn't own", ply:Nick(), itemId )
+        KLogf( 3, "[WARN] Player %s tried to sell item he doesn't own", ply:Nick(), item.id )
         return Promise.Reject( 0, "Couldn't sell item: You don't own this item." )
     end
 
+    return Promise.Resolve( )
+end
 
-    return Promise.Resolve():Then(function()
+function Pointshop2Controller:sellItem( ply, itemId )
+    local item = KInventory.ITEMS[itemId]
+    return isValidSale( ply, item ):Then(function()
         local amount, currencyType = item:GetSellPrice( )
 
         local slot = Pointshop2.GetSlotContainingItemId( ply, item.id )
@@ -235,10 +238,59 @@ function Pointshop2Controller:sellItem( ply, itemId )
         end
     end):Then(function()
         KInventory.ITEMS[itemId] = nil
-        Pointshop2.LogCacheEvent('REMOVE', 'SellItem', item.id)
+        Pointshop2.LogCacheEvent( "REMOVE", "SellItem", item.id)
         item:OnSold( )
         KLogf( 4, "Player %s sold an item", ply:Nick( ) )
-        hook.Run( "PS2_SoldItem", ply )
+        return self:sendWallet( ply )
+    end)
+end
+
+function Pointshop2Controller:sellItems( ply, itemIds )
+    local validSale = Promise.Resolve( )
+    local items = { }
+    for k, itemId in pairs( itemIds ) do
+        local item = KInventory.ITEMS[itemId]
+        table.insert( items, item )
+        validSale = validSale:Then( function()
+            if Pointshop2.GetSlotContainingItemId( ply, item.id ) then
+                return Promise.Reject( 0, "Items from slots cannot be sold using this method" )
+            end
+            return isValidSale( ply, item )
+        end )
+    end
+
+    return validSale:Then(function()
+        local saleAmounts = {
+            points = 0,
+            premiumPoints = 0
+        }
+        for k, item in pairs( items ) do
+            local amount, currencyType = item:GetSellPrice( )
+            saleAmounts[currencyType] = saleAmounts[currencyType] + amount
+        end
+
+        local transaction = Pointshop2.DB.Transaction()
+        transaction:begin()
+        local idsCommaSeparated = LibK._(items):chain():pluck("id"):join(","):value()
+        transaction:add(Format("DELETE FROM kinv_items WHERE id IN (%s)", idsCommaSeparated))
+        transaction:add(Format("UPDATE ps2_wallet SET points = points + %i, premiumPoints = premiumPoints + %i WHERE ownerId = %i", saleAmounts.points, saleAmounts.premiumPoints, ply.kPlayerId))
+        return transaction:commit():Then(function()
+            for k, itemId in pairs( itemIds ) do
+                ply.PS2_Inventory:notifyItemRemoved( itemId )
+            end
+        end, function( err )
+            transaction:rollback()
+            LibK.GLib.Error(err)
+        end )
+    end):Then(function()
+        for k, item in pairs( items ) do
+            KInventory.ITEMS[item.id] = nil
+            Pointshop2.LogCacheEvent("REMOVE", "SellItem", item.id)
+            item:OnSold( )
+        end
+
+        local idsCommaSeparated = LibK._(items):chain():pluck("id"):join(","):value()
+        KLogf( 4, "Player %s sold an item stack %s", ply:Nick( ), idsCommaSeparated )
         return self:sendWallet( ply )
     end)
 end

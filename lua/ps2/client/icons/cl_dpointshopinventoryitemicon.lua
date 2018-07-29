@@ -48,14 +48,14 @@ end
 
 function PANEL:Select( )
 	self.Selected = true
-	
+
 	local item = self.item
 	if self.stackPanel then
 		self.stackPanel.Selected = true
 		item = self.stackPanel.items[1]
 	end
 
-	hook.Run( "PS2_InvItemIconSelected", self, item )
+	hook.Run( "PS2_InvItemIconSelected", self, item, self.stackPanel )
 	self:OnSelected( )
 end
 
