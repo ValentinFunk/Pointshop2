@@ -473,7 +473,7 @@ local function handleEquip( ply, item )
 		Pointshop2.ActivateItemHooks( item )
 		item:OnEquip( )
 	end
-	
+
 	hook.Run( "PS2_ItemEquipped", ply, item )
 end
 
@@ -502,7 +502,7 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 	if not item then
 		GLib.Error( "Invalid item in playerEquipItem" )
 	end
-	
+
 	local ply
 	for _, v in pairs( player.GetAll( ) ) do
 		if tonumber( v:GetNWInt( "KPlayerId" ) ) == tonumber( kPlayerId ) then
@@ -526,6 +526,13 @@ function Pointshop2View:playerEquipItem( kPlayerId, item, isRetry )
 
 	KInventory.ITEMS[item.id] = item
 	handleEquip( ply, item )
+end
+
+-- Called to update slots when player moves an item from one slot to another.
+-- We don't need to update equip hooks in this case. slotName is the slot
+-- the item was moved out of.
+function Pointshop2View:itemSlotSwapped( slotName )
+	LocalPlayer( ).PS2_Slots[slotName] = nil
 end
 
 function Pointshop2View:playerUnequipItem( ply, itemId )
@@ -556,7 +563,7 @@ function Pointshop2View:playerUnequipItem( ply, itemId )
 	if ply.PS2_EquippedItems then
 		ply.PS2_EquippedItems[itemId] = nil
 	end
-	
+
 	-- Hook
 	hook.Run( "PS2_ItemUnequipped", ply, item )
 end

@@ -1,7 +1,7 @@
 local Player = FindMetaTable( "Player" )
 
 --TODO
-function Player:PS2_HasItemEquipped( item ) 
+function Player:PS2_HasItemEquipped( item )
 	if CLIENT then
 		for slotName, eqItem in pairs( self.PS2_Slots ) do
 			if eqItem.id == item.id then
@@ -12,7 +12,7 @@ function Player:PS2_HasItemEquipped( item )
 	end
 	for k, slot in pairs( self.PS2_Slots ) do
 		if slot.itemId == item.id then
-			return true
+			return slot
 		end
 	end
 end
@@ -42,9 +42,9 @@ end
 
 function Player:PS2_HasInventorySpace( slots )
 	if not self.PS2_Inventory then
-		error( "Inventory of " .. tostring( self ) .. " not cached" )	
+		error( "Inventory of " .. tostring( self ) .. " not cached" )
 	end
-	
+
 	local slotsUsed = table.Count( self.PS2_Inventory:getItems() )
 	local slotsTotal = self.PS2_Inventory:getNumSlots( )
 	return slotsTotal - slotsUsed - slots >= 0
@@ -69,7 +69,7 @@ function Player:PS2_CanAfford( itemClass )
 		 return true
 	end
 
-	if price.premiumPoints and wallet.premiumPoints >= price.premiumPoints then 
+	if price.premiumPoints and wallet.premiumPoints >= price.premiumPoints then
 		return true
 	end
 
@@ -94,7 +94,7 @@ function Player:PS2_CanBuyItem( itemClass )
 	end
 
 	local tree
-	if SERVER then 
+	if SERVER then
 		tree = Pointshop2Controller:getInstance().tree
 	else
 		tree = Pointshop2View:getInstance().categoryItemsTable

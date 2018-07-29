@@ -301,8 +301,8 @@ function Pointshop2Controller:unequipItem( ply, slotName )
     end
 
     if not slot.itemId then
-        KLogf( 3, "[ERROR] Player %s tried to unequipItem empty slot %s", ply:Nick( ), slotName )
-        self:startView( "Pointshop2View", "displayError", ply, "Could not unequip item, " .. slotName .. " is empty!" )
+        KLogf( 4, "[ERROR] Player %s tried to unequipItem empty slot %s", ply:Nick( ), slotName )
+        -- self:startView( "Pointshop2View", "displayError", ply, "Could not unequip item, " .. slotName .. " is empty!" )
         return
     end
 
@@ -374,70 +374,82 @@ function Pointshop2Controller:equipItem( ply, itemId, slotName )
         -- Find or create slot entry in DB
         local slot = ply:PS2_GetSlot( slotName )
         if slot then
+            -- Move the item that is in that slot atm back into the inventory
+            if slot.itemId then
+                -- Doesn't make sense to move an item from a slot into the same slot
+                if slot.itemId == itemId then
+                    return Promise.Reject( -1, "BAIL" )
+                end
+
+                local transaction = Pointshop2.DB.Transaction( )
+                transaction:begin( )
+                local oldItem = KInventory.ITEMS[slot.itemId]
+                if not oldItem then
+                    KLogf( 2, "[ERROR] Unsynced item %i in slot %s", slot.itemId, slot.slotName )
+                end
+
+                oldItem.inventory_id = ply.PS2_Inventory.id
+                slot.itemId = nil
+                slot.Item = nil
+                transaction:add( oldItem:getSaveSql( ) )
+                transaction:add( slot:getSaveSql( ) )
+
+                return transaction:commit( ):Then( function( )
+                    ply.PS2_Inventory:notifyItemAdded( oldItem, { doSend = false } )
+                    self:handleItemUnequip( oldItem, ply, slot.slotName )
+                end ):Then( function( )
+                    return slot
+                end, function( err )
+                    transaction:rollback( )
+                    return Promise.Reject( "Moving the old item failed " .. err )
+                end )
+            end
+
             return slot
         else
-            slot = Pointshop2.EquipmentSlot:new( )
-            slot.ownerId = ply.kPlayerId
-            slot.slotName = slotName
-            return slot:save( ):Then( function( slot )
+            -- Create a slot entry
+            local newSlot = Pointshop2.EquipmentSlot:new( )
+            newSlot.ownerId = ply.kPlayerId
+            newSlot.slotName = slotName
+            return newSlot:save( ):Then( function( )
                 KLogf(4, "Created slot" )
-                dpt(slot)
-                ply.PS2_Slots[slot.id] = slot
-                return slot
+                dpt( newSlot )
+                ply.PS2_Slots[newSlot.id] = newSlot
+                return newSlot
             end )
         end
     end ):Then( function( slot )
-        -- Move the item that is in that slot atm back into the inventory
-        if slot.itemId then
-            if slot.itemId == itemId then
-                return Promise.Reject( -1, "BAIL" )
-            end
-
-            local transaction = Pointshop2.DB.Transaction( )
-            transaction:begin( )
-            local oldItem = KInventory.ITEMS[slot.itemId]
-            if not oldItem then
-                KLogf( 2, "[ERROR] Unsynced item %i in slot %s", slot.itemId, slot.slotName )
-            end
-
-            oldItem.inventory_id = ply.PS2_Inventory.id
-            slot.itemId = nil
-            slot.Item = nil
-            transaction:add( oldItem:getSaveSql( ) )
-            transaction:add( slot:getSaveSql( ) )
-
-            return transaction:commit( ):Then( function( )
-                ply.PS2_Inventory:notifyItemAdded( oldItem, { doSend = false } )
-                self:handleItemUnequip( oldItem, ply, slot.slotName )
-            end ):Then( function( )
-                return slot
-            end, function( err )
-                transaction:rollback( )
-                return Promise.Reject( "Moving the old item failed " .. err )
-            end )
-        end
-
-        return slot
-    end ):Then( function( slot )
-        -- Move the new item into the slot
+        local movingFromSlot = ply:PS2_HasItemEquipped( item )
+        -- Move the new item into the slot and remove the item from inventory
+        -- or the slot where it is currently in
         slot.itemId = item.id
         slot.Item = item
-        item.inventory_id = nil
         local transaction = Pointshop2.DB.Transaction( )
         transaction:begin( )
+        if movingFromSlot then
+            movingFromSlot.Item = nil
+            movingFromSlot.itemId = nil
+            transaction:add( movingFromSlot:getSaveSql( ) )
+        else
+            item.inventory_id = nil
+            transaction:add( item:getSaveSql( ) )
+        end
         transaction:add( slot:getSaveSql( ) )
-        transaction:add( item:getSaveSql( ) )
         return transaction:commit( ):Then( function( )
-            return slot
+            return slot, movingFromSlot
         end ):Fail( function( err )
             transaction:rollback( )
         end )
     end )
-    :Then( function( slot )
+    :Then( function( slot, movingFromSlot )
         item.owner = ply
 
         self:handleItemEquip( ply, item, slot.slotName )
-        ply.PS2_Inventory:notifyItemRemoved( item.id, { resetSelection = false } )
+        if movingFromSlot then
+            self:startView( "Pointshop2View", "itemSlotSwapped", ply, movingFromSlot.slotName )
+        else
+            ply.PS2_Inventory:notifyItemRemoved( item.id, { resetSelection = false } )
+        end
     end )
     :Then( function() end, function( errid, err )
         if errid == -1 then
