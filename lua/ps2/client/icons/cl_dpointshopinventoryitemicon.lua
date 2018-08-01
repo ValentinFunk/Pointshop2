@@ -12,7 +12,9 @@ function PANEL:Init( )
 		local selected = self.Selected or ( self.stackPanel and self.stackPanel.Selected )
 		if itemIcon != self and selected then
 			self.Selected = false
-			self.stackPanel.Selected = false
+			if self.stackPanel then
+				self.stackPanel.Selected = false
+			end
 			self:OnDeselected( )
 		end
 	end )
