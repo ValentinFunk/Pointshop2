@@ -32,12 +32,14 @@ function PANEL:Init( )
     end
     local itemDesc = self
     function self.buttonsPanel:Think( )
-        if IsValid( itemDesc.stack ) and table.Count( itemDesc.stack.items ) > 1 and not itemDesc.noButtons then
+    -- print( "Stack", IsValid( itemDesc.stack ), "num",IsValid( itemDesc.stack ) and  #itemDesc.stack.items > 1, "no btn", itemDesc.noButtons)
+        if IsValid( itemDesc.stack ) and #itemDesc.stack.items > 1 and not itemDesc.noButtons then
+            --print("stack > 1", IsValid( self.sellStackBtn ))
             if not IsValid( self.sellStackBtn ) then
                 self:AddSellStackButton( itemDesc.stack )
             end
         elseif IsValid( self.sellStackBtn ) then
-            self.sellStackBtn:Remove()
+            self.sellStackBtn:Remove( )
         end
     end
 
@@ -313,6 +315,7 @@ end
 
 function PANEL:SetItemClass( itemClass, noBuyPanel )
     self.item = nil
+    self.stack = nil
     self.itemClass = itemClass
 
     self.titleLabel:SetText( itemClass.PrintName )
@@ -331,10 +334,10 @@ function PANEL:SetItemClass( itemClass, noBuyPanel )
     hook.Run( "PS2_ItemDescription_SetItemClass", self, itemClass )
 end
 
-function PANEL:SetItem( item, noButtons, stack )
+function PANEL:SetItem( item, noButtons )
     self:SetItemClass( item.class, true )
+    self.stack = nil
     self.item = item
-    self.stack = stack
     self.noButtons = noButtons
 
     self.titleLabel:SetText( item:GetPrintName( ) )
@@ -347,7 +350,11 @@ function PANEL:SetItem( item, noButtons, stack )
         self.buttonsPanel:AddSellButton( item )
     end
 
-    hook.Run( "PS2_ItemDescription_SetItem", self, item, stack )
+    hook.Run( "PS2_ItemDescription_SetItem", self, item )
+end
+
+function PANEL:SetStack( stack )
+    self.stack = stack
 end
 
 function PANEL:PerformLayout( )
