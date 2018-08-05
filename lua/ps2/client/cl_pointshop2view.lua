@@ -217,7 +217,7 @@ function Pointshop2View:startSellItems( itemIds )
     if Pointshop2.ClientSettings.GetSetting( "BasicSettings.AutoconfirmSale" ) then
         def:Resolve( true )
     else
-        Derma_Query( "Are you sure you want to sell " .. #itemIds .. "items?", "Selling multiple items", "Yes", function()
+        Derma_Query( "Are you sure you want to sell " .. #itemIds .. " items?", "Selling multiple items", "Yes", function()
             def:Resolve( true )
         end, "No", function()
             def:Resolve( false )
