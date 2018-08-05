@@ -214,7 +214,9 @@ end
 
 function Pointshop2View:startSellItems( itemIds )
     local def = Deferred()
-    if Pointshop2.ClientSettings.GetSetting( "BasicSettings.AutoconfirmSale" ) then
+
+    local forceConfirm = hook.Run( "PS2_ShouldForceItemSellConfirmation", itemIds )
+    if Pointshop2.ClientSettings.GetSetting( "BasicSettings.AutoconfirmSale" ) and not forceConfirm then
         def:Resolve( true )
     else
         Derma_Query( "Are you sure you want to sell " .. #itemIds .. " items?", "Selling multiple items", "Yes", function()
@@ -229,6 +231,7 @@ function Pointshop2View:startSellItems( itemIds )
             return self:controllerTransaction( "sellItems", itemIds ):Done( function( )
                 --Reset selection
                 hook.Run( "PS2_InvItemIconSelected" )
+                hook.Run( "PS2_AfterItemsSold", itemIds )
             end )
         end
     end ):Fail( function( err )
@@ -237,8 +240,11 @@ function Pointshop2View:startSellItems( itemIds )
 end
 
 function Pointshop2View:startSellItem( item )
+    local itemIds = { item.id }
+    local forceConfirm = hook.Run( "PS2_ShouldForceItemSellConfirmation", itemIds )
+
     local def = Deferred()
-    if Pointshop2.ClientSettings.GetSetting( "BasicSettings.AutoconfirmSale" ) then
+    if Pointshop2.ClientSettings.GetSetting( "BasicSettings.AutoconfirmSale" ) and not forceConfirm then
         def:Resolve( true )
     else
         Derma_Query( "Are you sure you want to sell " .. item:GetPrintName() .. "?", "Selling an item", "Yes", function()
@@ -250,7 +256,9 @@ function Pointshop2View:startSellItem( item )
 
     return def:Promise( ):Then( function( confirmed )
         if confirmed then
-            return self:controllerTransaction( "sellItem", item.id )
+            return self:controllerTransaction( "sellItem", item.id ):Done( function( )
+                hook.Run( "PS2_AfterItemsSold", itemIds )
+            end )
         end
     end ):Fail( function( err )
         self:displayError( "Error selling the item: " .. err )
