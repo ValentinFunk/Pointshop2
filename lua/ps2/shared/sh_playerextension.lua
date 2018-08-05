@@ -93,6 +93,11 @@ function Player:PS2_CanBuyItem( itemClass )
 		return false, "You are not the correct rank", "Wrong Rank"
 	end
 
+    local canBuy, message = hook.Run( "PS2_CanBuyItem", ply, itemClass )
+    if not canBuy then
+        return false, message
+    end
+
 	local tree
 	if SERVER then
 		tree = Pointshop2Controller:getInstance().tree
