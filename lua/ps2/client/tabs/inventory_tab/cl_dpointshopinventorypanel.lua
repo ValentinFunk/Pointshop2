@@ -49,15 +49,25 @@ function PANEL:Init( )
         end
     end )
     hook.Add( "KInv_ItemRemoved", self, function( self, inventory, itemId, resetSelection )
-        print("KInv_ItemRemoved", resetSelection and "Reset")
         if inventory.id != LocalPlayer( ).PS2_Inventory.id then
             return
         end
 
-        print( self.descPanel.item, self.descPanel.item.id, itemId )
-        if self.descPanel.item and self.descPanel.item.id == itemId and resetSelection then
-            self.descPanel:SelectionReset( )
+        if IsValid( self.descPanel ) then
+            local stack = self.descPanel.stack
+            local stackItems = IsValid( stack ) and stack.items or { }
+            local nextItem = LibK._.find( stackItems, function( stackItem )
+                return stackItem.id != itemId
+            end )
+
+            if nextItem then
+                self.descPanel:SetItem( nextItem, false )
+                self.descPanel:SetStack( stack )
+            elseif self.descPanel.item and self.descPanel.item.id == itemId and resetSelection then
+                self.descPanel:SelectionReset( )
+            end
         end
+
         self.invPanel:itemRemoved( itemId )
     end )
 
@@ -182,7 +192,6 @@ function PANEL:Init( )
         end
     end )
     hook.Add( "PS2_ItemAddedToSlot", self, function( self, slotName, item )
-        print("PS2_ItemAddedToSlot", slotName, item:GetPrintName())
         local slotPanel = self.slotLookup[slotName]
         if IsValid( slotPanel ) and item then
             slotPanel:SetEquippedItem( item )

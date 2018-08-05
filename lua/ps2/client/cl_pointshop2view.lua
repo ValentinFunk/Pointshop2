@@ -250,11 +250,7 @@ function Pointshop2View:startSellItem( item )
 
     return def:Promise( ):Then( function( confirmed )
         if confirmed then
-            return self:controllerTransaction( "sellItem", item.id ):Done( function( )
-                --TODO: Sound
-                --Reset selection
-                hook.Run( "PS2_InvItemIconSelected" )
-            end )
+            return self:controllerTransaction( "sellItem", item.id )
         end
     end ):Fail( function( err )
         self:displayError( "Error selling the item: " .. err )

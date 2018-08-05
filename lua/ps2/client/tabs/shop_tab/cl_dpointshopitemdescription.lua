@@ -32,9 +32,7 @@ function PANEL:Init( )
     end
     local itemDesc = self
     function self.buttonsPanel:Think( )
-    -- print( "Stack", IsValid( itemDesc.stack ), "num",IsValid( itemDesc.stack ) and  #itemDesc.stack.items > 1, "no btn", itemDesc.noButtons)
         if IsValid( itemDesc.stack ) and #itemDesc.stack.items > 1 and not itemDesc.noButtons then
-            --print("stack > 1", IsValid( self.sellStackBtn ))
             if not IsValid( self.sellStackBtn ) then
                 self:AddSellStackButton( itemDesc.stack )
             end
@@ -305,6 +303,7 @@ function PANEL:SelectionReset( )
     self.titleLabel:SizeToContents( )
     self.description:SetText( "Please Select an Item" )
     self.buttonsPanel:Reset( )
+    self.stack = nil
 
     if self.restrictionsPanel then
         self.restrictionsPanel:Remove( )

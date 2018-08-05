@@ -10,6 +10,7 @@ ITEM.category = "Misc"
 ITEM.material = "pointshop2/dollar103.png"
 ITEM.currencyType = "points"
 ITEM.amount = 100
+ITEM.stackCount = 8
 
 function ITEM:initialize( id )
 	KInventory.Items.base_pointshop_item.initialize( self, id )
