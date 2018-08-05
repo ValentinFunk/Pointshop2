@@ -184,7 +184,8 @@ function Pointshop2Controller:handleItemUnequip( item, ply, slotName )
             ply.PS2_Slots[slotId] = nil
         end
     end
-    self:startView( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
+
+    self:startViewWhenValid( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
 end
 
 local function isValidSale( ply, item )
