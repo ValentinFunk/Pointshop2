@@ -94,7 +94,7 @@ function Player:PS2_CanBuyItem( itemClass )
 	end
 
     local canBuy, message = hook.Run( "PS2_CanBuyItem", ply, itemClass )
-    if not canBuy then
+    if canBuy == false then
         return false, message
     end
 
