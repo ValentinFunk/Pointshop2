@@ -93,7 +93,7 @@ function Player:PS2_CanBuyItem( itemClass )
 		return false, "You are not the correct rank", "Wrong Rank"
 	end
 
-    local canBuy, message, short = hook.Run( "PS2_CanBuyItem", ply, itemClass )
+    local canBuy, message, short = hook.Run( "PS2_CanBuyItem", self, itemClass )
     if canBuy == false then
         return false, message, short
     end
