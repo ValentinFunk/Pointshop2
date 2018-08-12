@@ -184,13 +184,22 @@ function Pointshop2Controller:handleItemUnequip( item, ply, slotName )
             ply.PS2_Slots[slotId] = nil
         end
     end
-
-    self:startViewWhenValid( "Pointshop2View", "playerUnequipItem", player.GetAll( ), ply, item.id )
+    
+    local players = {}
+    for k, v in pairs( player.GetAll() ) do
+        if getPromiseState( v.fullyLoadedPromise ) != "resolved" then
+            continue
+        end
+        
+        table.insert( players, v )
+    end
+    
+    self:startView( "Pointshop2View", "playerUnequipItem", players, ply, item.id )
 end
 
 local function isValidSale( ply, item )
     if not item then
-        KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached (id %i)", ply:Nick( ), item.id )
+        KLogf( 3, "[WARN] Player %s tried to sell an item that wasn't cached", ply:Nick( ) )
         return Promise.Reject( 0, "Invalid Data" )
     end
 
