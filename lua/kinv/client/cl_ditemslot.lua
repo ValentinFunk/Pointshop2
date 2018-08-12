@@ -142,7 +142,7 @@ function PANEL:DroppedOn( panel )
             -- Can't swap, ask the other item container to try and accept my items
             otherStack:GetParent():AcceptItems( self.itemStack )
             otherStack:Think( )
-            if IsValid( self.otherStack.icon ) then
+            if self.otherStack and IsValid( self.otherStack.icon ) then
                 self.otherStack.icon:Select( )
             end
             return
