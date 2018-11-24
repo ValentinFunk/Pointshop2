@@ -716,33 +716,37 @@ end )
 
 function Pointshop2Controller:sendPoints( ply, targetPly, points )
     points = tonumber(math.floor( points ))
+    
+	if points < 0 then
+		KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
+		return Promise.Reject()
+	end
 
-    if points < 0 then
-        KLogf( 3, "Player %s tried to send negative points! Hacking attempt!", ply:Nick( ) )
-        return
-    end
+	if points > tonumber(ply.PS2_Wallet.points) then
+		KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
+		return Promise.Reject()
+	end
 
-    if points > tonumber(ply.PS2_Wallet.points) then
-        KLogf( 3, "Player %s tried to send more points than he has! Hacking attempt!", ply:Nick( ) )
-        return
-    end
+	if not LibK.isProperNumber( points ) then
+		KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
+		return Promise.Reject()
+	end
 
-    if not LibK.isProperNumber( points ) then
-        KLogf( 3, "Player %s tried to send nan/inf points!", ply:Nick( ) )
-        return
-    end
+	if not IsValid( targetPly ) then
+		--This could legitimately happen
+		KLogf( 2, "Player %s tried to send points to an invalid player!", ply:Nick( ) )
+		return Promise.Reject()
+	end
 
-    if not IsValid( targetPly ) then
-        --This could legitimately happen
-        KLogf( 2, "Player %s tried to send points to an invalid player!", ply:Nick( ) )
-        return
-    end
-
-    if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SendPointsEnabled" ) == false then
-        KLogf( 2, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
-        return
-    end
-
+	if Pointshop2.GetSetting( "Pointshop 2", "BasicSettings.SendPointsEnabled" ) == false then
+		KLogf( 2, "Player %s tried to bypass disabled sendpoints, possible hacking attempt!" )
+		return Promise.Reject()
+	end
+	
+	-- Hook to prevent
+	if hook.Run( "PS2_CanSendPoints", ply, targetPly, points ) then
+		return Promise.Reject()
+	end
 
     local transaction = Pointshop2.DB.Transaction()
     transaction:begin()
