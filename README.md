@@ -5,6 +5,7 @@ Developer Guides:
 - Adding items programatically: https://gist.github.com/Kamshak/e343784e15966b1fa8a38544793293e9
 - Binding to different key: https://gist.github.com/Kamshak/a4e8246f336ba5599f01855013fe55d8
 - Restrict weapon equiping for Permaweapons by Team: https://gist.github.com/Kamshak/d6cc30c828ec9d0316ba8ef0eb4e5858
+- Award a random item from a category: https://gist.github.com/Kamshak/3bf0e70316fbab83c00a95d36c14d29e
 
 ## Requirements
 - [LibK](https://github.com/Kamshak/LibK)
