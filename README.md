@@ -1,15 +1,18 @@
 Pointshop2
 ==========
 
-WIP Project. 
+Developer Guides:
+- Adding items programatically: https://gist.github.com/Kamshak/e343784e15966b1fa8a38544793293e9
+- Binding to different key: https://gist.github.com/Kamshak/a4e8246f336ba5599f01855013fe55d8
+- Restrict weapon equiping for Permaweapons by Team: https://gist.github.com/Kamshak/d6cc30c828ec9d0316ba8ef0eb4e5858
 
 ## Requirements
 - [LibK](https://github.com/Kamshak/LibK)
 - [PAC 3](https://github.com/CapsAdmin/pac3)
 
 ## Docs
-Documentation: http://pointshop2.kamshak.com/en/latest/
 
+Documentation: http://pointshop2.kamshak.com/en/latest/
 Documentation source: https://github.com/Kamshak/Pointshop2-Docs/
 
 
