@@ -3,6 +3,8 @@ Pointshop2
 
 ![](https://github.com/Kamshak/Pointshop2/blob/master/images.weserv.nl.png?raw=true)
 
+Extensions / Plugins: https://github.com/Kamshak?tab=repositories&q=ps2&type=&language=
+
 Developer Guides:
 - Adding items programatically: https://gist.github.com/Kamshak/e343784e15966b1fa8a38544793293e9
 - Binding to different key: https://gist.github.com/Kamshak/a4e8246f336ba5599f01855013fe55d8
