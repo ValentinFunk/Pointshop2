@@ -6,20 +6,17 @@ Pointshop2
 Extensions / Plugins: https://github.com/Kamshak?tab=repositories&q=ps2&type=&language=
 
 Developer Guides:
+- How to create a custom item type (3 step tutorial series with example code): https://physgun.netlify.app/pointshop-2/custom-item-part1/
 - Adding items programatically: https://gist.github.com/Kamshak/e343784e15966b1fa8a38544793293e9
 - Binding to different key: https://gist.github.com/Kamshak/a4e8246f336ba5599f01855013fe55d8
 - Restrict weapon equiping for Permaweapons by Team: https://gist.github.com/Kamshak/d6cc30c828ec9d0316ba8ef0eb4e5858
 - Award a random item from a category: https://gist.github.com/Kamshak/3bf0e70316fbab83c00a95d36c14d29e
+- More module information & how to create settings that can be modified via GUI: http://pointshop2.kamshak.com/en/latest/developer/modules.html
 
-## Requirements
-- [LibK](https://github.com/Kamshak/LibK)
-- [PAC 3](https://github.com/CapsAdmin/pac3)
 
 ## Docs
 
 Documentation: http://pointshop2.kamshak.com/en/latest/
-Documentation source: https://github.com/Kamshak/Pointshop2-Docs/
-
 
 # Pointshop 2
 
@@ -46,24 +43,24 @@ Pointshop 2 supports your server by supporting two currencies: a standard, in ga
 ## Extensible and customizable
 Every aspect of the script can be customized. Full support for derma skins allows a complete visual makeover to fit your community's looks. The script itself is built in a modular and extensible way, you can expect many skins, addons and new item types to be made!
 
-Technical choices such as allowing you to connect to MySQL or SQLite enable tight integration with your systems as well as the flexibility you need. A module based approach makes sure that 
-
-No more trouble with addons breaking your server: All addons to pointshop 2 go through an extended quality review to make sure that no matter what, you always get the best addons. A list of addons supporting and approved by Pointshop 2 will be added here. 
-
-## Premium Support
-As always, the price includes not only the script but also support. If you are having trouble setting the script up or need help customizing, your questions and requests are always welcome and will be handled as quickly as possible.
-
-The script will be updated to all future gmod version and stay in active development, receiving bug fixes, functionality updates and tweaks heavily influenced by your feedback.
-
-## Documentation - For users and developers
-You can find the documentation inside of the zip you downloaded or access it online at [the official documentation page](http://pointshop2.kamshak.com/en/latest/). 
-
-Developer information and terms are also documented. The page will continue getting updates. 
-Looking to create a pointshop 2 addon? Request a discounted [developer license](http://pointshop2.kamshak.com/en/latest/developer/index.html#developer-license).
-
-
 # Installation and Setup
-Installing the script is very simple. To keep all information in one place please refer to [the official documentation](http://pointshop2.kamshak.com/en/latest/installation.html) for setup and usage instructions.
+
+Download [Pointshop2](https://github.com/Kamshak/Pointshop2/archive/master.zip) [LibK](https://github.com/Kamshak/LibK/archive/master.zip) and [PAC3](https://github.com/CapsAdmin/pac3/archive/master.zip)
+
+Install all three addons so that you end up with three folders in your addons folder:
+
+```
+garrysmod/addons
+  /libk
+  /pac3
+  /pointshop2
+```
+
+Having trouble? Check [the official documentation](http://pointshop2.kamshak.com/en/latest/installation.html) for more instructions. You can also find Workshop setup and MySQL configuration options there.
+
+## Requirements
+- [LibK](https://github.com/Kamshak/LibK)
+- [PAC 3](https://github.com/CapsAdmin/pac3)
 
 ## Credits
 
@@ -77,7 +74,3 @@ Thanks go to:
 - CapsAdmin for PAC3, which is used to provide the advanced hat/accessory positioning editor and the rendering of advanced items, as well as ludata
 - Vercas for vON, the flexible lua serializer
 - Lexic for the creation of the lua Promises system used throughout the script to provide non-blocking, blazing fast mysql queries
-
-- To the server/community owners for sharing their experience with pointshop and giving great input on how to improve:
- - TODO: List them here
-
