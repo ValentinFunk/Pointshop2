@@ -3,7 +3,8 @@ Pointshop2
 
 ![](https://github.com/Kamshak/Pointshop2/blob/master/images.weserv.nl.png?raw=true)
 
-Extensions / Plugins: https://github.com/Kamshak?tab=repositories&q=ps2&type=&language=
+[<img width="256" src="http://www.ageofcivilizationsgame.com/uploads/monthly_2019_06/discord_button.png.3c4e31057287000ade2e552fdc414e79.png">](https://discord.gg/N9DmwwX)
+
 
 Developer Guides:
 - How to create a custom item type (3 step tutorial series with example code): https://physgun.netlify.app/pointshop-2/custom-item-part1/
@@ -17,6 +18,8 @@ Developer Guides:
 ## Docs
 
 Documentation: http://pointshop2.kamshak.com/en/latest/
+
+**Get PS2 Extensions / Plugins**: https://github.com/Kamshak?tab=repositories&q=ps2&type=&language=
 
 # Pointshop 2
 
