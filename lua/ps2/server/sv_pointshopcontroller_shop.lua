@@ -187,7 +187,7 @@ function Pointshop2Controller:handleItemUnequip( item, ply, slotName )
     
     local players = {}
     for k, v in pairs( player.GetAll() ) do
-        if getPromiseState( v.fullyLoadedPromise ) != "resolved" then
+        if getPromiseState( v.fullyLoadedPromise ) != "done" then
             continue
         end
         
