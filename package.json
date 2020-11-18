@@ -9,7 +9,7 @@
     "dotenv": "^4.0.0",
     "last-release-git": "^0.0.2",
     "scriptfodder-publish": "^1.7.2",
-    "semantic-release": "^6.3.2",
+    "semantic-release": "^17.2.3",
     "semantic-release-noop": "^1.1.0",
     "semantic-sf-release": "2.2.2",
     "shx": "^0.2.2"
