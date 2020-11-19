@@ -63,8 +63,8 @@ Having trouble? Check [the official documentation](http://pointshop2.kamshak.com
 
 ## Troubleshooting
 
-**Hats/Texthats are lagging behind players**: This is caused by addons that use a "util.traceline" on the client. Known addons are: uTime, third person addns
-**Cannot open the shop**: Can have many reasons, always check server & client console for errors. Make sure that in addons/ all of the names are lowercase, e.g. `addons/libk` instead of `addons/LibK`.
+- **Hats/Texthats are lagging behind players**: This is caused by addons that use a "util.traceline" on the client. Known addons are: uTime, third person addns
+- **Cannot open the shop**: Can have many reasons, always check server & client console for errors. Make sure that in addons/ all of the names are lowercase, e.g. `addons/libk` instead of `addons/LibK`.
 
 ## Credits
 
