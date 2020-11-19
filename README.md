@@ -61,9 +61,10 @@ garrysmod/addons
 
 Having trouble? Check [the official documentation](http://pointshop2.kamshak.com/en/latest/installation.html) for more instructions. You can also find Workshop setup and MySQL configuration options there.
 
-## Requirements
-- [LibK](https://github.com/Kamshak/LibK)
-- [PAC 3](https://github.com/CapsAdmin/pac3)
+## Troubleshooting
+
+**Hats/Texthats are lagging behind players**: This is caused by addons that use a "util.traceline" on the client. Known addons are: uTime, third person addns
+**Cannot open the shop**: Can have many reasons, always check server & client console for errors. Make sure that in addons/ all of the names are lowercase, e.g. `addons/libk` instead of `addons/LibK`.
 
 ## Credits
 
