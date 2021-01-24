@@ -46,6 +46,8 @@ Vercas for vON, the flexible lua serializer
 
 Lexic for the creation of the lua Promises system used throughout the script to provide non-blocking, blazing fast mysql queries
 
+Dimentio for improving and fixing bugs
+
 To the server/community owners for sharing their experience with pointshop and giving great input on how to improve
 	]] )
 
