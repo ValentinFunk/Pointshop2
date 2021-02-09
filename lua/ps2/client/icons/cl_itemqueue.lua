@@ -40,7 +40,7 @@ end
 
 do
 	Pointshop2.rIcon  = Pointshop2.rIcon  or vgui.Create( "ModelImage" )
-	Pointshop2.rModel = Pointshop2.rModel or ClientsideModel( "error" )
+	Pointshop2.rModel = Pointshop2.rModel or ClientsideModel( "models/props_lab/huladoll.mdl" )
 
 	local rIcon  = Pointshop2.rIcon
 	local rModel = Pointshop2.rModel
