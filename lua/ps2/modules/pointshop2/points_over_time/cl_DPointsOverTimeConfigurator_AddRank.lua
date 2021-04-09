@@ -84,6 +84,7 @@ end
 function PANEL:EditRank( rank, multiplier )
 	self.rankPanel.control:SetDisabled( true )
 	self.rankPanel.control:SetText( rank.title )
+	self.selectedRank = rank
 	self.pointsPanel.control:SetValue( multiplier )
 	self.pointsPanel.control:RequestFocus( )
 end
