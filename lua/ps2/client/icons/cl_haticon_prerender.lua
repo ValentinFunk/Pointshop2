@@ -92,6 +92,8 @@ local function PaintHatIcon(itemClass)
 		pac.HookEntityRender( entity, v )
 	end
 	
+	pac.RenderOverride(entity, "update", true)
+	
 	if not petModel then
 		local viewInfo = itemClass.iconInfo.shop.iconViewInfo
 		entity:SetModel( plyModel )
