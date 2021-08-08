@@ -219,7 +219,7 @@ function PANEL:PopulateSlots( )
             if itemInThisSlot and previousSlot then
                 -- calls slot's function directly to avoid infinite loops
                 local prevCanHoldItem = Pointshop2.EquipmentSlotLookup[previousSlot]
-                if not prevCanHoldItem() then
+                if not prevCanHoldItem(item) then
                     return false
                 end
             end
