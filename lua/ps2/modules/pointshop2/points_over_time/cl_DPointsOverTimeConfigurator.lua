@@ -269,15 +269,15 @@ function PANEL:SetData( data )
 end
 
 function PANEL:Verify( settings )
-	if settings["PointsOverTime.Delay"] < 1 then
+	if tonumber(settings["PointsOverTime.Delay"]) < 1 then
 		return false, "Delay has to be greater than 1"
 	end
 
-	if settings["PointsOverTime.Points"] > 20000000 then
+	if tonumber(settings["PointsOverTime.Points"]) > 20000000 then
 		return false, "Points amount is too large"
 	end
 
-	if settings["PointsOverTime.Points"] < 0 then
+	if tonumber(settings["PointsOverTime.Points"]) < 0 then
 		return false, "Points amount need to be >0"
 	end
 
