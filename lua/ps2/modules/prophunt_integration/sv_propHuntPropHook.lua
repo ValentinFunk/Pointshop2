@@ -1,4 +1,6 @@
 local function hookProp()
+	if PHX and PHX ~= nil then return end
+	
     local ENT = scripted_ents.GetStored( 'ph_prop' )
     -- Called when we take damge
     function ENT:OnTakeDamage(dmg)

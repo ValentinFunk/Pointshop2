@@ -89,7 +89,11 @@ function Pointshop2.PropHunt.OnPropKilled( victim, inflictor, attacker )
 		attacker:PS2_AddStandardPoints( S("Kills.HunterKillsProp"), "Killed Prop" )
 	end
 end
-hook.Add( "PS2_PH_PropKilled", "PH_PropKilled", Pointshop2.PropHunt.OnPropKilled )
+if PHX and PHX ~= nil then
+	hook.Add("PH_OnPropKilled", "PH_PS2_PropKilled", Pointshop2.PropHunt.OnPropKilled ) -- We'll use from provided PH:X hook instead.
+else
+	hook.Add( "PS2_PH_PropKilled", "PH_PropKilled", Pointshop2.PropHunt.OnPropKilled )
+end
 
 local function installHooks( )
 	GAMEMODE.OriginalSetRoundResult = GAMEMODE.OriginalSetRoundResult or GAMEMODE.SetRoundResult -- need to use this as fretta resets timer before OnRoundResult
