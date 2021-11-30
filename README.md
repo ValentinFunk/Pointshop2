@@ -19,7 +19,11 @@ Developer Guides:
 
 Documentation: http://pointshop2.kamshak.com/en/latest/
 
-**Get PS2 Extensions / Plugins**: https://github.com/Kamshak?tab=repositories&q=ps2&type=&language=
+**Get PS2 Extensions / Plugins**:
+
+ DLC: https://github.com/Kamshak?tab=repositories&q=ps2&type=&language=
+ 
+ Achievements: https://github.com/Phoenixf129-2/pointshop2-achievements/
 
 # Pointshop 2
 
