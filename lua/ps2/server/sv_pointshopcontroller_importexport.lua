@@ -40,7 +40,7 @@ function Pointshop2Controller:importItems( exportTable )
 	for persistenceClassName, exportData in pairs( exportTable ) do
 		local persistenceClass = getClass( persistenceClassName )
 		if not persistenceClass then
-			KLogf( 3, "[WARN] Not importing %s items, persistence not installed!" )
+			KLogf( 3, "[WARN] Not importing %s items, persistence not installed!", persistenceClassName )
 			continue
 		end
 
