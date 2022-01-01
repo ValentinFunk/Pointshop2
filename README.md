@@ -63,6 +63,8 @@ garrysmod/addons
   /pointshop2
 ```
 
+**It is very important that your folder names are all lowercase. You want to have a folder named libk not LibK-master. Garrysmod does not load addons where the folder name contains uppercase letters** 
+
 Having trouble? Check [the official documentation](http://pointshop2.kamshak.com/en/latest/installation.html) for more instructions. You can also find Workshop setup and MySQL configuration options there.
 
 ## Troubleshooting
