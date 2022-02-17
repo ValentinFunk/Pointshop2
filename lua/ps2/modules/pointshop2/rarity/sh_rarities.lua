@@ -72,16 +72,14 @@ end
 
 -- Returns rarity information for a chance in absolute values
 function Pointshop2.GetRarityInfoFromAbsolute(absoluteChance)
-	local maxRarity = 0
-	for i = #Pointshop2.Rarities, 1, -1 do
-		rarityObject = Pointshop2.Rarities[i]
-		maxRarity = maxRarity + rarityObject.chance
-		if absoluteChance <= maxRarity then
-			return {
-				name = rarityObject.name,
-				chance = rarityObject.chance,
-				color = Pointshop2.RarityColorMap[rarityObject.chance]
-			}
-		end
-	end
+    for i = #Pointshop2.Rarities, 1, -1 do
+        local rarityObject = Pointshop2.Rarities[i]
+        if absoluteChance <= rarityObject.chance then
+            return {
+                name = rarityObject.name,
+                chance = rarityObject.chance,
+                color = Pointshop2.RarityColorMap[rarityObject.chance]
+            }
+        end
+    end
 end
