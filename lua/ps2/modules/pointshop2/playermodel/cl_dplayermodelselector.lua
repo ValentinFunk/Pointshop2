@@ -105,8 +105,6 @@ function PANEL:Init( )
 	local function RebuildBodygroupTab()
 		bdcontrolspanel:Clear()
 		
-		bgtab.Tab:SetVisible( false )
-
 		local nskins = mdl.Entity:SkinCount() - 1
 		if ( nskins > 0 ) then
 			local skins = vgui.Create( "DNumSlider" )
@@ -123,8 +121,6 @@ function PANEL:Init( )
 			bdcontrolspanel:AddItem( skins )
 
 			mdl.Entity:SetSkin( window.skin )
-			
-			bgtab.Tab:SetVisible( true )
 		end
 
 		local groups = string.Explode( " ", window.bodygroups )
@@ -146,9 +142,9 @@ function PANEL:Init( )
 			bdcontrolspanel:AddItem( bgroup )
 
 			mdl.Entity:SetBodygroup( k, groups[ k + 1 ] or 0 )
-			
-			bgtab.Tab:SetVisible( true )
 		end
+		
+		bgtab.Tab:SetEnabled( (#bdcontrolspanel:GetItems() > 0) or (nskins > 0) )
 	end
 
 	function PanelSelect:OnActivePanelChanged( old, new )
