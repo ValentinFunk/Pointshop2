@@ -104,7 +104,7 @@ function Player:PS2_CanBuyItem( itemClass )
 	else
 		tree = Pointshop2View:getInstance().categoryItemsTable
 	end
-	if table.HasValue( tree:getNotForSaleItemClassNames( ), itemClassName ) then
+	if table.HasValue( tree:getNotForSaleItemClassNames( ), itemClass.className ) then
 		return false, "This item cannot be bought", "Can't buy"
 	end
 
