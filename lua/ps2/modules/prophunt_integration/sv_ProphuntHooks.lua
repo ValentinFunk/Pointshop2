@@ -48,7 +48,7 @@ function Pointshop2.PropHunt.SetRoundResult( result )
 	if result == TEAM_PROPS then
 		for k, v in pairs( GAMEMODE.ps2TeamPlayers[TEAM_PROPS] ) do
 			if not IsValid( v ) then
-				return
+				continue
 			end
 
 			if v:Alive() and v:Team( ) == TEAM_PROPS then
@@ -67,7 +67,7 @@ function Pointshop2.PropHunt.SetRoundResult( result )
 		end
 		for k, v in pairs( GAMEMODE.ps2TeamPlayers[TEAM_HUNTERS] ) do
 			if not IsValid( v ) then
-				return
+				continue
 			end
 
 			if v:Alive() and v:Team( ) == TEAM_HUNTERS then
