@@ -686,16 +686,16 @@ function Pointshop2View:fixDatabase( )
     self:controllerAction( "fixDatabase" )
 end
 
-function Pointshop2View:removeItem( itemClass, refund )
+function Pointshop2View:removeItem( itemClass, refund, refundCurrentValue )
     hook.Run( "PS2_PreReload" )
 
-    self:controllerTransaction( "removeItem", itemClass.className, refund )
+    self:controllerTransaction( "removeItem", itemClass.className, refund,refundCurrentValue)
     :Done( function( )
         KInventory.Items[itemClass.className] = nil
     end )
 end
 
-function Pointshop2View:removeItems( itemClasses, refund )
+function Pointshop2View:removeItems( itemClasses, refund,refundCurrentValue )
     hook.Run( "PS2_PreReload" )
 
     local classNames = {}
@@ -703,7 +703,7 @@ function Pointshop2View:removeItems( itemClasses, refund )
         table.insert( classNames, v.className )
     end
 
-    self:controllerTransaction( "removeItems", classNames, refund )
+    self:controllerTransaction( "removeItems", classNames, refund,refundCurrentValue )
     :Done( function( removedNames )
         for _, className in pairs( removedNames ) do
             KInventory.Items[className] = nil
