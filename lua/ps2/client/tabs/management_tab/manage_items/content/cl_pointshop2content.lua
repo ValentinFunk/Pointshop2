@@ -36,7 +36,7 @@ local function addEditMenu( panel, itemClass )
 
 		local btn = menu:AddOption( "Delete", function( )
 			Derma_Query( "Do you really want to permanently delete this item?", "Confirm",
-				"Yes and refund players at pruchase price", function( )
+				"Yes and refund players at purchase price", function( )
 					Pointshop2View:getInstance( ):removeItem( itemClass, true )
 				end,
 				"Yes and refund players at current price", function( )
