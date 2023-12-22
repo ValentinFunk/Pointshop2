@@ -765,17 +765,22 @@ function Pointshop2Controller:sendPoints( ply, targetPly, points )
     --TODO: Send the targetPlayer a nice notification, similar to iten added
 end
 
-local function calculateRefundAmounts( itemsToRefund, currentPrice )
+
+local function calculateRefundAmounts( itemsToRefund ,refundAmounts)
     local refundsByPlayer = LibK._( itemsToRefund ):chain()
     :groupBy( function( item )
         return item.ownerId
     end )
     :mapValues( function( groupedByPlayer )
         return LibK._.reduce( groupedByPlayer, { points = 0, premiumPoints = 0 }, function( accumulated, item )
-            local purchaseData = item.purchaseData
-            if purchaseData and purchaseData.currency and purchaseData.amount then
-                accumulated[purchaseData.currency] = accumulated[purchaseData.currency] + purchaseData.amount
-            end
+			local purchaseData = item.purchaseData
+			if refundAmounts then
+				accumulated[purchaseData.currency] = accumulated[purchaseData.currency] + refundAmounts[purchaseData.currency]
+			else
+				if purchaseData and purchaseData.currency and purchaseData.amount then
+					accumulated[purchaseData.currency] = accumulated[purchaseData.currency] + purchaseData.amount
+				end
+			end
             return accumulated
         end )
     end ):value( )
@@ -794,17 +799,18 @@ local function removeSingleItem( itemClass, refund, refundCurrentPrice )
         :Then( function( results )
             results = results or {}
             -- Deserialize purchaseData (this is usually done in LibK but we're querying manually)
-            results = LibK._.map( results, function( row )
-                return row.purchaseData = util.JSONToTable( row.data ).purchaseData
+            results = LibK._.map( results, function( row )		
+                row.purchaseData = util.JSONToTable( row.data ).purchaseData
+		return row				
             end )
-
+			
             local refundPromise = Promise.Resolve()
             if refund then
-                local currentPrice = false
+				local refundAmmount = false
 				if refundCurrentPrice then
-					currentPrice = table.Inherit(itemClass.static.Price, { points = 0, premiumPoints = 0 })
+					refundAmmount = table.Inherit(itemClass.static.Price,{ points = 0, premiumPoints = 0 })
 				end
-                local refundsByPlayer = calculateRefundAmounts( refund, currentPrice )
+                local refundsByPlayer = calculateRefundAmounts(results,refundAmmount)
                 -- Remove players that get refunded 0 points
                 local toRefund = LibK._( refundsByPlayer ):chain()
                     :entries( )
