@@ -149,9 +149,11 @@ end
 function Pointshop2.GetCreatorControlForClass( itemClass )
 	local base = itemClass.super.className
 	for _, mod in pairs( Pointshop2.Modules ) do
-		for _, itemInfo in pairs( mod.Blueprints ) do
-			if itemInfo.base == base then
-				return itemInfo.creator, itemInfo.noModal
+		if mod.Blueprints then
+			for _, itemInfo in pairs( mod.Blueprints ) do
+				if itemInfo.base == base then
+					return itemInfo.creator, itemInfo.noModal
+				end
 			end
 		end
 	end
